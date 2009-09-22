@@ -191,8 +191,9 @@ public class MainGui extends JFrame implements LanguageListener {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.lang.LanguageListener#languageChanged(fr.turtlesport.lang
-   *      .LanguageEvent)
+   * @see
+   * fr.turtlesport.lang.LanguageListener#languageChanged(fr.turtlesport.lang
+   * .LanguageEvent)
    */
   public void languageChanged(final LanguageEvent event) {
     if (SwingUtilities.isEventDispatchThread()) {
@@ -582,41 +583,46 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private JXSplitButton getJXSplitButtonUser() {
     if (jXSplitButtonUser == null) {
-
-      List<DataUser> list = null;
-      try {
-        list = UserTableManager.getInstance().retreive();
-      }
-      catch (SQLException e) {
-        log.error("", e);
-        list = new ArrayList<DataUser>();
-      }
-
-      JPopupMenu jPopupMenuDropDown = new JPopupMenu();
-      buttonGroupDropDown = new ButtonGroup();
-      // Ajout all user
-      JCheckBoxMenuItemUser jmiUser = new JCheckBoxMenuItemUser(DataUser
-          .getAllUser().getId(), DataUser.getAllUser().getFirstName());
-      buttonGroupDropDown.add(jmiUser);
-      jPopupMenuDropDown.add(jmiUser);
-      jPopupMenuDropDown.addSeparator();
-
-      // Ajout des utilisateurs
-      if (list != null) {
-        for (int i = 0; i < list.size(); i++) {
-          jmiUser = new JCheckBoxMenuItemUser(list.get(i).getId(),
-                                              list.get(i).getFirstName() + " "
-                                                  + list.get(i).getLastName());
-          buttonGroupDropDown.add(jmiUser);
-          jPopupMenuDropDown.add(jmiUser);
-        }
-      }
-
-      jXSplitButtonUser = new JXSplitButton(null, ImagesMenuRepository
-          .getImageIcon("run.png"), jPopupMenuDropDown);
+      jXSplitButtonUser = new JXSplitButton(ImagesMenuRepository
+          .getImageIcon("run.png"));
       jXSplitButtonUser.setFont(GuiFont.FONT_PLAIN);
+      setUsers();
     }
     return jXSplitButtonUser;
+  }
+
+  private void setUsers() {
+    List<DataUser> list = null;
+    try {
+      list = UserTableManager.getInstance().retreive();
+    }
+    catch (SQLException e) {
+      log.error("", e);
+      list = new ArrayList<DataUser>();
+    }
+
+    JPopupMenu jPopupMenuDropDown = new JPopupMenu();
+    buttonGroupDropDown = new ButtonGroup();
+
+    // Ajout all user
+    JCheckBoxMenuItemUser jmiUser = new JCheckBoxMenuItemUser(DataUser
+        .getAllUser().getId(), DataUser.getAllUser().getFirstName());
+    buttonGroupDropDown.add(jmiUser);
+    jPopupMenuDropDown.add(jmiUser);
+    jPopupMenuDropDown.addSeparator();
+
+    // Ajout des utilisateurs
+    if (list != null) {
+      for (int i = 0; i < list.size(); i++) {
+        jmiUser = new JCheckBoxMenuItemUser(list.get(i).getId(),
+                                            list.get(i).getFirstName() + " "
+                                                + list.get(i).getLastName());
+        buttonGroupDropDown.add(jmiUser);
+        jPopupMenuDropDown.add(jmiUser);
+      }
+    }
+
+    jXSplitButtonUser.setDropDownMenu(jPopupMenuDropDown);
   }
 
   /**
@@ -1084,7 +1090,8 @@ public class MainGui extends JFrame implements LanguageListener {
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
       // Affichage de l'IHM
@@ -1108,7 +1115,8 @@ public class MainGui extends JFrame implements LanguageListener {
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
       try {
@@ -1142,7 +1150,8 @@ public class MainGui extends JFrame implements LanguageListener {
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
       // Affichage de l'IHM
@@ -1223,6 +1232,26 @@ public class MainGui extends JFrame implements LanguageListener {
   }
 
   /**
+   * Mis &agrave; jour des utilisateurs.
+   */
+  protected void fireUsers() {
+    setUsers();
+    try {
+      if (currentIdUser == -1
+          || !UserTableManager.getInstance().exist(currentIdUser)) {
+        setCurrentIdUser(-1);
+      }
+      else {
+        setCurrentIdUser(currentIdUser);
+      }
+    }
+    catch (SQLException e) {
+      log.error("", e);
+    }
+
+  }
+
+  /**
    * @author Denis Apparicio
    * 
    */
@@ -1288,7 +1317,8 @@ public class MainGui extends JFrame implements LanguageListener {
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent actionevent) {
       // ui
@@ -1476,7 +1506,8 @@ public class MainGui extends JFrame implements LanguageListener {
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
       MainGui.this.setTitle("Turtle Sport - " + getText());
