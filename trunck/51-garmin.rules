@@ -1,3 +1,0 @@
-UBSYSTEM!="usb_device", GOTO="garmin_rules_end" ACTION!="add", GOTO="garmin_rules_end" 
-ATTRS{idVendor}=="091e", ATTRS{idProduct}=="0003", MODE="0660", GROUP="plugdev" 
-LABEL="garmin_rules_end"
