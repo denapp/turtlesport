@@ -19,7 +19,8 @@ public final class LanguageManager {
   /** Libelle des languages. */
   private static final String[]       LANGUAGES = { LanguageFr.getInstance()
           .getName(),
-      LanguageEn.getInstance().getName()       };
+      LanguageEn.getInstance().getName(),
+      LanguageSv.getInstance().getName()       };
 
   /** Liste des listeners. */
   private ArrayList<LanguageListener> listeners = new ArrayList<LanguageListener>();
@@ -117,7 +118,7 @@ public final class LanguageManager {
     LanguageEvent e = new LanguageEvent(lang);
     for (LanguageListener l : listeners) {
       l.languageChanged(e);
-    }    
+    }
   }
 
   /**
