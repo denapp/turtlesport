@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Encoding=UTF-8
-Name=Turtle Sport
-Comment=Sport Measurement
-Exec=turtlesport
-Icon=/opt/turtlesport/turtleSport.png
-Categories=Education;Sports
