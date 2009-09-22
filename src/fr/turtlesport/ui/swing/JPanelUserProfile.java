@@ -766,8 +766,8 @@ public class JPanelUserProfile extends JPanel implements LanguageListener,
             // sauvegarde
             save();
 
-            UserTableManager.getInstance().logTable();
-            EquipementTableManager.getInstance().logTable();
+            // mis a jour des utilisateurs
+            MainGui.getWindow().fireUsers();
           }
           catch (SQLException e) {
             log.error("", e);
