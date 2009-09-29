@@ -2,6 +2,8 @@ package fr.turtlesport.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
@@ -77,7 +79,9 @@ public final class ResourceBundleUtility {
     InputStream in = null;
     try {
       in = clazz.getResourceAsStream(st.toString());
-      log.debug("ressource " + st.toString());
+      if (log.isDebugEnabled()) {
+        log.debug("ressource " + clazz + " " + st.toString());
+      }
       return new PropertyResourceBundle(in);
     }
     catch (IOException e) {

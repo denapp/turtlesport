@@ -41,7 +41,7 @@ public class JDialogAbout extends JDialog {
 
   private JPanel      jPanelNorth;
 
-  private JButton jButtonLicence;
+  private JButton     jButtonLicence;
 
   /**
    * @param owner
@@ -60,7 +60,7 @@ public class JDialogAbout extends JDialog {
     initialize();
   }
 
-  /**
+  /**about_en.html
    * Affiche la boite de dialogue A propos.
    * 
    */
@@ -78,12 +78,19 @@ public class JDialogAbout extends JDialog {
    */
   private void initialize() {
     this.setContentPane(getJContentPane());
-    this.setSize(450, 370);
+    this.setSize(490, 420);
     this.setResizable(true);
     ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
         .getManager().getCurrentLang(), getClass());
     this.setTitle(rb.getString("title"));
-    jEditorPane.setText(rb.getString("html"));
+
+    try {
+      String lang = LanguageManager.getManager().getCurrentLang().getLocale().getLanguage();
+      jEditorPane.setPage(getClass().getResource("about_"+lang+".properties"));
+    }
+    catch (Throwable e) {
+    }
+    // jEditorPane.setText(rb.getString("html"));
     jButtonLicence.setText(rb.getString("jButtonLicence"));
   }
 
@@ -112,13 +119,14 @@ public class JDialogAbout extends JDialog {
     if (jPanelNorth == null) {
       JLabel jLabel = new JLabel();
       jLabel.setFont(GuiFont.FONT_PLAIN);
-      jLabel.setText("<html><body><table><tr><td>"
-                     + "<img src='"
-                     + ImagesRepository.class.getResource("turtleAbout.png")
-                         .toString() + "'/>" + "</td><td><center>"
-                     + "<font size='+3'>Turtle Sport</font><br><b>Version&nbsp;"
-                     + Version.VERSION
-                     + "</b></center></td></tr></table></body></html>");
+      jLabel
+          .setText("<html><body><table><tr><td>"
+                   + "<img src='"
+                   + ImagesRepository.class.getResource("turtleAbout.png")
+                       .toString() + "'/>" + "</td><td><center>"
+                   + "<font size='+3'>Turtle Sport</font><br><b>Version&nbsp;"
+                   + Version.VERSION
+                   + "</b></center></td></tr></table></body></html>");
       jPanelNorth = new JPanel();
       jPanelNorth.setFont(GuiFont.FONT_PLAIN);
       jPanelNorth.setLayout(new FlowLayout());
@@ -210,7 +218,7 @@ public class JDialogAbout extends JDialog {
     }
     return jPanelSouth;
   }
-  
+
   /**
    * This method initializes jButtonClose
    * 

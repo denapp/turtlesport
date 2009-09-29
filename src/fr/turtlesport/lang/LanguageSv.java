@@ -93,7 +93,4 @@ public final class LanguageSv implements ILanguage {
     return "Annulera";
   }
 
-  public static void main(String[] args) {
-    System.out.println(LanguageSv.getInstance().getName());
-  }
 }

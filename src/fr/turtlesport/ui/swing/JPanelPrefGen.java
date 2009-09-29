@@ -216,7 +216,7 @@ public class JPanelPrefGen extends JPanel implements LanguageListener,
       jPanelCenter.add(getJComboBoxTheme(), null);
 
       jCheckBoxCheckUpdate = new JCheckBox();
-      jCheckBoxCheckUpdate.setBounds(new Rectangle(5, 75, 280, 23));
+      jCheckBoxCheckUpdate.setBounds(new Rectangle(5, 75, 350, 23));
       jCheckBoxCheckUpdate.setFont(GuiFont.FONT_PLAIN);
       jCheckBoxCheckUpdate.setSelected(Configuration.getConfig()
           .getPropertyAsBoolean("update", "checkatbook", false));
