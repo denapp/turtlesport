@@ -102,10 +102,9 @@ public class SwingApplication {
       boolean isAlreayRunning = false;
       Throwable th = e.getCause();
       while (th != null && th instanceof SQLException) {
-        if (th.getMessage() != null
-            && th
-                .getMessage()
-                .startsWith("Another instance of Derby may have already booted")) {
+        SQLException sqle = (SQLException) th;
+        if ("XSDB6".equals(sqle.getSQLState())) {
+          // instance de derby deja boote
           splash.toBack();
           JShowMessage.error(splash, rb.getString("errorAlreadyRun"));
           isAlreayRunning = true;

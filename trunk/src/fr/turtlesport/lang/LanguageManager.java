@@ -2,6 +2,8 @@ package fr.turtlesport.lang;
 
 import java.util.ArrayList;
 
+import javax.swing.JComponent;
+
 import fr.turtlesport.Configuration;
 import fr.turtlesport.db.DataLanguageRessource;
 import fr.turtlesport.log.TurtleLogger;
@@ -119,6 +121,8 @@ public final class LanguageManager {
     for (LanguageListener l : listeners) {
       l.languageChanged(e);
     }
+    // composant
+    JComponent.setDefaultLocale(lang.getLocale());
   }
 
   /**
@@ -170,6 +174,9 @@ public final class LanguageManager {
     }
     if (LanguageFr.getInstance().getName().equals(name)) {
       return LanguageFr.getInstance();
+    }
+    if (LanguageSv.getInstance().getName().equals(name)) {
+      return LanguageSv.getInstance();
     }
 
     return null;
