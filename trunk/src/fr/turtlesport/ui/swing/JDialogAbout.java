@@ -60,8 +60,8 @@ public class JDialogAbout extends JDialog {
     initialize();
   }
 
-  /**about_en.html
-   * Affiche la boite de dialogue A propos.
+  /**
+   * about_en.html Affiche la boite de dialogue A propos.
    * 
    */
   public static void prompt() {
@@ -85,8 +85,10 @@ public class JDialogAbout extends JDialog {
     this.setTitle(rb.getString("title"));
 
     try {
-      String lang = LanguageManager.getManager().getCurrentLang().getLocale().getLanguage();
-      jEditorPane.setPage(getClass().getResource("about_"+lang+".properties"));
+      String lang = LanguageManager.getManager().getCurrentLang().getLocale()
+          .getLanguage();
+      jEditorPane.setPage(getClass().getResource("about_" + lang
+                                                 + ".properties"));
     }
     catch (Throwable e) {
     }
@@ -123,7 +125,7 @@ public class JDialogAbout extends JDialog {
           .setText("<html><body><table><tr><td>"
                    + "<img src='"
                    + ImagesRepository.class.getResource("turtleAbout.png")
-                       .toString() + "'/>" + "</td><td><center>"
+                       .toString() + "'>" + "</td><td><center>"
                    + "<font size='+3'>Turtle Sport</font><br><b>Version&nbsp;"
                    + Version.VERSION
                    + "</b></center></td></tr></table></body></html>");
