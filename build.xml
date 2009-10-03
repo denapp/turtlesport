@@ -17,7 +17,7 @@
 	<property name="exe" location="${basedir}/exe" />
 	<property name="build.javadocs" location="docs/api" />
 	<property name="packages" value="fr.turtlesport.*" />
-	<property name="liv" location="${basedir}/livraison" />
+	<property name="release" location="${basedir}/release" />
 	<property name="jarApp" value="${Name}.jar" />
 	<property name="dirBundle" location="${exe}/macosx/turlesport" />
 	<property name="jnimacosx" location="${basedir}/c/usbcom/macosx/build/Release/libusbcom.jnilib" />
@@ -31,8 +31,7 @@
 		<mkdir dir="${exe}/linux" />
 		<mkdir dir="${exe}/macosx" />
 		<mkdir dir="${dirBundle}" />
-		<mkdir dir="${liv}" />
-		<mkdir dir="${liv}/${version}" />
+		<mkdir dir="${release}" />
 	</target>
 
 	<target name="clean">
@@ -219,29 +218,29 @@
 
 	<target name="release" depends="init, releaseLinux, releaseWin, releaseSource" />
 	<target name="releaseMacosx">
-		<delete file="${liv}/${version}/${Name}-macosx-${version}.dmg" />
+		<delete file="${release}/${Name}-macosx-${version}.dmg" />
 		<exec executable="hdiutil">
 			<arg value="create" />
 			<arg value="-srcfolder" />
 			<arg value="${dirBundle}" />
-			<arg value="${liv}/${version}/${Name}-macosx-${version}.dmg" />
+			<arg value="${release}/${Name}-macosx-${version}.dmg" />
 		</exec>
 	</target>
 	<target name="releaseLinux">
-		<delete file="${liv}/${version}/${Name}-linux-${version}.tar" />
-		<tar destfile="${liv}/${version}/${Name}-linux-${version}.tar">
+		<delete file="${release}/${Name}-linux-${version}.tar" />
+		<tar destfile="${release}/${Name}-linux-${version}.tar">
 			<tarfileset dir="${exe}/linux" username="root" group="root" mode="755">
 			</tarfileset>
         </tar>
 	</target>
 	<target name="releaseWin" depends="launch4j,SetupWin">
-		<delete file="${liv}/${version}/${Name}-win-${version}.zip" />
-		<zip destfile="${liv}/${version}/${Name}-win-${version}.zip" basedir="${exe}/win" excludes="InnoSetup/**" />
-		<copy file="${exe}\win\InnoSetup\Output\setup.exe" todir="${liv}/${version}/" overwrite="yes" />
+		<delete file="${release}/${Name}-win-${version}.zip" />
+		<zip destfile="${release}/${Name}-win-${version}.zip" basedir="${exe}/win" excludes="InnoSetup/**" />
+		<copy file="${exe}\win\InnoSetup\Output\setup.exe" todir="${release}/${version}/" overwrite="yes" />
 	</target>
 	<target name="releaseSource">
-		<delete file="${liv}/${version}/${Name}-source-${version}.zip" />
-		<zip destfile="${liv}/${version}/${Name}-source-${version}.zip" basedir="${src}" />
+		<delete file="${release}/${Name}-source-${version}.zip" />
+		<zip destfile="${release}/${Name}-source-${version}.zip" basedir="${src}" />
 	</target>
 </project>
 
