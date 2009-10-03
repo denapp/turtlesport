@@ -20,7 +20,6 @@
 	<property name="release" location="${basedir}/release" />
 	<property name="jarApp" value="${Name}.jar" />
 	<property name="dirBundle" location="${exe}/macosx/turlesport" />
-	<property name="jnimacosx" location="${basedir}/c/usbcom/macosx/build/Release/libusbcom.jnilib" />
 
 	<target name="init">
 		<tstamp />
@@ -161,7 +160,7 @@
 	<!--  ================================================================== -->
 	<!--   Bundle jarApp macosx                                              -->
 	<!--  ================================================================== -->
-	<target name="jarAppBundle" depends="jarApp">
+	<target name="jarAppBundle">
 		<delete dir="${dirBundle}" />
 		<mkdir dir="${dirBundle}" />
 		<jarbundler dir="${dirBundle}" name="TurtleSport" mainclass="fr.turtlesport.Launcher" jar="${exe}/macosx/${jarApp}" build="${version}" version="${version}" workingdirectory="$APP_PACKAGE" infostring="Turtle Sport" jvmversion="1.5+" vmoptions="-Xmx256m" shortname="Turtle Sport" verbose="true" icon="${exe}/macosx/turtleIcon.icns" showplist="true">
@@ -172,12 +171,12 @@
 		</jarbundler>
 
 		<!-- copy des jars -->
-        <copy file="${lib}/swingx.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-        <copy file="${lib}/swingx-ws.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${lib}/derby.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${lib}/log4j.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+        <copy file="${exe}/macosx/swingx.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+        <copy file="${exe}/macosx/swingx-ws.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+        <copy file="${exe}/macosx/derby.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/log4j.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
 		<copy file="${exe}/macosx/log4J.xml" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${jnimacosx}" tofile="${dirBundle}/TurtleSport.app/Contents/Resources/Java/libturtleUsbjni.jnilib" />
+		<copy file="${exe}/macosx/libturtleUsbjni.jnilib" tofile="${dirBundle}/TurtleSport.app/Contents/Resources/Java/libturtleUsbjni.jnilib" />
 	</target>
 
 	<!--  ============================================================== -->
