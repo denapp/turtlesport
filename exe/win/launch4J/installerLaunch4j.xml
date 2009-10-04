@@ -7,7 +7,7 @@
   <downloadUrl>http://java.com/download</downloadUrl>
   <supportUrl>http://turtlesport.sourceforge.net</supportUrl>
   <chdir>.</chdir>
-  <icon>turtle32.ico</icon>
+  <icon>turtleSport.ico</icon>
   <singleInstance>
     <mutexName>TurtleSport</mutexName>
     <windowTitle>TurtleSport</windowTitle>
