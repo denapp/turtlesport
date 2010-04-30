@@ -67,7 +67,7 @@ public final class JShowMessage {
    * @param title
    * @param options
    * @param initialValue
-   * @return true si la r�ponse est oui
+   * @return true si la r&eacute;ponse est oui
    */
   public static boolean question(String msg,
                                  String title,
@@ -278,8 +278,7 @@ public final class JShowMessage {
 
     Object[] options = { LanguageManager.getManager().getCurrentLang().cancel(),
         "ok" };
-    Object initialValue = LanguageManager.getManager().getCurrentLang()
-        .cancel();
+    Object initialValue = "ok";
 
     JOptionPane pane = new JOptionPane(msg,
                                        JOptionPane.INFORMATION_MESSAGE,

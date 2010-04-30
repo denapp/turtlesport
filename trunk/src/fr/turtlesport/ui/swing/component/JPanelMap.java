@@ -1,7 +1,6 @@
 package fr.turtlesport.ui.swing.component;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -12,7 +11,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import fr.turtlesport.db.DataRun;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
@@ -20,8 +18,6 @@ import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.JDialogMap;
-import fr.turtlesport.ui.swing.JPanelRun;
-import fr.turtlesport.ui.swing.component.JTurtleMapKit.TablePointsModel;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.util.ResourceBundleUtility;
@@ -43,7 +39,7 @@ public class JPanelMap extends JPanel implements LanguageListener, UnitListener 
   /**
    * 
    */
-  public JPanelMap(boolean isMap) {
+  public JPanelMap() {
     super();
 
     log.debug(">>JPanelMap");
@@ -75,6 +71,23 @@ public class JPanelMap extends JPanel implements LanguageListener, UnitListener 
    * @see fr.turtlesport.lang.LanguageListener#completedRemoveLanguageListener()
    */
   public void completedRemoveLanguageListener() {
+  }
+
+  public void fireActionGrow() {
+    if (SwingUtilities.isEventDispatchThread()) {
+      doFireActionGrow();
+    }
+    else {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          doFireActionGrow();
+        }
+      });
+    }
+  }
+
+  private void doFireActionGrow() {
+    JDialogMap.prompt(jMapKit);
   }
 
   /*
@@ -118,19 +131,7 @@ public class JPanelMap extends JPanel implements LanguageListener, UnitListener 
 
       public void mouseClicked(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
-          Container parent = JPanelMap.this.getParent();
-          while (parent != null) {
-            if (parent instanceof JPanelRun) {
-              break;
-            }
-            parent = parent.getParent();
-          }
-
-          DataRun data = null;
-          if (parent instanceof JPanelRun) {
-            data = ((JPanelRun) parent).getModel().getDataRun();
-          }
-          JDialogMap.prompt(jMapKit, data);
+          fireActionGrow();
         }
       }
 
@@ -146,10 +147,6 @@ public class JPanelMap extends JPanel implements LanguageListener, UnitListener 
       jMapKit = new JTurtleMapKit(true);
     }
     return jMapKit;
-  }
-
-  public TablePointsModel getModelMap() {
-    return jMapKit.getModelMap();
   }
 
 }

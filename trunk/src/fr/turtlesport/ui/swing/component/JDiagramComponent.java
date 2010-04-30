@@ -19,12 +19,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
+import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.filter.SavitzkyGolay;
 import fr.turtlesport.lang.ILanguage;
@@ -33,6 +35,11 @@ import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.GuiFont;
+import fr.turtlesport.ui.swing.model.ChangeMapEvent;
+import fr.turtlesport.ui.swing.model.ChangeMapListener;
+import fr.turtlesport.ui.swing.model.ChangePointsEvent;
+import fr.turtlesport.ui.swing.model.ModelMapkitManager;
+import fr.turtlesport.ui.swing.model.ModelPointsManager;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.TimeUnit;
 import fr.turtlesport.unit.event.UnitEvent;
@@ -85,6 +92,8 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
 
   /** Model. */
   private TablePointsModel            model;
+
+  private MyMouseMotionListener       mouseMotionListener;
 
   /**
    * 
@@ -165,7 +174,9 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
    */
   private void initialize() {
     model = new TablePointsModel();
-    addMouseMotionListener(new MyMouseMotionListener());
+    mouseMotionListener = new MyMouseMotionListener();
+    addMouseMotionListener(mouseMotionListener);
+
     addMouseListener(new MyMouseListener());
     addMouseWheelListener(new MyMouseWheelListener());
     performedLanguage(LanguageManager.getManager().getCurrentLang());
@@ -229,7 +240,12 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     if (model != null && model.indexX2 != 0) {
       paintPoints(g2);
       paintInterval(g2);
-      paintExtra(g2);
+      if (model.hasMouseMotionListener()) {
+        paintExtra(g2);
+      }
+      else {
+        paintPoint(g2);
+      }
     }
   }
 
@@ -318,10 +334,12 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         text = Integer.toString(gridy1);
         lenText = metrics.stringWidth(text);
         x = WIDTH_TITLE - PAD - lenText - 15;
+        g2.setColor(Color.RED);
         g2.drawString(text, x, y + (highText / 2));
 
         // texte Altitude
         if (gridy2 != -1) {
+          g2.setColor(Color.BLUE);
           text = Integer.toString(gridy2);
           x = tot + PAD + 10;
           g2.drawString(text, x, y + (highText / 2));
@@ -347,6 +365,10 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
       return;
     }
 
+    if (model.indexX2 < 1) {
+      return;
+    }
+
     int x1, x2 = 0, y1, y2;
     int ya1, ya2;
 
@@ -354,7 +376,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     Polygon pol = new Polygon();
     pol.addPoint(computeRelativeX(model.getX(model.indexX1)), tot);
 
-    // for (int i = 0; i < model.length() - 1; i++) {
     for (int i = model.indexX1; i < model.indexX2 - 1; i++) {
       x1 = computeRelativeX(model.getX(i));
       x2 = computeRelativeX(model.getX(i + 1));
@@ -389,7 +410,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     g2.setComposite(AC_TRANSPARENT);
     g2.fillPolygon(pol);
     g2.setComposite(AlphaComposite.SrcOver);
-
   }
 
   /**
@@ -481,10 +501,99 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     highText = (metrics.getAscent() - metrics.getDescent()) / 2;
 
     // recuperation des position de la souris
-    findPoints(mouseX);
+    findMousePoint(mouseX);
 
     // Le temps ecoule
-    // -------------------
+    // -----------------------------------------------------------
+    if (JPanelGraph.isVisibleTime()) {
+      g2.setColor(COLOR_TIME);
+
+      // Dessine le triangle
+      int[] tabx = { mouseX - 5, mouseX, mouseX + 5 };
+      int y = HEIGHT_TITLE_1;
+      int[] taby = { y + 5, y, y + 5 };
+      g2.fillPolygon(tabx, taby, 3);
+
+      // Dessine l'axe
+      int tot = getHeight() - HEIGHT_TITLE_2 - HEIGHT_TITLE_1;
+      g2.fillRect(mouseX, HEIGHT_TITLE_1, 1, tot);
+
+      // Dessine la valeur sur l'axe des x
+      st = TimeUnit.formatHundredSecondeTime(currentTime / 10);
+      lenText = metrics.stringWidth(st);
+      g2.drawString(st, mouseX - lenText / 2, HEIGHT_TITLE_1 - 2);
+    }
+
+    // Valeur axe des X
+    // ----------------------------------------------------------
+    g2.setColor(Color.DARK_GRAY);
+
+    // Dessine triangle sur axe x
+    drawTriangleX(g2, mouseX);
+
+    // Dessine la valeur sur l'axe des x
+    yg = getHeight() - WIDTH_TITLE + 10;
+    st = DistanceUnit.format(currentX);
+    lenText = metrics.stringWidth(st);
+    g2.drawString(st, mouseX - lenText / 2, yg);
+
+    // Courbe Y1
+    // ----------------------------------------------------------
+    if (JPanelGraph.isVisibleY1() && currentY1 > model.getGridY1Min()) {
+      g2.setColor(Color.RED);
+
+      // dessine la souris
+      g2.drawRect(mouseX - 2, tabMouseY[0] - 2, 4, 4);
+
+      // Dessine triangle sur axe y
+      drawTriangleY1(g2, tabMouseY[0]);
+
+      // Dessine la valeur sur l'axe des y
+      // st = Double.toString(currentY1);
+      st = Integer.toString((int) currentY1);
+      lenText = metrics.stringWidth(st);
+      xg = WIDTH_TITLE - lenText - 2;
+      g2.drawString(st, xg, tabMouseY[0] + highText);
+    }
+
+    // Courbe Y2
+    // ----------------------------------------------------------
+    if (JPanelGraph.isVisibleY2() && currentY2 > model.getGridY2Min()) {
+      g2.setColor(Color.BLUE);
+
+      // dessine la souris
+      g2.drawRect(mouseX - 2, tabMouseY[1] - 2, 4, 4);
+
+      // Dessine triangle sur axe y
+      drawTriangleY2(g2, tabMouseY[1]);
+
+      // Dessine la valeur sur l'axe des y
+      // st = Double.toString(currentY2);
+      st = Integer.toString((int) currentY2);
+      xg = getWidth() - WIDTH_TITLE + 2;
+      g2.drawString(st, xg, tabMouseY[1] + highText);
+    }
+  }
+
+  /**
+   * Affiche les positions.
+   */
+  private void paintPoint(Graphics2D g2) {
+    if (!JPanelGraph.isVisibleY1() && !JPanelGraph.isVisibleY2()) {
+      return;
+    }
+    if (mouseX < WIDTH_TITLE || mouseX > getWidth() - WIDTH_TITLE) {
+      return;
+    }
+    FontMetrics metrics;
+    int xg, yg, lenText, highText;
+    String st;
+
+    metrics = g2.getFontMetrics(GuiFont.FONT_PLAIN_SMALL);
+    highText = (metrics.getAscent() - metrics.getDescent()) / 2;
+
+    // Le temps ecoule
+    // -----------------------------------------------------------
     if (JPanelGraph.isVisibleTime()) {
       g2.setColor(COLOR_TIME);
 
@@ -587,7 +696,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
   /**
    * Fonction recherche du point.
    */
-  private void findPoints(int x0) {
+  private void findMousePoint(int x0) {
     double near = Double.MAX_VALUE;
     double nearCur;
 
@@ -621,53 +730,70 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
    * @author Denis Apparicio
    * 
    */
-  public class TablePointsModel {
-    private String       unit        = DistanceUnit.getDefaultUnit();
+  public class TablePointsModel implements ChangeMapListener {
+    private String           unit        = DistanceUnit.getDefaultUnit();
 
-    private DataRunTrk[] points;
+    private DataRunTrk[]     pointsFilter;
 
-    private DataRunTrk[] pointsFilter;
+    private List<DataRunTrk> points;
 
-    private double       minY2;
+    private double           minY2;
 
-    private double       maxY2;
+    private double           maxY2;
 
-    private double       minX1;
+    private double           minX1;
 
-    private double       maxX1;
+    private double           maxX1;
 
-    private double       maxY1;
+    private double           maxY1;
 
-    private int[]        gridY1      = { 50, 75, 100, 125, 150, 175, 200, 220 };
+    private int[]            gridY1      = { 50,
+                                             75,
+                                             100,
+                                             125,
+                                             150,
+                                             175,
+                                             200,
+                                             220 };
 
-    private int[]        gridY2;
+    private int[]            gridY2;
 
-    private double[]     gridX;
+    private double[]         gridX;
 
-    private String       unitX       = "Distance (km)";
+    private String           unitX       = "Distance (km)";
 
-    private int          intervalX1  = -1;
+    private int              intervalX1  = -1;
 
-    private int          intervalX2  = -1;
+    private int              intervalX2  = -1;
 
-    private boolean      bZoom       = true;
+    private boolean          bZoom       = true;
 
-    private int          indexX1;
+    private int              indexX1;
 
-    private int          indexX2;
+    private int              indexX2;
 
-    private int          currentZoom = 0;
+    private int              currentZoom = 0;
 
-    private int          maxZoom;
+    private int              maxZoom;
+
+    private boolean          hasMouseMotionListener;
 
     /**
      * 
      */
     public TablePointsModel() {
+      initialize();
+      ModelMapkitManager.getInstance().addChangeListener(this);
+      ModelPointsManager.getInstance().addChangeListener(this);
+    }
+
+    private void initialize() {
       gridX = new double[17];
       for (int i = 0, value = 0; i < gridX.length; i++, value += 2) {
         gridX[i] = value;
       }
+      pointsFilter = null;
+      currentZoom = 0;
     }
 
     public void unitChanged(String newUnit) {
@@ -682,35 +808,135 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
             p.setDistance((float) DistanceUnit.convert(unit, newUnit, p
                 .getDistance()));
           }
-          updateData(points, newUnit);
+          fireChangedAllPoints();
         }
       }
+    }
+
+    public boolean hasMouseMotionListener() {
+      return hasMouseMotionListener;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * fr.turtlesport.ui.swing.component.ChangePointsListener#changedAllPoints
+     * (fr.turtlesport.ui.swing.component.ChangePointsEvent)
+     */
+    public void changedAllPoints(ChangePointsEvent e) {
+      points = e.getListTrks();
+      JDiagramComponent.this.removeMouseMotionListener(mouseMotionListener);
+      JDiagramComponent.this.addMouseMotionListener(mouseMotionListener);
+      mouseX = 0;
+      fireChangedAllPoints();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @seefr.turtlesport.ui.swing.component.ChangePointsListener#changedLap(fr.
+     * turtlesport.ui.swing.component.ChangePointsEvent)
+     */
+    public void changedLap(ChangePointsEvent e) {
+
+      DataRunLap[] runLaps = ModelPointsManager.getInstance().getRunLaps();
+      int index = ModelPointsManager.getInstance().getLapIndex();
+      if (runLaps != null && index != -1) {
+        double[] inter = new double[2];
+
+        inter[0] = 0;
+        for (int i = 0; i < index; i++) {
+          inter[0] += runLaps[i].getTotalDist();
+        }
+        inter[1] = inter[0] + runLaps[index].getTotalDist();
+        this.intervalX1 = (int) inter[0];
+        this.intervalX2 = (int) inter[1];
+        repaint();
+      }
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * fr.turtlesport.ui.swing.component.ChangePointsListener#changedPoint(fr.
+     * turtlesport.ui.swing.component.ChangePointsEvent)
+     */
+    public void changedPoint(ChangePointsEvent e) {
+      if (e.hasPoints() && model != null) {
+        int index = e.getTrkIndexCurrentPoint();
+        mouseX = computeRelativeX(model.getX(index));
+        currentTime = getTime(index);
+        currentX = getX(index);
+        currentY1 = getY1(index);
+        currentY2 = getY2(index);
+
+        tabMouseY[0] = computeRelativeY1(currentY1);
+        tabMouseY[1] = computeRelativeY2(currentY2);
+        repaint();
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * fr.turtlesport.ui.swing.component.ChangeMapListener#changedMap(fr.turtlesport
+     * .ui.swing.component.ChangeMapEvent)
+     */
+    public void changedMap(ChangeMapEvent changeEvent) {
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @seefr.turtlesport.ui.swing.component.ChangeMapListener#changedPlay(fr.
+     * turtlesport.ui.swing.component.ChangeMapEvent)
+     */
+    public void changedPlay(ChangeMapEvent e) {
+      JDiagramComponent.this.removeMouseMotionListener(mouseMotionListener);
+      hasMouseMotionListener = !e.isRunning();
+      if (hasMouseMotionListener) {
+        JDiagramComponent.this.addMouseMotionListener(mouseMotionListener);
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @seefr.turtlesport.ui.swing.component.ChangeMapListener#changedSpeed(fr.
+     * turtlesport.ui.swing.component.ChangeMapEvent)
+     */
+    public void changedSpeed(ChangeMapEvent e) {
     }
 
     public void changeVisible() {
       repaint();
     }
 
-    protected double getX(int index) {
-      return points[index].getDistance() / 1000;
+    protected double getX(int i) {
+      return points.get(i).getDistance() / 1000;
     }
 
-    protected long getTime(int index) {
-      return points[index].getTime().getTime() - points[0].getTime().getTime();
+    protected long getTime(int i) {
+      return points.get(i).getTime().getTime()
+             - points.get(0).getTime().getTime();
     }
 
-    protected int getDistance(int index) {
-      return (int) points[index].getDistance();
+    protected int getDistance(int i) {
+      return (int) points.get(i).getDistance();
     }
 
-    protected double getY1(int index) {
-      return (JPanelGraph.isFilter()) ? pointsFilter[index].getHeartRate()
-          : points[index].getHeartRate();
+    protected double getY1(int i) {
+      return (JPanelGraph.isFilter()) ? pointsFilter[i].getHeartRate() : points
+          .get(i).getHeartRate();
     }
 
-    protected double getY2(int index) {
-      return (JPanelGraph.isFilter()) ? pointsFilter[index].getAltitude()
-          : points[index].getAltitude();
+    protected double getY2(int i) {
+      return (JPanelGraph.isFilter()) ? pointsFilter[i].getAltitude() : points
+          .get(i).getAltitude();
     }
 
     /**
@@ -804,7 +1030,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
      * @param intX1
      * @param intX2
      */
-    public void updateInt(double intX1, double intX2) {
+    public void updateLap(double intX1, double intX2) {
       this.intervalX1 = (int) intX1;
       this.intervalX2 = (int) intX2;
       repaint();
@@ -815,19 +1041,20 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
      * 
      * @param points
      */
-    public void updateData(DataRunTrk[] points, String unit) {
-      log.info(">>updateData");
-
+    private void fireChangedAllPoints() {
       this.intervalX1 = -1;
       this.intervalX2 = -1;
-      this.points = points;
-      this.unit = unit;
       this.pointsFilter = null;
-
       indexX2 = 0;
+      if (points == null || points.size() == 0) {
+        initialize();
+        repaint();
+        return;
+      }
+
       if (points != null) {
         indexX1 = 0;
-        indexX2 = points.length;
+        indexX2 = points.size();
 
         minX1 = Double.MAX_VALUE;
         maxX1 = 0;
@@ -895,7 +1122,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         }
       }
 
-      log.info("<<updateData");
       repaint();
     }
 
@@ -906,7 +1132,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
 
       if (JPanelGraph.isFilter()) {
         applyFilterSavitzyGolay();
-        // applyFilterSubdivision();
       }
       repaint();
     }
@@ -916,19 +1141,19 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         return;
       }
 
-      pointsFilter = new DataRunTrk[points.length];
+      pointsFilter = new DataRunTrk[points.size()];
 
       // courbe 1
-      double[] y = new double[points.length];
-      for (int i = 0; i < points.length; i++) {
-        y[i] = points[i].getHeartRate();
+      double[] y = new double[points.size()];
+      for (int i = 0; i < points.size(); i++) {
+        y[i] = points.get(i).getHeartRate();
         // if (y[i] < 50)
         // System.out.println(i + "=" + y[i]);
         pointsFilter[i] = new DataRunTrk();
       }
       double[] yFilter = SavitzkyGolay.filter(y);
-      for (int i = 0; i < points.length; i++) {
-        pointsFilter[i].setDistance(points[i].getDistance());
+      for (int i = 0; i < points.size(); i++) {
+        pointsFilter[i].setDistance(points.get(i).getDistance());
         if (yFilter[i] < gridY1[0]) {
           yFilter[i] = gridY1[0];
         }
@@ -939,11 +1164,11 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
       }
 
       // courbe 2
-      for (int i = 0; i < points.length; i++) {
-        y[i] = points[i].getAltitude();
+      for (int i = 0; i < points.size(); i++) {
+        y[i] = points.get(i).getAltitude();
       }
       yFilter = SavitzkyGolay.filter(y);
-      for (int i = 0; i < points.length; i++) {
+      for (int i = 0; i < points.size(); i++) {
         if (yFilter[i] < 0) {
           yFilter[i] = 0;
         }
@@ -964,7 +1189,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         return;
       }
       indexX1 = 0;
-      indexX2 = points.length;
+      indexX2 = points.size();
       applyZoom();
     }
 
@@ -995,7 +1220,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
             indexX1 *= 2;
             indexX2 *= 2;
           }
-          else if (indexX2 == points.length) {
+          else if (indexX2 == points.size()) {
             indexX1 -= (indexX2 - indexX1);
           }
           else {
@@ -1006,8 +1231,8 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
           if (indexX1 < 0) {
             indexX1 = 0;
           }
-          if (indexX2 > points.length) {
-            indexX2 = points.length;
+          if (indexX2 > points.size()) {
+            indexX2 = points.size();
           }
           applyZoom();
         }
@@ -1027,20 +1252,20 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
 
       // recuperation des max
       for (int i = indexX1; i < indexX2; i++) {
-        if (points[i].getDistance() < minX1) {
-          minX1 = points[i].getDistance();
+        if (points.get(i).getDistance() < minX1) {
+          minX1 = points.get(i).getDistance();
         }
-        if (points[i].getDistance() > maxX1) {
-          maxX1 = points[i].getDistance();
+        if (points.get(i).getDistance() > maxX1) {
+          maxX1 = points.get(i).getDistance();
         }
-        if (points[i].getHeartRate() > maxY1) {
-          maxY1 = points[i].getHeartRate();
+        if (points.get(i).getHeartRate() > maxY1) {
+          maxY1 = points.get(i).getHeartRate();
         }
-        if (points[i].getAltitude() > maxY2) {
-          maxY2 = points[i].getAltitude();
+        if (points.get(i).getAltitude() > maxY2) {
+          maxY2 = points.get(i).getAltitude();
         }
-        if (points[i].getAltitude() < minY2) {
-          minY2 = points[i].getAltitude();
+        if (points.get(i).getAltitude() < minY2) {
+          minY2 = points.get(i).getAltitude();
         }
       }
 
@@ -1062,12 +1287,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
 
       log.debug("<<applyZoom");
     }
-
-    // private void applyFilterSubdivision() {
-    // pointsFilter = null;
-    // pointsFilter = Subdivision.filter(points);
-    // }
-
   }
 
   /**
