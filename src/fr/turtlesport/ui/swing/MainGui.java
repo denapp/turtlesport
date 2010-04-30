@@ -56,6 +56,8 @@ import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JXSplitButton;
 import fr.turtlesport.ui.swing.component.calendar.JPanelCalendar;
 import fr.turtlesport.ui.swing.img.menu.ImagesMenuRepository;
+import fr.turtlesport.ui.swing.model.ModelMapkitManager;
+import fr.turtlesport.ui.swing.model.ModelPointsManager;
 import fr.turtlesport.ui.swing.model.ModelRunCalendar;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
@@ -116,6 +118,8 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private JButton              jButtonPrefUser;
 
+  private JButton              jButtonStat;
+
   private MainGuiMouseListener quitMouseListener;
 
   private MainGuiMouseListener aboutMouseListener;
@@ -149,6 +153,8 @@ public class MainGui extends JFrame implements LanguageListener {
   private JMenuItemTurtle      jMenuItemRunMap;
 
   private JMenuItem            jMenuItemRunImport;
+
+  private JMenuItem            jMenuItemRunAdd;
 
   private JMenuItemTurtle      jMenuItemMail;
 
@@ -219,8 +225,6 @@ public class MainGui extends JFrame implements LanguageListener {
   private void performedLanguage(ILanguage lang) {
     ResourceBundle rb = ResourceBundleUtility.getBundle(lang, getClass());
 
-    setTitle(rb.getString("title"));
-
     prefMouseListener.setMessage(rb.getString("prefMouseListener"));
     retreiveMouseListener.setMessage(rb.getString("retreiveMouseListener"));
     userPrefMouseListener.setMessage(rb.getString("userPrefMouseListener"));
@@ -251,6 +255,7 @@ public class MainGui extends JFrame implements LanguageListener {
     jMenuItemRunExportHst.setText(rb.getString("jMenuItemRunExportHst"));
 
     jMenuItemRunImport.setText(rb.getString("jMenuItemRunImport"));
+    jMenuItemRunAdd.setText(rb.getString("jMenuItemRunAdd"));
     jMenuItemRunSave.setText(rb.getString("jMenuItemRunSave"));
     jMenuItemRunDelete.setText(rb.getString("jMenuItemRunDelete"));
 
@@ -272,7 +277,11 @@ public class MainGui extends JFrame implements LanguageListener {
     JCheckBoxMenuItem miAllUser = (JCheckBoxMenuItem) jXSplitButtonUser
         .getDropDownMenu().getComponent(0);
     miAllUser.setText(DataUser.getAllUser().getFirstName());
-    MainGui.this.setTitle("Turtle Sport - " + miAllUser.getText());
+
+    if (currentIdUser == -1) {
+      setTitle("Turtle Sport - " + miAllUser.getText());
+    }
+    setCurrentIdUser(currentIdUser);
   }
 
   /**
@@ -292,30 +301,31 @@ public class MainGui extends JFrame implements LanguageListener {
   }
 
   private void setCurrentIdUser(int currentIdUser) {
-    this.currentIdUser = currentIdUser;
-    Configuration.getConfig().addProperty("general",
-                                          "currentIdUser",
-                                          Integer.toString(currentIdUser));
-    // mis a jour des dates
-    fireHistoric();
+    if (this.currentIdUser != currentIdUser) {
+      this.currentIdUser = currentIdUser;
+      Configuration.getConfig().addProperty("general",
+                                            "currentIdUser",
+                                            Integer.toString(currentIdUser));
+      // mis a jour des dates
+      fireHistoric();
 
-    // clear panel run si different de all user
-    JPanelRun panelRun = (JPanelRun) jSplitPaneCenter.getRightComponent();
-    try {
-      if (!DataUser.isAllUser(currentIdUser)) {
-        panelRun.getModel().updateView(panelRun, null);
-        ((JPanelCalendar) jSplitPaneCenter.getLeftComponent())
-            .fireDatesUnselect();
+      // clear panel run si different de all user
+      if (jSplitPaneCenter.getRightComponent() instanceof UserListener) {
+        try {
+          ((UserListener) jSplitPaneCenter.getRightComponent())
+              .userSelect(currentIdUser);
+          if (!DataUser.isAllUser(currentIdUser)) {
+            ((JPanelCalendar) jSplitPaneCenter.getLeftComponent())
+                .fireDatesUnselect();
+          }
+        }
+        catch (SQLException e) {
+          log.error("", e);
+          ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+              .getManager().getCurrentLang(), JPanelCalendar.class);
+          JShowMessage.error(rb.getString("errorSQL"));
+        }
       }
-      else {
-        panelRun.getModel().updateViewButtons(panelRun);
-      }
-    }
-    catch (SQLException e) {
-      log.error("", e);
-      ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-          .getManager().getCurrentLang(), JPanelCalendar.class);
-      JShowMessage.error(rb.getString("errorSQL"));
     }
   }
 
@@ -376,7 +386,6 @@ public class MainGui extends JFrame implements LanguageListener {
     // on ajuste la taille car pas de menu sous mac os x
     this.setSize(1200, 727 - (OperatingSystem.isMacOSX() ? 27 : 0));
     this.setContentPane(getJContentPane());
-    this.setTitle("Turtle Sport");
     initJMenuBar();
 
     this.setFont(GuiFont.FONT_PLAIN);
@@ -437,8 +446,14 @@ public class MainGui extends JFrame implements LanguageListener {
     userPrefMouseListener = new MainGuiMouseListener("Profil utilisateur");
     jButtonPrefUser.addMouseListener(userPrefMouseListener);
 
+    StatAction statAction = new StatAction();
+    jButtonStat.addActionListener(statAction);
+
     ImportActionListener importAction = new ImportActionListener();
     jMenuItemRunImport.addActionListener(importAction);
+
+    RunAddActionListener runAction = new RunAddActionListener();
+    jMenuItemRunAdd.addActionListener(runAction);
 
     NetAction netAction = new NetAction("http://turtlesport.sourceforge.net");
     jMenuItemNet.addActionListener(netAction);
@@ -481,10 +496,13 @@ public class MainGui extends JFrame implements LanguageListener {
         JCheckBoxMenuItemUser val = (JCheckBoxMenuItemUser) b;
         if (val.getIdUser() == oldIdUser) {
           buttonGroupDropDown.setSelected(val.getModel(), true);
+          val.actionPerformed(null);
           break;
         }
       }
     }
+
+    setRightComponent(new JPanelRun());
     setCurrentIdUser(oldIdUser);
 
     log.debug("<<initialize");
@@ -534,6 +552,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jToolBar.add(getJButtonRetrieve());
       jToolBar.add(getJXSplitButtonUser());
       jToolBar.add(getJButtonPrefUser());
+      jToolBar.add(getJButtonStat());
       jToolBar.addSeparator();
       jToolBar.add(getJButtonPreference());
     }
@@ -552,6 +571,20 @@ public class MainGui extends JFrame implements LanguageListener {
       jButtonRetreive.setEnabled(true);
     }
     return jButtonRetreive;
+  }
+
+  /**
+   * This method initializes jButtonStat
+   * 
+   * @return javax.swing.JButton
+   */
+  private JButton getJButtonStat() {
+    if (jButtonStat == null) {
+      jButtonStat = new JButton();
+      jButtonStat.setIcon(ImagesMenuRepository.getImageIcon("stat.png"));
+      jButtonStat.setEnabled(true);
+    }
+    return jButtonStat;
   }
 
   /**
@@ -658,6 +691,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuRun.addSeparator();
       jMenuRun.add(getJMenuRunExport());
       jMenuRun.add(getJMenuItemRunImport());
+      jMenuRun.add(getJMenuItemRunAdd());
       jMenuRun.addSeparator();
       jMenuRun.add(getJMenuItemRunSave());
       jMenuRun.add(getJMenuItemRunDelete());
@@ -754,6 +788,19 @@ public class MainGui extends JFrame implements LanguageListener {
   }
 
   /**
+   * This method initializes jMenuItemRunImport.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItem getJMenuItemRunAdd() {
+    if (jMenuItemRunAdd == null) {
+      jMenuItemRunAdd = new JMenuItem();
+      jMenuItemRunAdd.setFont(GuiFont.FONT_PLAIN);
+    }
+    return jMenuItemRunAdd;
+  }
+
+  /**
    * This method initializes jMenuRunExport.
    * 
    * @return javax.swing.JMenuItem
@@ -840,7 +887,7 @@ public class MainGui extends JFrame implements LanguageListener {
    * 
    * @return javax.swing.JMenuItem
    */
-  protected JMenuItemTurtle getJMenuItemRunDelete() {
+  public JMenuItemTurtle getJMenuItemRunDelete() {
     if (jMenuItemRunDelete == null) {
       jMenuItemRunDelete = new JMenuItemTurtle();
       jMenuItemRunDelete.setFont(GuiFont.FONT_PLAIN);
@@ -855,7 +902,7 @@ public class MainGui extends JFrame implements LanguageListener {
    * 
    * @return javax.swing.JMenuItem
    */
-  protected JMenuItemTurtle getJMenuItemRunSave() {
+  public JMenuItemTurtle getJMenuItemRunSave() {
     if (jMenuItemRunSave == null) {
       jMenuItemRunSave = new JMenuItemTurtle();
       jMenuItemRunSave.setFont(GuiFont.FONT_PLAIN);
@@ -1225,9 +1272,6 @@ public class MainGui extends JFrame implements LanguageListener {
       if (!(jSplitPaneCenter.getLeftComponent() instanceof JPanelCalendar)) {
         jSplitPaneCenter.setLeftComponent(panel);
       }
-      if (!(jSplitPaneCenter.getRightComponent() instanceof JPanelRun)) {
-        setRightComponent(new JPanelRun());
-      }
     }
   }
 
@@ -1292,7 +1336,9 @@ public class MainGui extends JFrame implements LanguageListener {
           }
           catch (SQLException e) {
             log.error("", e);
-            JShowMessage.error(e.getMessage());
+            ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+                .getManager().getCurrentLang(), MainGui.class);
+            JShowMessage.error(rb.getString("errorSQL"));
           }
           return null;
         }
@@ -1331,6 +1377,30 @@ public class MainGui extends JFrame implements LanguageListener {
    * @author Denis Apparicio
    * 
    */
+  private class RunAddActionListener implements ActionListener {
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
+    public void actionPerformed(ActionEvent actionevent) {
+      // ui
+      try {
+        JDialogAddRun.prompt();
+      }
+      catch (SQLException e) {
+        log.error("", e);
+      }
+    }
+
+  }
+
+  /**
+   * @author Denis Apparicio
+   * 
+   */
   private class UserAction extends AbstractAction {
 
     /*
@@ -1359,9 +1429,58 @@ public class MainGui extends JFrame implements LanguageListener {
           }
           catch (SQLException e) {
             log.error("", e);
-            JShowMessage.error("Erreur database.");
+            ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+                .getManager().getCurrentLang(), MainGui.class);
+            JShowMessage.error(rb.getString("errorSQL"));
           }
 
+          afterRunnableSwing();
+        }
+      });
+
+    }
+
+  }
+
+  /**
+   * @author Denis Apparicio
+   * 
+   */
+  private class StatAction extends AbstractAction {
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+     */
+    public void actionPerformed(ActionEvent e) {
+      if (jSplitPaneCenter.getRightComponent() instanceof JPanelStat) {
+        return;
+      }
+
+      beforeRunnableSwing();
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+
+          try {
+            JPanelStat panel = new JPanelStat();
+            setRightComponent(panel);
+            panel.userSelect(currentIdUser);
+            MainGui.getWindow().setEnableMenuRun(false);
+            // Pour les boutons de navigation avec CDE/Motif
+            if (SwingLookAndFeel.isLookAndFeelMotif()) {
+              MainGui.getWindow().updateComponentTreeUI();
+            }
+          }
+          catch (SQLException e) {
+            log.error("", e);
+            ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+                .getManager().getCurrentLang(), MainGui.class);
+            JShowMessage.error(rb.getString("errorSQL"));
+          }
+          catch (Throwable e) {
+            log.error("", e);
+          }
           afterRunnableSwing();
         }
       });
@@ -1462,6 +1581,11 @@ public class MainGui extends JFrame implements LanguageListener {
   public void setRightComponent(JPanel panel) {
     if (jSplitPaneCenter.getRightComponent() != null) {
       // Suppression des listeners
+      if (!(panel instanceof JPanelRun)) {
+        ModelPointsManager.getInstance().removeAllChangeListener();
+        ModelMapkitManager.getInstance().removeAllChangeListener();
+      }
+
       if (LanguageListener.class.isAssignableFrom(jSplitPaneCenter
           .getRightComponent().getClass())) {
         LanguageListener l = (LanguageListener) jSplitPaneCenter
@@ -1511,7 +1635,15 @@ public class MainGui extends JFrame implements LanguageListener {
      */
     public void actionPerformed(ActionEvent e) {
       MainGui.this.setTitle("Turtle Sport - " + getText());
-      setCurrentIdUser(idUser);
+      beforeRunnableSwing();
+
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          setCurrentIdUser(idUser);
+          afterRunnableSwing();
+        }
+      });
+
     }
 
   }

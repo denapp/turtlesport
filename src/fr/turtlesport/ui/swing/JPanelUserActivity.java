@@ -801,7 +801,7 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
   public JTextFieldLength getJTextFieldSpeedName() {
     if (jTextFieldZoneSpeedName == null) {
       jTextFieldZoneSpeedName = new JTextFieldLength();
-      Dimension dim = new Dimension(200, 23);
+      Dimension dim = new Dimension(290, 23);
       jTextFieldZoneSpeedName.setPreferredSize(dim);
       jTextFieldZoneSpeedName.setMinimumSize(dim);
 

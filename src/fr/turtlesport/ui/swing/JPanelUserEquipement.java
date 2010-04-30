@@ -420,9 +420,9 @@ public class JPanelUserEquipement extends JPanel implements LanguageListener,
     // Evenement
     jComboBoxDistanceUnits.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        // JComboBox cb = (JComboBox) e.getSource();
-        // model.setUnitDistance(JPanelUserEquipement.this, (String) cb
-        // .getSelectedItem());
+        JComboBox cb = (JComboBox) e.getSource();
+        model.setUnitDistance(JPanelUserEquipement.this, (String) cb
+            .getSelectedItem());
       }
     });
 

@@ -216,6 +216,21 @@ public class ModelMapkitManager {
   }
 
   /**
+   * Supprime tous les <code>ChangePointsListener</code>.
+   * 
+   * @param l
+   *          le <code>ChangePointsListener</code> &agrave; supprimer.
+   */
+  public void removeAllChangeListener() {
+    Object[] objs = listenerList.toArray();
+    if (objs != null) {
+      for (Object o : objs) {
+        removeChangeListener((ChangeMapListener) o);
+      }
+    }
+  }
+
+  /**
    * Supprime le <code>ChangeMapListener</code>.
    * 
    * @param l
