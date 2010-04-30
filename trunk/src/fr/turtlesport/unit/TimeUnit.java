@@ -37,7 +37,7 @@ public final class TimeUnit {
     if (date == null) {
       return 0;
     }
-    
+
     Calendar cal1 = Calendar.getInstance();
     cal1.setTime(date);
 
@@ -66,6 +66,60 @@ public final class TimeUnit {
     long hour = sec / 3600;
     if (hour == 0) {
       st.append("00:");
+    }
+    else if (hour < 10) {
+      st.append('0');
+      st.append(hour);
+      st.append(':');
+    }
+    else {
+      st.append(hour);
+      st.append(':');
+    }
+
+    long mn = (sec % 3600) / 60;
+    if (mn == 0) {
+      st.append("00:");
+    }
+    else if (mn < 10) {
+      st.append('0');
+      st.append(mn);
+      st.append(':');
+    }
+    else {
+      st.append(mn);
+      st.append(':');
+    }
+
+    long s = (sec % 3600) % 60;
+    if (s == 0) {
+      st.append("00");
+    }
+    else if (s < 10) {
+      st.append('0');
+      st.append(s);
+    }
+    else {
+      st.append(s);
+    }
+
+    return st.toString();
+  }
+
+  /**
+   * Formatte les centi&eagrave;mes de secondes au format hh mn secondes.
+   * 
+   * @param sec100
+   *          les centie&eagrave;mes de seconde.
+   * @return la date.
+   */
+  public static String formatHundredSecondeTimeWithoutHour(long sec100) {
+    StringBuilder st = new StringBuilder();
+
+    long sec = sec100 / 100;
+
+    long hour = sec / 3600;
+    if (hour == 0) {
     }
     else if (hour < 10) {
       st.append('0');
