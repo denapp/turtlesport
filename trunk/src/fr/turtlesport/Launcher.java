@@ -71,7 +71,7 @@ public final class Launcher {
       catch (Throwable e) {
         e.printStackTrace();
       }
-      
+
       // positionne les traces
       String dirExe = Location.dirNameExecution(Launcher.class);
       File file = new File(dirExe, "log4J.xml");
@@ -88,7 +88,7 @@ public final class Launcher {
       log.debug("<<main");
     }
     catch (Throwable e) {
-      e.printStackTrace();
+      log.error("", e);
     }
   }
 
