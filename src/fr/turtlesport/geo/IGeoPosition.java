@@ -14,7 +14,7 @@ public interface IGeoPosition {
    * 
    * @return <code>true</code> si cette postion est invalide.
    */
-   boolean isInvalidPosition();
+  boolean isInvalidPosition();
 
   /**
    * Restitue la latitude.
@@ -31,6 +31,22 @@ public interface IGeoPosition {
   double getLongitude();
 
   /**
+   * Valorise la latitude.
+   * 
+   * @param la
+   *          latitude.
+   */
+  void setLatitude(double latitude);
+
+  /**
+   * Valorise la longitude.
+   * 
+   * @param la
+   *          longitude.
+   */
+  void setLongitude(double longitude);
+
+  /**
    * Restitue la date de ce point.
    * 
    * @return la date de ce point.
@@ -43,4 +59,11 @@ public interface IGeoPosition {
    * @return la date de ce point.
    */
   void setDate(Date date);
+
+  /**
+   * Restitue la position sosu forme textuelle.
+   * 
+   * @return la position sous forme textuelle.
+   */
+  String geoPosition();
 }

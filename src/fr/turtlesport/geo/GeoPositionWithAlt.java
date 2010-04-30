@@ -8,15 +8,12 @@ import java.util.Date;
  * @author Denis Apparicio
  * 
  */
-public class GeoPositionWithAlt implements IGeoPositionWithAlt {
+public class GeoPositionWithAlt extends GeoPosition implements
+                                                   IGeoPositionWithAlt {
 
   private static final SimpleDateFormat DF        = new SimpleDateFormat("dd/MM/yyyy k:mm:ss.S");
 
   private boolean                       hasSensor = false;
-
-  private double                        latitude;
-
-  private double                        longitude;
 
   private double                        elevation;
 
@@ -30,11 +27,14 @@ public class GeoPositionWithAlt implements IGeoPositionWithAlt {
 
   /**
    * Construit une instance de GeoPosition.
+   * 
+   * @param latitude
+   *          la latitude en degr&eacute;
+   * @param longitude
+   *          la longitude en degr&eacute;
    */
   public GeoPositionWithAlt() {
-    super();
-    latitude = INVALID_POS;
-    longitude = INVALID_POS;
+    super(INVALID_POS, INVALID_POS);
     elevation = Double.NaN;
     distanceMeters = Double.NaN;
   }
@@ -51,8 +51,7 @@ public class GeoPositionWithAlt implements IGeoPositionWithAlt {
    *          l'altitude en metre;
    */
   public GeoPositionWithAlt(double latitude, double longitude, double elevation) {
-    this.latitude = latitude;
-    this.longitude = longitude;
+    super(INVALID_POS, INVALID_POS);
     this.elevation = elevation;
     distanceMeters = Double.NaN;
   }
@@ -75,33 +74,6 @@ public class GeoPositionWithAlt implements IGeoPositionWithAlt {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.geo.IGeoPosition#iPositionInvalid()
-   */
-  public boolean isInvalidPosition() {
-    return (latitude == INVALID_POS && longitude == INVALID_POS);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.geo.IGeoPosition#getLatitude()
-   */
-  public double getLatitude() {
-    return latitude;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.geo.IGeoPosition#getLongitude()
-   */
-  public double getLongitude() {
-    return longitude;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see fr.turtlesport.geo.IGeoPositionWithAlt#getElevation()
    */
   public double getElevation() {
@@ -115,22 +87,6 @@ public class GeoPositionWithAlt implements IGeoPositionWithAlt {
    */
   public Date getDate() {
     return date;
-  }
-
-  /**
-   * @param longitude
-   *          the longitude to set
-   */
-  public void setLongitude(double longitude) {
-    this.longitude = longitude;
-  }
-
-  /**
-   * @param latitude
-   *          the latitude to set
-   */
-  public void setLatitude(double latitude) {
-    this.latitude = latitude;
   }
 
   /**
@@ -252,8 +208,8 @@ public class GeoPositionWithAlt implements IGeoPositionWithAlt {
    */
   @Override
   public String toString() {
-    return "[" + latitude + ", " + longitude + ", " + elevation + ", "
-           + DF.format(date) + "]";
+    return "[" + getLatitude() + ", " + getLongitude() + ", " + elevation
+           + ", " + DF.format(date) + "]";
   }
 
 }

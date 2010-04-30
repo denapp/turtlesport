@@ -11,6 +11,8 @@ package fr.turtlesport.geo;
 
 import java.util.Date;
 
+import fr.turtlesport.util.GeoUtil;
+
 /**
  * 
  * @author Denis Apparicio
@@ -78,6 +80,36 @@ public class GeoPosition implements IGeoPosition {
    */
   public double getLongitude() {
     return longitude;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.IGeoPosition#geoPosition()
+   */
+  public String geoPosition() {
+    if (isInvalidPosition()) {
+      return null;
+    }
+    return GeoUtil.geoPosition(latitude, longitude);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.IGeoPosition#setLatitude(double)
+   */
+  public void setLatitude(double latitude) {
+    this.latitude = latitude;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.IGeoPosition#setLongitude(double)
+   */
+  public void setLongitude(double longitude) {
+    this.longitude = longitude;
   }
 
   /*

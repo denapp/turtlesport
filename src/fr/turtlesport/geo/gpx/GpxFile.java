@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -99,8 +100,9 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       return null;
     }
 
-    DataRunTrk[] trks = RunTrkTableManager.getInstance().getTrks(data.getId());
-    if (trks != null && trks.length < 1) {
+    List<DataRunTrk> trks = RunTrkTableManager.getInstance().getTrks(data
+        .getId());
+    if (trks != null && trks.size() < 1) {
       return null;
     }
 
@@ -347,16 +349,16 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       log.warn("pas de points pour ce tour");
       return;
     }
-    
+
     // <trkseg> fils de <trk>
     // --------------------------------------------------
     writer.write("<trkseg>");
-    
+
     for (DataRunTrk t : trks) {
       writeln(writer);
       writeTrkPoint(writer, t, timeFormat);
     }
-    
+
     writer.write("</trkseg>");
     writeln(writer);
 

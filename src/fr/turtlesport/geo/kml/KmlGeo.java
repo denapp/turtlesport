@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunTrk;
@@ -77,8 +78,6 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
 
     long starTime = System.currentTimeMillis();
 
-    DataRunTrk[] trks;
-
     if (dataRun == null) {
       throw new IllegalArgumentException("dataRun est null");
     }
@@ -86,8 +85,9 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
       throw new IllegalArgumentException("file est null");
     }
 
-    trks = RunTrkTableManager.getInstance().getTrks(dataRun.getId());
-    if (trks != null && trks.length < 1) {
+    List<DataRunTrk> trks = RunTrkTableManager.getInstance().getTrks(dataRun
+        .getId());
+    if (trks != null && trks.size() < 1) {
       return null;
     }
 
@@ -125,7 +125,7 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
       // <name> fils de <Placemark>
       writer.write("<name>");
       writer.write("Track (");
-      writer.write(Integer.toString(trks.length));
+      writer.write(Integer.toString(trks.size()));
       writer.write(" records)");
       writer.write("</name>");
       writeln(writer);
@@ -168,12 +168,12 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
 
       // <description> fils de <Placemark>
       writer.write("<description>");
-      writePointCData(writer, trks[0].getTime(), trks[0].getAltitude());
+      writePointCData(writer, trks.get(0).getTime(), trks.get(0).getAltitude());
       writer.write("</description>");
       writeln(writer);
 
       // <point> fils de <Placemark>
-      writePoint(writer, trks[0]);
+      writePoint(writer, trks.get(0));
       writer.write("</Placemark>");
       writeln(writer);
 
@@ -187,9 +187,8 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
 
       // <description> fils de <Placemark>
       writer.write("<description>");
-      writePointCData(writer,
-                      trks[trks.length - 1].getTime(),
-                      trks[trks.length - 1].getAltitude());
+      writePointCData(writer, trks.get(trks.size() - 1).getTime(), trks
+          .get(trks.size() - 1).getAltitude());
       writer.write("</description>");
       writeln(writer);
 
@@ -201,7 +200,7 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
       writeln(writer);
 
       // <point> fils de <Placemark>
-      writePoint(writer, trks[trks.length - 1]);
+      writePoint(writer, trks.get(trks.size() - 1));
 
       writer.write("</Placemark>");
       writeln(writer);
@@ -279,7 +278,7 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
 
       // <description> fils de <Folder>
       writer.write("<description>");
-      writer.write(Integer.toString(trks.length));
+      writer.write(Integer.toString(trks.size()));
       writer.write(" records");
       writer.write("</description>");
       writeln(writer);
@@ -287,8 +286,8 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
       // <name> fils de <Folder>
       writer.write("<name>Waypoints</name>");
       writeln(writer);
-      for (int i = 0; i < trks.length; i++) {
-        convertWayPoint(writer, trks[i], i);
+      for (int i = 0; i < trks.size(); i++) {
+        convertWayPoint(writer, trks.get(i), i);
       }
       writeln(writer);
       writer.write("</Folder>");
@@ -340,8 +339,9 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.geo.convert.IGeoRunConvert#convert(fr.turtlesport.protocol.data.D1006CourseType,
-   *      java.io.File)
+   * @see
+   * fr.turtlesport.geo.convert.IGeoRunConvert#convert(fr.turtlesport.protocol
+   * .data.D1006CourseType, java.io.File)
    */
   public File convert(D1006CourseType data, File file) throws GeoConvertException {
     log.debug(">>convert");
@@ -596,7 +596,9 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.geo.convert.IGeoRunConvert#convert(fr.turtlesport.protocol.data.D1006CourseType)
+   * @see
+   * fr.turtlesport.geo.convert.IGeoRunConvert#convert(fr.turtlesport.protocol
+   * .data.D1006CourseType)
    */
   public File convert(D1006CourseType data) throws GeoConvertException {
     // Recuperation du fichier
@@ -622,7 +624,8 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
     writer.write("<br>Altitude ");
     writer.write(Float.toString(altitude));
     writer.write(" meters");
-    writer.write("<br>Created by <a href=\"http://turtlesport.sourceforge.net\">Turtlesport</a>");
+    writer
+        .write("<br>Created by <a href=\"http://turtlesport.sourceforge.net\">Turtlesport</a>");
     writer.write("]]>");
   }
 
@@ -660,14 +663,14 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
     return st.toString();
   }
 
-  private void writeCoordinates(Writer writer, DataRunTrk[] points) throws IOException {
-    int size = points.length - 1;
-    for (int i = 0; i < size; i++) {
-      writePointCoordinates(writer, points[i]);
+  private void writeCoordinates(Writer writer, List<DataRunTrk> points) throws IOException {
+    int size = points.size() - 1;
+    for (int i = 0; i < points.size(); i++) {
+      writePointCoordinates(writer, points.get(i));
       writer.write("\n");
       // writer.write(' ');
     }
-    writePointCoordinates(writer, points[size]);
+    writePointCoordinates(writer, points.get(size));
   }
 
   private void writeCoordinates(Writer writer, ArrayList<D304TrkPointType> list) throws IOException {
@@ -723,20 +726,20 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
     writer.write("</Point>");
   }
 
-  private DataRunTrk retreiveMinAltitudePoint(DataRunTrk[] points) {
+  private DataRunTrk retreiveMinAltitudePoint(List<DataRunTrk> points) {
     DataRunTrk pointCurrent = null;
 
     int i = 0;
-    for (i = 0; i < points.length; i++) {
-      if (points[i].isValidAltitude()) {
-        pointCurrent = points[i];
+    for (i = 0; i < points.size(); i++) {
+      if (points.get(i).isValidAltitude()) {
+        pointCurrent = points.get(i);
         break;
       }
     }
-    for (; i < points.length; i++) {
-      if (points[i].isValidAltitude()
-          && (points[i].getAltitude() < pointCurrent.getAltitude())) {
-        pointCurrent = points[i];
+    for (; i < points.size(); i++) {
+      if (points.get(i).isValidAltitude()
+          && (points.get(i).getAltitude() < pointCurrent.getAltitude())) {
+        pointCurrent = points.get(i);
       }
     }
     return pointCurrent;
@@ -761,20 +764,20 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
     return pointCurrent;
   }
 
-  private DataRunTrk retreiveMaxAltitudePoint(DataRunTrk[] points) {
+  private DataRunTrk retreiveMaxAltitudePoint(List<DataRunTrk> points) {
     DataRunTrk pointCurrent = null;
 
     int i = 0;
-    for (i = 0; i < points.length; i++) {
-      if (points[i].isValidAltitude()) {
-        pointCurrent = points[i];
+    for (i = 0; i < points.size(); i++) {
+      if (points.get(i).isValidAltitude()) {
+        pointCurrent = points.get(i);
         break;
       }
     }
-    for (; i < points.length; i++) {
-      if (points[i].isValidAltitude()
-          && (points[i].getAltitude() > pointCurrent.getAltitude())) {
-        pointCurrent = points[i];
+    for (; i < points.size(); i++) {
+      if (points.get(i).isValidAltitude()
+          && (points.get(i).getAltitude() > pointCurrent.getAltitude())) {
+        pointCurrent = points.get(i);
       }
     }
     return pointCurrent;
