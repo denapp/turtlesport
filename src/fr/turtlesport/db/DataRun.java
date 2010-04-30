@@ -11,30 +11,40 @@ import fr.turtlesport.unit.DistanceUnit;
  * 
  */
 public class DataRun {
-  private static TurtleLogger      log;
+  private static TurtleLogger log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(DataRun.class);
   }
 
-  private String    unit;
+  private String              unit;
 
-  private int       id;
+  private int                 id;
 
-  private int       sportType;
+  private int                 sportType;
 
-  private int       programType;
+  private int                 programType;
 
-  private int       multisport;
+  private int                 multisport;
 
-  private Timestamp time;
+  private Timestamp           time;
 
-  private String    comments;
+  private String              comments;
 
-  private String    equipement;
+  private String              equipement;
 
-  private double    distanceTot = -1;
+  private double              distanceTot = -1;
 
-  private int       timeTot     = -1;
+  private int                 timeTot     = -1;
+
+  private int                 maxRate     = -1;
+
+  private int                 minRate     = -1;
+
+  private int                 avgRate     = -1;
+
+  private int[]               alt;
+
+  private int                 calories    = -1;
 
   /**
    * 
@@ -254,4 +264,81 @@ public class DataRun {
     return timeTot;
   }
 
+  /**
+   * Calcul de la fr&eacute;quence cardiaque moyenne.
+   * 
+   * @return la la fr&eacute;quence cardiaque moyenne.
+   * @throws SQLException
+   */
+  public int computeAvgRate() throws SQLException {
+    if (avgRate == -1) {
+      avgRate = RunLapTableManager.getInstance().heartAvg(id);
+    }
+    return avgRate;
+  }
+
+  /**
+   * Calcul de la fr&eacute;quence cardiaque minimale.
+   * 
+   * @return la la fr&eacute;quence cardiaque minimale.
+   * @throws SQLException
+   */
+  public int computeMinRate() throws SQLException {
+    if (minRate == -1) {
+      minRate = RunTrkTableManager.getInstance().heartMin(id);
+    }
+    return minRate;
+  }
+
+  /**
+   * Calcul de la fr&eacute;quence cardiaque maximale.
+   * 
+   * @return la la fr&eacute;quence cardiaque maximale.
+   * @throws SQLException
+   */
+  public int computeMaxRate() throws SQLException {
+    if (maxRate == -1) {
+      maxRate = RunLapTableManager.getInstance().heartMax(id);
+    }
+    return maxRate;
+  }
+
+  /**
+   * Calcul d&eacute;nivel&eacute; positif.
+   * 
+   * @return d&eacute;nivel&eacute; positif.
+   * @throws SQLException
+   */
+  public int computeAltPlus() throws SQLException {
+    if (alt == null) {
+      alt = RunTrkTableManager.getInstance().altitude(id);
+    }
+    return alt[0];
+  }
+
+  /**
+   * Calcul d&eacute;nivel&eacute; n&eacute;gatif.
+   * 
+   * @return d&eacute;nivel&eacute; n&eacute;gatif.
+   * @throws SQLException
+   */
+  public int computeAltMoins() throws SQLException {
+    if (alt == null) {
+      alt = RunTrkTableManager.getInstance().altitude(id);
+    }
+    return alt[1];
+  }
+
+  /**
+   * Calcul des calories.
+   * 
+   * @return les calories.
+   * @throws SQLException
+   */
+  public int computeCalories() throws SQLException {
+    if (calories == -1) {
+      calories = RunLapTableManager.getInstance().computeCalories(id);
+    }
+    return calories;
+  }
 }

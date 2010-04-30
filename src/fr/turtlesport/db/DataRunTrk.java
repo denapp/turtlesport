@@ -8,21 +8,23 @@ import java.sql.Timestamp;
  */
 public class DataRunTrk {
 
-  private int       id;
+  private static final int INVALID = 0x7FFFFFFF;
 
-  private int       latitude;
+  private int              id;
 
-  private int       longitude;
+  private int              latitude;
 
-  private Timestamp time;
+  private int              longitude;
 
-  private float     altitude;
+  private Timestamp        time;
 
-  private float     distance;
+  private float            altitude;
 
-  private int       heartRate;
+  private float            distance;
 
-  private int       cadence = 0xff;
+  private int              heartRate;
+
+  private int              cadence = 0xff;
 
   /**
    * 
@@ -36,6 +38,16 @@ public class DataRunTrk {
    */
   public float getAltitude() {
     return altitude;
+  }
+
+  /**
+   * D&eacute;termine si coordonn&eacute;es GPS sont valides.
+   * 
+   * @return <code>true</code> si si coordonn&eacute;es GPS sont valides,
+   *         <code>false</code> sinon.
+   */
+  public boolean isValidGps() {
+    return (getLongitude() != INVALID) && (getLatitude() != INVALID);
   }
 
   /**

@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import org.apache.derby.jdbc.EmbeddedDataSource;
 
@@ -20,7 +22,7 @@ import fr.turtlesport.util.Location;
  * @author Denis Apparicio
  * 
  */
-public final class DatabaseManager {
+public class DatabaseManager {
   private static TurtleLogger            log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(DatabaseManager.class);
@@ -51,7 +53,7 @@ public final class DatabaseManager {
 
   private static boolean                 isNeedCreateIndex   = false;
 
-  private DatabaseManager() {
+  public DatabaseManager() {
   }
 
   /**
@@ -80,6 +82,11 @@ public final class DatabaseManager {
     }
 
     isInit = true;
+
+    // create function
+    createFunctions();
+
+    // create tables
     createTables(null);
 
     log.debug("<<initDatabase");
@@ -108,6 +115,9 @@ public final class DatabaseManager {
 
     isInit = true;
     createTables(splash);
+
+    // create function
+    createFunctions();
 
     log.debug("<<initDatabase");
   }
@@ -895,6 +905,110 @@ public final class DatabaseManager {
   }
 
   /**
+   * Creation des fonctions
+   */
+  private static void createFunctions() throws SQLException {
+
+    // DayOfWeek
+    StringBuilder st = new StringBuilder();
+    try {
+      executeUpdate("DROP FUNCTION  APP.dayOfWeek");
+    }
+    catch (SQLException e) {
+    }
+    st = new StringBuilder();
+    st.append("create function APP.dayOfWeek(dateValue TIMESTAMP)");
+    st.append(" RETURNS INTEGER");
+    st.append(" LANGUAGE JAVA");
+    st.append(" EXTERNAL NAME 'fr.turtlesport.db.DatabaseManager.dayOfWeek'");
+    st.append(" PARAMETER STYLE java no sql");
+    executeUpdate(st.toString());
+
+    // Week
+    st = new StringBuilder();
+    try {
+      executeUpdate("DROP FUNCTION  APP.Week");
+    }
+    catch (SQLException e) {
+    }
+    st = new StringBuilder();
+    st.append("create function APP.Week(dateValue TIMESTAMP)");
+    st.append(" RETURNS INTEGER");
+    st.append(" LANGUAGE JAVA");
+    st.append(" EXTERNAL NAME 'fr.turtlesport.db.DatabaseManager.week'");
+    st.append(" PARAMETER STYLE java no sql");
+    executeUpdate(st.toString());
+
+    // Year Week
+    st = new StringBuilder();
+    try {
+      executeUpdate("DROP FUNCTION  APP.YearWeek");
+    }
+    catch (SQLException e) {
+    }
+    st = new StringBuilder();
+    st.append("create function APP.yearWeek(dateValue TIMESTAMP)");
+    st.append(" RETURNS INTEGER");
+    st.append(" LANGUAGE JAVA");
+    st.append(" EXTERNAL NAME 'fr.turtlesport.db.DatabaseManager.yearweek'");
+    st.append(" PARAMETER STYLE java no sql");
+    executeUpdate(st.toString());
+  }
+
+  /**
+   * Function dayOfWeek
+   * 
+   * @param date
+   * @return day of week :
+   *         <ul>
+   *         <li>1=Sunday</li>
+   *         <li>2=Monday</li>
+   *         <li>3=Tuesday</li>
+   *         <li>4=Wednesday</li>
+   *         <li>5=Friday</li>
+   *         <li>6=Saturday</li>
+   *         <ul>
+   */
+  public static int dayOfWeek(java.sql.Timestamp date) {
+    GregorianCalendar calendar = new GregorianCalendar();
+    calendar.setTime(date);
+    return calendar.get(Calendar.DAY_OF_WEEK);
+  }
+
+  /**
+   * Function week
+   * 
+   * @param date
+   * @return
+   */
+  public static int week(java.sql.Timestamp date) {
+    GregorianCalendar calendar = new GregorianCalendar();
+    calendar.setTime(date);
+    return calendar.get(Calendar.WEEK_OF_YEAR);
+  }
+
+  /**
+   * Function week
+   * 
+   * @param date
+   * @return
+   */
+  public static int yearweek(java.sql.Timestamp date) {
+    GregorianCalendar calendar = new GregorianCalendar();
+    calendar.setTime(date);
+    int week = calendar.get(Calendar.WEEK_OF_YEAR);
+    int year = calendar.get(Calendar.YEAR);
+    int month = calendar.get(Calendar.MONTH);
+    if (month == 0 && week >= 52) {
+      year--;
+    }
+    else if (month == 11 && week == 1) {
+      year++;
+    }
+    return year;
+  }
+
+  /**
    * Determine si la table existe.
    */
   private static boolean tableDoesntExist(String sqlState) {
@@ -984,6 +1098,23 @@ public final class DatabaseManager {
     String    comments;
 
     String    equipement;
+
+    // version 0.1.14
+    double    distance_tot;
+
+    int       timetot;
+
+    int       calories;
+
+    int       max_heart_rate;
+
+    int       min_heart_rate;
+
+    int       avg_heart_rate;
+
+    int       alt_plus;
+
+    int       alt_moins;
   }
 
   private static class DataUser {
@@ -1003,5 +1134,4 @@ public final class DatabaseManager {
 
     String image_path;
   }
-
 }
