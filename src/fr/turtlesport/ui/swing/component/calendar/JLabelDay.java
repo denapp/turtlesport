@@ -115,6 +115,7 @@ public class JLabelDay extends JLabel implements CalendarDayListener {
     isActive = false;
     isSelect = false;
     nbEvents = 0;
+    uiEvents();
     setForeground(RESET_COLOR);
     setFont(GuiFont.FONT_PLAIN);
   }

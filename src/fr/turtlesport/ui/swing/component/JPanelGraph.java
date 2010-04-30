@@ -18,7 +18,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import fr.turtlesport.Configuration;
-import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
@@ -109,7 +108,9 @@ public class JPanelGraph extends JPanel implements LanguageListener {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.lang.LanguageListener#languageChanged(fr.turtlesport.lang.LanguageEvent)
+   * @see
+   * fr.turtlesport.lang.LanguageListener#languageChanged(fr.turtlesport.lang
+   * .LanguageEvent)
    */
   public void languageChanged(final LanguageEvent event) {
     if (SwingUtilities.isEventDispatchThread()) {
@@ -145,13 +146,6 @@ public class JPanelGraph extends JPanel implements LanguageListener {
                        + "</font></html>");
     jCheckBoxTime.setText(rb.getString("time"));
     jCheckBoxFilter.setText(rb.getString("filter"));
-  }
-
-  /**
-   * @param trks
-   */
-  public void updatePoints(DataRunTrk[] trks, String unit) {
-    jDiagram.getModel().updateData(trks, unit);
   }
 
   /**

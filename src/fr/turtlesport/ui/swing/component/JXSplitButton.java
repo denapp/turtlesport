@@ -27,6 +27,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
 
@@ -309,9 +310,9 @@ public class JXSplitButton extends JButton implements SwingConstants {
 
   /**
    * If the maximum size has been set to a non-<code>null</code> value just
-   * returns it. If the UI delegate's <code>getMaximumSize</code> method
-   * returns a non-<code>null</code> value then return that; otherwise defer
-   * to the component's layout manager.
+   * returns it. If the UI delegate's <code>getMaximumSize</code> method returns
+   * a non-<code>null</code> value then return that; otherwise defer to the
+   * component's layout manager.
    * 
    * 
    * @return the value of the <code>maximumSize</code> property
@@ -340,8 +341,8 @@ public class JXSplitButton extends JButton implements SwingConstants {
    * 
    * 
    * @param maximumSize
-   *          a <code>Dimension</code> containing the desired maximum
-   *          allowable size
+   *          a <code>Dimension</code> containing the desired maximum allowable
+   *          size
    * @see #getMaximumSize
    * @beaninfo bound: true description: The maximum size of the component.
    */
@@ -353,9 +354,9 @@ public class JXSplitButton extends JButton implements SwingConstants {
 
   /**
    * If the minimum size has been set to a non-<code>null</code> value just
-   * returns it. If the UI delegate's <code>getMinimumSize</code> method
-   * returns a non-<code>null</code> value then return that; otherwise defer
-   * to the component's layout manager.
+   * returns it. If the UI delegate's <code>getMinimumSize</code> method returns
+   * a non-<code>null</code> value then return that; otherwise defer to the
+   * component's layout manager.
    * 
    * 
    * @return the value of the <code>minimumSize</code> property
@@ -459,8 +460,8 @@ public class JXSplitButton extends JButton implements SwingConstants {
   }
 
   /**
-   * Sets the preferred size of this component. If <code>preferredSize</code>
-   * is <code>null</code>, the UI will be asked for the preferred size.
+   * Sets the preferred size of this component. If <code>preferredSize</code> is
+   * <code>null</code>, the UI will be asked for the preferred size.
    * 
    * @beaninfo preferred: true bound: true description: The preferred size of
    *           the component.
@@ -510,8 +511,7 @@ public class JXSplitButton extends JButton implements SwingConstants {
    * component and its children should not paint in the insets area allocated to
    * the border. Subclasses can just override this method, as always. A subclass
    * that just wants to specialize the UI (look and feel) delegate's
-   * <code>paint</code> method should just override
-   * <code>paintComponent</code>.
+   * <code>paint</code> method should just override <code>paintComponent</code>.
    * 
    * 
    * @param g
