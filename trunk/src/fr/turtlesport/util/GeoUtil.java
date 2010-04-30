@@ -18,6 +18,37 @@ public final class GeoUtil {
   private static final double VAL     = 180.0 / Math.pow(2, 31);
 
   /**
+   * Restitue la position sous forme textuelle.
+   * 
+   * @return la position sous forme textuelle.
+   */
+  public static String geoPosition(double gLatitude, double gLongitude) {
+    StringBuilder st = new StringBuilder();
+    toDegree(st, gLatitude);
+    st.append((gLatitude < 0) ? "S" : "N");
+    st.append("    ");
+    toDegree(st, gLongitude);
+    st.append((gLongitude < 0) ? "W" : "E");
+
+    return st.toString();
+  }
+
+  private static void toDegree(StringBuilder st, double value) {
+    int valInt = Math.abs((int) value);
+
+    st.append(valInt);
+    st.append("°");
+    double val = 60 * (Math.abs(value) - valInt);
+    st.append((int) val);
+    st.append("'");
+    val = 60 * (val - ((int) val));
+    st.append((int) val);
+    st.append('.');
+    st.append((int) ((val - (int) val) * 100));
+    st.append("'' ");
+  }
+
+  /**
    * Conversion d'un point garmin en point g&eacute;graphique.
    * 
    * @param latitude
@@ -25,7 +56,7 @@ public final class GeoUtil {
    * @return
    */
   public static IGeoPosition makeFromGarmin(int gLatitude, int gLongitude) {
-    if (isInvalid(gLatitude) || isInvalid(gLongitude)) {
+    if (isInvalidGarminGpx(gLatitude) || isInvalidGarminGpx(gLongitude)) {
       return null;
     }
     return new GeoPosition(makeLatitudeFromGarmin(gLatitude),
@@ -114,7 +145,7 @@ public final class GeoUtil {
    * @return la distance entre 2 points g&eacute;ographiques en m&ecirc;tre.
    */
   public static double computeDistance(IGeoPosition geo1, IGeoPosition geo2) {
-    if (geo1.isInvalidPosition() || geo2.isInvalidPosition()) {      
+    if (geo1.isInvalidPosition() || geo2.isInvalidPosition()) {
       return 0;
     }
     return Wgs84.computeWsg84(geo1.getLatitude(), geo1.getLongitude(), geo2
@@ -140,7 +171,11 @@ public final class GeoUtil {
     return distance;
   }
 
-  private static boolean isInvalid(int gPos) {
+  /**
+   * @param gPos
+   * @return
+   */
+  public static boolean isInvalidGarminGpx(int gPos) {
     return (gPos == INVALID);
   }
 }
