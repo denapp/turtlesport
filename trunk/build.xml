@@ -3,7 +3,7 @@
 
 	<!-- set global properties for this build -->
 	<property name="Name" value="turtlesport" />
-	<property name="version" value="0.1.13" />
+	<property name="version" value="0.1.14" />
 	<property name="src" location="${basedir}/src" />
 	<property name="test" location="${basedir}/test" />
 	<property name="srcccommonUsbCom" location="${basedir}/c/usbcom/srccommon" />
@@ -144,7 +144,7 @@
 		<jar destfile="${exe}/${jarApp}" basedir="${dest}">
 			<manifest>
 				<attribute name="Main-Class" value="fr.turtlesport.Launcher" />
-				<attribute name="Class-Path" value="swingx.jar swingx-ws.jar log4j.jar derby.jar" />
+				<attribute name="Class-Path" value="swingx.jar swingx-ws.jar log4j.jar derby.jar jcommon.jar jfreechart.jar" />
 				<section name="common">
 					<attribute name="Specification-Title" value="${Name}" />
 					<attribute name="Specification-Version" value="${version}" />
@@ -171,6 +171,8 @@
 		</jarbundler>
 
 		<!-- copy des jars -->
+        <copy file="${exe}/macosx/jcommon.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+        <copy file="${exe}/macosx/jfreechart.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
         <copy file="${exe}/macosx/swingx.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
         <copy file="${exe}/macosx/swingx-ws.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
         <copy file="${exe}/macosx/derby.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
