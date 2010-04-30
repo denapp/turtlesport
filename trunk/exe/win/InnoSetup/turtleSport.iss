@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{14B614CA-42E0-4545-A272-B1248809E95D}
 AppName=Turtle Sport
-AppVerName=TurtleSport 0.1.12
+AppVerName=TurtleSport 0.1.14
 AppPublisher=TurtleSport
 AppPublisherURL=http://turtlesport.sourceforge.net
 AppSupportURL=http://turtlesport.sourceforge.net
@@ -28,7 +28,8 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 Source: "..\derby.jar"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\derbyclient.jar"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\jcommon.jar"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\jfreechart.jar"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\log4j.jar"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\log4J.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\msvcr71.dll"; DestDir: "{app}"; Flags: ignoreversion
