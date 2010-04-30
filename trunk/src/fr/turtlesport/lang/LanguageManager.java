@@ -1,6 +1,9 @@
 package fr.turtlesport.lang;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 import javax.swing.JComponent;
 
@@ -13,28 +16,35 @@ import fr.turtlesport.log.TurtleLogger;
  * 
  */
 public final class LanguageManager {
-  private static TurtleLogger         log;
+  private static TurtleLogger               log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(LanguageManager.class);
   }
 
-  /** Libelle des languages. */
-  private static final String[]       LANGUAGES = { LanguageFr.getInstance()
-          .getName(),
-      LanguageEn.getInstance().getName(),
-      LanguageSv.getInstance().getName()       };
+  /** Les languages. */
+  private static final ILanguage[]          ILANGUAGES = { LanguageFr
+          .getInstance(),
+      LanguageEn.getInstance(),
+      LanguageSv.getInstance()                        };
+
+  private static HashMap<String, ILanguage> mapLang;
 
   /** Liste des listeners. */
-  private ArrayList<LanguageListener> listeners = new ArrayList<LanguageListener>();
+  private List<LanguageListener>            listeners  = new ArrayList<LanguageListener>();
 
-  private static LanguageManager      singleton = new LanguageManager();
+  private static LanguageManager            singleton  = new LanguageManager();
 
-  private ILanguage                   currentLang;
+  private ILanguage                         currentLang;
 
   /**
    * 
    */
   private LanguageManager() {
+    mapLang = new HashMap<String, ILanguage>();
+    for (ILanguage l : ILANGUAGES) {
+      mapLang.put(l.toString(), l);
+    }
+
     // Langage par defaut
     currentLang = LanguageFr.getInstance();
 
@@ -62,22 +72,12 @@ public final class LanguageManager {
   }
 
   /**
+   * Restitue les languages.
    * 
-   * Restitue le libell&eacute; du langage courant.
-   * 
-   * @return le libell&eacute; du langage courant.
+   * @return les languages.
    */
-  public String getCurrentLanguageName() {
-    return currentLang.getName();
-  }
-
-  /**
-   * Restitue les libell&eacute; des locales.
-   * 
-   * @return les libell&eacute; des locales.
-   */
-  public String[] getLibelleLocales() {
-    return LANGUAGES;
+  public ILanguage[] getLanguages() {
+    return ILANGUAGES;
   }
 
   /**
@@ -123,6 +123,7 @@ public final class LanguageManager {
     }
     // composant
     JComponent.setDefaultLocale(lang.getLocale());
+    Locale.setDefault(lang.getLocale());
   }
 
   /**
@@ -134,7 +135,7 @@ public final class LanguageManager {
   public void fireLanguageChanged(String name) {
     log.debug(">>fireLanguageChanged name=" + name);
 
-    ILanguage lang = getLang(name);
+    ILanguage lang = mapLang.get(name);
     if (lang != null) {
       fireLanguageChanged(lang);
     }
@@ -155,31 +156,6 @@ public final class LanguageManager {
     fireLanguageChanged(value);
 
     log.debug("<<fireLanguageChanged");
-  }
-
-  /**
-   * Restitue le langage en fonction de son nom.
-   * 
-   * @param name
-   *          nom du langage.
-   * @return le langage.
-   */
-  private ILanguage getLang(String name) {
-    if (name == null || "".equals(name)) {
-      return null;
-    }
-
-    if (LanguageEn.getInstance().getName().equals(name)) {
-      return LanguageEn.getInstance();
-    }
-    if (LanguageFr.getInstance().getName().equals(name)) {
-      return LanguageFr.getInstance();
-    }
-    if (LanguageSv.getInstance().getName().equals(name)) {
-      return LanguageSv.getInstance();
-    }
-
-    return null;
   }
 
 }

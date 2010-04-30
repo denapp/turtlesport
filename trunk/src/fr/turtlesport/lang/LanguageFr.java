@@ -8,7 +8,7 @@ import java.util.Locale;
  * @author Denis Apparicio
  * 
  */
-public final class LanguageFr implements ILanguage {
+public final class LanguageFr extends AbstractLanguage {
 
   /** Instance unique. */
   private static LanguageFr singleton = new LanguageFr();
@@ -32,15 +32,6 @@ public final class LanguageFr implements ILanguage {
    */
   public Locale getLocale() {
     return Locale.FRENCH;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.lang.ILanguage#getName()
-   */
-  public String getName() {
-    return getLocale().getDisplayLanguage();
   }
 
   /*
