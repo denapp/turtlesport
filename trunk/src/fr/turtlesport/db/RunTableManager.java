@@ -107,7 +107,7 @@ public final class RunTableManager extends AbstractTableManager {
 
     if (log.isInfoEnabled()) {
       long delay = (System.currentTimeMillis() - start);
-      log.debug("<<find id=" + id + " delay=" + delay + "ms");
+      log.info("<<find id=" + id + " delay=" + delay + "ms");
     }
     return id;
   }
@@ -143,9 +143,7 @@ public final class RunTableManager extends AbstractTableManager {
       if (!DataUser.isAllUser(idUser)) {
         st.append(" AND id_user=?");
       }
-      else {
-        st.append(" ORDER BY start_time ASC");
-      }
+      st.append(" ORDER BY start_time ASC");
 
       Calendar cal = Calendar.getInstance();
       cal.setTime(date);
@@ -501,6 +499,89 @@ public final class RunTableManager extends AbstractTableManager {
   }
 
   /**
+   * Insertion d'un run sans points..
+   * 
+   * @param data
+   * @throws SQLException
+   */
+  public void store(DataRunWithoutPoints data) throws SQLException {
+    log.debug(">>store  data");
+
+    if (data == null) {
+      return;
+    }
+
+    // Debut de tansaction
+    DatabaseManager.beginTransaction();
+
+    try {
+      int id;
+
+      // Run
+      // --------------
+      Date startTime = data.getStartTime();
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(startTime);
+      cal.set(Calendar.MILLISECOND, 0);
+      startTime = cal.getTime();
+
+      if (log.isDebugEnabled()) {
+        SimpleDateFormat df = null;
+        df = new SimpleDateFormat("dd/MM/yyyy k:mm:ss.S");
+        log.debug("route startTime=" + df.format(startTime));
+      }
+      id = find(data.getIdUser(), startTime);
+      if (id != -1) {
+        // suppression du tour a la meme date
+        delete(id);
+      }
+
+      // insertion du run
+      id = store(data.getIdUser(), data.getSportType(), 0, 0, startTime, data
+          .getComments(), data.getEquipement());
+
+      // Lap
+      // ------------
+      RunLapTableManager.getInstance().store(id,
+                                             0,
+                                             startTime,
+                                             data.getTimeTot(),
+                                             (float) data.getDistanceTot(),
+                                             0,
+                                             0,
+                                             0,
+                                             0);
+    }
+    catch (SQLException e) {
+      log.error("", e);
+      // Erreur rollback
+      DatabaseManager.rollbackTransaction();
+      DatabaseManager.getConnection().close();
+      throw e;
+    }
+    catch (RuntimeException e) {
+      log.error("", e);
+      // Erreur rollback
+      DatabaseManager.rollbackTransaction();
+      DatabaseManager.getConnection().close();
+      throw e;
+    }
+    catch (Throwable e) {
+      log.error("", e);
+      // Erreur rollback
+      DatabaseManager.rollbackTransaction();
+      DatabaseManager.getConnection().close();
+      throw new RuntimeException(e);
+    }
+
+    // ok -> commit
+    DatabaseManager.commitTransaction();
+    DatabaseManager.getConnection().close();
+
+    log.debug("<<store");
+  }
+
+  /**
    * Suppression du run.
    * 
    * @return <code>true</code> si ligne trouv&eacute;e.
@@ -817,6 +898,63 @@ public final class RunTableManager extends AbstractTableManager {
   }
 
   /**
+   * Recuperation des run d'un utilisateur.
+   * 
+   * @param idUser
+   * @param date
+   * 
+   * @return
+   * @throws SQLException
+   */
+  public List<DataRun> retreive(int idUser) throws SQLException {
+    if (log.isInfoEnabled()) {
+      log.info(">>retreive  idUser=" + idUser);
+    }
+    List<DataRun> listRun = new ArrayList<DataRun>();
+
+    long startTime = System.currentTimeMillis();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT * FROM ");
+      st.append(getTableName());
+      if (!DataUser.isAllUser(idUser)) {
+        st.append(" WHERE id_user=?");
+      }
+      st.append(" ORDER BY start_time ASC");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        DataRun dataRun = new DataRun();
+        dataRun.setId(rs.getInt("id"));
+        dataRun.setSportType(rs.getInt("sport_type"));
+        dataRun.setProgramType(rs.getInt("program_type"));
+        dataRun.setMultisport(rs.getInt("multisport"));
+        dataRun.setTime(rs.getTimestamp("start_time"));
+        dataRun.setComments(rs.getString("comments"));
+        dataRun.setEquipement(rs.getString("equipement"));
+        listRun.add(dataRun);
+        log.debug("id" + dataRun.getId());
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      long delay = System.currentTimeMillis() - startTime;
+      log.info(">>retreive  idUser=" + idUser + " delay=" + delay + "ms");
+    }
+    return listRun;
+  }
+
+  /**
    * R&eaute;cup&eaute;ration des dates.
    * 
    * @param idUser
@@ -895,7 +1033,6 @@ public final class RunTableManager extends AbstractTableManager {
     Connection conn = DatabaseManager.getConnection();
     try {
       StringBuilder st = new StringBuilder();
-      // st.append("SELECT DATE(start_time) FROM ");
       st.append("SELECT start_time FROM ");
       st.append(getTableName());
       st.append(" WHERE (start_time BETWEEN ? AND ?)");

@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import fr.turtlesport.geo.IGeoSegment;
 import fr.turtlesport.log.TurtleLogger;
@@ -420,7 +421,7 @@ public final class RunLapTableManager extends AbstractTableManager {
         pstmt.setInt(4, 0x7FFFFFFF);
         pstmt.setTimestamp(5, timestampDeb);
         pstmt.setTimestamp(6, timestampEnd);
-        
+
         rs = pstmt.executeQuery();
         if (rs.next()) {
           trk = new DataRunTrk();
@@ -613,6 +614,633 @@ public final class RunLapTableManager extends AbstractTableManager {
 
     log.info("<<distanceTot distanceTot=" + distanceTot);
     return distanceTot;
+  }
+
+  /**
+   * Restitue la distance totale par an.
+   * 
+   * @param idUser
+   * @return la distance totale.
+   * @throws SQLException
+   */
+  public List<DataStatYear> distanceByYear(int idUser) throws SQLException {
+    log.info(">>distanceByYear");
+
+    List<DataStatYear> res = new ArrayList<DataStatYear>();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      if (DataUser.isAllUser(idUser)) {
+        st.append("SELECT ");
+        st.append("Year(start_time) AS THE_YEAR,");
+        st.append("SUM(total_dist),");
+        st.append("COUNT(DISTINCT id) ");
+        st.append("FROM ");
+        st.append(getTableName());
+        st.append(" GROUP BY Year(start_time)");
+      }
+      else {
+        st.append("SELECT ");
+        st.append("Year(LAP.start_time) AS THE_YEAR,");
+        st.append("SUM(LAP.total_dist),");
+        st.append("COUNT(DISTINCT LAP.id) ");
+        st.append("FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" AND RUN.id_user=?");
+        st.append(" GROUP BY Year(LAP.start_time)");
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+      ResultSet rs = pstmt.executeQuery();
+
+      while (rs.next()) {
+        res.add(new DataStatYear(rs.getInt(1), rs.getDouble(2), rs.getInt(3)));
+
+      }
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.info("<<distanceByYear");
+    return res;
+  }
+
+  /**
+   * Restitue la distance totale par an.
+   * 
+   * @param idUser
+   * @return la distance totale.
+   * @throws SQLException
+   */
+  public List<DataStatYear> timeByYear(int idUser) throws SQLException {
+    log.info(">>distanceByYear");
+
+    List<DataStatYear> res = new ArrayList<DataStatYear>();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      if (DataUser.isAllUser(idUser)) {
+        st.append("SELECT");
+        st.append(" Year(start_time) AS THE_YEAR,");
+        st.append(" SUM(total_time),");
+        st.append(" COUNT(DISTINCT id)");
+        st.append("FROM ");
+        st.append(getTableName());
+        st.append(" GROUP BY Year(start_time)");
+      }
+      else {
+        st.append("SELECT ");
+        st.append("Year(LAP.start_time) AS THE_YEAR,");
+        st.append("SUM(LAP.total_time),");
+        st.append("COUNT(DISTINCT LAP.id) ");
+        st.append("FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" AND RUN.id_user=?");
+        st.append(" GROUP BY Year(LAP.start_time)");
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        res.add(new DataStatYear(rs.getInt(1), rs.getDouble(2), rs.getInt(3)));
+      }
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.info("<<distanceByYear");
+    return res;
+  }
+
+  /**
+   * Restitue la distance totale par mois.
+   * 
+   * @param idRun
+   * @return la distance totale.
+   * @throws SQLException
+   */
+  public List<DataStatYearMonth> distanceByMonth(int idUser) throws SQLException {
+    log.info(">>distanceByMonth");
+
+    List<DataStatYearMonth> res = new ArrayList<DataStatYearMonth>();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      if (DataUser.isAllUser(idUser)) {
+        st.append("SELECT");
+        st.append(" Year(start_time) AS THE_YEAR,");
+        st.append(" Month(start_time) AS THE_MONTH,");
+        st.append(" SUM(total_dist) AS TOT_DIST, ");
+        st.append(" COUNT(DISTINCT id) ");
+        st.append("FROM ");
+        st.append(getTableName());
+        st.append(" GROUP BY Year(start_time), Month(start_time)");
+        st.append(" ORDER  BY THE_YEAR, THE_MONTH");
+      }
+      else {
+        st.append("SELECT ");
+        st.append(" Year(LAP.start_time) AS THE_YEAR,");
+        st.append(" Month(LAP.start_time) AS THE_MONTH,");
+        st.append(" SUM(LAP.total_dist) AS TOT_DIST, ");
+        st.append("COUNT(DISTINCT LAP.id) ");
+        st.append("FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" AND RUN.id_user=?");
+        st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
+        st.append(" ORDER  BY THE_YEAR, THE_MONTH");
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        res.add(new DataStatYearMonth(rs.getInt(1), rs.getInt(2), rs
+            .getDouble(3), rs.getInt(4)));
+      }
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.info("<<distanceByYear");
+    return res;
+  }
+
+  /**
+   * Restitue la distance totale par mois.
+   * 
+   * @param idUser
+   * @return la distance totale.
+   * @throws SQLException
+   */
+  public List<DataStatYearMonth> timeByMonth(int idUser) throws SQLException {
+    log.info(">>timeByMonth");
+
+    List<DataStatYearMonth> res = new ArrayList<DataStatYearMonth>();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      if (DataUser.isAllUser(idUser)) {
+        st.append("SELECT");
+        st.append(" Year(start_time) AS THE_YEAR,");
+        st.append(" Month(start_time) AS THE_MONTH,");
+        st.append(" SUM(total_time) AS TOT_TIME, ");
+        st.append(" COUNT(DISTINCT id) ");
+        st.append("FROM ");
+        st.append(getTableName());
+        st.append(" GROUP BY Year(start_time), Month(start_time)");
+        st.append(" ORDER  BY THE_YEAR, THE_MONTH");
+      }
+      else {
+        st.append("SELECT");
+        st.append(" Year(LAP.start_time) AS THE_YEAR,");
+        st.append(" Month(LAP.start_time) AS THE_MONTH,");
+        st.append(" SUM(LAP.total_time) AS TOT_TIME, ");
+        st.append("COUNT(DISTINCT LAP.id) ");
+        st.append("FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" AND RUN.id_user=?");
+        st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
+        st.append(" ORDER  BY THE_YEAR, THE_MONTH");
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        res.add(new DataStatYearMonth(rs.getInt(1), rs.getInt(2), rs
+            .getDouble(3), rs.getInt(4)));
+      }
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.info("<<timeByMonth");
+    return res;
+  }
+
+  /**
+   * Compte le nombre de run.
+   * 
+   * @param idUser
+   * @return le nombre de run.
+   */
+  public int count(int idUser) throws SQLException {
+    if (log.isInfoEnabled()) {
+      log.debug(">>count=" + idUser);
+    }
+
+    int tot = 0;
+    Connection conn = DatabaseManager.getConnection();
+
+    try {
+      StringBuilder st = new StringBuilder();
+      if (DataUser.isAllUser(idUser)) {
+        st.append("SELECT COUNT(DISTINCT id) FROM ");
+        st.append(getTableName());
+      }
+      else {
+        st.append("SELECT COUNT(DISTINCT LAP.id) FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" AND RUN.id_user=?");
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+      ResultSet rs = pstmt.executeQuery();
+      if (rs.next()) {
+        tot = rs.getInt(1);
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      log.info("<<count tot=" + tot);
+    }
+    return tot;
+  }
+
+  /**
+   * Restitue la distance totale par mois.
+   * 
+   * @param idRun
+   * @return la distance totale.
+   * @throws SQLException
+   */
+  public DataStatTot total() throws SQLException {
+    log.info(">>total");
+
+    DataStatTot tot = null;
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+
+      st.append("SELECT");
+      st.append(" SUM(CAST(calories AS INTEGER)) AS CALORIES, ");
+      st.append(" SUM(total_dist), ");
+      st.append(" SUM(total_time) ");
+      st.append("FROM ");
+      st.append(getTableName());
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      ResultSet rs = pstmt.executeQuery();
+
+      if (rs.next()) {
+        tot = new DataStatTot(rs.getInt(1), rs.getFloat(2), rs.getInt(3));
+      }
+      else {
+        tot = new DataStatTot(0, 0, 0);
+      }
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.info("<<DataStatTot");
+    return tot;
+  }
+
+  /**
+   * Restitue la distance totale par mois.
+   * 
+   * @param idRun
+   * @return la distance totale.
+   * @throws SQLException
+   */
+  public List<DataStatYearWeek> distanceByWeek(int idUser) throws SQLException {
+    log.info(">>distanceByWeek");
+
+    List<DataStatYearWeek> res = new ArrayList<DataStatYearWeek>();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+
+      if (DataUser.isAllUser(idUser)) {
+        st.append("SELECT");
+        st.append(" THE_YEAR,");
+        st.append(" THE_WEEK,");
+        st.append(" SUM(THE_TOT_DIST),");
+        st.append(" COUNT(DISTINCT THE_ID) ");
+        st.append("FROM ");
+        st.append("(SELECT");
+        st.append(" APP.yearWeek(LAP.start_time) AS THE_YEAR,");
+        st.append(" APP.week(LAP.start_time) AS THE_WEEK,");
+        st.append(" LAP.total_dist AS THE_TOT_DIST,");
+        st.append(" LAP.id AS THE_ID");
+        st.append(" FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" ) tt ");
+        st.append(" GROUP BY THE_YEAR, THE_WEEK");
+        st.append(" ORDER  BY THE_YEAR, THE_WEEK");
+      }
+      else {
+        st.append("SELECT");
+        st.append(" THE_YEAR,");
+        st.append(" THE_WEEK,");
+        st.append(" SUM(THE_TOT_DIST),");
+        st.append(" COUNT(DISTINCT THE_ID) ");
+        st.append("FROM ");
+        st.append("(SELECT");
+        st.append(" APP.yearWeek(LAP.start_time) AS THE_YEAR,");
+        st.append(" APP.week(LAP.start_time) AS THE_WEEK,");
+        st.append(" LAP.total_dist AS THE_TOT_DIST,");
+        st.append(" LAP.id AS THE_ID");
+        st.append(" FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" AND RUN.id_user=?");
+        st.append(" ) tt ");
+        st.append(" GROUP BY THE_YEAR, THE_WEEK");
+        st.append(" ORDER  BY THE_YEAR, THE_WEEK");
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+      ResultSet rs = pstmt.executeQuery();
+
+      DataStatYearWeek dLast = new DataStatYearWeek(1, -1, 0);
+      while (rs.next()) {
+        dLast = new DataStatYearWeek(rs.getInt(1), rs.getInt(2), rs
+            .getDouble(3), rs.getInt(4));
+        res.add(dLast);
+      }
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.info("<<distanceByWeek");
+    return res;
+  }
+
+  /**
+   * Restitue la distance totale par mois.
+   * 
+   * @param idRun
+   * @return la distance totale.
+   * @throws SQLException
+   */
+  public List<DataStatYearWeek> timeByWeek(int idUser) throws SQLException {
+    log.info(">>timeByWeek");
+
+    List<DataStatYearWeek> res = new ArrayList<DataStatYearWeek>();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      if (DataUser.isAllUser(idUser)) {
+        st.append("SELECT");
+        st.append(" THE_YEAR,");
+        st.append(" THE_WEEK,");
+        st.append(" SUM(total_time) AS TOT_TIME,");
+        st.append(" COUNT(DISTINCT id) ");
+        st.append("FROM ");
+        st.append("(SELECT");
+        st.append(" APP.yearWeek(start_time) AS THE_YEAR,");
+        st.append(" APP.week(start_time) AS THE_WEEK,");
+        st.append(" total_time,");
+        st.append(" id");
+        st.append(" FROM ");
+        st.append(getTableName());
+        st.append(" ) tt ");
+        st.append(" GROUP BY THE_YEAR, THE_WEEK");
+        st.append(" ORDER  BY THE_YEAR, THE_WEEK");
+      }
+      else {
+        st.append("SELECT");
+        st.append(" THE_YEAR,");
+        st.append(" THE_WEEK,");
+        st.append(" SUM(THE_TOTAL_TIME),");
+        st.append(" COUNT(DISTINCT THE_ID) ");
+        st.append("FROM ");
+        st.append("(SELECT");
+        st.append(" APP.yearWeek(LAP.start_time) AS THE_YEAR,");
+        st.append(" APP.week(LAP.start_time) AS THE_WEEK,");
+        st.append(" LAP.total_time AS THE_TOTAL_TIME,");
+        st.append(" LAP.id AS THE_ID");
+        st.append(" FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" AND RUN.id_user=?");
+        st.append(" ) tt ");
+        st.append(" GROUP BY THE_YEAR, THE_WEEK");
+        st.append(" ORDER  BY THE_YEAR, THE_WEEK");
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      DataStatYearWeek dLast = new DataStatYearWeek(1, -1, 0);
+      while (rs.next()) {
+        dLast = new DataStatYearWeek(rs.getInt(1), rs.getInt(2), rs
+            .getDouble(3), rs.getInt(4));
+        res.add(dLast);
+      }
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.info("<<timeByWeek");
+    return res;
+  }
+
+  /**
+   * Restitue la distance totale par mois.
+   * 
+   * @param idUser
+   * @return la distance totale.
+   * @throws SQLException
+   */
+  public DataStat[] distanceByDayOfWeek(int idUser) throws SQLException {
+    log.info(">>distanceByDayOfWeek");
+
+    DataStat[] res = new DataStat[7];
+    for (int i = 0; i < res.length; i++) {
+      res[i] = new DataStat(0, 0);
+    }
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      if (DataUser.isAllUser(idUser)) {
+        st.append("SELECT ");
+        st.append("THE_DAY, ");
+        st.append("SUM(total_dist), ");
+        st.append("COUNT(DISTINCT id) ");
+        st.append("FROM ");
+        st.append("(SELECT");
+        st.append(" APP.dayOfWeek(start_time) AS THE_DAY,");
+        st.append(" total_dist,");
+        st.append(" id");
+        st.append(" FROM ");
+        st.append(getTableName());
+        st.append(" ) tt ");
+        st.append(" GROUP BY THE_DAY");
+        st.append(" ORDER BY THE_DAY");
+      }
+      else {
+        st.append("SELECT ");
+        st.append("THE_DAY, ");
+        st.append("SUM(THE_TOT_DIST), ");
+        st.append("COUNT(DISTINCT THE_ID) ");
+        st.append("FROM ");
+        st.append("(SELECT");
+        st.append(" APP.dayOfWeek(LAP.start_time) AS THE_DAY,");
+        st.append(" LAP.total_dist AS THE_TOT_DIST,");
+        st.append(" LAP.id AS THE_ID");
+        st.append(" FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" AND RUN.id_user=?");
+        st.append(" ) tt ");
+        st.append(" GROUP BY THE_DAY");
+        st.append(" ORDER BY THE_DAY");
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        res[rs.getInt(1) - 1].setDistance(rs.getDouble(2));
+        res[rs.getInt(1) - 1].setNumberRaces(rs.getInt(3));
+      }
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.info("<<distanceByDayOfWeek");
+    return res;
+  }
+
+  /**
+   * Restitue la distance totale par mois.
+   * 
+   * @param idUser
+   * @return la distance totale.
+   * @throws SQLException
+   */
+  public DataStat[] timeByDayOfWeek(int idUser) throws SQLException {
+    log.info(">>timeByDayOfWeek");
+
+    DataStat[] res = new DataStat[7];
+    for (int i = 0; i < res.length; i++) {
+      res[i] = new DataStat(0, 0);
+    }
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      if (DataUser.isAllUser(idUser)) {
+        st.append("SELECT");
+        st.append(" THE_DAY,");
+        st.append(" SUM(total_time),");
+        st.append(" COUNT(DISTINCT id) ");
+        st.append("FROM ");
+        st.append("(SELECT");
+        st.append(" APP.dayOfWeek(start_time) AS THE_DAY,");
+        st.append(" total_time,");
+        st.append(" id");
+        st.append(" FROM ");
+        st.append(getTableName());
+        st.append(" ) tt ");
+        st.append(" GROUP BY THE_DAY");
+        st.append(" ORDER BY THE_DAY");
+      }
+      else {
+        st.append("SELECT");
+        st.append(" THE_DAY,");
+        st.append(" SUM(THE_TOT_TIME),");
+        st.append(" COUNT(DISTINCT THE_ID) ");
+        st.append("FROM ");
+        st.append("(SELECT");
+        st.append(" APP.dayOfWeek(LAP.start_time) AS THE_DAY,");
+        st.append(" LAP.total_time AS THE_TOT_TIME,");
+        st.append(" LAP.id AS THE_ID");
+        st.append(" FROM ");
+        st.append(getTableName() + " LAP, ");
+        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append(" AND RUN.id_user=?");
+        st.append(" ) tt ");
+        st.append(" GROUP BY THE_DAY");
+        st.append(" ORDER BY THE_DAY");
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        res[rs.getInt(1) - 1].setDistance(rs.getDouble(2));
+        res[rs.getInt(1) - 1].setNumberRaces(rs.getInt(3));
+      }
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.info("<<timeByDayOfWeek");
+    return res;
   }
 
   /**

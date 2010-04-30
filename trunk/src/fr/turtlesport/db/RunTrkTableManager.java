@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import fr.turtlesport.geo.IGeoPositionWithAlt;
 import fr.turtlesport.log.TurtleLogger;
@@ -187,7 +188,9 @@ public final class RunTrkTableManager extends AbstractTableManager {
 
   /**
    * Suppresion de tout les points d'un run.
-   * @param id id du run
+   * 
+   * @param id
+   *          id du run
    * @throws SQLException
    */
   protected void delete(int id) throws SQLException {
@@ -219,11 +222,11 @@ public final class RunTrkTableManager extends AbstractTableManager {
    * @return
    * @throws SQLException
    */
-  public DataRunTrk[] getTrks(int idRun) throws SQLException {
+  public List<DataRunTrk> getTrks(int idRun) throws SQLException {
     if (log.isInfoEnabled()) {
       log.info(">>getTrks idRun=" + idRun);
     }
-    DataRunTrk[] res = null;
+    List<DataRunTrk> list = new ArrayList<DataRunTrk>();
 
     long startTime = System.currentTimeMillis();
     Connection conn = DatabaseManager.getConnection();
@@ -242,7 +245,6 @@ public final class RunTrkTableManager extends AbstractTableManager {
       pstmt.setInt(3, 0x7FFFFFFF);
       pstmt.setInt(4, 0x7FFFFFFF);
 
-      ArrayList<DataRunTrk> list = new ArrayList<DataRunTrk>();
       DataRunTrk trk;
       ResultSet rs = pstmt.executeQuery();
       while (rs.next()) {
@@ -257,11 +259,6 @@ public final class RunTrkTableManager extends AbstractTableManager {
         trk.setHeartRate(rs.getInt(7));
         list.add(trk);
       }
-
-      res = new DataRunTrk[list.size()];
-      if (res.length > 0) {
-        list.toArray(res);
-      }
     }
     finally {
       DatabaseManager.releaseConnection(conn);
@@ -271,7 +268,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
       long delay = System.currentTimeMillis() - startTime;
       log.info("<<getTrks delay=" + delay + "ms");
     }
-    return res;
+    return list;
   }
 
   /**
