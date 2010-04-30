@@ -3,6 +3,8 @@ package fr.turtlesport.lang;
 import java.text.DateFormat;
 import java.util.Locale;
 
+import javax.swing.ImageIcon;
+
 /**
  * @author Denis Apparicio
  * 
@@ -15,6 +17,13 @@ public interface ILanguage {
    * @return le <code>Locale</code> du langage.
    */
   Locale getLocale();
+
+  /**
+   * Restitue le drapeau du langage.
+   * 
+   * @return le drapeau du langage.
+   */
+  ImageIcon getFlag();
 
   /**
    * Restitue le nom de ce langage.
@@ -36,14 +45,14 @@ public interface ILanguage {
    * @return le formatter pour une date.
    */
   DateFormat getDateTimeFormatterWithoutSep();
-  
+
   /**
    * Restitue le libell&eacute, pour non.
    * 
    * @return le libell&eacute, pour non.
    */
   String no();
-  
+
   /**
    * Restitue le libell&eacute, pour oui.
    * 

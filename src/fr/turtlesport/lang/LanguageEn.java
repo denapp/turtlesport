@@ -8,7 +8,7 @@ import java.util.Locale;
  * @author Denis Apparicio
  * 
  */
-public final class LanguageEn implements ILanguage {
+public final class LanguageEn extends AbstractLanguage {
 
   /** Instance unique. */
   private static LanguageEn singleton = new LanguageEn();
@@ -32,15 +32,6 @@ public final class LanguageEn implements ILanguage {
    */
   public Locale getLocale() {
     return Locale.ENGLISH;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.lang.ILanguage#getName()
-   */
-  public String getName() {
-    return getLocale().getDisplayLanguage();
   }
 
   /*

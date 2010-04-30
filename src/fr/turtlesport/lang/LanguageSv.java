@@ -10,7 +10,7 @@ import java.util.Locale;
  * @author Denis Apparicio
  * 
  */
-public final class LanguageSv implements ILanguage {
+public final class LanguageSv extends AbstractLanguage {
 
   /** Instance unique. */
   private static LanguageSv singleton = new LanguageSv();
@@ -37,15 +37,6 @@ public final class LanguageSv implements ILanguage {
    */
   public Locale getLocale() {
     return locale;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.lang.ILanguage#getName()
-   */
-  public String getName() {
-    return getLocale().getDisplayLanguage();
   }
 
   /*
