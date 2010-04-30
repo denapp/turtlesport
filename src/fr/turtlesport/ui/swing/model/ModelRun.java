@@ -1,16 +1,12 @@
 package fr.turtlesport.ui.swing.model;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 
 import fr.turtlesport.db.DataRun;
-import fr.turtlesport.db.DataRunLap;
-import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.db.RunTrkTableManager;
-import fr.turtlesport.geo.IGeoPosition;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.JPanelRun;
 import fr.turtlesport.ui.swing.MainGui;
@@ -21,7 +17,6 @@ import fr.turtlesport.unit.PaceUnit;
 import fr.turtlesport.unit.SpeedPaceUnit;
 import fr.turtlesport.unit.TimeUnit;
 import fr.turtlesport.unit.event.UnitEvent;
-import fr.turtlesport.util.GeoUtil;
 
 /**
  * @author Denis Apparicio
@@ -43,13 +38,6 @@ public class ModelRun {
   }
 
   /**
-   * @return the dataRuns
-   */
-  public DataRun getDataRun() {
-    return dataRun;
-  }
-
-  /**
    * Mis &aecute; jour de la vue.
    * 
    * @param view
@@ -60,8 +48,8 @@ public class ModelRun {
       log.info(">>updateView " + date);
     }
 
-    eraseGui(view);
     if (date == null) {
+      eraseGui(view);
       dataRun = null;
       return;
     }
@@ -70,7 +58,6 @@ public class ModelRun {
     dataRun = RunTableManager.getInstance().findNext(MainGui.getWindow()
                                                          .getCurrentIdUser(),
                                                      date);
-    log.info("dataRun id=" + dataRun.getId());
 
     // mis a jour de la vue
     update(view);
@@ -183,60 +170,28 @@ public class ModelRun {
     // -------------------------------
     updateSummary(view);
 
-    // mis a jour des tours intermediaires
-    // -------------------------------------------------------
-    if (dataRun == null) {
-      // mis a jour de la vue.
-      view.getTableModelLap().clear();
-    }
-    else {
-      // recuperation des donnees
-      DataRunLap[] runLaps = RunLapTableManager.getInstance().findLaps(dataRun
-          .getId());
-
-      // mis a jour de la vue.
-      view.getTableModelLap().updateData(runLaps);
-    }
-
-    // mis a jour du graph
-    // -----------------------------------
+    // mis a jour du graph et de la vue
+    // --------------------------------------------------
     // recuperation des donnees
-
-    DataRunTrk[] trks = RunTrkTableManager.getInstance().getTrks(dataRun
-        .getId());
-    if (trks != null) {
-      if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
-        for (DataRunTrk t : trks) {
-          t.setDistance((float) DistanceUnit.convert(DistanceUnit.unitKm(),
-                                                     DistanceUnit
-                                                         .getDefaultUnit(),
-                                                     t.getDistance()));
-        }
-      }
-    }
+    ModelPointsManager.getInstance().setDataRun(dataRun);
 
     // mis a jour de la vue.
-    view.getJDiagram().updatePoints(trks, DistanceUnit.getDefaultUnit());
+    // view.getJPanelMap().getModel().updateData(dataRun, listGeo);
 
-    // mis a jour du mercator
-    // -------------------------------------------------------
-    ArrayList<IGeoPosition> listGeo = new ArrayList<IGeoPosition>();
-
-    // recuperation des donnees
-    if (trks != null) {
-      for (DataRunTrk p : trks) {
-        IGeoPosition gp = GeoUtil.makeFromGarmin(p.getLatitude(), p
-            .getLongitude());
-        if (gp != null) {
-          listGeo.add(gp);
-        }
-      }
-    }
-    // mis a jour de la vue.
-    view.getJPanelMap().getModelMap().updateData(listGeo);
+    // Mis a jour des boutons et menu
+    // --------------------------------------------------------------------------------
+    boolean hasPoint = ModelPointsManager.getInstance().hasPoints();
+    view.setEnableMenuRun(hasPoint);
+    view.getJMenuItemRunSave().setEnabled(true);
+    view.getJMenuItemRunDelete().setEnabled(true);
+    view.getJButtonSave().setEnabled(true);
+    view.getJButtonDelete().setEnabled(true);
+    MainGui.getWindow().setEnableMenuRun(hasPoint);
+    MainGui.getWindow().getJMenuItemRunSave().setEnabled(true);
+    MainGui.getWindow().getJMenuItemRunDelete().setEnabled(true);
 
     // Pour les boutons de navigation avec CDE/Motif
-    // ----------------------------------------------
+    // --------------------------------------------------------------------------------
     if (SwingLookAndFeel.isLookAndFeelMotif()) {
       MainGui.getWindow().updateComponentTreeUI();
     }
@@ -268,9 +223,12 @@ public class ModelRun {
     view.setEnableMenuRun(false);
     MainGui.getWindow().setEnableMenuRun(false);
 
-    view.getTableModelLap().clear();
-    view.getJDiagram().updatePoints(null, DistanceUnit.getDefaultUnit());
-    view.getJPanelMap().getModelMap().updateData(null);
+    try {
+      ModelPointsManager.getInstance().setDataRun(null);
+    }
+    catch (SQLException e) {
+      log.error("", e);
+    }
   }
 
   /**
@@ -346,9 +304,6 @@ public class ModelRun {
 
     updateViewButtons(view);
 
-    view.setEnableMenuRun(true);
-    MainGui.getWindow().setEnableMenuRun(true);
-
     log.info("<<updateSummary");
   }
 
@@ -413,6 +368,7 @@ public class ModelRun {
    * @throws SQLException
    */
   public void delete(JPanelRun view) throws SQLException {
+    DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
     if (dataRun == null) {
       return;
     }
@@ -444,7 +400,6 @@ public class ModelRun {
    */
   public void updateButtons(JPanelRun view) throws SQLException {
     if (dataRun != null) {
-
       updateViewButtons(view);
     }
   }

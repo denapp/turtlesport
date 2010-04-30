@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 
 import fr.turtlesport.db.DataRun;
-import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
@@ -65,10 +64,8 @@ public class ModelRunDetail {
         .formatHundredSecondeTime(dataRun.computeTimeTot()));
 
     // recuperation des donnees
-    DataRunTrk[] trks = RunTrkTableManager.getInstance().getTrks(dataRun
-        .getId());
-
-    view.getTableModel().updateData(trks);
+    view.getTableModel().updateData(RunTrkTableManager.getInstance()
+        .getTrks(dataRun.getId()));
 
     log.debug("<<updateView");
   }

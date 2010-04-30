@@ -152,11 +152,11 @@ public class ModelAthlete {
     if (!WeightUnit.isUnitKg(unitWeight)) {
       double newWeight = WeightUnit.convert(unitWeight,
                                             WeightUnit.unitKg(),
-                                            data.getHeight());
+                                            data.getWeight());
       data.setWeight((float) newWeight);
     }
     if (!HeightUnit.isUnitCm(unitHeight)) {
-      double newHeight = HeightUnit.convert(unitWeight,
+      double newHeight = HeightUnit.convert(unitHeight,
                                             HeightUnit.unitCm(),
                                             data.getHeight());
       data.setHeight((float) newHeight);
@@ -168,12 +168,12 @@ public class ModelAthlete {
     if (!WeightUnit.isUnitKg(unitWeight)) {
       double newWeight = WeightUnit.convert(WeightUnit.unitKg(),
                                             unitWeight,
-                                            data.getHeight());
+                                            data.getWeight());
       data.setWeight((float) newWeight);
     }
     if (!HeightUnit.isUnitCm(unitHeight)) {
       double newHeight = HeightUnit.convert(HeightUnit.unitCm(),
-                                            unitWeight,
+                                            unitHeight,
                                             data.getHeight());
       data.setHeight((float) newHeight);
     }

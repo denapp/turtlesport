@@ -2,15 +2,11 @@ package fr.turtlesport.ui.swing.model;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
-import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.RunTrkTableManager;
-import fr.turtlesport.geo.IGeoPosition;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.JDialogMap;
@@ -18,7 +14,6 @@ import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
 import fr.turtlesport.unit.SpeedPaceUnit;
 import fr.turtlesport.unit.TimeUnit;
-import fr.turtlesport.util.GeoUtil;
 
 /**
  * @author Denis Apparicio
@@ -30,58 +25,11 @@ public class ModelDialogMap {
     log = (TurtleLogger) TurtleLogger.getLogger(ModelDialogMap.class);
   }
 
-  private List<IGeoPosition>  list;
-
-  private String              title;
-
-  private DataRun             dataRun;
-
   /**
    * 
    */
-  public ModelDialogMap(DataRun dataRun) throws SQLException {
+  public ModelDialogMap() {
     super();
-
-    this.dataRun = dataRun;
-
-    // recuperation des donnees
-    DataRunTrk[] trks = RunTrkTableManager.getInstance().getTrks(dataRun
-        .getId());
-
-    // Modification des points.
-    list = new ArrayList<IGeoPosition>();
-    for (DataRunTrk p : trks) {
-      IGeoPosition geo = GeoUtil.makeFromGarmin(p.getLatitude(), p
-          .getLongitude());
-      if (geo != null) {
-        list.add(geo);
-      }
-    }
-
-    // Recuperation du libelle
-    initTitle(dataRun);
-  }
-
-  /**
-   * 
-   */
-  public ModelDialogMap(List<IGeoPosition> list, DataRun dataRun) {
-    super();
-
-    this.dataRun = dataRun;
-    this.list = list;
-
-    // Recuperation du libelle
-    initTitle(dataRun);
-  }
-
-  /**
-   * Restitue la liste des points.
-   * 
-   * @return la liste des points.
-   */
-  public List<IGeoPosition> getList() {
-    return list;
   }
 
   /**
@@ -93,30 +41,27 @@ public class ModelDialogMap {
   public void updateView(JDialogMap view) throws SQLException {
     log.debug(">>updateView");
 
-    view.getJLabelTitle().setText(title);
-    view.getJPanelMap().getModelMap().updateData(list);
+    DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
+
+    view.getJLabelTitle().setText(title(dataRun));
 
     // resume
     // ----------------------------------------
-    updateSummary(view);
+    updateSummary(view, dataRun);
 
     // mis a jour des tours intermediaires
     // -------------------------------------------------------
     // recuperation des donnees
-    if (dataRun != null) {
-      DataRunLap[] runLaps = RunLapTableManager.getInstance().findLaps(dataRun
-          .getId());
-      if (runLaps.length > 1) {
-        // mis a jour de la vue.
-        view.getJComboBoxLap().addItem(new DataRunLapInCombo(" "));
-        for (int i = 0; i < runLaps.length; i++) {
-          view.getJComboBoxLap().addItem(new DataRunLapInCombo(runLaps[i],
-                                                               i + 1));
-        }
+    int size = ModelPointsManager.getInstance().runLapsSize();
+    if (size > 1) {
+      view.getJComboBoxLap().addItem(" ");
+      // mis a jour de la vue.
+      for (int i = 0; i < size; i++) {
+        view.getJComboBoxLap().addItem(String.valueOf(i + 1));
       }
-      else {
-        view.getJComboBoxLap().setEnabled(false);
-      }
+    }
+    else {
+      view.getJComboBoxLap().setEnabled(false);
     }
 
     log.debug("<<updateView");
@@ -128,40 +73,14 @@ public class ModelDialogMap {
    * @param dialogMap
    * @param selectedItem
    */
-  public void updateViewLap(JDialogMap view, Object selectedItem) {
-    if (selectedItem == null) {
-      clearLap(view);
-      return;
-    }
+  public void updateViewLap(JDialogMap view, int selectedItem) {
+    clearLap(view);
 
     try {
-      DataRunLap lap = ((DataRunLapInCombo) selectedItem).lap;
+      DataRunLap lap = ModelPointsManager.getInstance().getRunLaps()[selectedItem];
       if (lap == null) {
         clearLap(view);
         return;
-      }
-
-      // Map
-      if (view.getJComboBoxLap().getItemCount() > 0) {
-        DataRunTrk deb = null;
-        DataRunTrk end = null;
-
-        deb = RunLapTableManager.getInstance().lapTrkBegin(lap.getId(),
-                                                           lap.getLapIndex());
-        if (deb != null) {
-          end = RunLapTableManager.getInstance().lapTrkEnd(lap.getId(),
-                                                           lap.getLapIndex());
-        }
-        if (deb != null && end != null) {
-          IGeoPosition p1 = GeoUtil.makeFromGarmin(deb.getLatitude(), deb
-              .getLongitude());
-          IGeoPosition p2 = GeoUtil.makeFromGarmin(end.getLatitude(), end
-              .getLongitude());
-          view.getJPanelMap().getModelMap().updateInt(p1, p2);
-        }
-        else {
-          view.getJPanelMap().getModelMap().updateInt(null, null);
-        }
       }
 
       // Date
@@ -204,6 +123,9 @@ public class ModelDialogMap {
                                              + " / -"
                                              + Integer.toString(lap
                                                  .computeDeniveleNeg()));
+
+      // on déclenche l'evenement.
+      ModelPointsManager.getInstance().setLap(selectedItem);
     }
     catch (SQLException e) {
       log.error("", e);
@@ -211,7 +133,6 @@ public class ModelDialogMap {
   }
 
   private void clearLap(JDialogMap view) {
-    view.getJPanelMap().getModelMap().updateInt(null, null);
     view.getJLabelValDayLap().setText("");
     view.getJLabelValHourLap().setText("");
     view.getJLabelValTimeLap().setText("");
@@ -227,7 +148,7 @@ public class ModelDialogMap {
   /**
    * 
    */
-  private void updateSummary(JDialogMap view) throws SQLException {
+  private void updateSummary(JDialogMap view, DataRun dataRun) throws SQLException {
     log.info(">>updateSummary");
 
     if (dataRun == null) {
@@ -292,45 +213,25 @@ public class ModelDialogMap {
     log.info("<<updateSummary");
   }
 
-  private void initTitle(DataRun dataRun) {
+  private String title(DataRun dataRun) {
     if (dataRun == null) {
       log.error("dataRun est null");
-      return;
+      return null;
     }
+
     try {
-      title = LanguageManager.getManager().getCurrentLang().getDateFormatter()
+      return LanguageManager.getManager().getCurrentLang().getDateFormatter()
           .format(dataRun.getTime())
-              + "   "
-              + new SimpleDateFormat("kk:mm:ss").format(dataRun.getTime())
-              + "   "
-              + DistanceUnit.formatWithUnit(dataRun.getComputeDistanceTot());
+             + "   "
+             + new SimpleDateFormat("kk:mm:ss").format(dataRun.getTime())
+             + "   "
+             + DistanceUnit.formatWithUnit(dataRun.getComputeDistanceTot());
     }
     catch (SQLException e) {
       log.error("", e);
-      title = null;
-    }
-  }
-
-  private class DataRunLapInCombo {
-    private DataRunLap lap;
-
-    private String     text;
-
-    public DataRunLapInCombo(DataRunLap lap, int index) {
-      super();
-      this.lap = lap;
-      this.text = String.valueOf(index);
     }
 
-    public DataRunLapInCombo(String text) {
-      super();
-      this.text = text;
-    }
-
-    public String toString() {
-      return text;
-    }
-
+    return null;
   }
 
 }
