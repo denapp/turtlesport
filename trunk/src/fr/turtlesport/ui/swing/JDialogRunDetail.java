@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.swing.DefaultComboBoxModel;
@@ -127,6 +128,7 @@ public class JDialogRunDetail extends JDialog {
     this.setTitle(rb.getString("title"));
 
     // Evenement
+    getRootPane().setDefaultButton(jButtonOK);
     jButtonOK.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         dispose();
@@ -166,11 +168,11 @@ public class JDialogRunDetail extends JDialog {
 
       jPanelDistance = new JPanel();
       jPanelDistance.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 5));
-      
+
       jPanelDistance.add(jLabelLibDistance, null);
       jPanelDistance.add(getJComboBoxDistance(), null);
       jPanelDistance.add(jLabelLibUnit, null);
-      
+
       jPanelDistance.add(new JLabel("  "), null);
       jPanelDistance.add(getJLabelTitle(), null);
       jPanelDistance.add(new JLabel("  "), null);
@@ -294,7 +296,7 @@ public class JDialogRunDetail extends JDialog {
 
     private final int[]          columWidth  = { 50, 40, 30, 70, 70, 25, 25 };
 
-    private DataRunTrk[]         trks;
+    private List<DataRunTrk>     trks;
 
     private ArrayList<TableData> listData;
 
@@ -427,19 +429,21 @@ public class JDialogRunDetail extends JDialog {
      * 
      * @param runLaps
      */
-    public void updateData(DataRunTrk[] trks) {
-      this.trks = trks;
-      if (trks != null) {
+    public void updateData(List<DataRunTrk> listTrks) {
+      this.trks = listTrks;
+      if (listTrks != null && listTrks.size() > 0) {
 
         listData = new ArrayList<TableData>();
 
         // recuperation de la distance totale
-        float distance = trks[trks.length - 1].getDistance() / 1000;
+        float distance = listTrks.get(listTrks.size() - 1).getDistance() / 1000;
 
         // mis a jour des valeurs miles
         if (!DistanceUnit.isDefaultUnitKm()) {
-          for (int i = 0; i < trks.length; i++) {
-            trks[i].setDistance((float) (trks[i].getDistance() / 1.609));
+          int size = listTrks.size();
+          for (int i = 0; i < size; i++) {
+            listTrks.get(i)
+                .setDistance((float) (listTrks.get(i).getDistance() / 1.609));
           }
         }
 
@@ -469,21 +473,22 @@ public class JDialogRunDetail extends JDialog {
       dist *= 1000;
       int currentDist = dist;
 
-      TableData data = new TableData(trks[0].getTime(), trks[0].getDistance());
+      TableData data = new TableData(trks.get(0).getTime(), trks.get(0)
+          .getDistance());
       listData.add(data);
 
-      for (int i = 0; i < trks.length; i++) {
-        if (trks[i].getDistance() <= currentDist) {
-          data.setTimeEnd(trks[i].getTime());
-          data.setEndDistance(trks[i].getDistance());
-          data.addHeartRate(trks[i].getHeartRate());
+      for (int i = 0; i < trks.size(); i++) {
+        if (trks.get(i).getDistance() <= currentDist) {
+          data.setTimeEnd(trks.get(i).getTime());
+          data.setEndDistance(trks.get(i).getDistance());
+          data.addHeartRate(trks.get(i).getHeartRate());
         }
         else {
           currentDist += dist;
-          if ((i + 1) < trks.length) {
-            data = new TableData(trks[i - 1].getTime(), trks[i - 1]
+          if ((i + 1) < trks.size()) {
+            data = new TableData(trks.get(i - 1).getTime(), trks.get(i - 1)
                 .getDistance());
-            data.addHeartRate(trks[i - 1].getHeartRate());
+            data.addHeartRate(trks.get(i - 1).getHeartRate());
             listData.add(data);
           }
         }
@@ -588,7 +593,8 @@ public class JDialogRunDetail extends JDialog {
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
       getTableModel().updateData();

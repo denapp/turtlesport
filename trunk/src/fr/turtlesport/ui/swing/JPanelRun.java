@@ -46,14 +46,12 @@ import fr.turtlesport.db.AbstractDataActivity;
 import fr.turtlesport.db.DataActivityOther;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
-import fr.turtlesport.db.DataRunTrk;
+import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.EquipementTableManager;
-import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.UserActivityTableManager;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.geo.GeoConvertException;
 import fr.turtlesport.geo.IGeoConvertRun;
-import fr.turtlesport.geo.IGeoPosition;
 import fr.turtlesport.googleearth.GoogleEarthException;
 import fr.turtlesport.googleearth.GoogleEarthFactory;
 import fr.turtlesport.googleearth.IGoogleEarth;
@@ -71,6 +69,9 @@ import fr.turtlesport.ui.swing.component.JPanelMap;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTextAreaLength;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
+import fr.turtlesport.ui.swing.model.ChangePointsEvent;
+import fr.turtlesport.ui.swing.model.ChangePointsListener;
+import fr.turtlesport.ui.swing.model.ModelPointsManager;
 import fr.turtlesport.ui.swing.model.ModelRun;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
@@ -80,14 +81,14 @@ import fr.turtlesport.unit.TimeUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
-import fr.turtlesport.util.GeoUtil;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
  * @author Denis Apparicio
  * 
  */
-public class JPanelRun extends JPanel implements LanguageListener, UnitListener {
+public class JPanelRun extends JPanel implements LanguageListener,
+                                     UnitListener, UserListener {
   private static TurtleLogger     log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelRun.class);
@@ -215,6 +216,20 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
     model = new ModelRun();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.ui.swing.UserListener#userSelect(int)
+   */
+  public void userSelect(int idUser) throws SQLException {
+    if (!DataUser.isAllUser(idUser)) {
+      model.updateView(this, null);
+    }
+    else {
+      model.updateViewButtons(this);
+    }
+  }
+
   /**
    * @return the rb
    */
@@ -309,6 +324,16 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
     getJButtonDetails().setEnabled(b);
   }
 
+  /**
+   * Rend le menu save.
+   * 
+   * @param b
+   *          <code>true</code> pour activer le menu save.
+   */
+  public void setEnableSave(boolean b) {
+    getJButtonSave().setEnabled(b);
+  }
+
   /*
    * (non-Javadoc)
    * 
@@ -385,9 +410,6 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
     jLabelLibEquipment.setText(rb.getString("jLabelLibEquipment"));
     jLabelLibNotes.setText(rb.getString("jLabelLibNotes"));
     jLabelLibActivity.setText(rb.getString("jLabelLibActivity"));
-    if (model != null && model.getDataRun() != null) {
-      // jLabelValActivity.setText(model.getDataRun().getLibelleSportType());
-    }
     jMenuItemRunDetail.setText(rb.getString("jMenuItemRunDetail"));
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
     jMenuItemRunGoogleEarth.setText(rb.getString("jMenuItemRunGoogleEarth"));
@@ -653,7 +675,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
    * 
    * @return javax.swing.JMenuItem
    */
-  protected JMenuItemTurtle getJMenuItemRunDelete() {
+  public JMenuItemTurtle getJMenuItemRunDelete() {
     if (jMenuItemRunDelete == null) {
       jMenuItemRunDelete = new JMenuItemTurtle();
       jMenuItemRunDelete.setFont(GuiFont.FONT_PLAIN);
@@ -670,7 +692,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
    * 
    * @return javax.swing.JMenuItem
    */
-  protected JMenuItemTurtle getJMenuItemRunSave() {
+  public JMenuItemTurtle getJMenuItemRunSave() {
     if (jMenuItemRunSave == null) {
       jMenuItemRunSave = new JMenuItemTurtle();
       jMenuItemRunSave.setFont(GuiFont.FONT_PLAIN);
@@ -1078,7 +1100,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
    */
   public JPanelMap getJPanelMap() {
     if (jPanelMap == null) {
-      jPanelMap = new JPanelMap(true);
+      jPanelMap = new JPanelMap();
       jPanelMap.setBorder(BorderFactory
           .createTitledBorder(null,
                               "",
@@ -1196,7 +1218,8 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
    * @author Denis Apparicio
    * 
    */
-  public class TableModelLap extends AbstractTableModel {
+  public class TableModelLap extends AbstractTableModel implements
+                                                       ChangePointsListener {
 
     private String                 unitDistance = DistanceUnit.unitKm();
 
@@ -1209,8 +1232,8 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
                                                     "moy.",
                                                     "max.",
                                                     "Calories",
-                                                    "D�nivel� +",
-                                                    "D�nivel� -" };
+                                                    "Denivele +",
+                                                    "Denivele -" };
 
     private final int[]            columWidth   = { 40,
                                                     40,
@@ -1224,55 +1247,11 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
                                                     35,
                                                     35 };
 
-    private DataRunLap[]           runLaps;
-
     private final SimpleDateFormat dfTime       = new SimpleDateFormat("kk:mm:ss");
 
-    public double[] computeInterval(int index) {
-      log.debug(">>computeInterval index=" + index);
-      double[] inter = null;
-      if (runLaps != null && (index >= 0) && (index < getRowCount())) {
-        inter = new double[2];
-
-        inter[0] = 0;
-        for (int i = 0; i < index; i++) {
-          inter[0] += runLaps[i].getTotalDist();
-        }
-        inter[1] = inter[0] + runLaps[index].getTotalDist();
-      }
-      return inter;
-    }
-
-    public IGeoPosition[] lapTrkBeginEnd(int index) {
-      IGeoPosition[] res = null;
-      if (runLaps != null && (index >= 0) && (index < getRowCount())) {
-        DataRunTrk deb = null;
-        DataRunTrk end = null;
-
-        try {
-          // Map
-          deb = RunLapTableManager
-              .getInstance()
-              .lapTrkBegin(runLaps[index].getId(), runLaps[index].getLapIndex());
-          if (deb != null) {
-            end = RunLapTableManager
-                .getInstance()
-                .lapTrkEnd(runLaps[index].getId(), runLaps[index].getLapIndex());
-          }
-
-          if (deb != null && end != null) {
-            res = new IGeoPosition[2];
-            res[0] = GeoUtil.makeFromGarmin(deb.getLatitude(), deb
-                .getLongitude());
-            res[1] = GeoUtil.makeFromGarmin(end.getLatitude(), end
-                .getLongitude());
-          }
-        }
-        catch (SQLException e) {
-          log.error("", e);
-        }
-      }
-      return res;
+    public TableModelLap() {
+      super();
+      ModelPointsManager.getInstance().addChangeListener(this);
     }
 
     /**
@@ -1325,6 +1304,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
       performedHeader(unit + "/h", 5);
 
       // mis a jour des valeurs
+      DataRunLap[] runLaps = ModelPointsManager.getInstance().getRunLaps();
       if (!unit.equals(unitDistance) && runLaps != null) {
         if (runLaps != null) {
           double value;
@@ -1380,7 +1360,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
      * @see javax.swing.table.TableModel#getRowCount()
      */
     public int getRowCount() {
-      return (runLaps == null) ? 0 : runLaps.length;
+      return ModelPointsManager.getInstance().runLapsSize();
     }
 
     /*
@@ -1401,6 +1381,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
       // "Denivele +",
       // "Denivele -" };
 
+      DataRunLap[] runLaps = ModelPointsManager.getInstance().getRunLaps();
       switch (columnIndex) {
         case 0: // Date
           return LanguageManager.getManager().getCurrentLang()
@@ -1457,37 +1438,50 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
       }
     }
 
-    /**
-     * Mis a jour des donnees de la table.
+    /*
+     * (non-Javadoc)
      * 
-     * @param runLaps
+     * @see
+     * fr.turtlesport.ui.swing.component.ChangePointsListener#changedAllPoints
+     * (fr.turtlesport.ui.swing.component.ChangePointsEvent)
      */
-    public void updateData(DataRunLap[] runLaps) {
-      log.info(">>updateData");
-
-      this.runLaps = runLaps;
+    public void changedAllPoints(ChangePointsEvent changeEvent) {
       unitDistance = DistanceUnit.unitKm();
       if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
         performedUnit(DistanceUnit.getDefaultUnit());
       }
       fireTableDataChanged();
-      // jTableLap.packAll();
-
-      log.info("<<updateData");
     }
 
-    /**
-     * Efface les donnees de la table.
+    /*
+     * (non-Javadoc)
      * 
-     * @param runLaps
+     * @see
+     * fr.turtlesport.ui.swing.component.ChangePointsListener#changedLap(fr.
+     * turtlesport.ui.swing.component.ChangePointsEvent)
      */
-    public void clear() {
-      updateData(null);
+    public void changedLap(ChangePointsEvent e) {
+      int index = ModelPointsManager.getInstance().getLapIndex();
+      jTableLap.getSelectionModel().setSelectionInterval(index, index);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * fr.turtlesport.ui.swing.component.ChangePointsListener#changedPoint(fr
+     * .turtlesport.ui.swing.component.ChangePointsEvent)
+     */
+    public void changedPoint(ChangePointsEvent e) {
     }
 
   }
 
   private class TableListSelectionListener implements ListSelectionListener {
+
+    public TableListSelectionListener() {
+      super();
+    }
 
     /*
      * (non-Javadoc)
@@ -1498,21 +1492,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
      */
     public void valueChanged(ListSelectionEvent e) {
       if (jTableLap.getRowCount() > 1) {
-        // Diagram
-        double[] inter = tableModelLap.computeInterval(jTableLap
-            .getSelectedRow());
-        if (inter != null) {
-          jDiagram.getJDiagram().getModel().updateInt(inter[0], inter[1]);
-        }
-        // Map
-        IGeoPosition[] pos = tableModelLap.lapTrkBeginEnd(jTableLap
-            .getSelectedRow());
-        if (pos != null) {
-          jPanelMap.getModelMap().updateInt(pos[0], pos[1]);
-        }
-        else {
-          jPanelMap.getModelMap().updateInt(null, null);
-        }
+        ModelPointsManager.getInstance().setLap(jTableLap.getSelectedRow());
       }
     }
 
@@ -1588,8 +1568,8 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
      */
     public void actionPerformed(ActionEvent ae) {
       String name = LanguageManager.getManager().getCurrentLang()
-          .getDateTimeFormatterWithoutSep()
-          .format(model.getDataRun().getTime());
+          .getDateTimeFormatterWithoutSep().format(ModelPointsManager
+              .getInstance().getDataRun().getTime());
 
       final IGeoConvertRun cv = FactoryGeoConvertRun.getInstance(ext);
       final File out = JFileSaver.showSaveDialog(MainGui.getWindow(), name, cv
@@ -1601,7 +1581,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             try {
-              cv.convert(model.getDataRun(), out);
+              cv.convert(ModelPointsManager.getInstance().getDataRun(), out);
               JShowMessage.ok(rb.getString("exportOK"), rb
                   .getString("exportTitle"));
             }
@@ -1643,7 +1623,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
             }
             else {
               // recuperation des pistes
-              DataRun dataRun = JPanelRun.this.model.getDataRun();
+              DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
               if (dataRun != null) {
                 File kmlFile = FactoryGeoConvertRun
                     .getInstance(FactoryGeoConvertRun.KML).convert(dataRun);
@@ -1682,7 +1662,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
      * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
-      JDialogRunSendEmail.prompt(getModel().getDataRun());
+      JDialogRunSendEmail.prompt(ModelPointsManager.getInstance().getDataRun());
     }
   }
 
@@ -1767,7 +1747,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
   private class DetailActionListener implements ActionListener {
 
     public void actionPerformed(ActionEvent actionevent) {
-      JDialogRunDetail.prompt(getModel().getDataRun());
+      JDialogRunDetail.prompt(ModelPointsManager.getInstance().getDataRun());
     }
   }
 
@@ -1778,14 +1758,13 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
   private class MapMercatorActionListener implements ActionListener {
 
     public void actionPerformed(ActionEvent actionevent) {
-      // JDialogMapMercator.prompt(getModel().getDataRun());
+      jPanelMap.fireActionGrow();
     }
   }
 
-  
   /**
    * @author Denis apparicio
-   *
+   * 
    */
   private class PopupListener extends MouseAdapter {
     private JPopupMenu popup;
@@ -1811,7 +1790,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
 
   /**
    * @author Denis Apparicio
-   *
+   * 
    */
   public class ActivityComboBoxModel extends DefaultComboBoxModel {
     public ActivityComboBoxModel() {
@@ -1852,7 +1831,7 @@ public class JPanelRun extends JPanel implements LanguageListener, UnitListener 
 
   /**
    * @author Denis Apparicio
-   *
+   * 
    */
   public class EquipementComboBoxModel extends DefaultComboBoxModel {
     public EquipementComboBoxModel() {

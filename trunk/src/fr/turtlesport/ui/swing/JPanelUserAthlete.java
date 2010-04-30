@@ -10,6 +10,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -116,6 +117,8 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
 
   private FocusListener                       focusListenerHeight;
 
+  private GenericModelDocListener             docLstUserBirthDate;
+
   // Formatter
   public static final DefaultFormatterFactory TIME_FORMATTER_FACTORY = TextFormatterFactory
                                                                          .createTime();
@@ -196,10 +199,8 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
                                                      Float.TYPE);
       jTextFieldHeight.getDocument().addDocumentListener(docLstUserHeight);
 
-      // docLstUserBirthDate = new GenericModelDocListener(jTextFieldBirthDate,
-      // data,
-      // "setBirthDate",
-      // Date.class);
+      docLstUserBirthDate = new GenericModelDocListener(jXDatePicker
+          .getEditor(), data, "setBirthDate", Date.class);
 
       focusListenerWeight = new FocusAdapter() {
         @Override
@@ -217,8 +218,8 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
       };
       jTextFieldHeight.addFocusListener(focusListenerHeight);
 
-      // jTextFieldBirthDate.getDocument()
-      // .addDocumentListener(docLstUserBirthDate);
+      jXDatePicker.getEditor().getDocument()
+          .addDocumentListener(docLstUserBirthDate);
 
       photoListener = new PhotoListener() {
         public void photoChanged(PhotoEvent event) {

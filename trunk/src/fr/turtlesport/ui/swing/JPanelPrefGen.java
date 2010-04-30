@@ -10,9 +10,12 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ResourceBundle;
 
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -154,8 +157,10 @@ public class JPanelPrefGen extends JPanel implements LanguageListener,
     jComboBoxLanguage.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
-          String lang = (String) jComboBoxLanguage.getSelectedItem();
-          Configuration.getConfig().addProperty("general", "language", lang);
+          ILanguage lang = (ILanguage) jComboBoxLanguage.getSelectedItem();
+          Configuration.getConfig().addProperty("general",
+                                                "language",
+                                                lang.toString());
           LanguageManager.getManager().fireLanguageChanged(lang);
         }
       }
@@ -164,7 +169,7 @@ public class JPanelPrefGen extends JPanel implements LanguageListener,
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     jComboBoxLanguage.setSelectedItem(LanguageManager.getManager()
-        .getCurrentLanguageName());
+        .getCurrentLang());
 
     jCheckBoxCheckUpdate.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -204,7 +209,6 @@ public class JPanelPrefGen extends JPanel implements LanguageListener,
 
       jLabelLibTheme = new JLabel();
       jLabelLibTheme.setBounds(new Rectangle(5, 35, 77, 23));
-      jLabelLibTheme.setText("Th�me :");
       jLabelLibTheme.setFont(GuiFont.FONT_PLAIN);
 
       jPanelCenter = new JPanel();
@@ -234,7 +238,31 @@ public class JPanelPrefGen extends JPanel implements LanguageListener,
   private JComboBox getJComboBoxLanguage() {
     if (jComboBoxLanguage == null) {
       jComboBoxLanguage = new JComboBox(LanguageManager.getManager()
-          .getLibelleLocales());
+          .getLanguages());
+      new DefaultListCellRenderer();
+      jComboBoxLanguage.setRenderer(new DefaultListCellRenderer() {
+        @Override
+        public Component getListCellRendererComponent(JList list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus) {
+          super.getListCellRendererComponent(list,
+                                             value,
+                                             index,
+                                             isSelected,
+                                             cellHasFocus);
+          ILanguage language = (ILanguage) value;
+
+          setFont(GuiFont.FONT_PLAIN);
+          ImageIcon icon = language.getFlag();
+          if (icon != null) {
+            setIcon(icon);
+          }
+          setText(language.getName());
+          return this;
+        }
+      });
       jComboBoxLanguage.setFont(GuiFont.FONT_PLAIN);
       jComboBoxLanguage.setBounds(new Rectangle(98, 5, 188, 23));
     }

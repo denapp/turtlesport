@@ -87,6 +87,9 @@ public class JDialogAbout extends JDialog {
     try {
       String lang = LanguageManager.getManager().getCurrentLang().getLocale()
           .getLanguage();
+      jEditorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES,
+                                    Boolean.TRUE);
+      jEditorPane.setFont(GuiFont.FONT_PLAIN);
       jEditorPane.setPage(getClass().getResource("about_" + lang
                                                  + ".properties"));
     }

@@ -350,7 +350,7 @@ public final class JDialogImport extends JDialog implements
     this.setSize(1100, 450);
     this.setTitle(rb.getString("title"));
     this.setContentPane(getJContentPane());
-    this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
     // evenements
     cancelActionListener = new CancelActionListener();
@@ -1190,7 +1190,6 @@ public final class JDialogImport extends JDialog implements
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy k:mm:ss.S");
         log.debug("TableRowObject date=" + df.format(calendar.getTime()));
       }
-      log.error("defaultEquipement=" + defaultEquipement);
       if (defaultEquipement != null) {
         setEquipement(defaultEquipement);
       }
@@ -1294,7 +1293,6 @@ public final class JDialogImport extends JDialog implements
     }
 
     public void setEquipement(String equipement) {
-      log.error("setEquipement=" + equipement);
       this.equipement = equipement;
       ((DataRunExtra) route.getExtra()).setEquipement(equipement);
     }

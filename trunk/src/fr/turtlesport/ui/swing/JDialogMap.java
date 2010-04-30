@@ -1,6 +1,5 @@
 package fr.turtlesport.ui.swing;
 
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -19,20 +18,19 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
-import fr.turtlesport.db.DataRun;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTextAreaLength;
 import fr.turtlesport.ui.swing.component.JTurtleMapKit;
-import fr.turtlesport.ui.swing.component.JTurtleMapKit.JCheckBoxMenuItemMap;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.model.ModelDialogMap;
+import fr.turtlesport.ui.swing.model.ModelMapkitManager;
+import fr.turtlesport.ui.swing.model.ModelPointsManager;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -41,7 +39,7 @@ import fr.turtlesport.util.ResourceBundleUtility;
  */
 public class JDialogMap extends JDialog {
 
-  private JTurtleMapKit   jPanelMap;
+  private JTurtleMapKit   mapKit;
 
   private JLabel          jLabelTitle;
 
@@ -129,7 +127,7 @@ public class JDialogMap extends JDialog {
 
   private JScrollPane     jScrollPaneTextArea;
 
-  private JPanel          jPanelLeft;
+  private JPanel          jPaneRight;
 
   private JLabel          jLabelLibAltitudeLap;
 
@@ -137,61 +135,72 @@ public class JDialogMap extends JDialog {
 
   private JComboBox       jComboBoxLap;
 
-  private JTurtleMapKit   owner;
-
   // Model
   private ModelDialogMap  model;
 
   /**
-   * @param owner
-   * @param modal
-   * @param isMap
+   * @param frame
    */
-  public JDialogMap(Frame frame, JTurtleMapKit owner) {
+  private JDialogMap(Frame frame) {
     super(frame, true);
-    this.owner = owner;
     rb = ResourceBundleUtility.getBundle(LanguageManager.getManager()
         .getCurrentLang(), getClass());
 
     initialize();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.awt.Window#dispose()
+   */
   @Override
   public void dispose() {
     super.dispose();
-    owner = null;
+    ModelMapkitManager.getInstance().removeChangeListener(mapKit
+        .getMapListener());
   }
 
-  public static void prompt(JTurtleMapKit mapKit, DataRun data) {
+  /**
+   * Affiche la boite de dialogue.
+   * 
+   * @param mapKit
+   */
+  public static void prompt(JTurtleMapKit mapKit) {
     // mis a jour du model et affichage de l'IHM
-    JDialogMap view = new JDialogMap(MainGui.getWindow(), mapKit);
+    JDialogMap view = new JDialogMap(MainGui.getWindow());
 
-    ModelDialogMap model = new ModelDialogMap(mapKit.getModelMap().getListGeo(),
-                                              data);
-    try {
-      model.updateView(view);
-      view.model = model;
-    }
-    catch (SQLException e) {
-      JShowMessage.error(view.rb.getString("errorDatabase"));
-      return;
-    }
-
-    view.jPanelMap.getMainMap().setCenterPosition(mapKit.getMainMap()
+    // MapKit
+    view.mapKit.getMainMap().setCenterPosition(mapKit.getMainMap()
         .getCenterPosition());
     int zoom = mapKit.getMainMap().getZoom();
     if (zoom != 1) {
       zoom--;
     }
-    view.jPanelMap.getMainMap().setZoom(zoom);
-
-    //original zoom et position
-     zoom = mapKit.getOriginalZoom();
+    view.mapKit.getMainMap().setZoom(zoom);
+    
+    // original zoom et position
+    zoom = mapKit.getOriginalZoom();
     if (zoom != 1) {
       zoom--;
     }
-    view.jPanelMap.setOriginalZoom(zoom);
-    view.jPanelMap.setOriginalPosition(mapKit.getOriginalPosition());
+    view.mapKit.setOriginalZoom(zoom);
+    view.mapKit.setOriginalPosition(mapKit.getOriginalPosition());
+
+    // model
+    ModelDialogMap model = new ModelDialogMap();
+    try {
+      model.updateView(view);
+      view.model = model;
+      int indexLap = ModelPointsManager.getInstance().getLapIndex();
+      if (indexLap != -1) {
+        view.jComboBoxLap.setSelectedIndex(indexLap + 1);
+      }
+    }
+    catch (SQLException e) {
+      JShowMessage.error(view.rb.getString("errorDatabase"));
+      return;
+    }
 
     view.pack();
     view.setLocationRelativeTo(MainGui.getWindow());
@@ -294,7 +303,7 @@ public class JDialogMap extends JDialog {
     contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
     contentPane.add(getJPanelMap());
     contentPane.add(Box.createRigidArea(new Dimension(5, 0)));
-    contentPane.add(getJPanelLeft());
+    contentPane.add(getJPanelRight());
 
     this.setContentPane(contentPane);
     this.setTitle(rb.getString("title"));
@@ -302,56 +311,45 @@ public class JDialogMap extends JDialog {
     // Evenement
     jComboBoxLap.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (model != null) {
-          model.updateViewLap(JDialogMap.this, ((JComboBox) e.getSource())
-              .getSelectedItem());
+        if (model != null && jComboBoxLap.getSelectedIndex() > 0) {
+          model.updateViewLap(JDialogMap.this,
+                              jComboBoxLap.getSelectedIndex() - 1);
         }
       }
-
     });
 
-    JPopupMenu popupMenu = jPanelMap.getJXSplitButtonMap().getDropDownMenu();
-    for (int i = 0; i < popupMenu.getComponentCount(); i++) {
-      Component c = popupMenu.getComponent(i);
-      if (c instanceof JCheckBoxMenuItemMap) {
-        final JCheckBoxMenuItemMap mi = ((JCheckBoxMenuItemMap) c);
-        mi.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            owner.setTileFactory(mi.getTileFactory());
-          }
-        });
-      }
-    }
   }
 
-  private JPanel getJPanelLeft() {
-    if (jPanelLeft == null) {
-      jPanelLeft = new JPanel();
+  private JPanel getJPanelRight() {
+    if (jPaneRight == null) {
+      jPaneRight = new JPanel();
       Dimension dim = new Dimension(260, 600);
-      jPanelLeft.setPreferredSize(dim);
-      jPanelLeft.setLayout(new BoxLayout(jPanelLeft, BoxLayout.Y_AXIS));
-      jPanelLeft.add(getJPanelRunSummary());
-      jPanelLeft.add(Box.createRigidArea(new Dimension(5, 0)));
-      jPanelLeft.add(getJPanelRunLap());
+      jPaneRight.setPreferredSize(dim);
+      jPaneRight.setLayout(new BoxLayout(jPaneRight, BoxLayout.Y_AXIS));
+      jPaneRight.add(getJPanelRunSummary());
+      jPaneRight.add(Box.createRigidArea(new Dimension(5, 0)));
+      jPaneRight.add(getJPanelRunLap());
     }
-    return jPanelLeft;
+    return jPaneRight;
   }
 
   public JTurtleMapKit getJPanelMap() {
-    if (jPanelMap == null) {
-      jPanelMap = new JTurtleMapKit(false);
-      jPanelMap.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      jPanelMap.setBorder(BorderFactory
-          .createTitledBorder(null,
-                              "",
-                              TitledBorder.DEFAULT_JUSTIFICATION,
-                              TitledBorder.DEFAULT_POSITION,
-                              GuiFont.FONT_PLAIN,
-                              null));
+    if (mapKit == null) {
+      mapKit = new JTurtleMapKit(false);
+      mapKit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      // mapKit.setBorder(BorderFactory
+      // .createTitledBorder(null,
+      // "",
+      // TitledBorder.DEFAULT_JUSTIFICATION,
+      // TitledBorder.DEFAULT_POSITION,
+      // GuiFont.FONT_PLAIN,
+      // null));
       Dimension dim = new Dimension(600, 600);
-      jPanelMap.setPreferredSize(dim);
+      mapKit.setPreferredSize(dim);
+      mapKit.setGeoPositionVisible(true);
+      mapKit.setTimeVisible(true);
     }
-    return jPanelMap;
+    return mapKit;
   }
 
   /**
