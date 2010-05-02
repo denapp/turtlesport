@@ -1053,7 +1053,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jSplitPaneCenter.setOneTouchExpandable(true);
       jSplitPaneCenter.setLeftComponent(new JPanel());
       jSplitPaneCenter.setRightComponent(new JPanel());
-      jSplitPaneCenter.setDividerLocation(180);
+      jSplitPaneCenter.setDividerLocation(204);
     }
     return jSplitPaneCenter;
   }
