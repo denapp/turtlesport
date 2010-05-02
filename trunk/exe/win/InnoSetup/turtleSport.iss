@@ -14,7 +14,7 @@ AppSupportURL=http://turtlesport.sourceforge.net
 AppUpdatesURL=http://turtlesport.sourceforge.net
 DefaultDirName={pf}\turtlesport
 DefaultGroupName=Turtle Sport
-OutputBaseFilename=setup
+OutputBaseFilename=turtlesport-win-0.1.14
 Compression=lzma
 SolidCompression=yes
 
