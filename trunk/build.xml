@@ -237,7 +237,7 @@
 	<target name="releaseWin" depends="launch4j,SetupWin">
 		<delete file="${release}/${Name}-win-${version}.zip" />
 		<zip destfile="${release}/${Name}-win-${version}.zip" basedir="${exe}/win" excludes="InnoSetup/**, launch4J/**" />
-		<copy file="${exe}\win\InnoSetup\Output\setup.exe" todir="${release}/" overwrite="yes" />
+		<copy file="${exe}\win\InnoSetup\Output\${Name}-win-${version}.exe" todir="${release}/" overwrite="yes" />
 	</target>
 	<target name="releaseSource">
 		<delete file="${release}/${Name}-source-${version}.zip" />
