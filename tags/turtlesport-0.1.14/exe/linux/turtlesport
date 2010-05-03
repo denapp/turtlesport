@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Retrieve turtlesport directory
+PROGRAM=`readlink "$0"`
+if ["$PROGRAM" = ""]; then
+  PROGRAM=$0
+fi
+PROGRAM_DIR=`dirname "$PROGRAM"`
+
+# Run Turtle Sport
+exec java -jar "$PROGRAM_DIR"/turtlesport.jar
