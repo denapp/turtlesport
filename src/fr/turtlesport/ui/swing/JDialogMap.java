@@ -178,7 +178,7 @@ public class JDialogMap extends JDialog {
       zoom--;
     }
     view.mapKit.getMainMap().setZoom(zoom);
-    
+
     // original zoom et position
     zoom = mapKit.getOriginalZoom();
     if (zoom != 1) {
@@ -292,9 +292,6 @@ public class JDialogMap extends JDialog {
   }
 
   private void initialize() {
-    ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-        .getManager().getCurrentLang(), getClass());
-
     jLabelTitle = new JLabel();
     jLabelTitle.setHorizontalAlignment(SwingConstants.CENTER);
     jLabelTitle.setFont(GuiFont.FONT_PLAIN);
@@ -364,7 +361,7 @@ public class JDialogMap extends JDialog {
       jPanelRunSummary.setLayout(new GridBagLayout());
       borderPanelRunSummary = BorderFactory
           .createTitledBorder(null,
-                              "Course",
+                              rb.getString("jPanelRunSummary"),
                               TitledBorder.DEFAULT_JUSTIFICATION,
                               TitledBorder.DEFAULT_POSITION,
                               GuiFont.FONT_PLAIN,
@@ -523,7 +520,7 @@ public class JDialogMap extends JDialog {
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibCategory = new JLabel("Categorie :");
+      jLabelLibCategory = new JLabel(rb.getString("jLabelLibCategory"));
       jLabelLibCategory.setFont(GuiFont.FONT_PLAIN);
       jLabelLibCategory.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibCategory, g);
@@ -543,7 +540,7 @@ public class JDialogMap extends JDialog {
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibEquipment = new JLabel("Equipement :");
+      jLabelLibEquipment = new JLabel(rb.getString("jLabelLibEquipment"));
       jLabelLibEquipment.setFont(GuiFont.FONT_PLAIN);
       jLabelLibEquipment.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibEquipment, g);
@@ -563,7 +560,7 @@ public class JDialogMap extends JDialog {
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibNotes = new JLabel("Notes :");
+      jLabelLibNotes = new JLabel(rb.getString("jLabelLibNotes"));
       jLabelLibNotes.setFont(GuiFont.FONT_PLAIN);
       jLabelLibNotes.setHorizontalAlignment(SwingConstants.TRAILING);
       jLabelLibNotes.setVerticalAlignment(SwingConstants.TOP);

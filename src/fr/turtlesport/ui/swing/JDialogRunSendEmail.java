@@ -66,6 +66,8 @@ public class JDialogRunSendEmail extends JDialog {
 
   private JCheckBox           jCheckBoxKml;
 
+  private JCheckBox           jCheckBoxGoogleMap;
+
   private JCheckBox           jCheckBoxGpx;
 
   private JCheckBox           jCheckBoxDiagram;
@@ -97,10 +99,13 @@ public class JDialogRunSendEmail extends JDialog {
     this.setContentPane(getJContentPane());
 
     this.setTitle(rb.getString("title"));
+    jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());
 
     // Recuperation de la config precedente
     jCheckBoxGpx.setSelected(Configuration.getConfig()
         .getPropertyAsBoolean("mail", "racegpx", false));
+    jCheckBoxGoogleMap.setSelected(Configuration.getConfig()
+        .getPropertyAsBoolean("mail", "racegooglemap", false));
     jCheckBoxKml.setSelected(Configuration.getConfig()
         .getPropertyAsBoolean("mail", "racekml", false));
     jCheckBoxDiagram.setSelected(Configuration.getConfig()
@@ -146,12 +151,15 @@ public class JDialogRunSendEmail extends JDialog {
 
       jCheckBoxKml = new JCheckBox(rb.getString("jCheckBoxKml"));
       jCheckBoxKml.setFont(GuiFont.FONT_PLAIN);
+      jCheckBoxGoogleMap = new JCheckBox(rb.getString("jCheckBoxGoogleMap"));
+      jCheckBoxGoogleMap.setFont(GuiFont.FONT_PLAIN);
       jCheckBoxGpx = new JCheckBox(rb.getString("jCheckBoxGpx"));
       jCheckBoxGpx.setFont(GuiFont.FONT_PLAIN);
       jCheckBoxDiagram = new JCheckBox(rb.getString("jCheckBoxDiagram"));
       jCheckBoxDiagram.setFont(GuiFont.FONT_PLAIN);
 
       jPanelCenter.add(jCheckBoxKml, null);
+      jPanelCenter.add(jCheckBoxGoogleMap, null);
       jPanelCenter.add(jCheckBoxGpx, null);
       jPanelCenter.add(jCheckBoxDiagram, null);
     }
@@ -171,7 +179,6 @@ public class JDialogRunSendEmail extends JDialog {
   private JButton getJButtonOK() {
     if (jButtonOK == null) {
       jButtonOK = new JButton();
-      jButtonOK.setText("OK");
       jButtonOK.setFont(GuiFont.FONT_PLAIN);
     }
     return jButtonOK;
@@ -198,7 +205,7 @@ public class JDialogRunSendEmail extends JDialog {
       else {
         mail = Mail.getDefaultMail();
       }
-      
+
       if (mail == null) {
         dispose();
         return;
@@ -343,11 +350,18 @@ public class JDialogRunSendEmail extends JDialog {
               msg.addAttachment(kmz);
             }
           }
+          // google map
+          if (jCheckBoxGoogleMap.isSelected()) {
+            File f = FactoryGeoConvertRun.getInstance(FactoryGeoConvertRun.MAP)
+                .convert(dataRun);
+            if (f != null) {
+              msg.addAttachment(f);
+            }
+          }
           // gpx
           if (jCheckBoxGpx.isSelected()) {
             File f = FactoryGeoConvertRun.getInstance(FactoryGeoConvertRun.GPX)
                 .convert(dataRun);
-
             if (f != null) {
               msg.addAttachment(f);
             }
@@ -372,6 +386,10 @@ public class JDialogRunSendEmail extends JDialog {
       Configuration.getConfig().addProperty("mail",
                                             "racekml",
                                             Boolean.toString(jCheckBoxKml
+                                                .isSelected()));
+      Configuration.getConfig().addProperty("mail",
+                                            "racegooglemap",
+                                            Boolean.toString(jCheckBoxGoogleMap
                                                 .isSelected()));
       Configuration.getConfig().addProperty("mail",
                                             "racediagram",

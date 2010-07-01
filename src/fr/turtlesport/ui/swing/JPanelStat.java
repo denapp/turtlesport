@@ -207,7 +207,9 @@ public class JPanelStat extends JPanel implements LanguageListener,
         .getManager().getCurrentLang(), getClass());
     String libRace = rb.getString("titleChart");
 
-    final String[] criter1 = { "createChartDistance", "createChartTime" };
+    final String[] criter1 = { "createChartDistance",
+        "createChartTime",
+        "createChartRaceNumber" };
     final String[] criter2 = { "Day", "DayOfWeek", "Week", "Month", "Year" };
 
     String methodName = criter1[jComboxBoxCriter1.getSelectedIndex()]
@@ -253,7 +255,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
   public JFreeChart createChartTimeDayOfWeek(String libRace) throws SQLException {
     DataStat[] resDayOfWeek = RunLapTableManager.getInstance()
-        .timeByDayOfWeek(idUser);
+        .statByDayOfWeek(idUser);
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setDateFormatOverride(new SimpleDateFormat("EEEE"));
@@ -273,15 +275,17 @@ public class JPanelStat extends JPanel implements LanguageListener,
       cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
       timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
-             resDayOfWeek[i].getDistance());
-      s1.addValueExt(libRace + " : " + resDayOfWeek[i].getNumberRaces());
+             resDayOfWeek[i].getTimeTot());
+      s1.addValueExt(resDayOfWeek[i].getDistance() / 1000.0,
+                     libRace + " : " + resDayOfWeek[i].getNumberRaces());
     }
     timeInMillisDeb = cal.getTimeInMillis();
     cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
     timeInMillisEnd = cal.getTimeInMillis();
     s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
-           resDayOfWeek[0].getDistance());
-    s1.addValueExt(libRace + " : " + resDayOfWeek[0].getNumberRaces());
+           resDayOfWeek[0].getTimeTot());
+    s1.addValueExt(resDayOfWeek[0].getDistance() / 1000.0,
+                   libRace + " : " + resDayOfWeek[0].getNumberRaces());
 
     TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
     dataset.addSeries(s1);
@@ -290,7 +294,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
   public JFreeChart createChartDistanceDayOfWeek(String libRace) throws SQLException {
     DataStat[] resDayOfWeek = RunLapTableManager.getInstance()
-        .distanceByDayOfWeek(idUser);
+        .statByDayOfWeek(idUser);
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setDateFormatOverride(new SimpleDateFormat("EEEE"));
@@ -311,7 +315,11 @@ public class JPanelStat extends JPanel implements LanguageListener,
       timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
              resDayOfWeek[i].getDistance() / 1000.0);
-      s1.addValueExt(libRace + " : " + resDayOfWeek[i].getNumberRaces());
+
+      String ext1 = TimeUnit.formatHundredSecondeTime((long) resDayOfWeek[i]
+          .getTimeTot());
+      String ext2 = libRace + " : " + resDayOfWeek[i].getNumberRaces();
+      s1.addValueExt(ext1, ext2);
     }
 
     timeInMillisDeb = cal.getTimeInMillis();
@@ -319,7 +327,11 @@ public class JPanelStat extends JPanel implements LanguageListener,
     timeInMillisEnd = cal.getTimeInMillis();
     s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
            resDayOfWeek[0].getDistance() / 1000.0);
-    s1.addValueExt(libRace + " : " + resDayOfWeek[0].getNumberRaces());
+
+    String ext1 = TimeUnit.formatHundredSecondeTime((long) resDayOfWeek[0]
+        .getTimeTot());
+    String ext2 = libRace + " : " + resDayOfWeek[0].getNumberRaces();
+    s1.addValueExt(ext1, ext2);
 
     TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
     dataset.addSeries(s1);
@@ -328,7 +340,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
   public JFreeChart createChartDistanceYear(String libRace) throws SQLException {
     List<DataStatYear> resYear = RunLapTableManager.getInstance()
-        .distanceByYear(idUser);
+        .statByYear(idUser);
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.YEAR, 1));
@@ -348,7 +360,10 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisEnd = cal.getTimeInMillis();
       sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
           .getDistance() / 1000.0);
-      sYear.addValueExt(libRace + " : " + d.getNumberRaces());
+
+      String ext1 = TimeUnit.formatHundredSecondeTime((long) d.getTimeTot());
+      String ext2 = libRace + " : " + d.getNumberRaces();
+      sYear.addValueExt(ext1, ext2);
     }
 
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -359,7 +374,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
   public JFreeChart createChartTimeYear(String libRace) throws SQLException {
     List<DataStatYear> resYear = RunLapTableManager.getInstance()
-        .timeByYear(idUser);
+        .statByYear(idUser);
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.YEAR, 1));
@@ -378,8 +393,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       cal.add(GregorianCalendar.YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getDistance());
-      sYear.addValueExt(libRace + " : " + d.getNumberRaces());
+          .getTimeTot());
+      sYear.addValueExt(d.getDistance(), libRace + " : " + d.getNumberRaces());
     }
 
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -389,6 +404,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
   }
 
   public JFreeChart createChartDistanceMonth(String libRace) throws SQLException {
+    // List<DataStatYearMonth> resMonth = RunLapTableManager.getInstance()
+    // .statByMonth(idUser);
     List<DataStatYearMonth> resMonth = RunLapTableManager.getInstance()
         .distanceByMonth(idUser);
 
@@ -413,7 +430,10 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisEnd = cal.getTimeInMillis();
       sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
           .getDistance() / 1000.0);
-      sMonth.addValueExt(libRace + " : " + d.getNumberRaces());
+
+      String ext1 = TimeUnit.formatHundredSecondeTime((long) d.getTimeTot());
+      String ext2 = libRace + " : " + d.getNumberRaces();
+      sMonth.addValueExt(ext1, ext2);
     }
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
     dataset.addSeries(sMonth);
@@ -422,7 +442,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
   public JFreeChart createChartTimeMonth(String libRace) throws SQLException {
     List<DataStatYearMonth> resMonth = RunLapTableManager.getInstance()
-        .timeByMonth(idUser);
+        .statByMonth(idUser);
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, 1));
@@ -444,8 +464,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       cal.add(GregorianCalendar.MONTH, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getDistance());
-      sMonth.addValueExt(libRace + " : " + d.getNumberRaces());
+          .getTimeTot());
+      sMonth.addValueExt(d.getDistance(), libRace + " : " + d.getNumberRaces());
     }
 
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -478,7 +498,10 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
           .getDistance() / 1000.0);
-      s1.addValueExt(libRace + " : " + d.getNumberRaces());
+
+      String ext1 = TimeUnit.formatHundredSecondeTime((long) d.getTimeTot());
+      String ext2 = libRace + " : " + d.getNumberRaces();
+      s1.addValueExt(ext1, ext2);
     }
 
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -488,7 +511,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
   public JFreeChart createChartTimeWeek(String libRace) throws SQLException {
     List<DataStatYearWeek> resWeek = RunLapTableManager.getInstance()
-        .timeByWeek(idUser);
+        .statByWeek(idUser);
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setDateFormatOverride(new SimpleDateFormat("w-yyyy",
@@ -510,8 +533,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       cal.add(GregorianCalendar.WEEK_OF_YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getDistance());
-      s1.addValueExt(libRace + " : " + d.getNumberRaces());
+          .getTimeTot());
+      s1.addValueExt(d.getDistance(), libRace + " : " + d.getNumberRaces());
     }
 
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -537,7 +560,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
           .getComputeDistanceTot() / 1000.0);
-      s1.addValueExt("");
+      s1.addValueExt("", "");
     }
 
     TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -564,7 +587,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
           .computeTimeTot());
-      s1.addValueExt("");
+      s1.addValueExt("", "");
     }
 
     TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -586,8 +609,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
     final XYPlot plot = new XYPlot(dataset, dateAxis, rangeAxis, renderer);
 
     if (dateAxis.getDateFormatOverride() != null) {
-      String format = "<html><body>{1}<br>{2}" + DistanceUnit.getDefaultUnit()
-                      + "<br>{3}</body></html>";
+      String format = "<html><body>{1}<br>{2} " + DistanceUnit.getDefaultUnit()
+                      + "<br>{3}<br>{4}</body></html>";
       StandarXYToolTipGenratorExt generator = new StandarXYToolTipGenratorExt(format,
                                                                               dateAxis
                                                                                   .getDateFormatOverride(),
@@ -629,6 +652,217 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
     final NumberAxis rangeAxis = new NumberAxis("Heure");
     rangeAxis.setNumberFormatOverride(new HourNumberFormat());
+    XYBarRenderer renderer = new XYBarRenderer();
+    final XYPlot plot = new XYPlot(dataset, dateAxis, rangeAxis, renderer);
+
+    if (dateAxis.getDateFormatOverride() != null) {
+      String format = "<html><body>{1}<br>{2}<br>{3}<br>{4}</body></html>";
+      StandarXYToolTipGenratorExt generator = new StandarXYToolTipGenratorExt(format,
+                                                                              dateAxis
+                                                                                  .getDateFormatOverride(),
+                                                                              rangeAxis
+                                                                                  .getNumberFormatOverride());
+
+      renderer.setBaseToolTipGenerator(generator);
+    }
+
+    plot.setBackgroundPaint(Color.white);
+    plot.setDomainGridlinePaint(Color.black);
+    plot.setRangeGridlinePaint(Color.black);
+
+    // disable bar outlines...
+    renderer.setDrawBarOutline(false);
+
+    // set up gradient paints for series...
+    final GradientPaint gp = new GradientPaint(0.0f,
+                                               0.0f,
+                                               Color.blue,
+                                               0.0f,
+                                               0.0f,
+                                               Color.lightGray);
+    renderer.setSeriesPaint(0, gp);
+
+    // set the range axis to display integers only...
+    plot.getRangeAxis().setLabelFont(GuiFont.FONT_ITALIC);
+    plot.getRangeAxis().setTickLabelFont(GuiFont.FONT_ITALIC);
+    // chart
+    return new JFreeChart("", plot);
+  }
+
+  public JFreeChart createChartRaceNumberMonth(String libRace) throws SQLException {
+    List<DataStatYearMonth> resMonth = RunLapTableManager.getInstance()
+        .distanceByMonth(idUser);
+
+    DateAxis dateAxis = new DateAxis("");
+    dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, 1));
+    dateAxis.setDateFormatOverride(new SimpleDateFormat("MMMMM yyyy",
+                                                        LanguageManager
+                                                            .getManager()
+                                                            .getCurrentLang()
+                                                            .getLocale()));
+    final TimePeriodValuesExt sMonth = new TimePeriodValuesExt(libRace);
+    for (DataStatYearMonth d : resMonth) {
+      Calendar cal = GregorianCalendar.getInstance();
+      cal.set(GregorianCalendar.YEAR, d.getYear());
+      cal.set(GregorianCalendar.MONTH, d.getMonth() - 1);
+      cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
+      cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
+      cal.set(GregorianCalendar.MINUTE, 0);
+      cal.set(GregorianCalendar.MILLISECOND, 0);
+      long timeInMillisDeb = cal.getTimeInMillis();
+      cal.add(GregorianCalendar.MONTH, 1);
+      long timeInMillisEnd = cal.getTimeInMillis();
+      sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
+          .getNumberRaces());
+      sMonth.addValueExt("", libRace + " : " + d.getDistance() / 1000.0);
+    }
+    final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
+    dataset.addSeries(sMonth);
+    return createChartRaceNumber(dataset, dateAxis);
+  }
+
+  public JFreeChart createChartRaceNumberDay(String libRace) throws SQLException {
+    List<DataRun> listRun = RunTableManager.getInstance().retreive(idUser);
+
+    DateAxis dateAxis = new DateAxis("");
+    dateAxis.setDateFormatOverride(LanguageManager.getManager()
+        .getCurrentLang().getDateFormatter());
+    TimePeriodValuesExt s1 = new TimePeriodValuesExt(libRace);
+    for (DataRun d : listRun) {
+      Calendar cal = GregorianCalendar.getInstance();
+      cal.setTime(d.getTime());
+      cal.set(GregorianCalendar.HOUR_OF_DAY, 1);
+      cal.set(GregorianCalendar.MINUTE, 0);
+      cal.set(GregorianCalendar.MILLISECOND, 0);
+      long timeInMillisDeb = cal.getTimeInMillis();
+      cal.add(GregorianCalendar.HOUR_OF_DAY, 22);
+      long timeInMillisEnd = cal.getTimeInMillis();
+      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), 1);
+      s1.addValueExt("", "");
+    }
+
+    TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
+    dataset.addSeries(s1);
+    return createChartRaceNumber(dataset, dateAxis);
+  }
+
+  public JFreeChart createChartRaceNumberWeek(String libRace) throws SQLException {
+    List<DataStatYearWeek> resWeek = RunLapTableManager.getInstance()
+        .distanceByWeek(idUser);
+
+    DateAxis dateAxis = new DateAxis("");
+    dateAxis.setDateFormatOverride(new SimpleDateFormat("w-yyyy",
+                                                        LanguageManager
+                                                            .getManager()
+                                                            .getCurrentLang()
+                                                            .getLocale()));
+
+    // domainAxis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, 7));
+    final TimePeriodValuesExt s1 = new TimePeriodValuesExt(libRace);
+    for (DataStatYearWeek d : resWeek) {
+      Calendar cal = GregorianCalendar.getInstance();
+      cal.set(GregorianCalendar.YEAR, d.getYear());
+      cal.set(GregorianCalendar.WEEK_OF_YEAR, d.getWeek());
+      cal.set(GregorianCalendar.HOUR_OF_DAY, 01);
+      cal.set(GregorianCalendar.MINUTE, 0);
+      cal.set(GregorianCalendar.MILLISECOND, 0);
+      long timeInMillisDeb = cal.getTimeInMillis();
+      cal.add(GregorianCalendar.WEEK_OF_YEAR, 1);
+      long timeInMillisEnd = cal.getTimeInMillis();
+      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
+          .getNumberRaces());
+      s1.addValueExt("", libRace + " : " + d.getDistance() / 1000.0);
+    }
+
+    final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
+    dataset.addSeries(s1);
+    return createChartRaceNumber(dataset, dateAxis);
+  }
+
+  public JFreeChart createChartRaceNumberDayOfWeek(String libRace) throws SQLException {
+    DataStat[] resDayOfWeek = RunLapTableManager.getInstance()
+        .distanceByDayOfWeek(idUser);
+
+    DateAxis dateAxis = new DateAxis("");
+    dateAxis.setDateFormatOverride(new SimpleDateFormat("EEEE"));
+    dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, 1));
+    TimePeriodValuesExt s1 = new TimePeriodValuesExt(libRace);
+    Calendar cal = GregorianCalendar.getInstance();
+    cal.setTimeInMillis(System.currentTimeMillis());
+    cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
+    cal.set(GregorianCalendar.MINUTE, 0);
+    cal.set(GregorianCalendar.MILLISECOND, 1);
+    cal.set(GregorianCalendar.WEEK_OF_MONTH, 2);
+    cal.set(GregorianCalendar.DAY_OF_WEEK, Calendar.MONDAY);
+
+    long timeInMillisDeb, timeInMillisEnd;
+    for (int i = 1; i < resDayOfWeek.length; i++) {
+      timeInMillisDeb = cal.getTimeInMillis();
+      cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
+      timeInMillisEnd = cal.getTimeInMillis();
+      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+             resDayOfWeek[i].getNumberRaces());
+      s1.addValueExt("", libRace + " : " + resDayOfWeek[i].getDistance()
+                         / 1000.0);
+    }
+
+    timeInMillisDeb = cal.getTimeInMillis();
+    cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
+    timeInMillisEnd = cal.getTimeInMillis();
+    s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+           resDayOfWeek[0].getNumberRaces());
+    s1
+        .addValueExt("", libRace + " : " + resDayOfWeek[0].getDistance()
+                         / 1000.0);
+
+    TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
+    dataset.addSeries(s1);
+    return createChartRaceNumber(dataset, dateAxis);
+  }
+
+  public JFreeChart createChartRaceNumberYear(String libRace) throws SQLException {
+    List<DataStatYear> resYear = RunLapTableManager.getInstance()
+        .distanceByYear(idUser);
+
+    DateAxis dateAxis = new DateAxis("");
+    dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.YEAR, 1));
+    dateAxis.setDateFormatOverride(new SimpleDateFormat("yyyy", LanguageManager
+        .getManager().getCurrentLang().getLocale()));
+    final TimePeriodValuesExt sYear = new TimePeriodValuesExt(libRace);
+    for (DataStatYear d : resYear) {
+      Calendar cal = GregorianCalendar.getInstance();
+      cal.set(GregorianCalendar.YEAR, d.getYear());
+      cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
+      cal.set(GregorianCalendar.MONTH, Calendar.JANUARY);
+      cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
+      cal.set(GregorianCalendar.MINUTE, 0);
+      cal.set(GregorianCalendar.MILLISECOND, 0);
+      long timeInMillisDeb = cal.getTimeInMillis();
+      cal.add(GregorianCalendar.YEAR, 1);
+      long timeInMillisEnd = cal.getTimeInMillis();
+      sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
+          .getNumberRaces());
+      sYear.addValueExt("", libRace + " : " + d.getDistance() / 1000.0);
+
+    }
+
+    final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
+    dataset.addSeries(sYear);
+
+    return createChartRaceNumber(dataset, dateAxis);
+  }
+
+  public JFreeChart createChartRaceNumber(final XYDataset dataset,
+                                          final DateAxis dateAxis) {
+    dateAxis.setLabelFont(GuiFont.FONT_ITALIC);
+    dateAxis.setTickLabelFont(GuiFont.FONT_PLAIN_SMALL);
+    dateAxis.setLowerMargin(0.01);
+    dateAxis.setUpperMargin(0.01);
+    dateAxis.setVerticalTickLabels(true);
+    dateAxis.setTickMarkPosition(DateTickMarkPosition.MIDDLE);
+
+    final NumberAxis rangeAxis = new NumberAxis("Nombre");
+    rangeAxis.setNumberFormatOverride(NumberFormat.getIntegerInstance());
     XYBarRenderer renderer = new XYBarRenderer();
     final XYPlot plot = new XYPlot(dataset, dateAxis, rangeAxis, renderer);
 
@@ -713,6 +947,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
     jComboxBoxCriter1.removeAllItems();
     jComboxBoxCriter1.addItem(rb.getString("jComboxBoxType.item1"));
     jComboxBoxCriter1.addItem(rb.getString("jComboxBoxType.item2"));
+    jComboxBoxCriter1.addItem(rb.getString("jComboxBoxType.item3"));
     int index2 = jComboxBoxCriter2.getSelectedIndex();
     jComboxBoxCriter2.removeAllItems();
     jComboxBoxCriter2.addItem(rb.getString("jComboxBoxDate.item1"));
@@ -1011,10 +1246,13 @@ public class JPanelStat extends JPanel implements LanguageListener,
     public String generateLabelString(XYDataset dataset, int series, int item) {
       String result = null;
       Object[] items = createItemArray(dataset, series, item);
-      Object[] itemsExt = new Object[items.length + 1];
+      Object[] itemsExt = new Object[items.length + 2];
       System.arraycopy(items, 0, itemsExt, 0, items.length);
+
+      itemsExt[itemsExt.length - 2] = ((TimePeriodValuesExt) (((TimePeriodValuesCollection) dataset)
+          .getSeries(series))).getValueExt1(item);
       itemsExt[itemsExt.length - 1] = ((TimePeriodValuesExt) (((TimePeriodValuesCollection) dataset)
-          .getSeries(series))).getValueExt(item);
+          .getSeries(series))).getValueExt2(item);
 
       result = MessageFormat.format(getFormatString(), itemsExt);
       return result;
@@ -1026,18 +1264,25 @@ public class JPanelStat extends JPanel implements LanguageListener,
    * 
    */
   private class TimePeriodValuesExt extends TimePeriodValues {
-    List<Object> dataExt = new ArrayList<Object>();
+    List<Object> dataExt1 = new ArrayList<Object>();
+
+    List<Object> dataExt2 = new ArrayList<Object>();
 
     public TimePeriodValuesExt(String name) {
       super(name);
     }
 
-    public void addValueExt(Object value) {
-      dataExt.add(value);
+    public void addValueExt(Object value1, Object value2) {
+      dataExt1.add(value1);
+      dataExt2.add(value2);
     }
 
-    public Object getValueExt(int item) {
-      return dataExt.get(item);
+    public Object getValueExt1(int item) {
+      return dataExt1.get(item);
+    }
+
+    public Object getValueExt2(int item) {
+      return dataExt2.get(item);
     }
   }
 

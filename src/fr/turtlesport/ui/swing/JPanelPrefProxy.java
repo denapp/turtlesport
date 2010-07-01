@@ -172,12 +172,12 @@ public class JPanelPrefProxy extends JPanel implements PanelPrefListener {
       jLabelLibHost.setFont(GuiFont.FONT_PLAIN);
 
       jLabelLibPort = new JLabel();
-      jLabelLibPort.setBounds(new Rectangle(255, 95, 50, 25));
+      jLabelLibPort.setBounds(new Rectangle(275, 95, 50, 25));
       jLabelLibPort.setText(rb.getString("jLabelLibPort"));
       jLabelLibPort.setFont(GuiFont.FONT_PLAIN);
 
       jLabelLibUsername = new JLabel();
-      jLabelLibUsername.setBounds(new Rectangle(5, 125, 110, 25));
+      jLabelLibUsername.setBounds(new Rectangle(5, 125, 130, 25));
       jLabelLibUsername.setText(rb.getString("jLabelLibUsername"));
       jLabelLibUsername.setFont(GuiFont.FONT_PLAIN);
 
@@ -207,7 +207,7 @@ public class JPanelPrefProxy extends JPanel implements PanelPrefListener {
     if (jTextFieldHost == null) {
       jTextFieldHost = new JTextField();
       jTextFieldHost.setFont(GuiFont.FONT_PLAIN);
-      jTextFieldHost.setBounds(new Rectangle(118, 95, 130, 25));
+      jTextFieldHost.setBounds(new Rectangle(130, 95, 130, 25));
     }
     return jTextFieldHost;
   }
@@ -216,7 +216,7 @@ public class JPanelPrefProxy extends JPanel implements PanelPrefListener {
     if (jTextFieldPort == null) {
       jTextFieldPort = new JTextField();
       jTextFieldPort.setFont(GuiFont.FONT_PLAIN);
-      jTextFieldPort.setBounds(new Rectangle(290, 95, 50, 25));
+      jTextFieldPort.setBounds(new Rectangle(320, 95, 50, 25));
     }
     return jTextFieldPort;
   }
@@ -225,7 +225,7 @@ public class JPanelPrefProxy extends JPanel implements PanelPrefListener {
     if (jTextfieldUsername == null) {
       jTextfieldUsername = new JTextField();
       jTextfieldUsername.setFont(GuiFont.FONT_PLAIN);
-      jTextfieldUsername.setBounds(new Rectangle(118, 125, 130, 25));
+      jTextfieldUsername.setBounds(new Rectangle(130, 125, 130, 25));
     }
     return jTextfieldUsername;
   }
@@ -234,7 +234,7 @@ public class JPanelPrefProxy extends JPanel implements PanelPrefListener {
     if (jPasswordField == null) {
       jPasswordField = new JPasswordField();
       jPasswordField.setFont(GuiFont.FONT_PLAIN);
-      jPasswordField.setBounds(new Rectangle(118, 155, 130, 25));
+      jPasswordField.setBounds(new Rectangle(130, 155, 130, 25));
     }
     return jPasswordField;
   }

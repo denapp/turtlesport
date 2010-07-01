@@ -8,13 +8,12 @@ public class DataStatYearMonth extends DataStatYear {
 
   private int month;
 
-  public DataStatYearMonth(int year, int month, double distance, int numberRaces) {
-    super(year, distance, numberRaces);
-    this.month = month;
-  }
-
-  public DataStatYearMonth(int year, int month, double distance) {
-    this(year, month, distance, 0);
+  public DataStatYearMonth(int year,
+                           int month,
+                           double distance,
+                           double timeTot,
+                           int numberRaces) {
+    super(year, distance, timeTot, numberRaces);
     this.month = month;
   }
 

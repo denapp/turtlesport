@@ -51,6 +51,7 @@ public final class BrowserUtil {
       }
       else if (OperatingSystem.isUnix()) {
         String[] browsers = { "firefox",
+            "google-chrome",
             "konqueror",
             "epiphany",
             "mozilla",

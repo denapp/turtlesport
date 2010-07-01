@@ -344,10 +344,12 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
     jLabelLibName.setFont(GuiFont.FONT_PLAIN);
     jLabelLibName.setHorizontalAlignment(SwingConstants.RIGHT);
     g = new GridBagConstraints();
+    g.weightx = 0.0;
     g.insets = insets1;
     g.anchor = GridBagConstraints.EAST;
     this.add(jLabelLibName, g);
     g = new GridBagConstraints();
+    g.weightx = 0.0;
     g.insets = insets1;
     g.anchor = GridBagConstraints.WEST;
     g.gridwidth = GridBagConstraints.REMAINDER;
@@ -359,10 +361,12 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
     jLabelLibFirstName.setFont(GuiFont.FONT_PLAIN);
     jLabelLibFirstName.setHorizontalAlignment(SwingConstants.RIGHT);
     g = new GridBagConstraints();
+    g.weightx = 0.0;
     g.insets = insets1;
     g.anchor = GridBagConstraints.EAST;
     this.add(jLabelLibFirstName, g);
     g = new GridBagConstraints();
+    g.weightx = 0.0;
     g.insets = insets1;
     g.anchor = GridBagConstraints.WEST;
     g.gridwidth = GridBagConstraints.REMAINDER;
@@ -374,28 +378,32 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
     jLabelLibBirthday.setHorizontalAlignment(SwingConstants.RIGHT);
     jLabelLibBirthday.setFont(GuiFont.FONT_PLAIN);
     g = new GridBagConstraints();
+    g.weightx = 0.0;
     g.insets = insets1;
     g.anchor = GridBagConstraints.EAST;
     this.add(jLabelLibBirthday, g);
     g = new GridBagConstraints();
-    g.fill = GridBagConstraints.HORIZONTAL;
     g.insets = insets1;
+    g.weightx = 0.0;
     g.anchor = GridBagConstraints.WEST;
     this.add(getJDatePicker(), g);
     jLabelLibBirthday.setLabelFor(getJDatePicker());
     jLabelLibSexe = new JLabel("Sexe :");
-    jLabelLibSexe.setHorizontalAlignment(SwingConstants.RIGHT);
+    jLabelLibSexe.setHorizontalAlignment(SwingConstants.LEFT);
     jLabelLibSexe.setFont(GuiFont.FONT_PLAIN);
     g = new GridBagConstraints();
     g.insets = insets1;
-    g.anchor = GridBagConstraints.EAST;
+    g.weightx = 0.0;
+    g.anchor = GridBagConstraints.WEST;
     this.add(jLabelLibSexe, g);
     g = new GridBagConstraints();
     g.insets = insets1;
+    g.weightx = 0.0;
     g.anchor = GridBagConstraints.WEST;
+    g.gridwidth = GridBagConstraints.RELATIVE;
     this.add(getJRadioButtonMale(), g);
-    g = new GridBagConstraints();
     g.insets = insets1;
+    g.weightx = 0.0;
     g.anchor = GridBagConstraints.WEST;
     g.gridwidth = GridBagConstraints.REMAINDER;
     this.add(getJRadioButtonFemale(), g);
@@ -547,11 +555,13 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
   public JRadioButton getJRadioButtonMale() {
     if (jRadioButtonMale == null) {
       jRadioButtonMale = new JRadioButton();
+      jRadioButtonMale.setHorizontalAlignment(SwingConstants.LEFT);
       jRadioButtonMale.setFont(GuiFont.FONT_PLAIN);
       if (sexButtonGroup == null) {
         sexButtonGroup = new ButtonGroup();
       }
       sexButtonGroup.add(jRadioButtonMale);
+      jLabelLibSexe.setLabelFor(jRadioButtonMale);
     }
     return jRadioButtonMale;
   }
@@ -564,6 +574,7 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
   public JRadioButton getJRadioButtonFemale() {
     if (jRadioButtonFemale == null) {
       jRadioButtonFemale = new JRadioButton();
+      jRadioButtonFemale.setHorizontalAlignment(SwingConstants.LEFT);
       jRadioButtonFemale.setFont(GuiFont.FONT_PLAIN);
       if (sexButtonGroup == null) {
         sexButtonGroup = new ButtonGroup();

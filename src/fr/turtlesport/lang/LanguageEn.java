@@ -49,7 +49,7 @@ public final class LanguageEn extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#getDateTimeFormatterWithoutSep()
    */
   public DateFormat getDateTimeFormatterWithoutSep() {
-    return new SimpleDateFormat("ddMMyyyy_kkmmss", getLocale());
+    return new SimpleDateFormat("MMddyyyy_kkmmss", getLocale());
   }
 
   /*
@@ -77,5 +77,23 @@ public final class LanguageEn extends AbstractLanguage {
    */
   public String cancel() {
     return "Cancel";
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#ok()
+   */
+  public String ok() {
+    return "OK";
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#hasWebSiteTranslate()
+   */
+  public boolean hasWebSiteTranslate() {
+    return true;
   }
 }

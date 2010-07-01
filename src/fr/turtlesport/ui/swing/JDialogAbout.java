@@ -31,17 +31,20 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * 
  */
 public class JDialogAbout extends JDialog {
-  private JPanel      jContentPane;
+  private JPanel         jContentPane;
 
-  private JEditorPane jEditorPane;
+  private JEditorPane    jEditorPane;
 
-  private JButton     jButtonOK;
+  private JButton        jButtonOK;
 
-  private JPanel      jPanelSouth;
+  private JPanel         jPanelSouth;
 
-  private JPanel      jPanelNorth;
+  private JPanel         jPanelNorth;
 
-  private JButton     jButtonLicence;
+  private JButton        jButtonLicence;
+
+  private ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+                                .getManager().getCurrentLang(), getClass());
 
   /**
    * @param owner
@@ -69,6 +72,7 @@ public class JDialogAbout extends JDialog {
     JDialogAbout view = new JDialogAbout(MainGui.getWindow(), true);
     view.setLocationRelativeTo(MainGui.getWindow());
     view.setVisible(true);
+    view.pack();
   }
 
   /**
@@ -80,10 +84,8 @@ public class JDialogAbout extends JDialog {
     this.setContentPane(getJContentPane());
     this.setSize(490, 420);
     this.setResizable(true);
-    ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-        .getManager().getCurrentLang(), getClass());
     this.setTitle(rb.getString("title"));
-
+    jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());
     try {
       String lang = LanguageManager.getManager().getCurrentLang().getLocale()
           .getLanguage();
@@ -95,7 +97,6 @@ public class JDialogAbout extends JDialog {
     }
     catch (Throwable e) {
     }
-    // jEditorPane.setText(rb.getString("html"));
     jButtonLicence.setText(rb.getString("jButtonLicence"));
   }
 
@@ -128,7 +129,24 @@ public class JDialogAbout extends JDialog {
           .setText("<html><body><table><tr><td>"
                    + "<img src='"
                    + ImagesRepository.class.getResource("turtleAbout.png")
-                       .toString() + "'>" + "</td><td><center>"
+                       .toString()
+                   + "'>"
+                   + "</td><td><center>"// try {
+                   // String lang =
+                   // LanguageManager.getManager().getCurrentLang().getLocale()
+                   // .getLanguage();
+                   // jEditorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES,
+                   // Boolean.TRUE);
+                   // jEditorPane.setFont(GuiFont.FONT_PLAIN);
+                   // jEditorPane.setPage(getClass().getResource("about_" + lang
+                   // + ".properties"));
+                   // jEditorPane.setContentType("text/html");
+                   // jEditorPane.setOpaque(false);
+                   // jEditorPane.setEditable(false);
+                   // }
+                   // catch (Throwable e) {
+                   // }
+
                    + "<font size='+3'>Turtle Sport</font><br><b>Version&nbsp;"
                    + Version.VERSION
                    + "</b></center></td></tr></table></body></html>");
@@ -151,12 +169,18 @@ public class JDialogAbout extends JDialog {
       borderLayout.setHgap(10);
 
       jEditorPane = new JEditorPane();
+      jEditorPane.setFont(GuiFont.FONT_PLAIN);
+      jEditorPane.setContentType("text/html");
+      jEditorPane.setOpaque(false);
+      jEditorPane.setEditable(false);
+      jEditorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES,
+                                    Boolean.TRUE);
+
       jEditorPane.setBorder(BorderFactory.createEtchedBorder());
       jEditorPane.setFont(GuiFont.FONT_PLAIN);
 
       jEditorPane.setPreferredSize(new Dimension(520, 160));
       jEditorPane.setEditable(false);
-      jEditorPane.setContentType("text/html");
       jEditorPane.addHyperlinkListener(new HyperlinkListener() {
         public void hyperlinkUpdate(final HyperlinkEvent e) {
           if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
@@ -188,9 +212,7 @@ public class JDialogAbout extends JDialog {
    */
   private JButton getJButtonOK() {
     if (jButtonOK == null) {
-
       jButtonOK = new JButton();
-      jButtonOK.setText("OK");
       jButtonOK.setMnemonic(java.awt.event.KeyEvent.VK_ENTER);
       jButtonOK.setFont(GuiFont.FONT_PLAIN);
       jButtonOK.addActionListener(new java.awt.event.ActionListener() {
@@ -209,7 +231,7 @@ public class JDialogAbout extends JDialog {
    */
   private JPanel getJPanelSouth() {
     if (jPanelSouth == null) {
-      JLabel jLabel = new JLabel("<html><body>Copyright &#169; 2008-2009 Turtle Sport</html></body>");
+      JLabel jLabel = new JLabel("<html><body>Copyright &#169; 2008-2010 Turtle Sport</html></body>");
       jLabel.setFont(GuiFont.FONT_PLAIN);
 
       jPanelSouth = new JPanel();

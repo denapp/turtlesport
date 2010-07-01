@@ -2,6 +2,7 @@ package fr.turtlesport.geo;
 
 import fr.turtlesport.geo.garmin.hst.HstFile;
 import fr.turtlesport.geo.garmin.tcx.TcxFile;
+import fr.turtlesport.geo.googlemap.GoogleMapGeo;
 import fr.turtlesport.geo.gpx.GpxFile;
 import fr.turtlesport.geo.kml.KmlGeo;
 
@@ -10,6 +11,9 @@ import fr.turtlesport.geo.kml.KmlGeo;
  * 
  */
 public final class FactoryGeoConvertRun {
+
+  /** Pour conversion foofle map. */
+  public static final String MAP = "html";
 
   /** Pour conversion kml. */
   public static final String KML = "kml";
@@ -35,6 +39,9 @@ public final class FactoryGeoConvertRun {
    */
   public static IGeoConvertRun getInstance(String extension) {
 
+    if (MAP.equals(extension)) {
+      return new GoogleMapGeo();
+    }
     if (KML.equals(extension)) {
       return new KmlGeo();
     }

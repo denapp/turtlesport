@@ -18,11 +18,11 @@ public final class StringUtil {
   }
 
   /**
-   * Remplace les retours à la ligne par &lt;br&gt;.
+   * Remplace les retours &agrave; la ligne par &lt;br&gt;.
    * 
    * @param value
-   *          la chaîne à formatter.
-   * @return la chaîne formatter.
+   *          la chaine &agrave; formatter.
+   * @return la chaine formatter.
    */
   public static String formatToHtml(String value) {
     if (value == null) {
@@ -41,11 +41,11 @@ public final class StringUtil {
   }
 
   /**
-   * Concatène des châines de caractères au format HTML.
+   * Concat&egrave;ne des chaines de caract&egrave;res au format HTML.
    * 
    * @param value
-   *          les chaînes de caractères à concaténer.
-   * @return la chaîne HTML.
+   *          les chaines de caract&egrave;res ï¿½&agrave;concat&eacute;ner.
+   * @return la chaine HTML.
    */
   public static String formatToHtml(String[] value) {
     if (value == null) {

@@ -81,7 +81,25 @@ public final class LanguageSv extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#cancel()
    */
   public String cancel() {
-    return "Annulera";
+    return "Avbryt";
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#ok()
+   */
+  public String ok() {
+    return "OK";
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#hasWebSiteTranslate()
+   */
+  public boolean hasWebSiteTranslate() {
+    return true;
   }
 
 }

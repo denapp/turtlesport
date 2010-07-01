@@ -148,8 +148,8 @@ public class JDialogPreference extends JDialog implements LanguageListener {
   private void performedLanguage(ILanguage lang) {
     rb = ResourceBundleUtility.getBundle(lang, JDialogPreference.class);
     setTitle(rb.getString("title"));
-    jButtonOK.setText(rb.getString("jButtonOK"));
-    jButtonCancel.setText(rb.getString("jButtonCancel"));
+    jButtonOK.setText(lang.ok());
+    jButtonCancel.setText(lang.cancel());
 
     rb = ResourceBundleUtility.getBundle(lang, ModelPref.class);
     modelPrefGen.setTitle(rb.getString("modelPrefGen"));
@@ -340,7 +340,6 @@ public class JDialogPreference extends JDialog implements LanguageListener {
   private JButton getJButtonOK() {
     if (jButtonOK == null) {
       jButtonOK = new JButton();
-      jButtonOK.setText("OK");
       jButtonOK.setFont(GuiFont.FONT_PLAIN);
     }
     return jButtonOK;

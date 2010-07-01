@@ -51,7 +51,7 @@ public class GeoPositionWithAlt extends GeoPosition implements
    *          l'altitude en metre;
    */
   public GeoPositionWithAlt(double latitude, double longitude, double elevation) {
-    super(INVALID_POS, INVALID_POS);
+    super(latitude, longitude);
     this.elevation = elevation;
     distanceMeters = Double.NaN;
   }
