@@ -62,7 +62,8 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.progress.ICourseTransfertProgress#abortTransfert()
+   * @see
+   * fr.turtlesport.protocol.progress.ICourseTransfertProgress#abortTransfert()
    */
   public boolean abortTransfert() {
     return isAbortTransfert;
@@ -71,7 +72,8 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.progress.ICourseTransfertProgress#beginTransfert()
+   * @see
+   * fr.turtlesport.protocol.progress.ICourseTransfertProgress#beginTransfert()
    */
   public void beginTransfert() {
     jLabelProgress.setText(rb.getString("jLabelProgressBeginTransfer"));
@@ -81,7 +83,8 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.progress.ICourseTransfertProgress#endTransfert()
+   * @see
+   * fr.turtlesport.protocol.progress.ICourseTransfertProgress#endTransfert()
    */
   public void endTransfert() {
     jButtonOK.setEnabled(true);
@@ -90,13 +93,15 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
     jProgressBar.setMaximum(100);
     jProgressBar.setValue(100);
 
-    jButtonOK.setText(rb.getString("OK"));
+    jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.progress.ICourseTransfertProgress#beginTransfertLap()
+   * @see
+   * fr.turtlesport.protocol.progress.ICourseTransfertProgress#beginTransfertLap
+   * ()
    */
   public void beginTransfertLap() {
   }
@@ -104,7 +109,9 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.progress.ICourseTransfertProgress#beginTransfertTrk(int)
+   * @see
+   * fr.turtlesport.protocol.progress.ICourseTransfertProgress#beginTransfertTrk
+   * (int)
    */
   public void beginTransfertTrk(int nbTrkPoints) {
     log.debug("beginTransfertTrk nbPoints=" + nbTrkPoints);
@@ -116,7 +123,9 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.progress.ICourseTransfertProgress#transfertTrk(fr.turtlesport.protocol.data.D1006CourseType)
+   * @see
+   * fr.turtlesport.protocol.progress.ICourseTransfertProgress#transfertTrk(
+   * fr.turtlesport.protocol.data.D1006CourseType)
    */
   public void transfertTrk(D1006CourseType d1006) {
     int value = jProgressBar.getValue() + pointNotify();
@@ -126,7 +135,9 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.progress.ICourseTransfertProgress#beginTransfertPoint(int)
+   * @see
+   * fr.turtlesport.protocol.progress.ICourseTransfertProgress#beginTransfertPoint
+   * (int)
    */
   public void beginTransfertPoint(int nbPoints) {
     log.debug("beginTransfertPoint nbPoints=" + nbPoints);
@@ -139,7 +150,9 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.progress.ICourseTransfertProgress#transfertPoint(fr.turtlesport.protocol.data.D1006CourseType)
+   * @see
+   * fr.turtlesport.protocol.progress.ICourseTransfertProgress#transfertPoint
+   * (fr.turtlesport.protocol.data.D1006CourseType)
    */
   public void transfertPoint(D1006CourseType d1006) {
     log.debug("transfertPoint");
@@ -150,7 +163,8 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.progress.ICourseTransfertProgress#pointNotify()
+   * @see
+   * fr.turtlesport.protocol.progress.ICourseTransfertProgress#pointNotify()
    */
   public int pointNotify() {
     return 40;
@@ -238,7 +252,8 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
     // evenements
     jButtonOK.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent actionevent) {
-        if (jButtonOK.getText().equals(rb.getString("Cancel"))) {
+        if (jButtonOK.getText().equals(LanguageManager.getManager()
+            .getCurrentLang().cancel())) {
           isAbortTransfert = true;
         }
         dispose();
@@ -295,7 +310,7 @@ public class JDialogProgressRoutes extends JDialog implements ICourseProgress {
     if (jButtonOK == null) {
       jButtonOK = new JButton();
       jButtonOK.setFont(GuiFont.FONT_PLAIN);
-      jButtonOK.setText(rb.getString("Cancel"));
+      jButtonOK.setText(LanguageManager.getManager().getCurrentLang().cancel());
     }
     return jButtonOK;
   }

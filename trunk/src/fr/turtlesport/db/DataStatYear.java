@@ -8,13 +8,9 @@ public class DataStatYear extends DataStat {
 
   private int year;
 
-  public DataStatYear(int year, double distance, int numberRaces) {
-    super(distance, numberRaces);
+  public DataStatYear(int year, double distance, double timeTot, int numberRaces) {
+    super(distance, timeTot, numberRaces);
     this.year = year;
-  }
-
-  public DataStatYear(int year, double distance) {
-    this(year, distance, 0);
   }
 
   public int getYear() {

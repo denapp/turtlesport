@@ -167,22 +167,22 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
     if (jPanelCenter == null) {
 
       jLabelLibDistance = new JLabel();
-      jLabelLibDistance.setBounds(new Rectangle(5, 5, 77, 23));
+      jLabelLibDistance.setBounds(new Rectangle(5, 5, 110, 23));
       jLabelLibDistance.setText(rb.getString("jLabelLibDistance"));
       jLabelLibDistance.setFont(GuiFont.FONT_PLAIN);
 
       jLabelLibSpeed = new JLabel();
-      jLabelLibSpeed.setBounds(new Rectangle(5, 35, 77, 23));
+      jLabelLibSpeed.setBounds(new Rectangle(5, 35, 110, 23));
       jLabelLibSpeed.setText(rb.getString("jLabelLibSpeed"));
       jLabelLibSpeed.setFont(GuiFont.FONT_PLAIN);
 
       jLabelLibWeight = new JLabel();
-      jLabelLibWeight.setBounds(new Rectangle(5, 65, 77, 23));
+      jLabelLibWeight.setBounds(new Rectangle(5, 65, 110, 23));
       jLabelLibWeight.setText(rb.getString("jLabelLibWeight"));
       jLabelLibWeight.setFont(GuiFont.FONT_PLAIN);
 
       jLabelLibHeight = new JLabel();
-      jLabelLibHeight.setBounds(new Rectangle(5, 95, 77, 23));
+      jLabelLibHeight.setBounds(new Rectangle(5, 95, 150, 23));
       jLabelLibHeight.setText(rb.getString("jLabelLibHeight"));
       jLabelLibHeight.setFont(GuiFont.FONT_PLAIN);
 
@@ -210,7 +210,7 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
       jComboBoxDistance = new JComboBox(DistanceUnit.units());
       jComboBoxDistance.setSelectedItem(DistanceUnit.getDefaultUnit());
       jComboBoxDistance.setFont(GuiFont.FONT_PLAIN);
-      jComboBoxDistance.setBounds(new Rectangle(98, 5, 100, 23));
+      jComboBoxDistance.setBounds(new Rectangle(120, 5, 100, 23));
     }
     return jComboBoxDistance;
   }
@@ -225,7 +225,7 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
       jComboBoxSpeed = new JComboBox(SpeedPaceUnit.units());
       jComboBoxSpeed.setSelectedItem(SpeedPaceUnit.getDefaultUnit());
       jComboBoxSpeed.setFont(GuiFont.FONT_PLAIN);
-      jComboBoxSpeed.setBounds(new Rectangle(98, 35, 100, 23));
+      jComboBoxSpeed.setBounds(new Rectangle(120, 35, 100, 23));
     }
     return jComboBoxSpeed;
   }
@@ -240,7 +240,7 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
       jComboBoxWeight = new JComboBox(WeightUnit.units());
       jComboBoxWeight.setSelectedItem(WeightUnit.getDefaultUnit());
       jComboBoxWeight.setFont(GuiFont.FONT_PLAIN);
-      jComboBoxWeight.setBounds(new Rectangle(98, 65, 100, 23));
+      jComboBoxWeight.setBounds(new Rectangle(120, 65, 100, 23));
     }
     return jComboBoxWeight;
   }
@@ -255,7 +255,7 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
       jComboBoxHeight = new JComboBox(HeightUnit.units());
       jComboBoxHeight.setSelectedItem(HeightUnit.getDefaultUnit());
       jComboBoxHeight.setFont(GuiFont.FONT_PLAIN);
-      jComboBoxHeight.setBounds(new Rectangle(98, 95, 100, 23));
+      jComboBoxHeight.setBounds(new Rectangle(120, 95, 100, 23));
     }
     return jComboBoxHeight;
   }

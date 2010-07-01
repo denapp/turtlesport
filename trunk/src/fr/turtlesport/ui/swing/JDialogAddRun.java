@@ -153,7 +153,7 @@ public class JDialogAddRun extends JDialog {
     jLabelLibActivity.setText(rb.getString("jLabelLibActivity"));
     jLabelLibEquipment.setText(rb.getString("jLabelLibEquipment"));
     jLabelLibNotes.setText(rb.getString("jLabelLibNotes"));
-    jButtonCancel.setText(rb.getString("jButtonCancel"));
+    jButtonCancel.setText(LanguageManager.getManager().getCurrentLang().cancel());
     jButtonSave.setText(rb.getString("jButtonSave"));
 
     // evenements

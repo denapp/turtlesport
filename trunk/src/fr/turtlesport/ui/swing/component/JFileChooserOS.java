@@ -36,7 +36,6 @@ public class JFileChooserOS {
    */
   public JFileChooserOS() {
     super();
-
   }
 
   /**

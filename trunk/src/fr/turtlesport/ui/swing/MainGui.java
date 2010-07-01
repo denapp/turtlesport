@@ -55,6 +55,7 @@ import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JXSplitButton;
 import fr.turtlesport.ui.swing.component.calendar.JPanelCalendar;
+import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.img.menu.ImagesMenuRepository;
 import fr.turtlesport.ui.swing.model.ModelMapkitManager;
 import fr.turtlesport.ui.swing.model.ModelPointsManager;
@@ -170,6 +171,10 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private int                  currentIdUser = -1;
 
+  private JMenuItemTurtle      jMenuItemTwitter;
+
+  private JMenuItemTurtle jMenuItemRunGoogleMap;
+
   /**
    * 
    */
@@ -260,6 +265,7 @@ public class MainGui extends JFrame implements LanguageListener {
     jMenuItemRunDelete.setText(rb.getString("jMenuItemRunDelete"));
 
     jMenuItemNet.setText(rb.getString("jMenuItemNet"));
+    jMenuItemTwitter.setText(rb.getString("jMenuItemTwitter"));
     if (jMenuItemMail != null) {
       jMenuItemMail.setText(rb.getString("jMenuItemMail"));
     }
@@ -363,6 +369,7 @@ public class MainGui extends JFrame implements LanguageListener {
     getJMenuItemRunDetail().setEnabled(b);
     getJMenuItemRunMap().setEnabled(b);
     getJMenuItemRunGoogleEarth().setEnabled(b);
+    getJMenuItemRunGoogleMap().setEnabled(b);
     if (jMenuItemRunEmail != null) {
       jMenuItemRunEmail.setEnabled(b);
     }
@@ -460,6 +467,11 @@ public class MainGui extends JFrame implements LanguageListener {
     siteMouseListener = new MainGuiMouseListener("Site web http://turtlesport.sourceforge.net");
     jMenuItemNet.addMouseListener(siteMouseListener);
 
+    netAction = new NetAction("http://twitter.com/turtlesport");
+    jMenuItemTwitter.addActionListener(netAction);
+    jMenuItemTwitter
+        .addMouseListener(new MainGuiMouseListener("http://twitter.com/turtlesport"));
+
     usersMouseListener = new MainGuiMouseListener("");
     jXSplitButtonUser.addMouseListener(usersMouseListener);
 
@@ -469,8 +481,7 @@ public class MainGui extends JFrame implements LanguageListener {
     }
 
     jMenuItemCheckUpdate.addActionListener(new CheckUpdateAction());
-    jMenuItemDonate
-        .addActionListener(new NetAction("http://turtlesport.sourceforge.net/FR/donation.html"));
+    jMenuItemDonate.addActionListener(new DonationAction());
 
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
@@ -688,6 +699,7 @@ public class MainGui extends JFrame implements LanguageListener {
         jMenuRun.add(getJMenuItemRunEmail());
       }
       jMenuRun.add(getJMenuItemRunGoogleEarth());
+      jMenuRun.add(getJMenuItemRunGoogleMap());
       jMenuRun.addSeparator();
       jMenuRun.add(getJMenuRunExport());
       jMenuRun.add(getJMenuItemRunImport());
@@ -757,6 +769,22 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuItemRunGoogleEarth.setEnabled(false);
     }
     return jMenuItemRunGoogleEarth;
+  }
+  
+  /**
+   * This method initializes jMenuItemRunGoogleEarth.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunGoogleMap() {
+    if (jMenuItemRunGoogleMap == null) {
+      jMenuItemRunGoogleMap = new JMenuItemTurtle();
+      jMenuItemRunGoogleMap.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunGoogleMap.setAccelerator(menuProperties,
+                                             "jMenuItemRunGoogleMap");
+      jMenuItemRunGoogleMap.setEnabled(false);
+    }
+    return jMenuItemRunGoogleMap;
   }
 
   /**
@@ -927,6 +955,7 @@ public class MainGui extends JFrame implements LanguageListener {
       if (Mail.isSupported()) {
         jMenuAbout.add(getJMenuItemMail());
       }
+      jMenuAbout.add(getJMenuItemTwitter());
       jMenuAbout.add(getJMenuItemCheckUpdate());
       if (!OperatingSystem.isMacOSX()) {
         jMenuAbout.add(getJMenuItemPreference());
@@ -1005,6 +1034,21 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuItemNet.setAccelerator(menuProperties, "jMenuItemNet");
     }
     return jMenuItemNet;
+  }
+
+  /**
+   * This method initializes jMenuItemTwitter
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  private JMenuItemTurtle getJMenuItemTwitter() {
+    if (jMenuItemTwitter == null) {
+      jMenuItemTwitter = new JMenuItemTurtle();
+      jMenuItemTwitter.setIcon(ImagesRepository.getImageIcon("twitter-t.jpg"));
+      jMenuItemTwitter.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemNet.setAccelerator(menuProperties, "jMenuItemTwitter");
+    }
+    return jMenuItemTwitter;
   }
 
   /**
@@ -1179,6 +1223,43 @@ public class MainGui extends JFrame implements LanguageListener {
 
     public void setUrl(String url) {
       this.url = url;
+    }
+
+  }
+
+  /**
+   * 
+   * @author Denis Apparicio
+   * 
+   */
+  private class DonationAction extends AbstractAction {
+
+    public DonationAction() {
+      super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
+    public void actionPerformed(ActionEvent e) {
+      try {
+        String url;
+        if (LanguageManager.getManager().getCurrentLang().hasWebSiteTranslate()) {
+          url = "http://turtlesport.sourceforge.net/"
+                + LanguageManager.getManager().getLocale().getLanguage()
+                    .toUpperCase() + "/donation.html";
+
+        }
+        else {
+          url = "http://turtlesport.sourceforge.net/EN/donation.html";
+        }
+        BrowserUtil.browse(new URI(url));
+      }
+      catch (URISyntaxException ue) {
+      }
     }
 
   }

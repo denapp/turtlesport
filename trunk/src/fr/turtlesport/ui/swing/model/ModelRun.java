@@ -217,6 +217,7 @@ public class ModelRun {
     view.getJButtonPrev().setEnabled(false);
     view.getJButtonSave().setEnabled(false);
     view.getJButtonGoogleEarth().setEnabled(false);
+    view.getJButtonGoogleMap().setEnabled(false);
     if (view.getJButtonEmail() != null) {
       view.getJButtonEmail().setEnabled(false);
     }

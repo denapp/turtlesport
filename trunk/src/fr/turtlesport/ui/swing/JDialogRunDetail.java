@@ -124,7 +124,8 @@ public class JDialogRunDetail extends JDialog {
     jLabelLibDistance.setText(rb.getString("jLabelLibDistance"));
     jLabelLibDistanceTot.setText(rb.getString("jLabelLibDistanceTot"));
     jLabelLibTimeTot.setText(rb.getString("jLabelLibTimeTot"));
-    this.setPreferredSize(new Dimension(640, 400));
+    jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());
+    this.setPreferredSize(new Dimension(696, 420));
     this.setTitle(rb.getString("title"));
 
     // Evenement
@@ -229,7 +230,7 @@ public class JDialogRunDetail extends JDialog {
       jPanelTable = new JScrollPane();
       jPanelTable.setViewportView(getJTableLap());
       jPanelTable.setFont(GuiFont.FONT_PLAIN);
-      jPanelTable.setBounds(new Rectangle(10, 155, 685, 130));
+      jPanelTable.setBounds(new Rectangle(10, 200, 685, 130));
     }
     return jPanelTable;
   }
@@ -274,7 +275,6 @@ public class JDialogRunDetail extends JDialog {
   private JButton getJButtonOK() {
     if (jButtonOK == null) {
       jButtonOK = new JButton();
-      jButtonOK.setText("OK");
       jButtonOK.setFont(GuiFont.FONT_PLAIN);
     }
     return jButtonOK;
@@ -294,7 +294,7 @@ public class JDialogRunDetail extends JDialog {
                                                  "moy.",
                                                  "max." };
 
-    private final int[]          columWidth  = { 50, 40, 30, 70, 70, 25, 25 };
+    private final int[]          columWidth  = { 50, 50, 30, 70, 70, 35, 30 };
 
     private List<DataRunTrk>     trks;
 

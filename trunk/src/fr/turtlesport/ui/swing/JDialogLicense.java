@@ -64,6 +64,7 @@ public class JDialogLicense extends JDialog {
     this.setContentPane(getJContentPane());
     this.setSize(500, 400);
 
+    jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());
     // recuperation de la licence
     BufferedReader reader = null;
     try {
@@ -150,9 +151,7 @@ public class JDialogLicense extends JDialog {
    */
   private JButton getJButtonOK() {
     if (jButtonOK == null) {
-
       jButtonOK = new JButton();
-      jButtonOK.setText("OK");
       jButtonOK.setMnemonic(java.awt.event.KeyEvent.VK_ENTER);
       jButtonOK.setFont(GuiFont.FONT_PLAIN);
       jButtonOK.addActionListener(new java.awt.event.ActionListener() {

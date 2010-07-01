@@ -54,6 +54,7 @@ public final class JFileSaver {
     if (OperatingSystem.isMacOSX()) {
       // MacOSX
       FileDialog dlg = new FileDialog(MainGui.getWindow());
+      dlg.setLocale(LanguageManager.getManager().getLocale());
       dlg.setMode(FileDialog.SAVE);
       dlg.setDirectory(currentDirectory.getPath());
       dlg.setFile(name + suffix);
@@ -175,6 +176,7 @@ public final class JFileSaver {
       super(currentDirectory);
       this.suffix = suffix;
       setDragEnabled(true);
+      setLocale(LanguageManager.getManager().getLocale());
     }
 
     /*

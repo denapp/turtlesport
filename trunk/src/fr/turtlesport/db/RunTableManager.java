@@ -1284,7 +1284,7 @@ public final class RunTableManager extends AbstractTableManager {
 
     log.debug("<<updateSportType");
   }
-
+  
   private int getIdUser(D1009RunType runType) {
     if (runType.getExtra() != null) {
       return ((DataRunExtra) runType.getExtra()).getIdUser();

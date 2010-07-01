@@ -8,13 +8,13 @@ public class DataStatYearWeek extends DataStatYear {
 
   private int week;
 
-  public DataStatYearWeek(int year, int week, double distance, int numberRaces) {
-    super(year, distance, numberRaces);
+  public DataStatYearWeek(int year,
+                          int week,
+                          double distance,
+                          double timeTot,
+                          int numberRaces) {
+    super(year, distance, timeTot, numberRaces);
     this.week = week;
-  }
-
-  public DataStatYearWeek(int year, int week, double distance) {
-    this(year, week, distance, 0);
   }
 
   /**

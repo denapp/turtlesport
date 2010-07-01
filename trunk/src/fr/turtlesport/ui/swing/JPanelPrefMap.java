@@ -185,10 +185,10 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
 
     long length = OpenStreetMapTileFactory.cacheSize();
     if (length == 0) {
-      value = "0 octect";
+      value = "0 o";
     }
     else if (length < 1024) {
-      value = String.valueOf(length) + " octects";
+      value = String.valueOf(length) + " o";
     }
     else {
       DecimalFormatSymbols symbols = new DecimalFormatSymbols();

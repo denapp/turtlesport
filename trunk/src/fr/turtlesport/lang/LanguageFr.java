@@ -78,5 +78,22 @@ public final class LanguageFr extends AbstractLanguage {
   public String cancel() {
     return "Annuler";
   }
+  
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#ok()
+   */
+  public String ok() {
+    return "OK";
+  }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#hasWebSiteTranslate()
+   */
+  public boolean hasWebSiteTranslate() {
+    return true;
+  }
 
 }

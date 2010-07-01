@@ -25,7 +25,10 @@ public final class LanguageManager {
   private static final ILanguage[]          ILANGUAGES = { LanguageFr
           .getInstance(),
       LanguageEn.getInstance(),
-      LanguageSv.getInstance()                        };
+      LanguageSv.getInstance(),
+      LanguageEs.getInstance(),
+      LanguageCa.getInstance(),
+      LanguageDe.getInstance(),                       };
 
   private static HashMap<String, ILanguage> mapLang;
 
@@ -69,6 +72,15 @@ public final class LanguageManager {
    */
   public ILanguage getCurrentLang() {
     return currentLang;
+  }
+
+  /**
+   * Restitue le <code>Locale</code> du langage.
+   * 
+   * @return le <code>Locale</code> du langage.
+   */
+  public Locale getLocale() {
+    return currentLang.getLocale();
   }
 
   /**

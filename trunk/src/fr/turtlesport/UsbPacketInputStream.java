@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import fr.turtlesport.log.TurtleLogger;
@@ -32,12 +31,24 @@ public class UsbPacketInputStream extends InputStream {
 
   private static long          elapsed1989;
   static {
+    // Calendar cal = Calendar.getInstance();
+    // cal.setTimeZone(TimeZone.getDefault());
+    // //cal.set(1989, 11, 30, 23, 0, 0);
+    // cal.set(1989, 11, 31, 0, 0, 0);
+    // date1989 = cal.getTime();
+    // elapsed1989 = date1989.getTime();
+
     Calendar cal = Calendar.getInstance();
-    cal.setTimeZone(TimeZone.getDefault());
-    //cal.set(1989, 11, 30, 23, 0, 0);
-    cal.set(1989, 11, 31, 0, 0, 0);
+    cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+    cal.set(Calendar.DAY_OF_MONTH, 0);
+    cal.set(Calendar.MONTH, 0);
+    cal.set(Calendar.YEAR, 1990);
+    cal.set(Calendar.HOUR_OF_DAY, 0);
+    cal.set(Calendar.MINUTE, 0);
+    cal.set(Calendar.SECOND, 0);
+    cal.set(Calendar.MILLISECOND, 0);
     date1989 = cal.getTime();
-    elapsed1989 = date1989.getTime();
+    elapsed1989 = cal.getTime().getTime();
   }
 
   /** InputStream du packet. */
@@ -221,17 +232,7 @@ public class UsbPacketInputStream extends InputStream {
   public Date readTime() {
     // Temps ecoule
     int time = ByteUtil.toInt(readByte(), readByte(), readByte(), readByte());
-    GregorianCalendar cal = new GregorianCalendar();
-
-    cal.setTimeZone(TimeZone.getDefault());
-    cal.setTime(date1989);
-    cal.add(Calendar.SECOND, time);
-
-    cal.add(Calendar.MILLISECOND, TimeZone.getDefault().getOffset(cal
-        .getTimeInMillis()));
-
-    Date date = cal.getTime();
-    return date;
+    return new Date(elapsed1989 + time * 1000L);
   }
 
   /**

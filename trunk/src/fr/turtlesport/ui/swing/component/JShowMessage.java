@@ -277,8 +277,8 @@ public final class JShowMessage {
                                        String title) {
 
     Object[] options = { LanguageManager.getManager().getCurrentLang().cancel(),
-        "ok" };
-    Object initialValue = "ok";
+        LanguageManager.getManager().getCurrentLang().ok() };
+    Object initialValue = options[1];
 
     JOptionPane pane = new JOptionPane(msg,
                                        JOptionPane.INFORMATION_MESSAGE,
@@ -296,7 +296,7 @@ public final class JShowMessage {
     dialog.setVisible(true);
     dialog.dispose();
 
-    if (!"ok".equals(pane.getValue())) {
+    if (!options[1].equals(pane.getValue())) {
       return null;
     }
 

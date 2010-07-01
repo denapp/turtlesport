@@ -67,4 +67,18 @@ public interface ILanguage {
    */
   String cancel();
 
+  /**
+   * Restitue le libell&eacute, pour ok.
+   * 
+   * @return le libell&eacute, pour ok.
+   */
+  String ok();
+
+  /**
+   * D&eacut;termine si le site web est traduit.
+   * 
+   * @return <code>true</code> si e site web est traduit.
+   */
+  boolean hasWebSiteTranslate();
+
 }

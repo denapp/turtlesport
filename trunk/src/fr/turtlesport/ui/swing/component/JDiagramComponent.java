@@ -776,7 +776,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
 
     private int              maxZoom;
 
-    private boolean          hasMouseMotionListener;
+    private boolean          hasMouseMotionListener = true;
 
     /**
      * 

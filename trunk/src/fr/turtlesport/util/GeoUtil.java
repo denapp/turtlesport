@@ -1,5 +1,8 @@
 package fr.turtlesport.util;
 
+import java.util.List;
+
+import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.geo.GeoPosition;
 import fr.turtlesport.geo.IGeoPosition;
 import fr.turtlesport.protocol.data.PositionType;
@@ -178,4 +181,46 @@ public final class GeoUtil {
   public static boolean isInvalidGarminGpx(int gPos) {
     return (gPos == INVALID);
   }
+
+  /**
+   * Calcul le Nord West et Sud Est d'une liste de points.
+   * 
+   * @param sw
+   *          le Sud Est.
+   * @param ne
+   *          le Nord est.
+   * @param list
+   *          la liste de points.
+   */
+  public static void calculateBounds(IGeoPosition sw,
+                                     IGeoPosition ne,
+                                     List<DataRunTrk> list) {
+    int minLat = Integer.MAX_VALUE;
+    int minLon = Integer.MAX_VALUE;
+    int maxLat = Integer.MIN_VALUE;
+    int maxLon = Integer.MIN_VALUE;
+
+    for (DataRunTrk g : list) {
+      if (g.isValidGps()) {
+        if (minLat > g.getLatitude()) {
+          minLat = g.getLatitude();
+        }
+        if (minLon > g.getLongitude()) {
+          minLon = g.getLongitude();
+        }
+        if (maxLat < g.getLatitude()) {
+          maxLat = g.getLatitude();
+        }
+        if (maxLon < g.getLongitude()) {
+          maxLon = g.getLongitude();
+        }
+      }
+    }
+
+    sw.setLatitude(GeoUtil.makeLatitudeFromGarmin(maxLat));
+    sw.setLongitude(GeoUtil.makeLatitudeFromGarmin(maxLon));
+    ne.setLatitude(GeoUtil.makeLatitudeFromGarmin(minLat));
+    ne.setLongitude(GeoUtil.makeLatitudeFromGarmin(minLon));
+  }
+
 }

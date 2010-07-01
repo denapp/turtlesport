@@ -81,6 +81,7 @@ import fr.turtlesport.unit.TimeUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
+import fr.turtlesport.util.BrowserUtil;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -192,6 +193,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JButtonCustom           jButtonGoogleEarth;
 
+  private JButtonCustom           jButtonGoogleMap;
+
   private JButtonCustom           jButtonDetails;
 
   private JButtonCustom           jButtonEmail;
@@ -204,6 +207,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
   private ActivityComboBoxModel   modelActivities;
 
   private EquipementComboBoxModel modelEquipements;
+
+  private JMenuItemTurtle         jMenuItemRunGoogleMap;
 
   private static ResourceBundle   rb;
 
@@ -305,6 +310,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
     getJMenuItemRunMap().setEnabled(b);
     getJMenuItemRunDetail().setEnabled(b);
     getJMenuItemRunGoogleEarth().setEnabled(b);
+    getJMenuItemRunGoogleMap().setEnabled(b);
     if (jMenuItemRunEmail != null) {
       jMenuItemRunEmail.setEnabled(b);
     }
@@ -321,6 +327,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jButtonEmail.setEnabled(b);
     }
     getJButtonGoogleEarth().setEnabled(b);
+    getJButtonGoogleMap().setEnabled(b);
     getJButtonDetails().setEnabled(b);
   }
 
@@ -392,6 +399,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
     jButtonDelete.setToolTipText(rb.getString("jButtonDeleteToolTipText"));
     jButtonGoogleEarth.setToolTipText(rb
         .getString("jButtonGoogleEarthToolTipText"));
+    jButtonGoogleMap
+        .setToolTipText(rb.getString("jButtonGoogleMapToolTipText"));
     jButtonDetails.setToolTipText(rb.getString("jButtonDetailsToolTipText"));
     if (jButtonEmail != null) {
       jButtonEmail.setToolTipText(rb.getString("jButtonEmailToolTipText"));
@@ -413,6 +422,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
     jMenuItemRunDetail.setText(rb.getString("jMenuItemRunDetail"));
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
     jMenuItemRunGoogleEarth.setText(rb.getString("jMenuItemRunGoogleEarth"));
+    jMenuItemRunGoogleMap.setText(rb.getString("jMenuItemRunGoogleMap"));
     if (jMenuItemRunEmail != null) {
       jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail"));
     }
@@ -473,6 +483,11 @@ public class JPanelRun extends JPanel implements LanguageListener,
     MainGui.getWindow().getJMenuItemRunGoogleEarth().addActionListener(action);
     getJButtonGoogleEarth().addActionListener(action);
 
+    action = new GoogleMapsShowActionListener();
+    getJMenuItemRunGoogleMap().addActionListener(action);
+    MainGui.getWindow().getJMenuItemRunGoogleMap().addActionListener(action);
+    getJButtonGoogleMap().addActionListener(action);
+
     if (jMenuItemRunEmail != null) {
       action = new EmailActionListener();
       jMenuItemRunEmail.addActionListener(action);
@@ -515,6 +530,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jPopupMenu.add(getJMenuItemRunDetail());
       jPopupMenu.add(getJMenuItemRunMap());
       jPopupMenu.add(getJMenuItemRunGoogleEarth());
+      jPopupMenu.add(getJMenuItemRunGoogleMap());
       if (Mail.isSupported()) {
         jMenuItemRunEmail = new JMenuItemTurtle();
         jMenuItemRunEmail.setFont(GuiFont.FONT_PLAIN);
@@ -577,6 +593,22 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jMenuItemRunGoogleEarth.setEnabled(false);
     }
     return jMenuItemRunGoogleEarth;
+  }
+
+  /**
+   * This method initializes jMenuItemRunGoogleEarth.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunGoogleMap() {
+    if (jMenuItemRunGoogleMap == null) {
+      jMenuItemRunGoogleMap = new JMenuItemTurtle();
+      jMenuItemRunGoogleMap.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunGoogleMap.setAccelerator(MainGui.getWindow()
+          .getMenuProperties(), "jMenuItemRunGoogleMap");
+      jMenuItemRunGoogleMap.setEnabled(false);
+    }
+    return jMenuItemRunGoogleMap;
   }
 
   /**
@@ -962,6 +994,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
         jPanelButtons.add(jButtonEmail);
       }
       jPanelButtons.add(getJButtonGoogleEarth());
+      jPanelButtons.add(getJButtonGoogleMap());
     }
     return jPanelButtons;
   }
@@ -992,6 +1025,20 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     }
     return jButtonGoogleEarth;
+  }
+
+  public JButton getJButtonGoogleMap() {
+    if (jButtonGoogleMap == null) {
+      jButtonGoogleMap = new JButtonCustom(ImagesRepository
+          .getImageIcon("googlemaps.png"));
+      Dimension dim = new Dimension(20, 20);
+      jButtonGoogleMap.setPreferredSize(dim);
+      jButtonGoogleMap.setMaximumSize(dim);
+      jButtonGoogleMap.setEnabled(false);
+      jButtonGoogleMap.setOpaque(false);
+
+    }
+    return jButtonGoogleMap;
   }
 
   public JButton getJButtonEmail() {
@@ -1241,8 +1288,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
                                                     30,
                                                     70,
                                                     70,
-                                                    25,
-                                                    25,
+                                                    35,
+                                                    28,
                                                     30,
                                                     35,
                                                     35 };
@@ -1645,6 +1692,48 @@ public class JPanelRun extends JPanel implements LanguageListener,
             log.error("", e);
             JShowMessage.error(e.getMessage());
           }
+          MainGui.getWindow().afterRunnableSwing();
+        }
+      });
+
+    }
+
+  }
+
+  private class GoogleMapsShowActionListener implements ActionListener {
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
+    public void actionPerformed(ActionEvent e) {
+      MainGui.getWindow().beforeRunnableSwing();
+
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          try {
+
+            // recuperation des pistes
+            DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
+            if (dataRun != null) {
+              File mapFile = FactoryGeoConvertRun
+                  .getInstance(FactoryGeoConvertRun.MAP).convert(dataRun);
+              if (mapFile != null) {
+                BrowserUtil.browse(mapFile.toURI());
+              }
+            }
+          }
+          catch (SQLException e) {
+            log.error("", e);
+            JShowMessage.error(rb.getString("errorDatabase"));
+          }
+          catch (GeoConvertException e) {
+            log.error("", e);
+            JShowMessage.error(e.getMessage());
+          }
+
           MainGui.getWindow().afterRunnableSwing();
         }
       });
