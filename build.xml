@@ -3,12 +3,12 @@
 
 	<!-- set global properties for this build -->
 	<property name="Name" value="turtlesport" />
-	<property name="version" value="0.1.14" />
+	<property name="version" value="0.1.15" />
 	<property name="src" location="${basedir}/src" />
 	<property name="test" location="${basedir}/test" />
 	<property name="srcccommonUsbCom" location="${basedir}/c/usbcom/srccommon" />
 	<property name="srcMailWin" location="${basedir}/c/mailWin/src" />
-	<property name="srcLaunchWinApp" location="${basedir}/c/launchWinApp/src" />	
+	<property name="srcLaunchWinApp" location="${basedir}/c/launchWinApp/src" />
 	<property name="srcRegistry" location="${basedir}/c/registryWin/src" />
 	<property name="dest" location="${basedir}/classes" />
 	<property name="destTest" location="${basedir}/classesTest" />
@@ -55,6 +55,20 @@
 			<path refid="ant.classpath" />
 		</classpath>
 	</taskdef>
+
+	<!-- task  Linux desktop entry-->
+	<taskdef name="desktopLinuxEntry" classname="com.googlecode.ant_deb_task.DesktopEntry">
+		<classpath>
+			<path refid="ant.classpath" />
+		</classpath>
+	</taskdef>
+	<!-- Creates an deb package-->
+	<taskdef name="deb" classname="com.googlecode.ant_deb_task.Deb">
+		<classpath>
+			<path refid="ant.classpath" />
+		</classpath>
+	</taskdef>
+
 
 	<!--  ================================================================== -->
 	<!--   Utilisation                                                       -->
@@ -135,7 +149,7 @@
 			</classpath>
 		</javah>
 	</target>
-	
+
 	<!--  ================================================================== -->
 	<!--   Archive jarApp                                                                                                                                               -->
 	<!--  ================================================================== -->
@@ -171,11 +185,11 @@
 		</jarbundler>
 
 		<!-- copy des jars -->
-        <copy file="${exe}/macosx/jcommon.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-        <copy file="${exe}/macosx/jfreechart.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-        <copy file="${exe}/macosx/swingx.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-        <copy file="${exe}/macosx/swingx-ws.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-        <copy file="${exe}/macosx/derby.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/jcommon.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/jfreechart.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/swingx.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/swingx-ws.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/derby.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
 		<copy file="${exe}/macosx/log4j.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
 		<copy file="${exe}/macosx/log4J.xml" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
 		<copy file="${exe}/macosx/libturtleUsbjni.jnilib" tofile="${dirBundle}/TurtleSport.app/Contents/Resources/Java/libturtleUsbjni.jnilib" />
@@ -232,7 +246,45 @@
 		<tar destfile="${release}/${Name}-linux-${version}.tar">
 			<tarfileset dir="${exe}/linux" username="root" group="root" mode="755">
 			</tarfileset>
-        </tar>
+		</tar>
+		<!-- Creates a Ubuntu/Debian package -->
+		<!--
+	      <desktopEntry toFile="${release}/turtlesport.desktop"
+	      	                      name="turtlesport" 
+	      	                      icon="atunes125" 
+	      	                      exec="turtlesport" 
+	      	                      categories="Audio;AudioVideo;"
+	      	                      type="Application">
+            <name lang="de" value="Turtle Sport" />
+            <genericName value="Audio Player" />
+            <genericName lang="de" value="Audioplayer" />
+            <comment value="Turtle Sport garmin" />
+            <comment lang="de" value="Turtle Sport garmin" />
+		</desktopEntry>
+-->
+
+		<deb todir="${release}" package="turtlesport" section="utils" depends="sun-java6-jre|sun-java6-jdk|openjdk-6-jre|openjdk-6-jdk">
+			<version upstream="${version}" />
+			<maintainer name="Turtle Sport team" email="turtlesport@sourceforge.net" />
+			<description synopsis="Turtle Sport">Turtle Sport garmin logbook.</description>
+			<tarfileset dir="${exe}/linux" prefix="usr/share/turtlesport" username="root" group="root" filemode="755">
+				<exclude name="**/turtlesport" />
+				<exclude name="**/turtlesport.desktop" />
+				<exclude name="**/turtleSport.png" />
+				<exclude name="**/turtlesport125.png" />
+				<exclude name="**/rpm" />
+			</tarfileset>
+			<tarfileset dir="${exe}/linux" prefix="usr/share/pixmaps" username="root" group="root">
+				<include name="**/turtlesport125.png" />
+			</tarfileset>
+			<tarfileset dir="${exe}/linux" prefix="usr/bin" username="root" group="root" filemode="755">
+				<include name="turtlesport" />
+			</tarfileset>
+			<tarfileset dir="${exe}/linux" prefix="usr/share/applications" username="root" group="root">
+				<include name="turtlesport.desktop" />
+			</tarfileset>
+		</deb>
+		<!--<rpm specfile="${exe}/linux/turtlesport.spec" />-->
 	</target>
 	<target name="releaseWin" depends="launch4j,SetupWin">
 		<delete file="${release}/${Name}-win-${version}.zip" />
