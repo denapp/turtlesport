@@ -13,6 +13,13 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
+ 
+# Retrieve turtlesport directory
+PROGRAM=`readlink "$0"`
+if ["$PROGRAM" = ""]; then
+  PROGRAM=$0
+fi
+PROGRAM_DIR=`dirname "$PROGRAM"`
 
-cd /usr/share/turtlesport
-sh ./turtlesport.sh
+# Run Turtle Sport
+exec java -jar "$PROGRAM_DIR"/turtlesport.jar
