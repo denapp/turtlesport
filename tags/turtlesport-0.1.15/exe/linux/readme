@@ -1,0 +1,9 @@
+TurtleSport needs :
+-----------------------
+libusb (see http://libusb.sourceforge.net)
+Java 1.5 or > (see http://java.sun.com/javase/downloads/index.jsp)
+
+Run TurtleSport
+----------------------------------
+turtlesport
+or in a console : java -jar turtlesport.jar
