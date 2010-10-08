@@ -80,8 +80,8 @@ public final class PaceUnit extends Unit {
    *          la valeur.
    * @return la valeur convertie en unit&eacute; <code>unit2</code>.
    */
-  public static Object convert(String unit1, String unit2, double value) {
-    return convertUnit(SpeedPaceUnit.class,
+  public static double convert(String unit1, String unit2, double value) {
+    return (Double) convertUnit(SpeedPaceUnit.class,
                        UNITS,
                        unit1,
                        unit2,
@@ -145,9 +145,18 @@ public final class PaceUnit extends Unit {
    * @return l'allure en mn/km.
    */
   public static String computeAllure(double distance, double sec100) {
-    StringBuilder st = new StringBuilder();
+    return format((distance == 0) ? 0 : sec100 / (6.0 * distance));
+  }
 
-    double allure = (distance == 0) ? 0 : sec100 / (6.0 * distance);
+  /**
+   * Calcule de l'allure en mn/km.
+   * 
+   * @param allure
+   *          allure
+   * @return l'allure en mn/km.
+   */
+  public static String format(double allure) {
+    StringBuilder st = new StringBuilder();
     if (allure == 0) {
       st.append("00");
     }
@@ -202,7 +211,7 @@ public final class PaceUnit extends Unit {
   public static String computeFormatAllureWithUnit(double distance,
                                                    double sec100) {
     return computeAllure(distance, sec100)
-           + getDefaultUnit().substring( getDefaultUnit().indexOf('/'));
+           + getDefaultUnit().substring(getDefaultUnit().indexOf('/'));
   }
 
 }

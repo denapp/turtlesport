@@ -87,6 +87,10 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
 
   private JLabel                              jLabelValImc;
 
+  private JLabel                              jLabelMinHeartRate;
+
+  private JFormattedTextField                 jTextFieldMinHeartRate;
+
   // model
   private ModelAthlete                        model;
 
@@ -107,6 +111,8 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
 
   private GenericModelDocListener             docLstUserHeight;
 
+  private GenericModelDocListener             docLstUserMinHeartRate;
+
   private PhotoListener                       photoListener;
 
   private ActionListener                      actionListenerMale;
@@ -116,6 +122,8 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
   private FocusListener                       focusListenerWeight;
 
   private FocusListener                       focusListenerHeight;
+
+  private FocusListener                       focusListenerMinHeartRate;
 
   private GenericModelDocListener             docLstUserBirthDate;
 
@@ -218,6 +226,20 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
       };
       jTextFieldHeight.addFocusListener(focusListenerHeight);
 
+      docLstUserMinHeartRate = new GenericModelDocListener(jTextFieldMinHeartRate,
+                                                           data,
+                                                           "setMinHeartRate",
+                                                           Integer.TYPE);
+      jTextFieldMinHeartRate.getDocument()
+          .addDocumentListener(docLstUserMinHeartRate);
+      focusListenerMinHeartRate = new FocusAdapter() {
+        @Override
+        public void focusLost(FocusEvent e) {
+          docLstUserMinHeartRate.fireUpdate();
+        }
+      };
+      jTextFieldMinHeartRate.addFocusListener(focusListenerMinHeartRate);
+
       jXDatePicker.getEditor().getDocument()
           .addDocumentListener(docLstUserBirthDate);
 
@@ -261,6 +283,9 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
 
     jTextFieldWeight.getDocument().removeDocumentListener(docLstUserWeight);
     jTextFieldHeight.getDocument().removeDocumentListener(docLstUserHeight);
+    jTextFieldMinHeartRate.getDocument()
+        .removeDocumentListener(docLstUserMinHeartRate);
+
     // jTextFieldBirthDate.getDocument()
     // .removeDocumentListener(docLstUserBirthDate);
     jButtonPhoto.removePhotoListener(photoListener);
@@ -268,14 +293,17 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
     jRadioButtonFemale.removeActionListener(actionListenerFemale);
     jTextFieldWeight.removeFocusListener(focusListenerWeight);
     jTextFieldHeight.removeFocusListener(focusListenerHeight);
+    jTextFieldMinHeartRate.removeFocusListener(focusListenerMinHeartRate);
 
     docLstUserWeight = null;
     docLstUserHeight = null;
+    docLstUserMinHeartRate = null;
     photoListener = null;
     actionListenerMale = null;
     actionListenerFemale = null;
     focusListenerWeight = null;
     focusListenerHeight = null;
+    focusListenerMinHeartRate = null;
   }
 
   private void performedLanguage(ILanguage lang) {
@@ -294,6 +322,7 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
     jButtonPhoto.setText(rb.getString("jButtonPhoto"));
     jRadioButtonMale.setText(rb.getString("jRadioButtonMale"));
     jRadioButtonFemale.setText(rb.getString("jRadioButtonFemale"));
+    jLabelMinHeartRate.setText(rb.getString("jLabelMinHeartRate"));
   }
 
   /*
@@ -334,7 +363,7 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
     g.fill = GridBagConstraints.HORIZONTAL;
     g.insets = insets1;
     g.anchor = GridBagConstraints.WEST;
-    g.gridheight = 5;
+    g.gridheight = 6;
     g.weighty = 0.0;
     g.weightx = 0.0;
     this.add(getJButtonPhoto(), g);
@@ -461,6 +490,24 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
     g.anchor = GridBagConstraints.WEST;
     g.gridwidth = GridBagConstraints.REMAINDER;
     this.add(getJComboBoxHeightUnits(), g);
+
+    // Frequence cardiaque
+    jLabelMinHeartRate = new JLabel();
+    jLabelMinHeartRate.setHorizontalAlignment(SwingConstants.RIGHT);
+    jLabelMinHeartRate.setFont(GuiFont.FONT_PLAIN);
+    g = new GridBagConstraints();
+    g.fill = GridBagConstraints.HORIZONTAL;
+    g.insets = insets1;
+    g.anchor = GridBagConstraints.EAST;
+    g.gridwidth = 2;
+    this.add(jLabelMinHeartRate, g);
+    g = new GridBagConstraints();
+    g.insets = insets1;
+    g.weightx = 0.0;
+    g.anchor = GridBagConstraints.WEST;
+    g.gridwidth = GridBagConstraints.REMAINDER;
+    jLabelMinHeartRate.setLabelFor(getJTextFieldMinHeartRate());
+    this.add(getJTextFieldMinHeartRate(), g);
 
     // Evenements
     jComboBoxWeightUnits.addActionListener(new ActionListener() {
@@ -619,6 +666,24 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
       jTextFieldHeight.setMinimumSize(dim);
     }
     return jTextFieldHeight;
+  }
+
+  /**
+   * This method initializes jTextFieldMinHeartRate.
+   * 
+   * @return javax.swing.JTextField
+   */
+  public JFormattedTextField getJTextFieldMinHeartRate() {
+    if (jTextFieldMinHeartRate == null) {
+      jTextFieldMinHeartRate = new JFormattedTextField();
+      jTextFieldMinHeartRate.setFormatterFactory(TextFormatterFactory
+          .createNumber(2, 0));
+      jTextFieldMinHeartRate.setFont(GuiFont.FONT_PLAIN);
+      Dimension dim = new Dimension(45, 23);
+      jTextFieldMinHeartRate.setPreferredSize(dim);
+      jTextFieldMinHeartRate.setMinimumSize(dim);
+    }
+    return jTextFieldMinHeartRate;
   }
 
   /**

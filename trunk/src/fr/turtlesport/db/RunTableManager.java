@@ -1218,8 +1218,8 @@ public final class RunTableManager extends AbstractTableManager {
       st.append(" WHERE id = ?");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
-      if (comments != null && comments.length() > 100) {
-        pstmt.setString(1, comments.substring(0, 99));
+      if (comments != null && comments.length() > 500) {
+        pstmt.setString(1, comments.substring(0, 499));
       }
       else {
         pstmt.setString(1, comments);

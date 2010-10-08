@@ -8,7 +8,7 @@ import java.sql.Timestamp;
  */
 public class DataRunTrk {
 
-  private static final int INVALID = 0x7FFFFFFF;
+  private static final int INVALID        = 0x7FFFFFFF;
 
   private int              id;
 
@@ -22,9 +22,17 @@ public class DataRunTrk {
 
   private float            distance;
 
-  private int              heartRate;
+  private int              heartRate      = 0;
 
-  private int              cadence = 0xff;
+  private int              cadence        = 0xff;
+
+  /** Vitesse en km/h */
+  private double           speed          = 0;
+
+  /** Allure en mn/km */
+  private double           pace           = 0;
+
+  private double           MAX_PACE_VALUE = 20;
 
   /**
    * 
@@ -181,6 +189,45 @@ public class DataRunTrk {
    */
   public boolean isValidAltitude() {
     return (altitude != 1.0e25f);
+  }
+
+  /**
+   * Restitue la vitesse en km/h.
+   * 
+   * @return la vitesse en km/h.
+   */
+  public double getSpeed() {
+    return speed;
+  }
+
+  /**
+   * Valorise la vitesse en km/h.
+   * 
+   * @param speed
+   *          la nouvelle valeur
+   */
+  public void setSpeed(double speed) {
+    this.speed = speed;
+  }
+
+  /**
+   * Restitue l'allure en mn/km.
+   * 
+   * @return l'allure en mn/km
+   */
+  public double getPace() {
+    return pace;
+  }
+
+  /**
+   * 
+   * Valorise l'allure en mn/km.
+   * 
+   * @param pace
+   *          la nouvelle valeur
+   */
+  public void setPace(double pace) {
+    this.pace = (pace > MAX_PACE_VALUE) ? MAX_PACE_VALUE : pace;
   }
 
   /*

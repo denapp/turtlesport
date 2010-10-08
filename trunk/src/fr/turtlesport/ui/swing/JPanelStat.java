@@ -843,7 +843,6 @@ public class JPanelStat extends JPanel implements LanguageListener,
       sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
           .getNumberRaces());
       sYear.addValueExt("", libRace + " : " + d.getDistance() / 1000.0);
-
     }
 
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();

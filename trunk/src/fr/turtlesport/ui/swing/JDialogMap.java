@@ -18,14 +18,11 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.ui.swing.component.JShowMessage;
-import fr.turtlesport.ui.swing.component.JTextAreaLength;
 import fr.turtlesport.ui.swing.component.JTurtleMapKit;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.model.ModelDialogMap;
@@ -39,104 +36,98 @@ import fr.turtlesport.util.ResourceBundleUtility;
  */
 public class JDialogMap extends JDialog {
 
-  private JTurtleMapKit   mapKit;
+  private JTurtleMapKit  mapKit;
 
-  private JLabel          jLabelTitle;
+  private JLabel         jLabelTitle;
 
-  private JPanel          jPanelRunLap;
+  private JPanel         jPanelRunLap;
 
-  private ResourceBundle  rb;
+  private ResourceBundle rb;
 
-  private JLabel          jLabelLibDayLap;
+  private JLabel         jLabelLibDayLap;
 
-  private JLabel          jLabelValDayLap;
+  private JLabel         jLabelValDayLap;
 
-  private JLabel          jLabelLibHourLap;
+  private JLabel         jLabelLibHourLap;
 
-  private JLabel          jLabelValHourLap;
+  private JLabel         jLabelValHourLap;
 
-  private JLabel          jLabelLibDistanceLap;
+  private JLabel         jLabelLibDistanceLap;
 
-  private JLabel          jLabelValDistanceLap;
+  private JLabel         jLabelValDistanceLap;
 
-  private JLabel          jLabelValTimeLap;
+  private JLabel         jLabelValTimeLap;
 
-  private JLabel          jLabelLibTimeLap;
+  private JLabel         jLabelLibTimeLap;
 
-  private JLabel          jLabelLibPaceLap;
+  private JLabel         jLabelLibPaceLap;
 
-  private JLabel          jLabelValPaceLap;
+  private JLabel         jLabelValPaceLap;
 
-  private JLabel          jLabelLibSpeedLap;
+  private JLabel         jLabelLibSpeedLap;
 
-  private JLabel          jLabelValSpeedLap;
+  private JLabel         jLabelValSpeedLap;
 
-  private JLabel          jLabelLibCaloriesLap;
+  private JLabel         jLabelLibCaloriesLap;
 
-  private JLabel          jLabelValCaloriesLap;
+  private JLabel         jLabelValCaloriesLap;
 
-  private JLabel          jLabelValAltitudeLap;
+  private JLabel         jLabelValAltitudeLap;
 
-  private JLabel          jLabelLibHeartLap;
+  private JLabel         jLabelLibHeartLap;
 
-  private JLabel          jLabelValHeartLap;
+  private JLabel         jLabelValHeartLap;
 
-  private JPanel          jPanelRunSummary;
+  private JPanel         jPanelRunSummary;
 
-  private TitledBorder    borderPanelRunSummary;
+  private TitledBorder   borderPanelRunSummary;
 
-  private JLabel          jLabelLibDistTot;
+  private JLabel         jLabelLibDistTot;
 
-  private JLabel          jLabelValDistTot;
+  private JLabel         jLabelValDistTot;
 
-  private JLabel          jLabelLibTimeTot;
+  private JLabel         jLabelLibTimeTot;
 
-  private JLabel          jLabelValTimeTot;
+  private JLabel         jLabelValTimeTot;
 
-  private JLabel          jLabelLibAllureTot;
+  private JLabel         jLabelLibAllureTot;
 
-  private JLabel          jLabelValAllureTot;
+  private JLabel         jLabelValAllureTot;
 
-  private JLabel          jLabelLibSpeedMoyTot;
+  private JLabel         jLabelLibSpeedMoyTot;
 
-  private JLabel          jLabelValSpeedMoyTot;
+  private JLabel         jLabelValSpeedMoyTot;
 
-  private JLabel          jLabelLibCaloriesTot;
+  private JLabel         jLabelLibCaloriesTot;
 
-  private JLabel          jLabelValCaloriesTot;
+  private JLabel         jLabelValCaloriesTot;
 
-  private JLabel          jLabelLibHeartTot;
+  private JLabel         jLabelLibHeartTot;
 
-  private JLabel          jLabelValHeartTot;
+  private JLabel         jLabelValHeartTot;
 
-  private JLabel          jLabelLibCategory;
+  private JLabel         jLabelLibActivity;
 
-  private JLabel          jLabelValCategory;
+  private JLabel         jLabelValActivity;
 
-  private JLabel          jLabelLibEquipment;
+  private JLabel         jLabelLibEquipment;
 
-  private JLabel          jLabelValEquipment;
+  private JLabel         jLabelValEquipment;
 
-  private JLabel          jLabelLibNotes;
+  private JLabel         jLabelLibAltitudeTot;
 
-  private JLabel          jLabelLibAltitudeTot;
+  private JLabel         jLabelValAltitudeTot;
 
-  private JLabel          jLabelValAltitudeTot;
+  private JPanel         jPaneRight;
 
-  private JTextAreaLength jTextFieldNotes;
+  private JLabel         jLabelLibAltitudeLap;
 
-  private JScrollPane     jScrollPaneTextArea;
+  private JLabel         jLabelLibLap;
 
-  private JPanel          jPaneRight;
-
-  private JLabel          jLabelLibAltitudeLap;
-
-  private JLabel          jLabelLibLap;
-
-  private JComboBox       jComboBoxLap;
+  private JComboBox      jComboBoxLap;
 
   // Model
-  private ModelDialogMap  model;
+  private ModelDialogMap model;
 
   /**
    * @param frame
@@ -243,12 +234,8 @@ public class JDialogMap extends JDialog {
     return jLabelValEquipment;
   }
 
-  public JTextAreaLength getJTextFieldNotes() {
-    return jTextFieldNotes;
-  }
-
-  public JLabel getJLabelValCategory() {
-    return jLabelValCategory;
+  public JLabel getJLabelValActivity() {
+    return jLabelValActivity;
   }
 
   public JComboBox getJComboBoxLap() {
@@ -355,7 +342,7 @@ public class JDialogMap extends JDialog {
    * 
    * @return javax.swing.JPanel
    */
-  private JPanel getJPanelRunSummary() {
+  public JPanel getJPanelRunSummary() {
     if (jPanelRunSummary == null) {
       jPanelRunSummary = new JPanel();
       jPanelRunSummary.setLayout(new GridBagLayout());
@@ -367,13 +354,15 @@ public class JDialogMap extends JDialog {
                               GuiFont.FONT_PLAIN,
                               null);
       jPanelRunSummary.setBorder(borderPanelRunSummary);
-      jPanelRunSummary.setPreferredSize(new Dimension(260, 300));
+      jPanelRunSummary.setPreferredSize(new Dimension(260, 290));
 
       Insets insets = new Insets(0, 0, 5, 10);
       GridBagConstraints g = new GridBagConstraints();
 
+      // Ligne 1
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -383,6 +372,7 @@ public class JDialogMap extends JDialog {
       jPanelRunSummary.add(jLabelLibDistTot, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -392,8 +382,10 @@ public class JDialogMap extends JDialog {
       jLabelLibDistTot.setLabelFor(jLabelValDistTot);
       jPanelRunSummary.add(jLabelValDistTot, g);
 
+      // Ligne 2
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -403,6 +395,7 @@ public class JDialogMap extends JDialog {
       jPanelRunSummary.add(jLabelLibTimeTot, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -412,8 +405,10 @@ public class JDialogMap extends JDialog {
       jLabelLibTimeTot.setLabelFor(jLabelValTimeTot);
       jPanelRunSummary.add(jLabelValTimeTot, g);
 
+      // Ligne 3
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -423,6 +418,7 @@ public class JDialogMap extends JDialog {
       jPanelRunSummary.add(jLabelLibAllureTot, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -432,8 +428,10 @@ public class JDialogMap extends JDialog {
       jLabelLibAllureTot.setLabelFor(jLabelValAllureTot);
       jPanelRunSummary.add(jLabelValAllureTot, g);
 
+      // Ligne 4
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -443,6 +441,7 @@ public class JDialogMap extends JDialog {
       jPanelRunSummary.add(jLabelLibSpeedMoyTot, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -452,8 +451,10 @@ public class JDialogMap extends JDialog {
       jLabelLibSpeedMoyTot.setLabelFor(jLabelValSpeedMoyTot);
       jPanelRunSummary.add(jLabelValSpeedMoyTot, g);
 
+      // Ligne 5
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -463,6 +464,7 @@ public class JDialogMap extends JDialog {
       jPanelRunSummary.add(jLabelLibCaloriesTot, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -472,19 +474,21 @@ public class JDialogMap extends JDialog {
       jLabelLibCaloriesTot.setLabelFor(jLabelValCaloriesTot);
       jPanelRunSummary.add(jLabelValCaloriesTot, g);
 
+      // Ligne 6
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibHeartTot = new JLabel();
+      jLabelLibHeartTot = new JLabel(rb.getString("jLabelLibHeartTot"));
       jLabelLibHeartTot.setIcon(ImagesRepository.getImageIcon("heart.gif"));
       jLabelLibHeartTot.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibHeartTot.setText(rb.getString("jLabelLibHeartTot"));
       jLabelLibHeartTot.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibHeartTot, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -494,18 +498,20 @@ public class JDialogMap extends JDialog {
       jLabelLibHeartTot.setLabelFor(jLabelValHeartTot);
       jPanelRunSummary.add(jLabelValHeartTot, g);
 
+      // Ligne 7
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibAltitudeTot = new JLabel();
+      jLabelLibAltitudeTot = new JLabel(rb.getString("jLabelLibAltitudeTot"));
       jLabelLibAltitudeTot.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibAltitudeTot.setText(rb.getString("jLabelLibAltitudeTot"));
       jLabelLibAltitudeTot.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibAltitudeTot, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -515,28 +521,33 @@ public class JDialogMap extends JDialog {
       jLabelLibAltitudeTot.setLabelFor(jLabelValAltitudeTot);
       jPanelRunSummary.add(jLabelValAltitudeTot, g);
 
+      // Ligne 8
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibCategory = new JLabel(rb.getString("jLabelLibCategory"));
-      jLabelLibCategory.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibCategory.setHorizontalAlignment(SwingConstants.TRAILING);
-      jPanelRunSummary.add(jLabelLibCategory, g);
+      jLabelLibActivity = new JLabel(rb.getString("jLabelLibCategory"));
+      jLabelLibActivity.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibActivity.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelLibActivity, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
-      jLabelValCategory = new JLabel();
-      jLabelValCategory.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibCategory.setLabelFor(jLabelValCategory);
-      jPanelRunSummary.add(jLabelValCategory, g);
+      jLabelValActivity = new JLabel();
+      jLabelValActivity.setFont(GuiFont.FONT_PLAIN);
+      g.anchor = GridBagConstraints.WEST;
+      jLabelLibActivity.setLabelFor(jLabelValActivity);
+      jPanelRunSummary.add(jLabelValActivity, g);
 
+      // Ligne 9
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -550,55 +561,13 @@ public class JDialogMap extends JDialog {
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
+      g.anchor = GridBagConstraints.WEST;
       jLabelValEquipment = new JLabel();
       jLabelValEquipment.setFont(GuiFont.FONT_PLAIN);
-      jLabelValCategory.setLabelFor(jLabelValEquipment);
+      jLabelLibEquipment.setLabelFor(jLabelValEquipment);
       jPanelRunSummary.add(jLabelValEquipment, g);
-
-      g = new GridBagConstraints();
-      g.weightx = 0.0;
-      g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
-      g.insets = insets;
-      jLabelLibNotes = new JLabel(rb.getString("jLabelLibNotes"));
-      jLabelLibNotes.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibNotes.setHorizontalAlignment(SwingConstants.TRAILING);
-      jLabelLibNotes.setVerticalAlignment(SwingConstants.TOP);
-      jPanelRunSummary.add(jLabelLibNotes, g);
-      g = new GridBagConstraints();
-      g.weightx = 1.0;
-      g.weighty = 1.0;
-      g.gridheight = 3;
-      g.anchor = GridBagConstraints.NORTHWEST;
-      g.fill = GridBagConstraints.BOTH;
-      g.gridwidth = GridBagConstraints.REMAINDER;
-      g.insets = insets;
-      jLabelLibNotes.setLabelFor(getJScrollPaneTextArea());
-      jPanelRunSummary.add(getJScrollPaneTextArea(), g);
-
     }
     return jPanelRunSummary;
-  }
-
-  /**
-   * This method initializes jScrollPaneTextArea.
-   * 
-   * @return javax.swing.JTextField
-   */
-  private JScrollPane getJScrollPaneTextArea() {
-    if (jScrollPaneTextArea == null) {
-      jTextFieldNotes = new JTextAreaLength(5, 20);
-      jTextFieldNotes.setMaxiMumCharacters(100);
-      jTextFieldNotes.setFont(GuiFont.FONT_PLAIN);
-      jTextFieldNotes.setWrapStyleWord(true);
-      jTextFieldNotes.setLineWrap(true);
-      jScrollPaneTextArea = new JScrollPane(jTextFieldNotes);
-      jScrollPaneTextArea
-          .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-      jScrollPaneTextArea
-          .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    }
-    return jScrollPaneTextArea;
   }
 
   /**
@@ -619,14 +588,16 @@ public class JDialogMap extends JDialog {
                               GuiFont.FONT_PLAIN,
                               null);
       jPanelRunLap.setBorder(borderPanelRunLap);
-      jPanelRunLap.setPreferredSize(new Dimension(260, 300));
+      jPanelRunLap.setPreferredSize(new Dimension(260, 310));
       jPanelRunLap.setLayout(new GridBagLayout());
 
       Insets insets = new Insets(0, 0, 5, 10);
       GridBagConstraints g = new GridBagConstraints();
 
+      // Ligne1
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -637,17 +608,20 @@ public class JDialogMap extends JDialog {
       jPanelRunLap.add(jLabelLibLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
-      g.fill = GridBagConstraints.BOTH;
+      g.fill = GridBagConstraints.HORIZONTAL;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
       jComboBoxLap = new JComboBox();
       jComboBoxLap.setFont(GuiFont.FONT_PLAIN);
       jLabelLibLap.setLabelFor(jComboBoxLap);
       jPanelRunLap.add(jComboBoxLap, g);
-
+      
+      // Ligne 2
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -658,6 +632,7 @@ public class JDialogMap extends JDialog {
       jPanelRunLap.add(jLabelLibDayLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -667,8 +642,10 @@ public class JDialogMap extends JDialog {
       jLabelLibDayLap.setLabelFor(jLabelValDayLap);
       jPanelRunLap.add(jLabelValDayLap, g);
 
+      // Ligne 3
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -679,6 +656,7 @@ public class JDialogMap extends JDialog {
       jPanelRunLap.add(jLabelLibHourLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -689,8 +667,10 @@ public class JDialogMap extends JDialog {
       jLabelLibHourLap.setLabelFor(jLabelValHourLap);
       jPanelRunLap.add(jLabelValHourLap, g);
 
+      // Ligne 4
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -701,6 +681,7 @@ public class JDialogMap extends JDialog {
       jPanelRunLap.add(jLabelLibDistanceLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -710,8 +691,10 @@ public class JDialogMap extends JDialog {
       jLabelLibDistanceLap.setLabelFor(jLabelValDistanceLap);
       jPanelRunLap.add(jLabelValDistanceLap, g);
 
+      // Ligne 5
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -722,6 +705,7 @@ public class JDialogMap extends JDialog {
       jPanelRunLap.add(jLabelLibTimeLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -731,8 +715,10 @@ public class JDialogMap extends JDialog {
       jLabelLibTimeLap.setLabelFor(jLabelValTimeLap);
       jPanelRunLap.add(jLabelValTimeLap, g);
 
+      // Ligne 6
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -743,6 +729,7 @@ public class JDialogMap extends JDialog {
       jPanelRunLap.add(jLabelLibPaceLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -752,8 +739,10 @@ public class JDialogMap extends JDialog {
       jLabelLibPaceLap.setLabelFor(jLabelValPaceLap);
       jPanelRunLap.add(jLabelValPaceLap, g);
 
+      // Ligne 7
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -764,6 +753,7 @@ public class JDialogMap extends JDialog {
       jPanelRunLap.add(jLabelLibSpeedLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -773,8 +763,10 @@ public class JDialogMap extends JDialog {
       jLabelLibSpeedLap.setLabelFor(jLabelValSpeedLap);
       jPanelRunLap.add(jLabelValSpeedLap, g);
 
+      // Ligne 8
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -786,6 +778,7 @@ public class JDialogMap extends JDialog {
       jPanelRunLap.add(jLabelLibHeartLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -795,8 +788,10 @@ public class JDialogMap extends JDialog {
       jLabelLibHeartLap.setLabelFor(jLabelValHeartLap);
       jPanelRunLap.add(jLabelValHeartLap, g);
 
+      // Ligne 9
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -807,6 +802,7 @@ public class JDialogMap extends JDialog {
       jPanelRunLap.add(jLabelLibCaloriesLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -816,8 +812,10 @@ public class JDialogMap extends JDialog {
       jLabelLibCaloriesLap.setLabelFor(jLabelValCaloriesLap);
       jPanelRunLap.add(jLabelValCaloriesLap, g);
 
+      // Ligne 10
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -825,7 +823,6 @@ public class JDialogMap extends JDialog {
       jLabelLibAltitudeLap.setFont(GuiFont.FONT_PLAIN);
       jLabelLibAltitudeLap.setText(rb.getString("jLabelLibAltitudeLap"));
       jLabelLibAltitudeLap.setHorizontalAlignment(SwingConstants.TRAILING);
-      jLabelLibAltitudeLap.setVerticalAlignment(SwingConstants.TOP);
       jPanelRunLap.add(jLabelLibAltitudeLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
@@ -835,7 +832,6 @@ public class JDialogMap extends JDialog {
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
       jLabelValAltitudeLap = new JLabel();
-      jLabelValAltitudeLap.setVerticalAlignment(SwingConstants.TOP);
       jLabelValAltitudeLap.setFont(GuiFont.FONT_PLAIN);
       jLabelLibAltitudeLap.setLabelFor(jLabelValAltitudeLap);
       jPanelRunLap.add(jLabelValAltitudeLap, g);

@@ -773,6 +773,10 @@ public class JPanelUserProfile extends JPanel implements LanguageListener,
             log.error("", e);
             JShowMessage.error(rb.getString("errorSave"));
           }
+          catch (RuntimeException e) {
+            log.error("", e);
+            JShowMessage.error(rb.getString("errorSave"));
+          }
           MainGui.getWindow().afterRunnableSwing();
         }
 
@@ -786,6 +790,7 @@ public class JPanelUserProfile extends JPanel implements LanguageListener,
             Athlete a = (Athlete) tableModelAthlete.getValueAt(i, 0);
             a.model.beforeSave();
             listUser.add(a.model.getData());
+            System.out.println(a.model.getData().getMinHeartRate());
           }
 
           UserTableManager.getInstance().store(listUser);

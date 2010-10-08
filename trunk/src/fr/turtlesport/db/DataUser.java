@@ -11,9 +11,9 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * 
  */
 public class DataUser implements Comparable<DataUser> {
-  private static final AllUser ALLUSER = new AllUser();
+  private static final AllUser ALLUSER      = new AllUser();
 
-  private int                  id      = -1;
+  private int                  id           = -1;
 
   private String               firstName;
 
@@ -28,6 +28,8 @@ public class DataUser implements Comparable<DataUser> {
   private float                height;
 
   private String               path;
+
+  private int                  minHeartRate = 40;
 
   /**
    * 
@@ -183,6 +185,20 @@ public class DataUser implements Comparable<DataUser> {
    */
   public void setPath(String path) {
     this.path = path;
+  }
+
+  /**
+   * @return
+   */
+  public int getMinHeartRate() {
+    return minHeartRate;
+  }
+
+  /**
+   * @param minHeartRate
+   */
+  public void setMinHeartRate(int minHeartRate) {
+    this.minHeartRate = (minHeartRate < 30) ? 30 : minHeartRate;
   }
 
   /*

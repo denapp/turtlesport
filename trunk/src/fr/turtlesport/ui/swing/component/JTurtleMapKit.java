@@ -215,38 +215,6 @@ public class JTurtleMapKit extends JXPanel {
   }
 
   private void initialize() {
-    // GridBagConstraints gridBagConstraints;
-    //
-    // setLayout(new GridBagLayout());
-    //
-    // mainMap = new JXMapViewer();
-    // mainMap.setLayout(new GridBagLayout());
-    //
-    // gridBagConstraints = new GridBagConstraints();
-    // gridBagConstraints.gridx = 0;
-    // gridBagConstraints.gridy = 0;
-    // gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
-    // gridBagConstraints.weightx = 1.0;
-    // gridBagConstraints.weighty = 1.0;
-    // gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-    // mainMap.add(getJPanelButton(), gridBagConstraints);
-    //
-    // gridBagConstraints = new GridBagConstraints();
-    // gridBagConstraints.gridx = 0;
-    // gridBagConstraints.gridy = 0;
-    // gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
-    // gridBagConstraints.weightx = 1.0;
-    // gridBagConstraints.weighty = 1.0;
-    // gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-    // jMediaMapKit = new JMediaMapKit(this);
-    // mainMap.add(jMediaMapKit, gridBagConstraints);
-    //
-    // gridBagConstraints = new java.awt.GridBagConstraints();
-    // gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    // gridBagConstraints.weightx = 1.0;
-    // gridBagConstraints.weighty = 1.0;
-    // add(mainMap, gridBagConstraints);
-
     GridBagConstraints gridBagConstraints;
 
     mainMap = new JXMapViewer();
@@ -269,15 +237,6 @@ public class JTurtleMapKit extends JXPanel {
     setLayout(new BorderLayout(0, 0));
     add(mainMap, BorderLayout.CENTER);
     add(jMediaMapKit, BorderLayout.PAGE_END);
-
-    // setLayout(new BorderLayout());
-    //
-    // mainMap = new JXMapViewer();
-    // jMediaMapKit = new JMediaMapKit(this);
-    //    
-    // add(mainMap, BorderLayout.CENTER);
-    // add(getJPanelButton(), BorderLayout.PAGE_START);
-    // add(jMediaMapKit, BorderLayout.PAGE_END);
 
     // Evenements
     jButtonZoomMoins.addActionListener(new java.awt.event.ActionListener() {

@@ -33,6 +33,33 @@ public final class SpeedPaceUnit extends Unit {
   }
 
   /**
+   * Restitue l'unit&eacute; de vitesse en mn/km.
+   * 
+   * @return l'unit&eacute; de vitesse en mn/km.
+   */
+  public static String unitMnPerkm() {
+    return UNITS[1];
+  }
+
+  /**
+   * Restitue l'unit&eacute; de vitesse en mile/h.
+   * 
+   * @return l'unit&eacute; de vitesse en mile/h.
+   */
+  public static String unitMilePerH() {
+    return UNITS[2];
+  }
+
+  /**
+   * Restitue l'unit&eacute; de vitesse en mn/mile.
+   * 
+   * @return l'unit&eacute; de vitesse en mn/mile.
+   */
+  public static String unitMnPerMile() {
+    return UNITS[3];
+  }
+
+  /**
    * Restitue l'unit&eacute; de vitesse en km/h.
    * 
    * @return l'unit&eacute; de vitesse en km/h.
@@ -351,6 +378,17 @@ public final class SpeedPaceUnit extends Unit {
    */
   public static String computeFormatSpeed(double distance, double sec100) {
     return DF_SPEED_1.format(computeSpeedKmS(distance, sec100));
+  }
+
+  /**
+   * Formate la vitesse.
+   * 
+   * @param speed
+   *          la vitesse.
+   * @return la vitesse.
+   */
+  public static String formatSpeed(double speed) {
+    return DF_SPEED_1.format(speed);
   }
 
 }

@@ -1,13 +1,38 @@
 package fr.turtlesport.ui.swing.model;
 
+import java.awt.Color;
+import java.awt.GradientPaint;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.MessageFormat;
+import java.text.NumberFormat;
 import java.util.Date;
+import java.util.List;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.labels.StandardCategoryToolTipGenerator;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.CategoryItemRenderer;
+import org.jfree.chart.util.RelativeDateFormat;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+
+import fr.turtlesport.db.AbstractDataActivity;
+import fr.turtlesport.db.DataHeartZone;
 import fr.turtlesport.db.DataRun;
+import fr.turtlesport.db.DataRunTrk;
+import fr.turtlesport.db.DataSpeedZone;
 import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.db.RunTrkTableManager;
+import fr.turtlesport.db.UserActivityTableManager;
+import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.JPanelRun;
 import fr.turtlesport.ui.swing.MainGui;
 import fr.turtlesport.ui.swing.SwingLookAndFeel;
@@ -15,6 +40,7 @@ import fr.turtlesport.ui.swing.component.calendar.JPanelCalendar;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
 import fr.turtlesport.unit.SpeedPaceUnit;
+import fr.turtlesport.unit.SpeedUnit;
 import fr.turtlesport.unit.TimeUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 
@@ -64,7 +90,7 @@ public class ModelRun {
 
     log.info("<<updateView");
   }
-
+  
   /**
    * @param summary
    * @throws SQLException
@@ -158,6 +184,14 @@ public class ModelRun {
     // mis a jour des tours intermediaires.
     // ------------------------------------------------------
     view.getTableModelLap().performedUnit(e);
+
+    // mis ajour des zones cadiaques
+    // --------------------------------------------------
+    try {
+      updateHeartZone(view);
+    }
+    catch (SQLException sqle) {
+    }
   }
 
   /**
@@ -195,6 +229,10 @@ public class ModelRun {
     if (SwingLookAndFeel.isLookAndFeelMotif()) {
       MainGui.getWindow().updateComponentTreeUI();
     }
+
+    // Mis a jour des zones cardiaque
+    // --------------------------------------------------
+    updateHeartZone(view);
 
     log.info("<<update");
   }
@@ -339,9 +377,7 @@ public class ModelRun {
     if (dataRun.getComments() != null) {
       comments = dataRun.getComments();
     }
-    if (view.getJTextFieldNotes() != null) {
-      newComments = view.getJTextFieldNotes().getText();
-    }
+    newComments = view.getJTextFieldNotes().getText();
 
     String equipment = "";
     String newEquipment = "";
@@ -394,7 +430,7 @@ public class ModelRun {
   }
 
   /**
-   * Mis &agrave; jour des boutons..
+   * Mis &agrave; jour des boutons.
    * 
    * @param view
    * @throws SQLException
@@ -405,4 +441,364 @@ public class ModelRun {
     }
   }
 
+  /**
+   * Mis &agrave; jour des zones cardiaques.
+   * 
+   * @param view
+   * @throws SQLException
+   */
+  public void updateHeartZone(JPanelRun view) throws SQLException {
+    if (dataRun == null) {
+      view.getChartHeartZone().setChart(null);
+      return;
+    }
+
+    AbstractDataActivity dataActivity = UserActivityTableManager.getInstance()
+        .retreive(view.getModelActivities().getSportType());
+    DataHeartZone[] hz = dataActivity.getHeartZones();
+    DataSpeedZone[] sz = dataActivity.getSpeedZones();
+
+    long thz[] = new long[hz.length];
+    float dhz[] = new float[hz.length];
+    long tsz[] = new long[sz.length];
+    float dsz[] = new float[sz.length];
+
+    List<DataRunTrk> trks = ModelPointsManager.getInstance().getListTrks();
+    if (trks != null) {
+      for (int i = 0; i < trks.size() - 1; i++) {
+        // heart
+        int h = trks.get(i).getHeartRate();
+        if (h == 0) {
+          continue;
+        }
+        else {
+          for (int j = 0; j < hz.length; j++) {
+            if (h >= hz[j].getLowHeartRate() && h < hz[j].getHighHeartRate()) {
+              thz[j] += trks.get(i + 1).getTime().getTime()
+                        - trks.get(i).getTime().getTime();
+              dhz[j] += trks.get(i + 1).getDistance()
+                        - trks.get(i).getDistance();
+              break;
+            }
+          }
+        }
+        // speed
+        double s = trks.get(i).getSpeed();
+        if (s <= 0) {
+          continue;
+        }
+        else {
+          for (int j = 0; j < sz.length; j++) {
+            if (s >= sz[j].getLowSpeed() && s < sz[j].getHighSpeed()) {
+              tsz[j] += trks.get(i + 1).getTime().getTime()
+                        - trks.get(i).getTime().getTime();
+              dsz[j] += trks.get(i + 1).getDistance()
+                        - trks.get(i).getDistance();
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    // heart
+    // ----------------------
+    long thzTot = 0;
+    for (long v : thz) {
+      thzTot += v;
+    }
+    if (thzTot == 0) {
+      thzTot = 1;
+    }
+    DefaultCategoryDataset datasetHeart = new DefaultCategoryDataset();
+    NumberFormat nf = NumberFormat.getPercentInstance(LanguageManager
+        .getManager().getLocale());
+    double p1, p2;
+    String lib;
+    String fh = "{0}-{1}";
+    String ftext1 = "{0} {1} : {2}-{3} ({4}-{5})";
+    String ftext2 = "<html><body>{0} ({1}) {2}</body></html>";
+    for (int i = 0; i < hz.length; i++) {
+      p1 = 1.0 * hz[i].getLowHeartRate() / dataActivity.getMaxHeartRate();
+      p2 = 1.0 * hz[i].getHighHeartRate() / dataActivity.getMaxHeartRate();
+      lib = MessageFormat.format(fh, hz[i].getLowHeartRate(), hz[i]
+          .getHighHeartRate())
+            + " ("
+            + MessageFormat.format(fh, nf.format(p1), nf.format(p2))
+            + ")";
+      datasetHeart.setValue(new LongExt(thz[i], thzTot, dhz[i], lib),
+                            "",
+                            "" + (i + 1));
+
+      view.getjLabelLibHearts()[i].setText(MessageFormat.format(ftext1, view
+          .getResourceBundle().getString("zone"), (i + 1), hz[i]
+          .getLowHeartRate(), hz[i].getHighHeartRate(), nf.format(p1), nf
+          .format(p2)));
+      view.getjLabelValHearts()[i].setText(lib);
+
+      double v = 1.0 * thz[i] / thzTot;
+      view.getjLabelValHearts()[i].setText(MessageFormat
+          .format(ftext2,
+                  TimeUnit.formatMilliSecondeTime(thz[i]),
+                  nf.format(v),
+                  DistanceUnit.formatWithUnit(dhz[i])));
+    }
+    JFreeChart chartHeart = ChartFactory
+        .createBarChart(null,
+                        null,
+                        null,
+                        datasetHeart,
+                        PlotOrientation.VERTICAL,
+                        false,
+                        true,
+                        false);
+    CategoryPlot plot = (CategoryPlot) chartHeart.getPlot();
+    plot.getDomainAxis().setLabelFont(GuiFont.FONT_ITALIC);
+    plot.getDomainAxis().setTickLabelFont(GuiFont.FONT_PLAIN_SMALL);
+    // plot.getDomainAxis()
+    // .setCategoryLabelPositions(CategoryLabelPositions.UP_45);
+    plot.setBackgroundPaint(Color.white);
+    plot.setDomainGridlinePaint(Color.black);
+    plot.setRangeGridlinePaint(Color.black);
+
+    DateAxis dateAxis = new DateAxis();
+    dateAxis.setLabelFont(GuiFont.FONT_ITALIC);
+    dateAxis.setTickLabelFont(GuiFont.FONT_PLAIN_SMALL);
+    dateAxis.setVerticalTickLabels(false);
+
+    RelativeDateFormat rdf = new RelativeDateFormat();
+    rdf.setShowZeroDays(false);
+    rdf.setSecondFormatter(new DecimalFormat("00"));
+    rdf.setMinuteFormatter(new DecimalFormat("00"));
+    rdf.setHourFormatter(new DecimalFormat("00"));
+    rdf.setSecondSuffix("");
+    rdf.setMinuteSuffix(":");
+    rdf.setHourSuffix(":");
+    dateAxis.setDateFormatOverride(rdf);
+    plot.setRangeAxis(dateAxis);
+
+    // renderer
+    CategoryItemRenderer renderer = plot.getRenderer();
+    String format = "<html><body><font color=\"red\">\u2665</font>&nbsp;{0}<br>{1} ({2})<br>{3}</body></html>";
+
+    StandardCategoryToolTipGeneratorExt generator = new StandardCategoryToolTipGeneratorExt(format,
+                                                                                            rdf);
+    renderer.setBaseToolTipGenerator(generator);
+    // set up gradient paints for series...
+    final GradientPaint gp = new GradientPaint(0.0f,
+                                               0.0f,
+                                               Color.blue,
+                                               0.0f,
+                                               0.0f,
+                                               Color.lightGray);
+    renderer.setSeriesPaint(0, gp);
+    renderer.setBaseItemLabelFont(GuiFont.FONT_PLAIN_SMALL);
+    chartHeart.setBackgroundPaint(view.getBackground());
+    // font
+    if (chartHeart.getTitle() != null) {
+      chartHeart.getTitle().setFont(GuiFont.FONT_PLAIN);
+    }
+    int i = 0;
+    while (chartHeart.getLegend(i) != null) {
+      chartHeart.getLegend(i).setItemFont(GuiFont.FONT_PLAIN);
+      i++;
+    }
+    view.getChartHeartZone().setChart(chartHeart);
+
+    view.getChartHeartZone().setMouseZoomable(true, true);
+    view.getChartHeartZone().setMouseWheelEnabled(false);
+    view.getChartHeartZone().setRangeZoomable(false);
+    view.getChartHeartZone().setDomainZoomable(true);
+    view.getChartHeartZone().setFillZoomRectangle(true);
+    view.getChartHeartZone().setLocale(LanguageManager.getManager()
+        .getCurrentLang().getLocale());
+
+    // speed
+    // ----------------------
+    long tszTot = 0;
+    for (long v : tsz) {
+      tszTot += v;
+    }
+    if (tszTot == 0) {
+      tszTot = 1;
+    }
+
+    DefaultCategoryDataset datasetSpeed = new DefaultCategoryDataset();
+    String fs = "{0}-{1} {2} <br>{3}-{4} {5}";
+
+    for (i = 0; i < sz.length; i++) {
+      double sl, sh;
+      if (!DistanceUnit.isDefaultUnitKm()) {
+        sl = (Double) SpeedPaceUnit.convert(SpeedUnit.unitKmPerH(), SpeedUnit
+            .unitMilePerH(), sz[i].getLowSpeed());
+        sh = (Double) SpeedPaceUnit.convert(SpeedUnit.unitKmPerH(), SpeedUnit
+            .unitMilePerH(), sz[i].getHighSpeed());
+        lib = MessageFormat.format(fs,
+                                   SpeedPaceUnit.formatSpeed(sl),
+                                   SpeedPaceUnit.formatSpeed(sh),
+                                   SpeedUnit.unitMilePerH(),
+                                   SpeedPaceUnit.convert(SpeedUnit
+                                       .unitMilePerH(), SpeedPaceUnit
+                                       .unitMnPerMile(), sl),
+                                   SpeedPaceUnit.convert(SpeedUnit
+                                       .unitMilePerH(), SpeedPaceUnit
+                                       .unitMnPerMile(), sh),
+                                   SpeedPaceUnit.unitMnPerMile());
+      }
+      else {
+        sl = sz[i].getLowSpeed();
+        sh = sz[i].getHighSpeed();
+        lib = MessageFormat.format(fs,
+                                   SpeedPaceUnit.formatSpeed(sl),
+                                   SpeedPaceUnit.formatSpeed(sh),
+                                   SpeedUnit.unitKmPerH(),
+                                   SpeedPaceUnit
+                                       .convert(SpeedUnit.unitKmPerH(),
+                                                SpeedPaceUnit.unitMnPerkm(),
+                                                sl),
+                                   SpeedPaceUnit
+                                       .convert(SpeedUnit.unitKmPerH(),
+                                                SpeedPaceUnit.unitMnPerkm(),
+                                                sh),
+                                   SpeedPaceUnit.unitMnPerkm());
+      }
+      datasetSpeed.setValue(new LongExt(tsz[i], tszTot, dsz[i], lib),
+                            "",
+                            "" + (i + 1));
+
+      double v = 1.0 * tsz[i] / tszTot;
+      view.getjLabelValSpeeds()[i].setText(MessageFormat
+          .format(ftext2,
+                  TimeUnit.formatMilliSecondeTime(tsz[i]),
+                  nf.format(v),
+                  DistanceUnit.formatWithUnit(dsz[i])));
+    }
+    JFreeChart chartSpeed = ChartFactory
+        .createBarChart(null,
+                        null,
+                        null,
+                        datasetSpeed,
+                        PlotOrientation.VERTICAL,
+                        false,
+                        true,
+                        false);
+    plot = (CategoryPlot) chartSpeed.getPlot();
+    plot.getDomainAxis().setLabelFont(GuiFont.FONT_ITALIC);
+    plot.getDomainAxis().setTickLabelFont(GuiFont.FONT_PLAIN_SMALL);
+    plot.setBackgroundPaint(Color.white);
+    plot.setDomainGridlinePaint(Color.black);
+    plot.setRangeGridlinePaint(Color.black);
+
+    dateAxis = new DateAxis();
+    dateAxis.setLabelFont(GuiFont.FONT_ITALIC);
+    dateAxis.setTickLabelFont(GuiFont.FONT_PLAIN_SMALL);
+    dateAxis.setVerticalTickLabels(false);
+
+    rdf = new RelativeDateFormat();
+    rdf.setShowZeroDays(false);
+    rdf.setSecondFormatter(new DecimalFormat("00"));
+    rdf.setMinuteFormatter(new DecimalFormat("00"));
+    rdf.setHourFormatter(new DecimalFormat("00"));
+    rdf.setSecondSuffix("");
+    rdf.setMinuteSuffix(":");
+    rdf.setHourSuffix(":");
+    dateAxis.setDateFormatOverride(rdf);
+    plot.setRangeAxis(dateAxis);
+
+    // renderer
+    renderer = plot.getRenderer();
+    format = "<html><body>{0}<br>{1} ({2})<br>{3}</body></html>";
+
+    generator = new StandardCategoryToolTipGeneratorExt(format, rdf);
+    renderer.setBaseToolTipGenerator(generator);
+    // set up gradient paints for series...
+    renderer.setSeriesPaint(0, gp);
+    renderer.setBaseItemLabelFont(GuiFont.FONT_PLAIN_SMALL);
+    chartSpeed.setBackgroundPaint(view.getBackground());
+    // font
+    if (chartSpeed.getTitle() != null) {
+      chartSpeed.getTitle().setFont(GuiFont.FONT_PLAIN);
+    }
+    i = 0;
+    while (chartSpeed.getLegend(i) != null) {
+      chartSpeed.getLegend(i).setItemFont(GuiFont.FONT_PLAIN);
+      i++;
+    }
+    view.getChartSpeedZone().setChart(chartSpeed);
+    view.getChartSpeedZone().setMouseZoomable(true, true);
+    view.getChartSpeedZone().setMouseWheelEnabled(false);
+    view.getChartSpeedZone().setRangeZoomable(false);
+    view.getChartSpeedZone().setDomainZoomable(true);
+    view.getChartSpeedZone().setFillZoomRectangle(true);
+    view.getChartSpeedZone().setLocale(LanguageManager.getManager()
+        .getCurrentLang().getLocale());
+
+  }
+
+  private class LongExt extends Number {
+    private Long   value;
+
+    private long   tot;
+
+    private float  distance;
+
+    private String lib;
+
+    public LongExt(long value, long tot, float distance, String lib) {
+      this.value = value;
+      this.tot = tot;
+      this.distance = distance;
+      this.lib = lib;
+    }
+
+    public float getDistance() {
+      return distance;
+    }
+
+    public long getTot() {
+      return tot;
+    }
+
+    @Override
+    public double doubleValue() {
+      return value.doubleValue();
+    }
+
+    @Override
+    public float floatValue() {
+      return value.floatValue();
+    }
+
+    @Override
+    public int intValue() {
+      return value.intValue();
+    }
+
+    @Override
+    public long longValue() {
+      return value.longValue();
+    }
+  }
+
+  private class StandardCategoryToolTipGeneratorExt extends
+      StandardCategoryToolTipGenerator {
+    public StandardCategoryToolTipGeneratorExt(String format, DateFormat rdf) {
+      super(format, rdf);
+    }
+
+    @Override
+    public String generateToolTip(CategoryDataset dataset, int row, int column) {
+      Object[] items = createItemArray(dataset, row, column);
+
+      LongExt value = (LongExt) dataset.getValue(row, column);
+
+      NumberFormat f = NumberFormat.getPercentInstance(LanguageManager
+          .getManager().getLocale());
+
+      double v = 1.0 * value.longValue() / value.getTot();
+
+      return MessageFormat.format(getLabelFormat(), value.lib, items[2], f
+          .format(v), DistanceUnit.formatWithUnit(value.getDistance()));
+    }
+  }
 }

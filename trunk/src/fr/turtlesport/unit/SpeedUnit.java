@@ -1,7 +1,8 @@
 package fr.turtlesport.unit;
 
-import fr.turtlesport.unit.event.Unit;
+import java.text.DecimalFormat;
 
+import fr.turtlesport.unit.event.Unit;
 
 /**
  * @author denis
@@ -9,9 +10,22 @@ import fr.turtlesport.unit.event.Unit;
  */
 public final class SpeedUnit extends Unit {
 
-  private static final String[] UNITS = { "km/h", "mile/h" };
+  private static final String[]      UNITS          = { "km/h", "mile/h" };
+
+  private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.#");
 
   private SpeedUnit() {
+  }
+
+  /**
+   * Formate une vitesse.
+   * 
+   * @param speed
+   *          vitesse.
+   * @return la vitesse.
+   */
+  public static String format(double speed) {
+    return DECIMAL_FORMAT.format(speed);
   }
 
   /**
@@ -23,7 +37,7 @@ public final class SpeedUnit extends Unit {
   public static boolean isUnitKmPerH(String unit) {
     return unitKmPerH().equals(unit);
   }
-  
+
   /**
    * Restitue l'unit&eacute; de vitesse.
    * 
@@ -48,6 +62,15 @@ public final class SpeedUnit extends Unit {
   public static String unitKmPerH() {
     return UNITS[0];
   }
+  
+  /**
+   * Restitue l'unit&eacute; de vitesse en mile/h.
+   * 
+   * @return l'unit&eacute; de vitesse en mile/h.
+   */
+  public static String unitMilePerH() {
+    return UNITS[1];
+  }
 
   /**
    * Restitue l'unit&eacute; de vitesse par d&eacute;faut.
@@ -69,15 +92,15 @@ public final class SpeedUnit extends Unit {
    *          la valeur.
    * @return la valeur convertie en unit&eacute; <code>unit2</code>.
    */
-  public static Object convert(String unit1, String unit2, double value) {
-    return convertUnit(SpeedPaceUnit.class,
+  public static double convert(String unit1, String unit2, double value) {
+    return (Double) convertUnit(SpeedPaceUnit.class,
                        UNITS,
                        unit1,
                        unit2,
                        value,
                        Double.TYPE);
   }
-  
+
   /**
    * Conversion de km/h en mile/h.
    * 
@@ -87,7 +110,7 @@ public final class SpeedUnit extends Unit {
   public static double convertKmperhToMileperh(double kmPerh) {
     return kmPerh / 1.609;
   }
-  
+
   /**
    * Conversion de mile/h en km/h.
    * 

@@ -22,6 +22,10 @@ public final class GuiFont {
                                                                    java.awt.Font.PLAIN,
                                                                    10);
 
+  public static final Font   FONT_BOLD_SMALL            = new Font("SansSerif",
+                                                                   java.awt.Font.BOLD,
+                                                                   10);
+
   public static final Font   FONT_PLAIN                 = new Font("SansSerif",
                                                                    java.awt.Font.PLAIN,
                                                                    11);

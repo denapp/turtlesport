@@ -1,6 +1,5 @@
 package fr.turtlesport.ui.swing.model;
 
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -98,6 +97,9 @@ public class ModelAthlete {
       view.getJButtonPhoto().setIcon(null);
     }
 
+    // Frequence cardiaque
+    view.getJTextFieldMinHeartRate().setValue(data.getMinHeartRate());
+    
     // ajout des evenements
     view.addEvents(data);
 
@@ -120,32 +122,32 @@ public class ModelAthlete {
     view.getJButtonPhoto().setIcon(null);
   }
 
-  /**
-   * Sauvegarde.
-   * 
-   * @throws SQLException
-   */
-  public void save() throws SQLException {
-    log.info(">>save");
-
-    // conversion unites
-    if (!WeightUnit.isUnitKg(unitWeight)) {
-      data.setWeight((float) WeightUnit.convert(unitWeight,
-                                                WeightUnit.unitKg(),
-                                                data.getWeight()));
-    }
-
-    // sauvegarde des equipements
-
-    // re-conversion unites
-    if (!WeightUnit.isUnitKg(unitWeight)) {
-      data.setWeight((float) WeightUnit.convert(WeightUnit.unitKg(),
-                                                unitWeight,
-                                                data.getWeight()));
-    }
-
-    log.info("<<save");
-  }
+  // /**
+  // * Sauvegarde.
+  // *
+  // * @throws SQLException
+  // */
+  // public void save() throws SQLException {
+  // log.info(">>save");
+  //
+  // // conversion unites
+  // if (!WeightUnit.isUnitKg(unitWeight)) {
+  // data.setWeight((float) WeightUnit.convert(unitWeight,
+  // WeightUnit.unitKg(),
+  // data.getWeight()));
+  // }
+  //
+  // // sauvegarde des equipements
+  //
+  // // re-conversion unites
+  // if (!WeightUnit.isUnitKg(unitWeight)) {
+  // data.setWeight((float) WeightUnit.convert(WeightUnit.unitKg(),
+  // unitWeight,
+  // data.getWeight()));
+  // }
+  //
+  // log.info("<<save");
+  // }
 
   public void beforeSave() {
     // conversion unite des zones

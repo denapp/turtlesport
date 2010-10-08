@@ -9,6 +9,7 @@ import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.JPanelUserActivity;
 import fr.turtlesport.unit.SpeedPaceUnit;
 import fr.turtlesport.unit.event.UnitEvent;
+import fr.turtlesport.util.ConvertStringTo;
 
 /**
  * @author Denis Apparicio
@@ -138,7 +139,7 @@ public class ModelActivity {
   public void afterSave() {
     // re-conversion des unites
     if (!SpeedPaceUnit.isUnitKmPerH(unitSpeedAndPace)) {
-      // mis a jour des valeurs
+      // mise a jour des valeurs
       Object newSpeedLow, newSpeedHigh;
 
       for (DataSpeedZone data : dataActivity.getSpeedZones()) {
@@ -148,8 +149,18 @@ public class ModelActivity {
         newSpeedHigh = SpeedPaceUnit.convert(SpeedPaceUnit.unitKmPerH(),
                                              unitSpeedAndPace,
                                              data.getHighSpeed());
-        data.setLowSpeed(new Float((Double) newSpeedLow));
-        data.setHighSpeed(new Float((Double) newSpeedHigh));
+        if (newSpeedHigh instanceof String) {
+          Float fNewSpeedLow = (Float) ConvertStringTo
+              .toObject(Float.TYPE, ((String) newSpeedLow).replace(':', '.'));
+          Float fNewSpeedHigh = (Float) ConvertStringTo
+              .toObject(Float.TYPE, ((String) newSpeedHigh).replace(':', '.'));
+          data.setLowSpeed(fNewSpeedLow);
+          data.setHighSpeed(fNewSpeedHigh);
+        }
+        else {
+          data.setLowSpeed(new Float((Double) newSpeedLow));
+          data.setHighSpeed(new Float((Double) newSpeedHigh));
+        }
       }
     }
 

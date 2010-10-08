@@ -99,11 +99,9 @@ public class JMediaMapKit extends JXPanel {
     jButtonPlay.setContentAreaFilled(false);
     jButtonPlay.setOpaque(false);
 
-    jLabelSpeed1 = new JLabel(ImagesDiagramRepository
-        .getImageIcon("turtle.png"));
+    jLabelSpeed1 = new JLabel(ImagesDiagramRepository.getImageIcon("turtle.png"));
     jLabelSpeed1.setVisible(true);
-    jLabelSpeed2 = new JLabel(ImagesDiagramRepository
-        .getImageIcon("rabbit.png"));
+    jLabelSpeed2 = new JLabel(ImagesDiagramRepository.getImageIcon("rabbit.png"));
     jLabelSpeed2.setVisible(true);
 
     jLabelTime = new JLabel(" ");
@@ -112,7 +110,7 @@ public class JMediaMapKit extends JXPanel {
     jLabelTime.setAlignmentX(Component.LEFT_ALIGNMENT);
     jLabelExtra = new JLabel(" ");
     jLabelExtra.setAlignmentX(Component.LEFT_ALIGNMENT);
-    jLabelExtra.setVisible(false);
+    jLabelExtra.setVisible(true);
     jLabelExtra.setFont(GuiFont.FONT_PLAIN_VERY_SMALL);
 
     setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -175,6 +173,22 @@ public class JMediaMapKit extends JXPanel {
         ModelMapkitManager.getInstance().setSpeed(value);
       }
 
+    });
+
+    jLabelSpeed1.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        ModelMapkitManager.getInstance().setSpeed(ModelMapkitManager
+            .getInstance().getSpeed() - 5);
+      }
+    });
+    jLabelSpeed2.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if ((ModelMapkitManager.getInstance().getSpeed() + 5) <= jProgressBarSpeed
+            .getMaximum()) {
+          ModelMapkitManager.getInstance().setSpeed(ModelMapkitManager
+              .getInstance().getSpeed() + 5);
+        }
+      }
     });
 
     timerActionListener = new TimerActionListener();
@@ -264,6 +278,7 @@ public class JMediaMapKit extends JXPanel {
   }
 
   public void startTimer() {
+    System.out.println("INIT="+jProgressBarPlay.getValue());
     if (jProgressBarPlay.getValue() == jProgressBarPlay.getMaximum()) {
       timerActionListener.init();
       ModelMapkitManager.getInstance().beginPoint();
@@ -320,17 +335,19 @@ public class JMediaMapKit extends JXPanel {
 
       jProgressBarPlay.setValue(value);
 
+      // geo position
+      model.geoPosition(p);
+
       // time
       model.extra(p);
       if (isBegin) {
         model.timeEnd();
+        ModelMapkitManager.getInstance().isRunning();
       }
       else {
         model.time(p);
       }
 
-      // geo position
-      model.geoPosition(p);
     }
   }
 
@@ -378,13 +395,9 @@ public class JMediaMapKit extends JXPanel {
      */
     public void setTimeVisible(boolean b) {
       jLabelTime.setVisible(b);
-      jLabelExtra.setVisible(b);
     }
 
     protected void extra(GeoPositionMapKit p) {
-      if (!jLabelTime.isVisible()) {
-        return;
-      }
 
       StringBuilder st = new StringBuilder();
 
@@ -393,11 +406,12 @@ public class JMediaMapKit extends JXPanel {
       st.append("<html><body>");
       double dist = (p == null) ? 0 : p.getDistance();
       if (p != null && !DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
-        dist = DistanceUnit.convert(DistanceUnit.unitKm(), DistanceUnit
-            .getDefaultUnit(), dist);
+        dist = DistanceUnit.convert(DistanceUnit.unitKm(),
+                                    DistanceUnit.getDefaultUnit(),
+                                    dist);
       }
       st.append(DistanceUnit.formatWithUnit(dist));
-      if (p != null && p.getHeartRate() > 50) {
+      if (jLabelTime.isVisible() && p != null && p.getHeartRate() > 50) {
         st.append("&nbsp;&nbsp;<font color=red>\u2665</font>&nbsp;");
         st.append(p.getHeartRate());
       }
@@ -435,8 +449,8 @@ public class JMediaMapKit extends JXPanel {
 
     protected void geoPosition(GeoPositionMapKit p) {
       if (mapkit.hasGeoPositionVisible()) {
-        getJLabelGeoPosition().setText(GeoUtil.geoPosition(p.getLatitude(), p
-            .getLongitude()));
+        getJLabelGeoPosition().setText(GeoUtil.geoPosition(p.getLatitude(),
+                                                           p.getLongitude()));
       }
     }
 
