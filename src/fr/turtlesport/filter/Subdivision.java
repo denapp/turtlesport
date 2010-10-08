@@ -19,13 +19,43 @@ public final class Subdivision {
   /**
    * 
    */
+  public static double[] filter(double[] points) {
+    double[] out;
+
+    // Redimensionne la structure pour stocker les nouveaux points
+    out = new double[2 * points.length];
+
+    // Replace les points deja presents dans la nouvelle structure
+    for (int i = 0; i < points.length; i++) {
+      out[i] = points[i];
+    }
+    for (int i = points.length; i < out.length; i++) {
+      out[i] = 0F;
+    }
+
+    for (int i = points.length - 1; i > 1; i--) {
+      // Creation des nouveaux points par interpolation
+      out[2 * i - 1] = (out[i] + out[i - 1]) / 2;
+
+      // Deplace les points deja presents
+      out[2 * i] = out[2 * i] * (1 - W) + W / 2
+                   * (out[2 * i - 1] + out[2 * i + 1]);
+
+    }
+
+    return out;
+  }
+
+  /**
+   * 
+   */
   public static DataRunTrk[] filter(DataRunTrk[] points) {
     DataRunTrk[] out;
 
     // Redimensionne la structure pour stocker les nouveaux points
     out = new DataRunTrk[2 * points.length];
 
-    // Replace les points deja présents dans la nouvelle structure
+    // Replace les points deja prï¿½sents dans la nouvelle structure
     for (int i = 0; i < points.length; i++) {
       out[i] = new DataRunTrk();
       out[i].setDistance(points[i].getDistance());
@@ -39,7 +69,7 @@ public final class Subdivision {
 
     double value;
     for (int i = points.length - 1; i > 1; i--) {
-      // Replace les points deja présents dans la nouvelle structure
+      // Replace les points deja prï¿½sents dans la nouvelle structure
       out[2 * i].setDistance(points[i].getDistance());
       out[2 * i].setHeartRate(points[i].getHeartRate());
       out[2 * i].setAltitude(points[i].getAltitude());
@@ -52,7 +82,7 @@ public final class Subdivision {
       out[2 * i - 1].setAltitude((out[i].getAltitude() + out[i - 1]
           .getAltitude()) / 2);
 
-      // Deplace les points deja présents
+      // Deplace les points deja prï¿½sents
       value = out[2 * i].getDistance() * (1 - W) + W / 2
               * (out[2 * i - 1].getDistance() + out[2 * i + 1].getDistance());
       out[2 * i].setDistance((float) value);
@@ -68,4 +98,5 @@ public final class Subdivision {
 
     return out;
   }
+
 }

@@ -385,7 +385,17 @@ public class DatabaseManager {
           executeUpdate("DROP TABLE " + TABLE_RUN);
         }
         else {
-          // la table existe
+          // la table existe 
+          if (rs.getMetaData().getColumnDisplaySize(8) != 500) {
+            // on augmente la taille des commentaires
+            releaseConnection(conn);
+            conn = null;
+            StringBuilder st = new StringBuilder();
+            st.append("ALTER TABLE ");
+            st.append(TABLE_RUN);
+            st.append(" ALTER COLUMN comments SET DATA TYPE VARCHAR(500)");
+            executeUpdate(st.toString());
+          }
           return;
         }
       }
@@ -688,6 +698,12 @@ public class DatabaseManager {
 
   }
 
+  /**
+   * A partir de la version 1.14 ajout de plusieurs utilisateur. Version 1.16 :
+   * ajout d'une colonne pour le fq au repos
+   * 
+   * @throws SQLException
+   */
   private static void createTableUser() throws SQLException {
     DataUser du = null;
     if (tableExists(TABLE_USER)) {
@@ -698,27 +714,41 @@ public class DatabaseManager {
                                                         + TABLE_USER);
         rs = pstmt.executeQuery();
 
-        if (rs.getMetaData().getColumnCount() != 8) {
-          // table existe dans une ancienne version ( < à 0.1.13)
-          // nouvelle version avec creation index
-          isNeedCreateIndex = true;
-          if (rs.next()) {
-            du = new DataUser();
-            du.first_name = rs.getString("first_name");
-            du.last_name = rs.getString("last_name");
-            du.sexe = rs.getInt("sexe");
-            du.birthdate = rs.getDate("birthdate");
-            du.weight = rs.getFloat("weight");
-            du.size = rs.getInt("size");
-            du.image_path = rs.getString("image_path");
-          }
-          releaseConnection(conn);
-          conn = null;
-          executeUpdate("DROP TABLE " + TABLE_USER);
-        }
-        else {
-          // la table existe
-          return;
+        switch (rs.getMetaData().getColumnCount()) {
+          case 7:
+            // table existe dans une ancienne version ( < à 0.1.13)
+            // nouvelle version avec creation index
+            isNeedCreateIndex = true;
+            if (rs.next()) {
+              du = new DataUser();
+              du.first_name = rs.getString("first_name");
+              du.last_name = rs.getString("last_name");
+              du.sexe = rs.getInt("sexe");
+              du.birthdate = rs.getDate("birthdate");
+              du.weight = rs.getFloat("weight");
+              du.size = rs.getInt("size");
+              du.image_path = rs.getString("image_path");
+            }
+            releaseConnection(conn);
+            conn = null;
+            executeUpdate("DROP TABLE " + TABLE_USER);
+            break;
+
+          case 8:
+            // table existe dans une ancienne version ( >= 0.1.13 et < 0.1.16)
+            // nouvelle version avec creation index
+            releaseConnection(conn);
+            conn = null;
+            StringBuilder st = new StringBuilder();
+            st.append("ALTER TABLE ");
+            st.append(TABLE_USER);
+            st.append(" ADD COLUMN min_heart_rate SMALLINT");
+            executeUpdate(st.toString());
+            return;
+
+          default:
+            // la table existe
+            return;
         }
       }
       finally {
@@ -741,7 +771,8 @@ public class DatabaseManager {
     st.append("birthdate DATE, ");
     st.append("weight FLOAT, ");
     st.append("size SMALLINT, ");
-    st.append("image_path VARCHAR(500)");
+    st.append("image_path VARCHAR(500), ");
+    st.append("min_heart_rate SMALLINT");
     st.append(')');
 
     executeUpdate(st.toString());

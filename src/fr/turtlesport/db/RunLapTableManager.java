@@ -644,7 +644,7 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append("SELECT ");
         st.append("Year(LAP.start_time) AS THE_YEAR,");
         st.append("SUM(LAP.total_dist),");
-        st.append("COUNT(DISTINCT LAP.id) ");
+        st.append("COUNT(DISTINCT LAP.ID) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");

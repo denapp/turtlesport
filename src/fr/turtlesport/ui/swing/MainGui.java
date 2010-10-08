@@ -1661,6 +1661,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
   public void setRightComponent(JPanel panel) {
     if (jSplitPaneCenter.getRightComponent() != null) {
+      
       // Suppression des listeners
       if (!(panel instanceof JPanelRun)) {
         ModelPointsManager.getInstance().removeAllChangeListener();

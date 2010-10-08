@@ -10,7 +10,7 @@ import fr.turtlesport.util.IniFile;
 import fr.turtlesport.util.Location;
 
 /**
- * Classe pour la configuration d'Outils Caisse.
+ * Classe pour la configuration de Turtle Sport.
  * 
  * @author Denis Apparicio
  * 

@@ -236,7 +236,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
       st.append(getTableName());
       st.append(" WHERE id=?");
       st.append(" AND distance <> ?");
-      st.append(" AND (latitude <> ? AND longitude <> ?) ");
+      st.append(" AND ((latitude <> ? AND longitude <> ?) AND  (latitude <> 0 AND longitude <> 0))");
       st.append(" ORDER BY distance");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
@@ -314,7 +314,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
       st.append(getTableName());
       st.append(" WHERE id=?");
       st.append(" AND distance <> ?");
-      st.append(" AND (latitude <> ? AND longitude <> ?) ");
+      st.append(" AND ((latitude <> ? AND longitude <> ?) AND  (latitude <> 0 AND longitude <> 0))");
       st.append(" AND (time BETWEEN ? AND ?)");
       st.append(" ORDER BY distance");
 

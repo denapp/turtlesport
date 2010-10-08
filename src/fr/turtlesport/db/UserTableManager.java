@@ -121,8 +121,9 @@ public final class UserTableManager extends AbstractTableManager {
       st.append(" birthdate,");
       st.append(" weight,");
       st.append(" size,");
-      st.append(" image_path)");
-      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?)");
+      st.append(" image_path,");
+      st.append(" min_heart_rate)");
+      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
 
@@ -134,6 +135,7 @@ public final class UserTableManager extends AbstractTableManager {
       pstmt.setFloat(5, data.getWeight());
       pstmt.setInt(6, (int) data.getHeight());
       pstmt.setString(7, data.getPath());
+      pstmt.setInt(8, data.getMinHeartRate());
 
       pstmt.executeUpdate();
       pstmt.close();
@@ -165,7 +167,8 @@ public final class UserTableManager extends AbstractTableManager {
       StringBuilder st = new StringBuilder();
       st.append("UPDATE ");
       st.append(getTableName());
-      st.append(" SET sexe=?, birthdate=?, weight=?, size=?, image_path=?");
+      st
+          .append(" SET sexe=?, birthdate=?, weight=?, size=?, image_path=?, min_heart_rate=?");
       st.append(" WHERE id=?");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
@@ -176,7 +179,8 @@ public final class UserTableManager extends AbstractTableManager {
       pstmt.setFloat(3, data.getWeight());
       pstmt.setInt(4, (int) data.getHeight());
       pstmt.setString(5, data.getPath());
-      pstmt.setInt(6, data.getId());
+      pstmt.setInt(6, data.getMinHeartRate());
+      pstmt.setInt(7, data.getId());
 
       pstmt.executeUpdate();
       pstmt.close();
@@ -257,7 +261,7 @@ public final class UserTableManager extends AbstractTableManager {
         data.setWeight(rs.getFloat(6));
         data.setHeight(rs.getInt(7));
         data.setPath(rs.getString(8));
-
+        data.setMinHeartRate(rs.getInt(9));
         list.add(data);
       }
 

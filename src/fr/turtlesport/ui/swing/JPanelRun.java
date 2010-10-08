@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,6 +29,7 @@ import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
@@ -35,13 +37,17 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
+import org.jfree.chart.ChartPanel;
 
+import fr.turtlesport.Configuration;
 import fr.turtlesport.db.AbstractDataActivity;
 import fr.turtlesport.db.DataActivityOther;
 import fr.turtlesport.db.DataRun;
@@ -143,11 +149,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JComboBox               jComboBoxEquipment;
 
-  private JLabel                  jLabelLibNotes;
-
   private JTextAreaLength         jTextFieldNotes;
-
-  private TitledBorder            borderPanelRunSummary;
 
   private TitledBorder            borderPanelRunLap;
 
@@ -201,6 +203,38 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JPanel                  jPanelButtons;
 
+  private JMenuItemTurtle         jMenuItemRunGoogleMap;
+
+  private JTabbedPane             jTabbedPaneRace;
+
+  private JPanel                  panelAllButtons;
+
+  private ChartPanel              chartPanelHeartZone;
+
+  private JPanel                  jPanelSpeed;
+
+  private JPanel                  jPanelHeart;
+
+  private JPanel                  jPanelTextHeart;
+
+  private JLabel[]                jLabelLibHearts;
+
+  private JLabel[]                jLabelValHearts;
+
+  private JLabel[]                jLabelLibSpeeds;
+
+  private JLabel[]                jLabelValSpeeds;
+
+  private JButton                 jButtonChartSpeed;
+
+  private JButton                 jButtonTextSpeed;
+
+  private JButton                 jButtonChartHeart;
+
+  private JButton                 jButtonTextHeart;
+
+  private ChartPanel              chartPanelSpeedZone;
+
   // model
   private ModelRun                model;
 
@@ -208,9 +242,9 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private EquipementComboBoxModel modelEquipements;
 
-  private JMenuItemTurtle         jMenuItemRunGoogleMap;
+  private ResourceBundle          rb;
 
-  private static ResourceBundle   rb;
+  private JPanel                  jPanelTextSpeed;
 
   /**
    * This is the default constructor.
@@ -238,7 +272,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
   /**
    * @return the rb
    */
-  public static ResourceBundle getResourceBundle() {
+  public ResourceBundle getResourceBundle() {
     return rb;
   }
 
@@ -359,7 +393,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
    * @see fr.turtlesport.unit.event.UnitListener#completedRemoveUnitListener()
    */
   public void completedRemoveUnitListener() {
-    UnitManager.getManager().removeUnitListener(jDiagram.getJDiagram());
+    UnitManager.getManager().removeUnitListener(jDiagram);
     UnitManager.getManager().removeUnitListener(jPanelMap);
   }
 
@@ -389,7 +423,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
    * @see fr.turtlesport.lang.LanguageListener#completedRemoveLanguageListener()
    */
   public void completedRemoveLanguageListener() {
-    LanguageManager.getManager().removeLanguageListener(jDiagram.getJDiagram());
+    LanguageManager.getManager().removeLanguageListener(jDiagram);
     LanguageManager.getManager().removeLanguageListener(jPanelMap);
   }
 
@@ -410,14 +444,15 @@ public class JPanelRun extends JPanel implements LanguageListener,
     jLabelLibAllure.setText(rb.getString("jLabelLibAllure"));
     jLabelLibSpeedMoy.setText(rb.getString("jLabelLibSpeedMoy"));
     jLabelLibCalories.setText(rb.getString("jLabelLibCalories"));
-    borderPanelRunSummary.setTitle(rb.getString("borderPanelRunSummary"));
+    String lib = rb.getString("jLabelLibNotes");
+    getJTabbedPaneRace().setTitleAt(0, rb.getString("tabPane1"));
+    getJTabbedPaneRace().setTitleAt(1, lib.substring(0, lib.length() - 2));
     getJButtonNext().setToolTipText(rb.getString("jButtonNextToolTipText"));
     getJButtonPrev().setToolTipText(rb.getString("jButtonPrevToolTipText"));
     jLabelLibHeart.setText(rb.getString("jLabelLibHeart"));
     borderPanelRunLap.setTitle(rb.getString("borderPanelRunLap"));
     jLabelLibAlt.setText(rb.getString("jLabelLibAlt"));
     jLabelLibEquipment.setText(rb.getString("jLabelLibEquipment"));
-    jLabelLibNotes.setText(rb.getString("jLabelLibNotes"));
     jLabelLibActivity.setText(rb.getString("jLabelLibActivity"));
     jMenuItemRunDetail.setText(rb.getString("jMenuItemRunDetail"));
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
@@ -437,6 +472,18 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     // mis a jour nom de colonnes
     tableModelLap.performedLanguage();
+
+    if (!chartPanelHeartZone.getLocale().equals(lang.getLocale())) {
+      try {
+        model.updateHeartZone(this);
+      }
+      catch (SQLException e) {
+      }
+    }
+
+    for (int i = 0; i < jLabelLibSpeeds.length; i++) {
+      jLabelLibSpeeds[i].setText(rb.getString("zone") + " " + (i + 1) + " : ");
+    }
     repaint();
   }
 
@@ -452,6 +499,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
     this.add(getJPopupMenu());
     this.add(getJPanelCenter(), BorderLayout.CENTER);
     this.add(getJPanelEast(), BorderLayout.EAST);
+
+    setBorder(BorderFactory.createTitledBorder(""));
 
     ActionListener action;
     // evenement
@@ -513,6 +562,79 @@ public class JPanelRun extends JPanel implements LanguageListener,
     action = new MapMercatorActionListener();
     getJMenuItemRunMap().addActionListener(action);
     MainGui.getWindow().getJMenuItemRunMap().addActionListener(action);
+
+    jTabbedPaneRace.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        if (jTabbedPaneRace.getSelectedComponent() instanceof ChartPanel) {
+          try {
+            model.updateHeartZone(JPanelRun.this);
+          }
+          catch (SQLException sqle) {
+          }
+        }
+      }
+    });
+
+    jButtonChartHeart.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (!(jPanelHeart.getComponent(1) instanceof ChartPanel)) {
+          jPanelHeart.remove(1);
+          jPanelHeart.add(chartPanelHeartZone, BorderLayout.CENTER);
+          Configuration.getConfig().addProperty("Run",
+                                                "heartchart",
+                                                Boolean.toString(true));
+          repaint();
+        }
+      }
+    });
+    jButtonTextHeart.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (jPanelHeart.getComponent(1) instanceof ChartPanel) {
+          jPanelHeart.remove(1);
+          jPanelHeart.add(jPanelTextHeart, BorderLayout.CENTER);
+          Configuration.getConfig().addProperty("Run",
+                                                "heartchart",
+                                                Boolean.toString(false));
+          repaint();
+        }
+      }
+    });
+
+    jButtonChartSpeed.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (!(jPanelSpeed.getComponent(1) instanceof ChartPanel)) {
+          jPanelSpeed.remove(1);
+          jPanelSpeed.add(chartPanelSpeedZone, BorderLayout.CENTER);
+          Configuration.getConfig().addProperty("Run",
+                                                "speedchart",
+                                                Boolean.toString(true));
+          repaint();
+        }
+      }
+    });
+    jButtonTextSpeed.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (jPanelSpeed.getComponent(1) instanceof ChartPanel) {
+          jPanelSpeed.remove(1);
+          jPanelSpeed.add(jPanelTextSpeed, BorderLayout.CENTER);
+          Configuration.getConfig().addProperty("Run",
+                                                "speedchart",
+                                                Boolean.toString(false));
+          repaint();
+        }
+      }
+    });
+
+    jComboBoxActivity.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        try {
+          model.updateHeartZone(JPanelRun.this);
+        }
+        catch (SQLException sqle) {
+          log.error("", sqle);
+        }
+      }
+    });
 
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
@@ -735,6 +857,25 @@ public class JPanelRun extends JPanel implements LanguageListener,
     return jMenuItemRunSave;
   }
 
+  public JTabbedPane getJTabbedPaneRace() {
+    if (jTabbedPaneRace == null) {
+      jTabbedPaneRace = new JTabbedPane();
+      jTabbedPaneRace.setBorder(BorderFactory.createTitledBorder(""));
+
+      jTabbedPaneRace.setFont(GuiFont.FONT_PLAIN);
+      jTabbedPaneRace.addTab("Course", getJPanelRunSummary());
+      jTabbedPaneRace.addTab("Notes", getJScrollPaneTextArea());
+      // jTabbedPaneRace
+      // .addTab("<html><body><font color=\"red\">\u2665</font></body></html>",
+      // getJPanelChartHeartZone());
+      jTabbedPaneRace
+          .addTab("<html><body><font color=\"red\">\u2665</font></body></html>",
+                  getJPanelChartHeart());
+      jTabbedPaneRace.addTab("Speed", getJPanelChartSpeed());
+    }
+    return jTabbedPaneRace;
+  }
+
   /**
    * This method initializes jPanelRunSummary.
    * 
@@ -745,54 +886,48 @@ public class JPanelRun extends JPanel implements LanguageListener,
     if (jPanelRunSummary == null) {
       jPanelRunSummary = new JPanel();
       jPanelRunSummary.setLayout(new GridBagLayout());
-      borderPanelRunSummary = BorderFactory
-          .createTitledBorder(null,
-                              "Course",
-                              TitledBorder.DEFAULT_JUSTIFICATION,
-                              TitledBorder.DEFAULT_POSITION,
-                              GuiFont.FONT_PLAIN,
-                              null);
-      jPanelRunSummary.setBorder(borderPanelRunSummary);
-      jPanelRunSummary.setPreferredSize(new Dimension(300, 400));
 
       Insets insets = new Insets(0, 0, 5, 10);
+      Insets insets2 = new Insets(10, 0, 5, 10);
       GridBagConstraints g = new GridBagConstraints();
+
+      // Ligne 1
+      g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
-      g.insets = insets;
-      jLabelLibDistTot = new JLabel("Distance totale :");
+      g.insets = insets2;
+      jLabelLibDistTot = new JLabel();
       jLabelLibDistTot.setFont(GuiFont.FONT_PLAIN);
       jLabelLibDistTot.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibDistTot, g);
       g = new GridBagConstraints();
-      g.weightx = 0.0;
+      g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
-      g.insets = insets;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets2;
       jLabelValDistTot = new JLabel();
       jLabelValDistTot.setFont(GuiFont.FONT_PLAIN);
       jLabelLibDistTot.setLabelFor(jLabelValDistTot);
       jPanelRunSummary.add(jLabelValDistTot, g);
-      g = new GridBagConstraints();
-      g.weightx = 1.0;
-      g.anchor = GridBagConstraints.NORTHEAST;
-      g.fill = GridBagConstraints.HORIZONTAL;
-      g.gridwidth = GridBagConstraints.REMAINDER;
-      g.insets = new Insets(0, 0, 0, 5);
-      jPanelRunSummary.add(getJPanelNav(), g);
 
+      // Ligne 2
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibTimeTot = new JLabel("Temps total :");
+      jLabelLibTimeTot = new JLabel();
       jLabelLibTimeTot.setFont(GuiFont.FONT_PLAIN);
       jLabelLibTimeTot.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibTimeTot, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -802,17 +937,20 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibTimeTot.setLabelFor(jLabelValTimeTot);
       jPanelRunSummary.add(jLabelValTimeTot, g);
 
+      // Ligne 3
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibAllure = new JLabel("Allure moyenne :");
+      jLabelLibAllure = new JLabel();
       jLabelLibAllure.setFont(GuiFont.FONT_PLAIN);
       jLabelLibAllure.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibAllure, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -822,17 +960,20 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibAllure.setLabelFor(jLabelValAllure);
       jPanelRunSummary.add(jLabelValAllure, g);
 
+      // Ligne 4
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibSpeedMoy = new JLabel("Vitesse moyenne :");
+      jLabelLibSpeedMoy = new JLabel();
       jLabelLibSpeedMoy.setFont(GuiFont.FONT_PLAIN);
       jLabelLibSpeedMoy.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibSpeedMoy, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -842,17 +983,20 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibSpeedMoy.setLabelFor(jLabelValSpeedMoy);
       jPanelRunSummary.add(jLabelValSpeedMoy, g);
 
+      // Ligne 5
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibCalories = new JLabel("Calories :");
+      jLabelLibCalories = new JLabel();
       jLabelLibCalories.setFont(GuiFont.FONT_PLAIN);
       jLabelLibCalories.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibCalories, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -862,18 +1006,21 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibCalories.setLabelFor(jLabelValCalories);
       jPanelRunSummary.add(jLabelValCalories, g);
 
+      // Ligne 6
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibHeart = new JLabel("Moyenne :");
+      jLabelLibHeart = new JLabel();
       jLabelLibHeart.setIcon(ImagesRepository.getImageIcon("heart.gif"));
       jLabelLibHeart.setFont(GuiFont.FONT_PLAIN);
       jLabelLibHeart.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibHeart, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
@@ -883,8 +1030,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibHeart.setLabelFor(jLabelValHeartAverage);
       jPanelRunSummary.add(jLabelValHeartAverage, g);
 
+      // Ligne 7
       g = new GridBagConstraints();
       g.weightx = 0.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
@@ -894,15 +1043,17 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jPanelRunSummary.add(jLabelLibAlt, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
+      g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
       jLabelValAlt = new JLabel();
       jLabelValAlt.setFont(GuiFont.FONT_PLAIN);
-      jLabelValAlt.setLabelFor(jLabelLibAlt);
+      jLabelLibAlt.setLabelFor(jLabelValAlt);
       jPanelRunSummary.add(jLabelValAlt, g);
 
+      // Ligne 8
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
@@ -924,12 +1075,13 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibActivity.setLabelFor(jComboBoxActivity);
       jPanelRunSummary.add(jComboBoxActivity, g);
 
+      // Ligne 9
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibEquipment = new JLabel("Equipement :");
+      jLabelLibEquipment = new JLabel();
       jLabelLibEquipment.setFont(GuiFont.FONT_PLAIN);
       jLabelLibEquipment.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibEquipment, g);
@@ -945,39 +1097,179 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibEquipment.setLabelFor(jComboBoxEquipment);
       jPanelRunSummary.add(jComboBoxEquipment, g);
 
-      g = new GridBagConstraints();
-      g.weightx = 0.0;
-      g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
-      g.insets = insets;
-      jLabelLibNotes = new JLabel("Notes :");
-      jLabelLibNotes.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibNotes.setHorizontalAlignment(SwingConstants.TRAILING);
-      jLabelLibNotes.setVerticalAlignment(SwingConstants.TOP);
-      jPanelRunSummary.add(jLabelLibNotes, g);
-      g = new GridBagConstraints();
-      g.weightx = 1.0;
-      g.weighty = 1.0;
-      g.gridheight = 3;
-      g.anchor = GridBagConstraints.NORTHWEST;
-      g.fill = GridBagConstraints.BOTH;
-      g.gridwidth = GridBagConstraints.REMAINDER;
-      g.insets = insets;
-      jLabelLibNotes.setLabelFor(getJScrollPaneTextArea());
-      jPanelRunSummary.add(getJScrollPaneTextArea(), g);
-
-      g = new GridBagConstraints();
-      g.weightx = 1.0;
-      g.anchor = GridBagConstraints.NORTHEAST;
-      g.fill = GridBagConstraints.BOTH;
-      g.gridwidth = GridBagConstraints.REMAINDER;
-      jPanelRunSummary.add(getJPanelButtons(), g);
     }
     return jPanelRunSummary;
   }
 
+  public JPanel getJPanelChartHeart() {
+    if (jPanelHeart == null) {
+      jPanelHeart = new JPanel();
+      jPanelHeart.setLayout(new BorderLayout());
+
+      JPanel panelButton = new JPanel();
+      panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.Y_AXIS));
+
+      jButtonChartHeart = new JButton(ImagesRepository
+          .getImageIcon("statSmall.png"));
+      jButtonChartHeart.setPreferredSize(new Dimension(24, 24));
+      jButtonTextHeart = new JButton(ImagesRepository.getImageIcon("list.png"));
+      jButtonTextHeart.setPreferredSize(new Dimension(24, 24));
+      panelButton.add(jButtonChartHeart);
+      panelButton.add(jButtonTextHeart);
+
+      jPanelHeart.add(panelButton, BorderLayout.EAST);
+      getJPanelTextHeart();
+      getChartHeartZone();
+      if (Configuration.getConfig().getPropertyAsBoolean("Run",
+                                                         "heartchart",
+                                                         true)) {
+        jPanelHeart.add(getChartHeartZone(), BorderLayout.CENTER);
+      }
+      else {
+        jPanelHeart.add(getJPanelTextHeart(), BorderLayout.CENTER);
+
+      }
+    }
+    return jPanelHeart;
+  }
+
+  public JPanel getJPanelTextHeart() {
+    if (jPanelTextHeart == null) {
+      jPanelTextHeart = new JPanel();
+      // jPanelTextHeart
+      // .setLayout(new BoxLayout(jPanelTextHeart, BoxLayout.Y_AXIS));
+      jPanelTextHeart.setLayout(new GridLayout(10, 1));
+
+      jLabelLibHearts = new JLabel[5];
+      jLabelValHearts = new JLabel[5];
+      for (int i = 0; i < 5; i++) {
+        jLabelLibHearts[i] = new JLabel();
+        jLabelLibHearts[i].setFont(GuiFont.FONT_PLAIN);
+        jLabelValHearts[i] = new JLabel();
+        jLabelValHearts[i].setFont(GuiFont.FONT_ITALIC);
+        jPanelTextHeart.add(jLabelLibHearts[i]);
+        jPanelTextHeart.add(jLabelValHearts[i]);
+      }
+
+    }
+    return jPanelTextHeart;
+  }
+
+  public JLabel[] getjLabelLibHearts() {
+    return jLabelLibHearts;
+  }
+
+  public JLabel[] getjLabelValHearts() {
+    return jLabelValHearts;
+  }
+
+  public ChartPanel getChartHeartZone() {
+    if (chartPanelHeartZone == null) {
+      chartPanelHeartZone = new ChartPanel(null);
+      chartPanelHeartZone.setFont(GuiFont.FONT_PLAIN);
+      chartPanelHeartZone.setPreferredSize(new Dimension(280, 350));
+    }
+    return chartPanelHeartZone;
+  }
+
+  public JLabel[] getjLabelLibSpeeds() {
+    return jLabelLibSpeeds;
+  }
+
+  public JLabel[] getjLabelValSpeeds() {
+    return jLabelValSpeeds;
+  }
+
+  public JPanel getJPanelChartSpeed() {
+    if (jPanelSpeed == null) {
+      jPanelSpeed = new JPanel();
+      jPanelSpeed.setLayout(new BorderLayout());
+
+      JPanel panelButton = new JPanel();
+      panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.Y_AXIS));
+
+      jButtonChartSpeed = new JButton(ImagesRepository
+          .getImageIcon("statSmall.png"));
+      jButtonChartSpeed.setPreferredSize(new Dimension(24, 24));
+      jButtonTextSpeed = new JButton(ImagesRepository.getImageIcon("list.png"));
+      jButtonTextSpeed.setPreferredSize(new Dimension(24, 24));
+      panelButton.add(jButtonChartSpeed);
+      panelButton.add(jButtonTextSpeed);
+
+      jPanelSpeed.add(panelButton, BorderLayout.EAST);
+      getJPanelTextSpeed();
+      getChartSpeedZone();
+      if (Configuration.getConfig().getPropertyAsBoolean("Run",
+                                                         "speedchart",
+                                                         true)) {
+        jPanelSpeed.add(getChartSpeedZone(), BorderLayout.CENTER);
+      }
+      else {
+        jPanelSpeed.add(getJPanelTextSpeed(), BorderLayout.CENTER);
+      }
+    }
+    return jPanelSpeed;
+  }
+
+  public JPanel getJPanelTextSpeed() {
+    if (jPanelTextSpeed == null) {
+      // jPanelTextSpeed = new JPanel();
+      // jPanelTextSpeed.setLayout(new GridLayout(10, 2));
+      // jLabelLibSpeeds = new JLabel[10];
+      // jLabelValSpeeds = new JLabel[10];
+      // for (int i = 0; i < 10; i++) {
+      // jLabelLibSpeeds[i] = new JLabel();
+      // jLabelLibSpeeds[i].setFont(GuiFont.FONT_PLAIN);
+      // jLabelValSpeeds[i] = new JLabel();
+      // jLabelValSpeeds[i].setFont(GuiFont.FONT_ITALIC);
+      // jPanelTextSpeed.add(jLabelLibSpeeds[i]);
+      // jPanelTextSpeed.add(jLabelValSpeeds[i]);
+      // }
+
+      jPanelTextSpeed = new JPanel();
+      jPanelTextSpeed.setLayout(new GridBagLayout());
+      jLabelLibSpeeds = new JLabel[10];
+      jLabelValSpeeds = new JLabel[10];
+
+      for (int i = 0; i < 10; i++) {
+        GridBagConstraints g = new GridBagConstraints();
+        g.weightx = 0.0;
+        g.weighty = 1.0;
+        g.anchor = GridBagConstraints.EAST;
+        g.fill = GridBagConstraints.BOTH;
+        jLabelLibSpeeds[i] = new JLabel();
+        jLabelLibSpeeds[i].setFont(GuiFont.FONT_PLAIN);
+        jLabelLibSpeeds[i].setHorizontalAlignment(SwingConstants.TRAILING);
+        jPanelTextSpeed.add(jLabelLibSpeeds[i], g);
+        g = new GridBagConstraints();
+        g.weightx = 1.0;
+        g.weighty = 1.0;
+        g.anchor = GridBagConstraints.WEST;
+        g.fill = GridBagConstraints.BOTH;
+        g.gridwidth = GridBagConstraints.REMAINDER;
+        jLabelValSpeeds[i] = new JLabel();
+        jLabelValSpeeds[i].setFont(GuiFont.FONT_PLAIN);
+        jLabelLibSpeeds[i].setLabelFor(jLabelValSpeeds[i]);
+        jPanelTextSpeed.add(jLabelValSpeeds[i], g);
+      }
+    }
+    return jPanelTextSpeed;
+  }
+
+  public ChartPanel getChartSpeedZone() {
+    if (chartPanelSpeedZone == null) {
+      chartPanelSpeedZone = new ChartPanel(null);
+      chartPanelSpeedZone.setFont(GuiFont.FONT_PLAIN);
+      chartPanelSpeedZone.setPreferredSize(new Dimension(280, 350));
+    }
+    return chartPanelSpeedZone;
+  }
+
   private JPanel getJPanelButtons() {
     if (jPanelButtons == null) {
+      panelAllButtons = new JPanel();
+      panelAllButtons.setLayout(new BorderLayout());
+
       jPanelButtons = new JPanel();
       jPanelButtons.setLayout(new FlowLayout(FlowLayout.RIGHT));
       jPanelButtons.add(getJButtonDelete());
@@ -995,8 +1287,11 @@ public class JPanelRun extends JPanel implements LanguageListener,
       }
       jPanelButtons.add(getJButtonGoogleEarth());
       jPanelButtons.add(getJButtonGoogleMap());
+
+      panelAllButtons.add(jPanelButtons, BorderLayout.EAST);
+      panelAllButtons.add(getJPanelNav(), BorderLayout.WEST);
     }
-    return jPanelButtons;
+    return panelAllButtons;
   }
 
   public JButton getJButtonSave() {
@@ -1130,8 +1425,9 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jPanelEastCenter = new JPanel();
       jPanelEastCenter.setLayout(new BoxLayout(jPanelEastCenter,
                                                BoxLayout.Y_AXIS));
-      jPanelEastCenter.add(getJPanelRunSummary());
-      jPanelEastCenter.add(Box.createRigidArea(new Dimension(0, 10)));
+      jPanelEastCenter.add(getJPanelButtons());
+      jPanelEastCenter.add(getJTabbedPaneRace());
+      // jPanelEastCenter.add(Box.createRigidArea(new Dimension(0, 5)));
       jPanelEastCenter.add(getJPanelMap());
       jPanelEast = new JPanel();
       jPanelEast.setLayout(new BorderLayout());
@@ -1246,7 +1542,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
                               GuiFont.FONT_PLAIN,
                               null));
       jPanelGraph.setFont(GuiFont.FONT_PLAIN);
-      jPanelGraph.setPreferredSize(new Dimension(600, 350));
+      jPanelGraph.setPreferredSize(new Dimension(600, 360));
     }
     return jPanelGraph;
   }
@@ -1762,8 +2058,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
    */
   private JScrollPane getJScrollPaneTextArea() {
     if (jScrollPaneTextArea == null) {
-      jTextFieldNotes = new JTextAreaLength(5, 20);
-      jTextFieldNotes.setMaxiMumCharacters(100);
+      jTextFieldNotes = new JTextAreaLength(13, 25);
+      jTextFieldNotes.setMaxiMumCharacters(500);
       jTextFieldNotes.setFont(GuiFont.FONT_PLAIN);
       jTextFieldNotes.setWrapStyleWord(true);
       jTextFieldNotes.setLineWrap(true);

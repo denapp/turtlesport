@@ -201,14 +201,10 @@ public class ModelDialogMap {
                                            + " / -" + Integer.toString(alt[1]));
 
     // Categorie
-    view.getJLabelValCategory().setText(dataRun.getLibelleSportType());
+    view.getJLabelValActivity().setText(dataRun.getLibelleSportType());
 
     // Equipement
     view.getJLabelValEquipment().setText(dataRun.getEquipement());
-
-    // Commentaires
-    view.getJTextFieldNotes().setText((dataRun.getComments() == null) ? ""
-        : dataRun.getComments());
 
     log.info("<<updateSummary");
   }
