@@ -83,7 +83,7 @@ public final class ModelPointsManager {
    * 
    * @return les tours interm&eacute;m&eacute;diares.
    */
-  public DataRunLap[] getRunLaps() {
+  public final DataRunLap[] getRunLaps() {
     return runLaps;
   }
 
@@ -92,7 +92,7 @@ public final class ModelPointsManager {
    * 
    * @return le nombre de tours interm&eacute;m&eacute;diares.
    */
-  public int runLapsSize() {
+  public final int runLapsSize() {
     return (runLaps == null) ? 0 : runLaps.length;
   }
 
@@ -101,7 +101,7 @@ public final class ModelPointsManager {
    * 
    * @return index du tour.
    */
-  public int getLapIndex() {
+  public final int getLapIndex() {
     return lapIndex;
   }
 
@@ -112,7 +112,7 @@ public final class ModelPointsManager {
    *          the dataRun to set
    * @throws SQLException
    */
-  public final void setDataRun(DataRun dataRun) throws SQLException {
+  public final void setDataRun(Object source, DataRun dataRun) throws SQLException {
     if (dataRun != null && dataRun.equals(this.dataRun)) {
       return;
     }
@@ -155,7 +155,7 @@ public final class ModelPointsManager {
       }
     }
 
-    fireAllPointsChanged();
+    fireAllPointsChanged(source);
   }
 
   /**
@@ -164,7 +164,7 @@ public final class ModelPointsManager {
    * @param newLapIndex
    *          index du tour.
    */
-  public void setLap(int newLapIndex) {
+  public final void setLap(Object source, int newLapIndex) {
     if ((newLapIndex > runLapsSize() - 1) || newLapIndex == lapIndex) {
       return;
     }
@@ -179,22 +179,20 @@ public final class ModelPointsManager {
 
       try {
         // Map
-        deb = RunLapTableManager.getInstance().lapTrkBegin(runLaps[lapIndex]
-                                                               .getId(),
-                                                           runLaps[lapIndex]
-                                                               .getLapIndex());
+        deb = RunLapTableManager.getInstance()
+            .lapTrkBegin(runLaps[lapIndex].getId(),
+                         runLaps[lapIndex].getLapIndex());
         if (deb != null) {
-          end = RunLapTableManager.getInstance().lapTrkEnd(runLaps[lapIndex]
-                                                               .getId(),
-                                                           runLaps[lapIndex]
-                                                               .getLapIndex());
+          end = RunLapTableManager.getInstance()
+              .lapTrkEnd(runLaps[lapIndex].getId(),
+                         runLaps[lapIndex].getLapIndex());
         }
 
         if (deb != null && end != null) {
-          lapGeoBegin = makeGeoMapFromGarmin(deb.getLatitude(), deb
-              .getLongitude());
-          lapGeoEnd = makeGeoMapFromGarmin(end.getLatitude(), end
-              .getLongitude());
+          lapGeoBegin = makeGeoMapFromGarmin(deb.getLatitude(),
+                                             deb.getLongitude());
+          lapGeoEnd = makeGeoMapFromGarmin(end.getLatitude(),
+                                           end.getLongitude());
         }
       }
       catch (SQLException e) {
@@ -206,7 +204,7 @@ public final class ModelPointsManager {
     }
 
     // on deckenche
-    fireLapChanged();
+    fireLapChanged(source);
   }
 
   /**
@@ -265,16 +263,25 @@ public final class ModelPointsManager {
   }
 
   /**
+   * Restitue l'index du point courant.
+   * 
+   * @return
+   */
+  public final boolean isCurrentLastPoint() {
+    return (listGeo != null && currentMapPoint == (listGeo.size() - 1));
+  }
+
+  /**
    * Valorise l'index du point courant de la map.
    * 
    * @param currentMapPoint
    *          la nouvelle valeur.
    * @return <code>true</code> si dernier point.
    */
-  public final void setMapCurrentPoint(int currentMapPoint) {
+  public final void setMapCurrentPoint(Object source, int currentMapPoint) {
     if (this.currentMapPoint != currentMapPoint) {
       this.currentMapPoint = currentMapPoint;
-      firePointChanged();
+      firePointChanged(source);
     }
   }
 
@@ -298,10 +305,12 @@ public final class ModelPointsManager {
    *          le <code>ChangePointsListener</code> &a grave; ajouter.
    */
   public void addChangeListener(ChangePointsListener l) {
-    listenerList.add(l);
-    if (hasPoints()) {
-      l.changedAllPoints(changeEvent);
-      l.changedPoint(changeEvent);
+    if (!listenerList.contains(l)) {
+      listenerList.add(l);
+      if (hasPoints()) {
+        l.changedAllPoints(changeEvent);
+        l.changedPoint(changeEvent);
+      }
     }
   }
 
@@ -335,9 +344,11 @@ public final class ModelPointsManager {
    * Execute chaque<code>ChangeListener</code>.
    * 
    */
-  protected void fireAllPointsChanged() {
+  protected void fireAllPointsChanged(Object source) {
     for (ChangePointsListener l : listenerList) {
-      l.changedAllPoints(changeEvent);
+      if (!l.equals(source)) {
+        l.changedAllPoints(changeEvent);
+      }
     }
   }
 
@@ -345,9 +356,11 @@ public final class ModelPointsManager {
    * Execute chaque<code>ChangeListener</code>.
    * 
    */
-  protected void fireLapChanged() {
+  protected void fireLapChanged(Object source) {
     for (ChangePointsListener l : listenerList) {
-      l.changedLap(changeEvent);
+      if (!l.equals(source)) {
+        l.changedLap(changeEvent);
+      }
     }
   }
 
@@ -355,9 +368,11 @@ public final class ModelPointsManager {
    * Execute chaque<code>ChangeListener</code>.
    * 
    */
-  protected void firePointChanged() {
+  protected void firePointChanged(Object source) {
     for (ChangePointsListener l : listenerList) {
-      l.changedPoint(changeEvent);
+      if (!l.equals(source)) {
+        l.changedPoint(changeEvent);
+      }
     }
   }
 
@@ -373,8 +388,8 @@ public final class ModelPointsManager {
         || GeoUtil.isInvalidGarminGpx(gLongitude)) {
       return null;
     }
-    return new GeoPosition(GeoUtil.makeLatitudeFromGarmin(gLatitude), GeoUtil
-        .makeLongitudeFromGarmin(gLongitude));
+    return new GeoPosition(GeoUtil.makeLatitudeFromGarmin(gLatitude),
+                           GeoUtil.makeLongitudeFromGarmin(gLongitude));
   }
 
 }

@@ -790,7 +790,6 @@ public class JPanelUserProfile extends JPanel implements LanguageListener,
             Athlete a = (Athlete) tableModelAthlete.getValueAt(i, 0);
             a.model.beforeSave();
             listUser.add(a.model.getData());
-            System.out.println(a.model.getData().getMinHeartRate());
           }
 
           UserTableManager.getInstance().store(listUser);

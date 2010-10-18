@@ -46,6 +46,7 @@ import org.jfree.data.time.TimePeriodValues;
 import org.jfree.data.time.TimePeriodValuesCollection;
 import org.jfree.data.xy.XYDataset;
 
+import fr.turtlesport.Configuration;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataStat;
 import fr.turtlesport.db.DataStatTot;
@@ -175,7 +176,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
     runTot.calories = dt.getCalories();
 
     // distance
-    jLabelValDistTot.setText(DistanceUnit.formatWithUnit(runTot.distanceTot));
+    jLabelValDistTot.setText(DistanceUnit
+        .formatWithDefaultUnit(runTot.distanceTot));
 
     // Temps
     jLabelValTimeTot.setText(TimeUnit.formatHundredSecondeTime(runTot.timeTot));
@@ -276,7 +278,10 @@ public class JPanelStat extends JPanel implements LanguageListener,
       timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
              resDayOfWeek[i].getTimeTot());
-      s1.addValueExt(resDayOfWeek[i].getDistance() / 1000.0,
+
+      String distance = DistanceUnit.formatWithDefaultUnit(resDayOfWeek[i]
+          .getDistance());
+      s1.addValueExt(distance,
                      libRace + " : " + resDayOfWeek[i].getNumberRaces());
     }
     timeInMillisDeb = cal.getTimeInMillis();
@@ -314,7 +319,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
       cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
       timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
-             resDayOfWeek[i].getDistance() / 1000.0);
+             convertDistance(resDayOfWeek[i].getDistance()));
 
       String ext1 = TimeUnit.formatHundredSecondeTime((long) resDayOfWeek[i]
           .getTimeTot());
@@ -326,7 +331,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
     cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
     timeInMillisEnd = cal.getTimeInMillis();
     s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
-           resDayOfWeek[0].getDistance() / 1000.0);
+           convertDistance(resDayOfWeek[0].getDistance() / 1000.0));
 
     String ext1 = TimeUnit.formatHundredSecondeTime((long) resDayOfWeek[0]
         .getTimeTot());
@@ -358,9 +363,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
-      sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getDistance() / 1000.0);
-
+      sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+                convertDistance(d.getDistance()));
       String ext1 = TimeUnit.formatHundredSecondeTime((long) d.getTimeTot());
       String ext2 = libRace + " : " + d.getNumberRaces();
       sYear.addValueExt(ext1, ext2);
@@ -392,9 +396,10 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
-      sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getTimeTot());
-      sYear.addValueExt(d.getDistance(), libRace + " : " + d.getNumberRaces());
+      sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+                d.getTimeTot());
+      String distance = DistanceUnit.formatWithDefaultUnit(d.getDistance());
+      sYear.addValueExt(distance, libRace + " : " + d.getNumberRaces());
     }
 
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -407,7 +412,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
     // List<DataStatYearMonth> resMonth = RunLapTableManager.getInstance()
     // .statByMonth(idUser);
     List<DataStatYearMonth> resMonth = RunLapTableManager.getInstance()
-        .distanceByMonth(idUser);
+        .statByMonth(idUser);
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, 1));
@@ -428,9 +433,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.MONTH, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
-      sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getDistance() / 1000.0);
-
+      sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+                 convertDistance(d.getDistance()));
       String ext1 = TimeUnit.formatHundredSecondeTime((long) d.getTimeTot());
       String ext2 = libRace + " : " + d.getNumberRaces();
       sMonth.addValueExt(ext1, ext2);
@@ -463,9 +467,10 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.MONTH, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
-      sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getTimeTot());
-      sMonth.addValueExt(d.getDistance(), libRace + " : " + d.getNumberRaces());
+      sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+                 d.getTimeTot());
+      String distance = DistanceUnit.formatWithDefaultUnit(d.getDistance());
+      sMonth.addValueExt(distance, libRace + " : " + d.getNumberRaces());
     }
 
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -496,8 +501,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.WEEK_OF_YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
-      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getDistance() / 1000.0);
+      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+             convertDistance(d.getDistance()));
 
       String ext1 = TimeUnit.formatHundredSecondeTime((long) d.getTimeTot());
       String ext2 = libRace + " : " + d.getNumberRaces();
@@ -532,9 +537,10 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.WEEK_OF_YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
-      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getTimeTot());
-      s1.addValueExt(d.getDistance(), libRace + " : " + d.getNumberRaces());
+      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+             d.getTimeTot());
+      String distance = DistanceUnit.formatWithDefaultUnit(d.getDistance());
+      s1.addValueExt(distance, libRace + " : " + d.getNumberRaces());
     }
 
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -558,8 +564,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.HOUR_OF_DAY, 22);
       long timeInMillisEnd = cal.getTimeInMillis();
-      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getComputeDistanceTot() / 1000.0);
+      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+             convertDistance(d.getComputeDistanceTot()));
       s1.addValueExt("", "");
     }
 
@@ -585,8 +591,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.HOUR_OF_DAY, 22);
       long timeInMillisEnd = cal.getTimeInMillis();
-      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .computeTimeTot());
+      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+             d.computeTimeTot());
       s1.addValueExt("", "");
     }
 
@@ -691,7 +697,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
   public JFreeChart createChartRaceNumberMonth(String libRace) throws SQLException {
     List<DataStatYearMonth> resMonth = RunLapTableManager.getInstance()
-        .distanceByMonth(idUser);
+        .statByMonth(idUser);
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, 1));
@@ -712,8 +718,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.MONTH, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
-      sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getNumberRaces());
+      sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+                 d.getNumberRaces());
       sMonth.addValueExt("", libRace + " : " + d.getDistance() / 1000.0);
     }
     final TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
@@ -769,8 +775,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.WEEK_OF_YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
-      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getNumberRaces());
+      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+             d.getNumberRaces());
       s1.addValueExt("", libRace + " : " + d.getDistance() / 1000.0);
     }
 
@@ -811,9 +817,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
     timeInMillisEnd = cal.getTimeInMillis();
     s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
            resDayOfWeek[0].getNumberRaces());
-    s1
-        .addValueExt("", libRace + " : " + resDayOfWeek[0].getDistance()
-                         / 1000.0);
+    s1.addValueExt("", libRace + " : " + resDayOfWeek[0].getDistance() / 1000.0);
 
     TimePeriodValuesCollection dataset = new TimePeriodValuesCollection();
     dataset.addSeries(s1);
@@ -840,8 +844,8 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
-      sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .getNumberRaces());
+      sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
+                d.getNumberRaces());
       sYear.addValueExt("", libRace + " : " + d.getDistance() / 1000.0);
     }
 
@@ -915,12 +919,30 @@ public class JPanelStat extends JPanel implements LanguageListener,
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
 
+    // Liste par defaut
+    int index1 = Configuration.getConfig()
+        .getPropertyAsInt("Stat", "jComboxBoxCriter1", 0);
+    int index2 = Configuration.getConfig()
+        .getPropertyAsInt("Stat", "jComboxBoxCriter2", 0);
+    jComboxBoxCriter1.setSelectedIndex(index1);
+    jComboxBoxCriter2.setSelectedIndex(index2);
+
     // Evenement
     ActionListener action = new ActionListener() {
       public void actionPerformed(final ActionEvent e) {
         MainGui.getWindow().beforeRunnableSwing();
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
+            Configuration.getConfig()
+                .addProperty("Stat",
+                             "jComboxBoxCriter1",
+                             Integer.toString(jComboxBoxCriter1
+                                 .getSelectedIndex()));
+            Configuration.getConfig()
+                .addProperty("Stat",
+                             "jComboxBoxCriter2",
+                             Integer.toString(jComboxBoxCriter2
+                                 .getSelectedIndex()));
             updateChart();
             MainGui.getWindow().afterRunnableSwing();
           }
@@ -1020,7 +1042,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
     runTot.unitDistance = unit;
 
     // distance
-    jLabelValDistTot.setText(DistanceUnit.formatWithUnit(distTot));
+    jLabelValDistTot.setText(DistanceUnit.formatWithDefaultUnit(distTot));
 
     // vitesse moyenne
     jLabelValSpeedMoy
@@ -1158,6 +1180,13 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
     }
     return jPanelChart;
+  }
+
+  private double convertDistance(double distance) {
+    if (DistanceUnit.isDefaultUnitKm()) {
+      return distance / 1000.0;
+    }
+    return DistanceUnit.convertKmToMile(distance / 1000.0);
   }
 
   private class DataRunTot {

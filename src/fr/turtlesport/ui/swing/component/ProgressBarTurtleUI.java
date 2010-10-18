@@ -62,9 +62,4 @@ public class ProgressBarTurtleUI extends BasicProgressBarUI {
     }
   }
 
-  public static void main(String[] args) {
-    System.out.println("paintIndeterminate");
-    
-  }
-
 }

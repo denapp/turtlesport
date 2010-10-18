@@ -231,8 +231,6 @@ public class JTurtleMapKit extends JXPanel {
     mainMap.add(getJPanelButton(), gridBagConstraints);
 
     jMediaMapKit = new JMediaMapKit(this);
-    // setBorder(BorderFactory.createCompoundBorder(BorderFactory
-    // .createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
     setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
     setLayout(new BorderLayout(0, 0));
     add(mainMap, BorderLayout.CENTER);
@@ -454,7 +452,6 @@ public class JTurtleMapKit extends JXPanel {
 
     public MapKitChangeMapListener() {
       super();
-      ModelPointsManager.getInstance().addChangeListener(this);
     }
 
     /*
