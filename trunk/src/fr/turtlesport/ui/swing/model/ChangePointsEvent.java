@@ -94,7 +94,7 @@ public class ChangePointsEvent extends ChangeEvent {
   public GeoPositionMapKit getMapCurrentPoint() {
     return ((ModelPointsManager) getSource()).getMapCurrentPoint();
   }
-  
+
   /**
    * Restitue l'index du point courant.
    * 
@@ -102,6 +102,15 @@ public class ChangePointsEvent extends ChangeEvent {
    */
   public final int getTrkIndexCurrentPoint() {
     return ((ModelPointsManager) getSource()).getTrkIndexCurrentPoint();
+  }
+
+  /**
+   * Determine si dernier point.
+   * 
+   * @return <ode>true</code> si dernier point.
+   */
+  public final boolean isCurrentLastPoint() {
+    return ((ModelPointsManager) getSource()).isCurrentLastPoint();
   }
 
 }

@@ -90,7 +90,7 @@ public class ModelRun {
 
     log.info("<<updateView");
   }
-  
+
   /**
    * @param summary
    * @throws SQLException
@@ -152,8 +152,9 @@ public class ModelRun {
       double distTot = 0;
       int timeTot = 0;
       try {
-        distTot = DistanceUnit.convert(dataRun.getUnit(), e.getUnit(), dataRun
-            .getComputeDistanceTot());
+        distTot = DistanceUnit.convert(dataRun.getUnit(),
+                                       e.getUnit(),
+                                       dataRun.getComputeDistanceTot());
         dataRun.setComputeDistanceTot(distTot);
         timeTot = dataRun.computeTimeTot();
 
@@ -169,16 +170,16 @@ public class ModelRun {
       view.getJLabelValDistTot().setText(DistanceUnit.formatWithUnit(distTot));
 
       // Temps
-      view.getJLabelValTimeTot().setText(TimeUnit
-          .formatHundredSecondeTime(timeTot));
+      view.getJLabelValTimeTot()
+          .setText(TimeUnit.formatHundredSecondeTime(timeTot));
 
       // vitesse moyenne
-      view.getJLabelValSpeedMoy().setText(SpeedPaceUnit
-          .computeFormatSpeedWithUnit(distTot, timeTot));
+      view.getJLabelValSpeedMoy()
+          .setText(SpeedPaceUnit.computeFormatSpeedWithUnit(distTot, timeTot));
 
       // allure moyenne
-      view.getJLabelValAllure().setText(PaceUnit
-          .computeFormatAllureWithUnit(distTot, timeTot));
+      view.getJLabelValAllure()
+          .setText(PaceUnit.computeFormatAllureWithUnit(distTot, timeTot));
     }
 
     // mis a jour des tours intermediaires.
@@ -207,7 +208,7 @@ public class ModelRun {
     // mis a jour du graph et de la vue
     // --------------------------------------------------
     // recuperation des donnees
-    ModelPointsManager.getInstance().setDataRun(dataRun);
+    ModelPointsManager.getInstance().setDataRun(this, dataRun);
 
     // mis a jour de la vue.
     // view.getJPanelMap().getModel().updateData(dataRun, listGeo);
@@ -263,7 +264,7 @@ public class ModelRun {
     MainGui.getWindow().setEnableMenuRun(false);
 
     try {
-      ModelPointsManager.getInstance().setDataRun(null);
+      ModelPointsManager.getInstance().setDataRun(this, null);
     }
     catch (SQLException e) {
       log.error("", e);
@@ -283,10 +284,12 @@ public class ModelRun {
     int value;
     if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
       // distance
-      dataRun.setComputeDistanceTot(DistanceUnit
-          .convert(DistanceUnit.unitKm(),
-                   DistanceUnit.getDefaultUnit(),
-                   dataRun.getComputeDistanceTot()));
+      dataRun
+          .setComputeDistanceTot(DistanceUnit.convert(DistanceUnit.unitKm(),
+                                                      DistanceUnit
+                                                          .getDefaultUnit(),
+                                                      dataRun
+                                                          .getComputeDistanceTot()));
     }
 
     // distance
@@ -294,18 +297,18 @@ public class ModelRun {
         .getComputeDistanceTot()));
 
     // Temps
-    view.getJLabelValTimeTot().setText(TimeUnit
-        .formatHundredSecondeTime(dataRun.computeTimeTot()));
+    view.getJLabelValTimeTot()
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
 
     // vitesse moyenne
-    view.getJLabelValSpeedMoy().setText(SpeedPaceUnit
-        .computeFormatSpeedWithUnit(dataRun.getComputeDistanceTot(), dataRun
-            .computeTimeTot()));
+    view.getJLabelValSpeedMoy()
+        .setText(SpeedPaceUnit.computeFormatSpeedWithUnit(dataRun
+            .getComputeDistanceTot(), dataRun.computeTimeTot()));
 
     // allure moyenne
-    view.getJLabelValAllure().setText(PaceUnit
-        .computeFormatAllureWithUnit(dataRun.getComputeDistanceTot(), dataRun
-            .computeTimeTot()));
+    view.getJLabelValAllure()
+        .setText(PaceUnit.computeFormatAllureWithUnit(dataRun
+            .getComputeDistanceTot(), dataRun.computeTimeTot()));
 
     // calories.
     value = RunLapTableManager.getInstance().computeCalories(dataRun.getId());
@@ -521,8 +524,9 @@ public class ModelRun {
     for (int i = 0; i < hz.length; i++) {
       p1 = 1.0 * hz[i].getLowHeartRate() / dataActivity.getMaxHeartRate();
       p2 = 1.0 * hz[i].getHighHeartRate() / dataActivity.getMaxHeartRate();
-      lib = MessageFormat.format(fh, hz[i].getLowHeartRate(), hz[i]
-          .getHighHeartRate())
+      lib = MessageFormat.format(fh,
+                                 hz[i].getLowHeartRate(),
+                                 hz[i].getHighHeartRate())
             + " ("
             + MessageFormat.format(fh, nf.format(p1), nf.format(p2))
             + ")";
@@ -629,10 +633,12 @@ public class ModelRun {
     for (i = 0; i < sz.length; i++) {
       double sl, sh;
       if (!DistanceUnit.isDefaultUnitKm()) {
-        sl = (Double) SpeedPaceUnit.convert(SpeedUnit.unitKmPerH(), SpeedUnit
-            .unitMilePerH(), sz[i].getLowSpeed());
-        sh = (Double) SpeedPaceUnit.convert(SpeedUnit.unitKmPerH(), SpeedUnit
-            .unitMilePerH(), sz[i].getHighSpeed());
+        sl = (Double) SpeedPaceUnit.convert(SpeedUnit.unitKmPerH(),
+                                            SpeedUnit.unitMilePerH(),
+                                            sz[i].getLowSpeed());
+        sh = (Double) SpeedPaceUnit.convert(SpeedUnit.unitKmPerH(),
+                                            SpeedUnit.unitMilePerH(),
+                                            sz[i].getHighSpeed());
         lib = MessageFormat.format(fs,
                                    SpeedPaceUnit.formatSpeed(sl),
                                    SpeedPaceUnit.formatSpeed(sh),
@@ -648,19 +654,18 @@ public class ModelRun {
       else {
         sl = sz[i].getLowSpeed();
         sh = sz[i].getHighSpeed();
-        lib = MessageFormat.format(fs,
-                                   SpeedPaceUnit.formatSpeed(sl),
-                                   SpeedPaceUnit.formatSpeed(sh),
-                                   SpeedUnit.unitKmPerH(),
-                                   SpeedPaceUnit
-                                       .convert(SpeedUnit.unitKmPerH(),
-                                                SpeedPaceUnit.unitMnPerkm(),
-                                                sl),
-                                   SpeedPaceUnit
-                                       .convert(SpeedUnit.unitKmPerH(),
-                                                SpeedPaceUnit.unitMnPerkm(),
-                                                sh),
-                                   SpeedPaceUnit.unitMnPerkm());
+        lib = MessageFormat
+            .format(fs,
+                    SpeedPaceUnit.formatSpeed(sl),
+                    SpeedPaceUnit.formatSpeed(sh),
+                    SpeedUnit.unitKmPerH(),
+                    SpeedPaceUnit.convert(SpeedUnit.unitKmPerH(),
+                                          SpeedPaceUnit.unitMnPerkm(),
+                                          sl),
+                    SpeedPaceUnit.convert(SpeedUnit.unitKmPerH(),
+                                          SpeedPaceUnit.unitMnPerkm(),
+                                          sh),
+                    SpeedPaceUnit.unitMnPerkm());
       }
       datasetSpeed.setValue(new LongExt(tsz[i], tszTot, dsz[i], lib),
                             "",

@@ -34,7 +34,6 @@ import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
-import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.model.ChangeMapEvent;
 import fr.turtlesport.ui.swing.model.ChangeMapListener;
@@ -56,11 +55,6 @@ import fr.turtlesport.util.ResourceBundleUtility;
  */
 public class JDiagramComponent extends JComponent implements LanguageListener,
                                                  UnitListener {
-  private static TurtleLogger         log;
-  static {
-    log = (TurtleLogger) TurtleLogger.getLogger(JDiagramComponent.class);
-  }
-
   // Mouse position
   private int                         mouseX         = 0;
 
@@ -120,9 +114,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
    */
   protected JDiagramComponent() {
     super();
-    log.debug(">>JDiagramComponent");
     initialize();
-    log.debug("<<JDiagramComponent");
   }
 
   /*
@@ -205,7 +197,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     UnitManager.getManager().addUnitListener(this);
 
     ModelMapkitManager.getInstance().addChangeListener(model);
-    ModelPointsManager.getInstance().addChangeListener(model);
   }
 
   /**
@@ -595,7 +586,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     if (mouseX < WIDTH_TITLE_1
         || mouseX > getWidth() - WIDTH_TITLE_1 - WIDTH_TITLE_2) {
       // on remet le point a zero pour la map
-      ModelPointsManager.getInstance().setMapCurrentPoint(0);
+      ModelPointsManager.getInstance().setMapCurrentPoint(model, 0);
       return;
     }
 
@@ -786,7 +777,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     }
 
     // on met a jour le point pour la map
-    ModelPointsManager.getInstance().setMapCurrentPoint(index);
+    ModelPointsManager.getInstance().setMapCurrentPoint(model, index);
 
     currentTime = model.getTime(index);
     currentDistance = model.getDistanceX(index);
@@ -1089,7 +1080,13 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     public void changedPoint(ChangePointsEvent e) {
       if (e.hasPoints() && model != null) {
         int index = e.getTrkIndexCurrentPoint();
-        mouseX = computeRelativeX(model.getX(index));
+        if (e.isCurrentLastPoint()) {
+          mouseX = computeRelativeX(model.getGridXMax());
+          repaint();
+        }
+        else {
+          mouseX = computeRelativeX(model.getX(index));
+        
         currentTime = getTime(index);
         currentDistance = getX(index);
         currentY1 = getY1(index);
@@ -1100,6 +1097,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         tabMouseY[1] = computeRelativeY2(currentY2);
         tabMouseY[2] = computeRelativeY3(currentY3);
         repaint();
+        }
       }
     }
 
@@ -1390,7 +1388,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         // max zoom
         currentZoom = 0;
         maxZoom = (int) (Math.log(max) / Math.log(2));
-        log.debug("maxZoom=" + maxZoom);
 
         // filtre
         if (model.isFilter()) {
@@ -1503,8 +1500,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     }
 
     private void zoom(boolean isLeft) {
-      log.debug(">>zoom");
-
       if (points == null) {
         return;
       }
@@ -1545,13 +1540,9 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
           applyZoom();
         }
       }
-
-      log.debug("<<zoom");
     }
 
     private void applyZoom() {
-      log.debug(">>applyZoom");
-
       minX1 = Double.MAX_VALUE;
       maxX1 = 0;
       maxY1 = 0;
@@ -1559,7 +1550,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
       maxY2 = 0;
       minY3Speed = Double.MAX_VALUE;
       maxY3Speed = 0;
-      minY3Pace= Double.MAX_VALUE;
+      minY3Pace = Double.MAX_VALUE;
       maxY3Pace = 0;
 
       // recuperation des max
@@ -1631,8 +1622,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
       }
 
       repaint();
-
-      log.debug("<<applyZoom");
     }
   }
 

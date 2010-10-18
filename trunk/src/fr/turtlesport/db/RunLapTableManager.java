@@ -753,7 +753,7 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" Year(LAP.start_time) AS THE_YEAR,");
         st.append(" Month(LAP.start_time) AS THE_MONTH,");
         st.append(" SUM(LAP.total_dist) AS TOT_DIST, ");
-        st.append("COUNT(DISTINCT LAP.id) ");
+        st.append(" COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
@@ -784,7 +784,7 @@ public final class RunLapTableManager extends AbstractTableManager {
       ResultSet rs = pstmt.executeQuery();
       while (rs.next()) {
         res.add(new DataStatYearMonth(rs.getInt(1), rs.getInt(2), rs
-            .getDouble(3), 0, rs.getInt(4)));
+            .getDouble(3), 0, rs.getInt(5)));
       }
       rs.close();
     }

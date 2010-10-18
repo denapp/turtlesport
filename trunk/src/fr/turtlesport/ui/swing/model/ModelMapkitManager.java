@@ -40,7 +40,7 @@ public class ModelMapkitManager {
    * 
    * @return l'instance unique du <code>ModelMapkitManager</code>.
    */
-  public static ModelMapkitManager getInstance() {
+  public static final ModelMapkitManager getInstance() {
     return singleton;
   }
 
@@ -49,7 +49,7 @@ public class ModelMapkitManager {
    * 
    * @return la vitesse de d&eacute;filement des points.
    */
-  public int getSpeed() {
+  public final int getSpeed() {
     return speed;
   }
 
@@ -57,14 +57,23 @@ public class ModelMapkitManager {
    * 
    */
   public void play() {
-    isRunning = !isRunning;
-    firePlayChanged();
+    if (!isRunning) {
+      isRunning = true;
+      firePlayChanged();
+    }
+  }
+
+  public void pause() {
+    if (isRunning) {
+      isRunning = false;
+      firePlayChanged();
+    }
   }
 
   /**
    * @return <code>true</code> si tourne, <code>false</code> sinon.
    */
-  public boolean isRunning() {
+  public final boolean isRunning() {
     return isRunning;
   }
 
@@ -74,7 +83,7 @@ public class ModelMapkitManager {
    * @param la
    *          vitesse de d&eacute;filement des points.
    */
-  public void setSpeed(int speed) {
+  public final void setSpeed(int speed) {
     if (speed < 1) {
       speed = 1;
     }
@@ -106,7 +115,7 @@ public class ModelMapkitManager {
    * 
    * @return <code>true</code> si le mod&egrave;le &agrave; des points.
    */
-  public boolean hasPoints() {
+  public final boolean hasPoints() {
     return ModelPointsManager.getInstance().hasPoints();
   }
 
@@ -115,7 +124,7 @@ public class ModelMapkitManager {
    * 
    * @return
    */
-  public int getMapIndexCurrentPoint() {
+  public final int getMapIndexCurrentPoint() {
     return ModelPointsManager.getInstance().getMapIndexCurrentPoint();
   }
 
@@ -124,7 +133,7 @@ public class ModelMapkitManager {
    * 
    * @return le point courant de la map.
    */
-  public GeoPositionMapKit getMapCurrentPoint() {
+  public final GeoPositionMapKit getMapCurrentPoint() {
     return ModelPointsManager.getInstance().getMapCurrentPoint();
   }
 
@@ -132,31 +141,25 @@ public class ModelMapkitManager {
    * Valorise le point courant au point de d&eacute;but.
    * 
    */
-  public void beginPoint() {
-    ModelPointsManager.getInstance().setMapCurrentPoint(0);
+  public final void beginPoint(Object source) {
+    ModelPointsManager.getInstance().setMapCurrentPoint(source, 0);
   }
 
   /**
    * Incr&eacute;mente le point courant de la map.
    * 
    */
-  public void nextPoint() {
-    if (hasPoints()) {
-      int value = ModelPointsManager.getInstance().getMapIndexCurrentPoint()
-                  + speed;
-      int max = ModelPointsManager.getInstance().getListGeo().size() - 1;
+  public final void nextPoint(Object source) {
+    int value = ModelPointsManager.getInstance().getMapIndexCurrentPoint()
+                + speed;
 
-      if (value > max) {
-        value = max;
-        isRunning = false;
-      }
-
-      ModelPointsManager.getInstance().setMapCurrentPoint(value);
-
-      if (isRunning == false) {
-        firePlayChanged();
-      }
-
+    int max = ModelPointsManager.getInstance().getListGeo().size() - 1;
+    if (value > max) {
+      ModelPointsManager.getInstance().setMapCurrentPoint(source, 0);
+      pause();
+    }
+    else {
+      ModelPointsManager.getInstance().setMapCurrentPoint(source, value);
     }
   }
 
@@ -165,19 +168,14 @@ public class ModelMapkitManager {
    * 
    * @param value
    */
-  public void setMapCurrentPoint(int value) {
-    if (hasPoints()) {
-      int max = ModelPointsManager.getInstance().getListGeo().size() - 1;
-      if (value > max) {
-        value = max;
-        isRunning = false;
-      }
-
-      ModelPointsManager.getInstance().setMapCurrentPoint(value);
-
-      if (isRunning == false) {
-        firePlayChanged();
-      }
+  public final void setMapCurrentPoint(Object source, int value) {
+    int max = ModelPointsManager.getInstance().getListGeo().size() - 1;
+    if (value > max) {
+      ModelPointsManager.getInstance().setMapCurrentPoint(source, max);
+      pause();
+    }
+    else {
+      ModelPointsManager.getInstance().setMapCurrentPoint(source, value);
     }
   }
 
@@ -210,9 +208,11 @@ public class ModelMapkitManager {
    *          le <code>ChangeMapListener</code> &agrave; ajouter.
    */
   public void addChangeListener(ChangeMapListener l) {
-    listenerList.add(l);
-    ModelPointsManager.getInstance().addChangeListener(l);
-    l.changedSpeed(changeEvent);
+    if (!listenerList.contains(l)) {
+      listenerList.add(l);
+      ModelPointsManager.getInstance().addChangeListener(l);
+      l.changedSpeed(changeEvent);
+    }
   }
 
   /**

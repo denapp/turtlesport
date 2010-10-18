@@ -31,6 +31,7 @@ import fr.turtlesport.util.GeoUtil;
  * 
  */
 public class JMediaMapKit extends JXPanel {
+
   private JButtonCustom       jButtonPlay;
 
   private JLabel              JLabelGeoPosition;
@@ -133,7 +134,12 @@ public class JMediaMapKit extends JXPanel {
 
     jButtonPlay.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        ModelMapkitManager.getInstance().play();
+        if (jButtonPlay.getIcon().equals(ICON_PAUSE)) {
+          ModelMapkitManager.getInstance().pause();
+        }
+        else {
+          ModelMapkitManager.getInstance().play();
+        }
       }
     });
 
@@ -151,7 +157,8 @@ public class JMediaMapKit extends JXPanel {
         int width = jProgressBarPlay.getSize().width;
 
         int value = (int) (((1.0 * x) / width) * jProgressBarPlay.getMaximum());
-        ModelMapkitManager.getInstance().setMapCurrentPoint(value);
+        ModelMapkitManager.getInstance()
+            .setMapCurrentPoint(this, value);
       }
 
     });
@@ -191,8 +198,14 @@ public class JMediaMapKit extends JXPanel {
       }
     });
 
+    // ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    // executor.scheduleAtFixedRate(timerActionListener,
+    // 0,
+    // 200,
+    // TimeUnit.MILLISECONDS);
+
     timerActionListener = new TimerActionListener();
-    timer = new Timer(200, timerActionListener);
+    timer = new Timer(300, timerActionListener);
   }
 
   /**
@@ -278,10 +291,9 @@ public class JMediaMapKit extends JXPanel {
   }
 
   public void startTimer() {
-    System.out.println("INIT="+jProgressBarPlay.getValue());
     if (jProgressBarPlay.getValue() == jProgressBarPlay.getMaximum()) {
       timerActionListener.init();
-      ModelMapkitManager.getInstance().beginPoint();
+      ModelMapkitManager.getInstance().beginPoint(this);
     }
     timer.start();
     jButtonPlay.setIcon(ICON_PAUSE);
@@ -289,9 +301,9 @@ public class JMediaMapKit extends JXPanel {
   }
 
   public void stopTimer() {
+    timer.stop();
     jButtonPlay.setIcon(ICON_PLAY);
     jButtonPlay.setRolloverIcon(ICON_PLAY_ROLLOVER);
-    timer.stop();
   }
 
   /**
@@ -299,23 +311,16 @@ public class JMediaMapKit extends JXPanel {
    * 
    */
   private class TimerActionListener implements ActionListener {
-    boolean isBegin = true;
-
-    int     value   = 0;
+    ModelMapkitManager modelMap = ModelMapkitManager.getInstance();
 
     public void actionPerformed(ActionEvent e) {
-      if (isBegin) {
-        init();
-      }
-      ModelMapkitManager.getInstance().nextPoint();
+      modelMap.nextPoint(this);
     }
 
     public void init() {
       jButtonPlay.setIcon(ICON_PAUSE);
       jButtonPlay.setRolloverIcon(ICON_PAUSE_ROLLOVER);
-      value = 0;
       jProgressBarPlay.setValue(0);
-      isBegin = false;
     }
 
     /**
@@ -325,29 +330,27 @@ public class JMediaMapKit extends JXPanel {
      * @param p
      */
     protected void firePogressBarPlayUpdate(int value, GeoPositionMapKit p) {
-
-      this.value = (value == -1) ? 0 : value;
       if (p == null || value >= (jProgressBarPlay.getMaximum() - 1)) {
-        stopTimer();
-        value = jProgressBarPlay.getMaximum();
-        isBegin = true;
-      }
+        value = jProgressBarPlay.getMaximum() - 1;
 
-      jProgressBarPlay.setValue(value);
+        // time
+        if (jLabelTime.isVisible()) {
+          model.timeEnd();
+        }
+      }
+      else {
+        // time
+        if (jLabelTime.isVisible()) {
+          model.time(p);
+        }
+      }
+      jProgressBarPlay.setValue(value + 1);
 
       // geo position
       model.geoPosition(p);
 
       // time
       model.extra(p);
-      if (isBegin) {
-        model.timeEnd();
-        ModelMapkitManager.getInstance().isRunning();
-      }
-      else {
-        model.time(p);
-      }
-
     }
   }
 
@@ -436,9 +439,6 @@ public class JMediaMapKit extends JXPanel {
     }
 
     protected void timeEnd() {
-      if (!jLabelTime.isVisible()) {
-        return;
-      }
       StringBuilder st = new StringBuilder();
       st.append("<html><body>");
       st.append(model.getTimeTot());

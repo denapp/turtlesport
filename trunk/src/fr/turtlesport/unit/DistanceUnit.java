@@ -33,7 +33,7 @@ public final class DistanceUnit extends Unit {
   public static double convertFtToMeter(double ft) {
     return ft * 0.30480061;
   }
-  
+
   /**
    * Conversion de Miles en metres.
    * 
@@ -43,7 +43,7 @@ public final class DistanceUnit extends Unit {
   public static double convertMileToMeter(double mile) {
     return mile * 1609;
   }
-  
+
   /**
    * D&eacute;termine si l'unit&eacute; de distance est le km.
    * 
@@ -180,6 +180,25 @@ public final class DistanceUnit extends Unit {
     StringBuilder st = new StringBuilder();
     st.append(DECIMAL_FORMAT.format(dist / 1000.0));
     st.append(' ');
+    st.append(DistanceUnit.getDefaultUnit());
+    return st.toString();
+  }
+
+  /**
+   * Formate une distance.
+   * 
+   * @param dist
+   *          la distance.
+   */
+  public static String formatWithDefaultUnit(double dist) {
+    StringBuilder st = new StringBuilder();
+    if (isDefaultUnitKm()) {
+      st.append(DECIMAL_FORMAT.format(dist / 1000.0));
+      st.append(' ');
+    }
+    else {
+      st.append(DECIMAL_FORMAT.format(convertKmToMile(dist / 1000.0)));
+    }
     st.append(DistanceUnit.getDefaultUnit());
     return st.toString();
   }

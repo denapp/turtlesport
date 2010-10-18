@@ -108,11 +108,9 @@ public class ModelDialogMap {
           .getTotalDist(), lap.getTotalTime()));
 
       // Frequence cardiaque
-      view.getJLabelValHeartLap().setText(Integer.toString(lap
-          .getAvgHeartRate())
-                                          + " / "
-                                          + Integer.toString(lap
-                                              .getMaxHeartRate()));
+      view.getJLabelValHeartLap()
+          .setText(Integer.toString(lap.getAvgHeartRate()) + " / "
+                   + Integer.toString(lap.getMaxHeartRate()));
       // Calories
       view.getJLabelValCaloriesLap().setText(String.valueOf(lap.getCalories()));
 
@@ -125,7 +123,7 @@ public class ModelDialogMap {
                                                  .computeDeniveleNeg()));
 
       // on déclenche l'evenement.
-      ModelPointsManager.getInstance().setLap(selectedItem);
+      ModelPointsManager.getInstance().setLap(this, selectedItem);
     }
     catch (SQLException e) {
       log.error("", e);
@@ -158,10 +156,12 @@ public class ModelDialogMap {
     int value;
     if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
       // distance
-      dataRun.setComputeDistanceTot(DistanceUnit
-          .convert(DistanceUnit.unitKm(),
-                   DistanceUnit.getDefaultUnit(),
-                   dataRun.getComputeDistanceTot()));
+      dataRun
+          .setComputeDistanceTot(DistanceUnit.convert(DistanceUnit.unitKm(),
+                                                      DistanceUnit
+                                                          .getDefaultUnit(),
+                                                      dataRun
+                                                          .getComputeDistanceTot()));
     }
 
     // distance
@@ -169,18 +169,18 @@ public class ModelDialogMap {
         .getComputeDistanceTot()));
 
     // Temps
-    view.getJLabelValTimeTot().setText(TimeUnit
-        .formatHundredSecondeTime(dataRun.computeTimeTot()));
+    view.getJLabelValTimeTot()
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
 
     // vitesse moyenne
-    view.getJLabelValSpeedMoyTot().setText(SpeedPaceUnit
-        .computeFormatSpeedWithUnit(dataRun.getComputeDistanceTot(), dataRun
-            .computeTimeTot()));
+    view.getJLabelValSpeedMoyTot()
+        .setText(SpeedPaceUnit.computeFormatSpeedWithUnit(dataRun
+            .getComputeDistanceTot(), dataRun.computeTimeTot()));
 
     // allure moyenne
-    view.getJLabelValAllureTot().setText(PaceUnit
-        .computeFormatAllureWithUnit(dataRun.getComputeDistanceTot(), dataRun
-            .computeTimeTot()));
+    view.getJLabelValAllureTot()
+        .setText(PaceUnit.computeFormatAllureWithUnit(dataRun
+            .getComputeDistanceTot(), dataRun.computeTimeTot()));
 
     // calories.
     value = RunLapTableManager.getInstance().computeCalories(dataRun.getId());

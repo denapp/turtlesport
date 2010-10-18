@@ -470,6 +470,11 @@ public class JPanelRun extends JPanel implements LanguageListener,
     jMenuItemRunSave.setText(rb.getString("jMenuItemRunSave"));
     jMenuItemRunDelete.setText(rb.getString("jMenuItemRunDelete"));
 
+    // tabepane
+    jTabbedPaneRace.setTitleAt(0, rb.getString("tabPane0"));
+    jTabbedPaneRace.setTitleAt(1, rb.getString("tabPane1"));
+    jTabbedPaneRace.setTitleAt(3, rb.getString("tabPane3"));
+
     // mis a jour nom de colonnes
     tableModelLap.performedLanguage();
 
@@ -506,6 +511,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
     // evenement
     PopupListener popupListener = new PopupListener(getJPopupMenu());
     this.addMouseListener(popupListener);
+    for (int i = 0; i < jTabbedPaneRace.getTabCount(); i++) {
+      jTabbedPaneRace.getComponentAt(i).addMouseListener(popupListener);
+    }
+    jDiagram.addMouseListener(popupListener);
 
     getJButtonNext().addActionListener(new NextActionListener());
     getJButtonPrev().addActionListener(new PrevActionListener());
@@ -639,6 +648,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
+    
+    ModelPointsManager.getInstance().addChangeListener(tableModelLap);
   }
 
   /**
@@ -1594,7 +1605,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     public TableModelLap() {
       super();
-      ModelPointsManager.getInstance().addChangeListener(this);
     }
 
     /**
@@ -1835,7 +1845,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
      */
     public void valueChanged(ListSelectionEvent e) {
       if (jTableLap.getRowCount() > 1) {
-        ModelPointsManager.getInstance().setLap(jTableLap.getSelectedRow());
+        ModelPointsManager.getInstance().setLap(null,
+                                                jTableLap.getSelectedRow());
       }
     }
 
