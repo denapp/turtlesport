@@ -7,14 +7,14 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{14B614CA-42E0-4545-A272-B1248809E95D}
 AppName=Turtle Sport
-AppVerName=TurtleSport 0.1.14
+AppVerName=TurtleSport 0.2
 AppPublisher=TurtleSport
 AppPublisherURL=http://turtlesport.sourceforge.net
 AppSupportURL=http://turtlesport.sourceforge.net
 AppUpdatesURL=http://turtlesport.sourceforge.net
 DefaultDirName={pf}\turtlesport
 DefaultGroupName=Turtle Sport
-OutputBaseFilename=turtlesport-win-0.1.14
+OutputBaseFilename=turtlesport-win-0.2
 Compression=lzma
 SolidCompression=yes
 
