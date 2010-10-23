@@ -471,8 +471,9 @@ public class JTurtleMapKit extends JXPanel {
       }
       // Timetot
       try {
-        jMediaMapKit.getModel().setTimeTot(TimeUnit
-            .formatHundredSecondeTimeWithoutHour(ModelPointsManager
+        jMediaMapKit
+            .getModel()
+            .setTimeTot(TimeUnit.formatHundredSecondeTimeWithoutHour(ModelPointsManager
                 .getInstance().getDataRun().computeTimeTot()));
       }
       catch (SQLException sqle) {
@@ -498,9 +499,8 @@ public class JTurtleMapKit extends JXPanel {
       gp = mainMap.getTileFactory().pixelToGeo(p, mainMap.getZoom());
       hashGeoMap.add(gp);
 
-      p = mainMap.getTileFactory().geoToPixel(listGeoMap
-                                                  .get(listGeoMap.size() - 1),
-                                              mainMap.getZoom());
+      p = mainMap.getTileFactory()
+          .geoToPixel(listGeoMap.get(listGeoMap.size() - 1), mainMap.getZoom());
       p.setLocation(p.getX(), p.getY() - widthImg);
       gp = mainMap.getTileFactory().pixelToGeo(p, mainMap.getZoom());
       hashGeoMap.add(gp);
@@ -619,7 +619,8 @@ public class JTurtleMapKit extends JXPanel {
      * turtlesport.ui.swing.component.ChangePointsEvent)
      */
     public void changedLap(ChangePointsEvent e) {
-      JTurtleMapKit.this.repaint();
+      // JTurtleMapKit.this.repaint();
+      mainMap.repaint();
     }
 
     /*
@@ -630,7 +631,7 @@ public class JTurtleMapKit extends JXPanel {
      * .turtlesport.ui.swing.component.ChangePointsEvent)
      */
     public void changedPoint(ChangePointsEvent e) {
-      JTurtleMapKit.this.repaint();
+      mainMap.repaint();
       JTurtleMapKit.this.jMediaMapKit.firePogressBarPlayUpdate(e
           .getMapIndexCurrentPoint(), e.getMapCurrentPoint());
     }
@@ -643,8 +644,8 @@ public class JTurtleMapKit extends JXPanel {
      * .swing.event.ChangeEvent)
      */
     public void changedSpeed(ChangeMapEvent e) {
-      JTurtleMapKit.this.jMediaMapKit.getJProgressBarSpeed().setValue(e
-          .getSpeed());
+      JTurtleMapKit.this.jMediaMapKit.getJProgressBarSpeed()
+          .setValue(e.getSpeed());
     }
 
     /*
