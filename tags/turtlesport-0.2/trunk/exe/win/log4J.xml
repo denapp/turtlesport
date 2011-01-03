@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration>
+
+   <!-- ======================================================= -->
+   <!--              Trace Appenders                            -->
+   <!-- ======================================================= -->
+    <!-- Appender pour les traces techniques -->
+	<appender name="FILE" class="fr.turtlesport.log.UserRollingFileAppender">
+	   <param name="File" value="turtle.log" />
+       <param name="Append" value="false" />
+       <param name="MaxFileSize" value="1MB"/>
+       <param name="MaxBackupIndex" value="2" />
+       <layout class="org.apache.log4j.PatternLayout">
+          <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %-5p %C - %m\n"/>
+       </layout>       
+	</appender>
+	<appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+     <layout class="org.apache.log4j.PatternLayout">
+         <param name="ConversionPattern"
+		            value="%d{HH:mm:ss,SSS} %-5p %C - %m\n"/>
+     </layout>
+	</appender>			 
+	
+    <!-- ======================================================= -->
+    <!--                        Trace Technique                  -->
+    <!-- ======================================================= -->    
+	<category name="fr.turtlesport"
+              class="fr.turtlesport.log.TurtleLogger"
+              additivity="false">
+		<level value="warn"/>
+		<appender-ref ref="FILE"/>
+		<appender-ref ref="STDOUT"/>
+	</category>
+</log4j:configuration>
