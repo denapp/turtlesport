@@ -3,7 +3,7 @@
 
 	<!-- set global properties for this build -->
 	<property name="Name" value="turtlesport" />
-	<property name="version" value="0.1.15" />
+	<property name="version" value="0.3" />
 	<property name="src" location="${basedir}/src" />
 	<property name="test" location="${basedir}/test" />
 	<property name="srcccommonUsbCom" location="${basedir}/c/usbcom/srccommon" />
