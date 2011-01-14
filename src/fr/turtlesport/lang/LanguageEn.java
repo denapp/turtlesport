@@ -25,6 +25,13 @@ public final class LanguageEn extends AbstractLanguage {
     return singleton;
   }
 
+  /* (non-Javadoc)
+   * @see fr.turtlesport.lang.ILanguage#getEncoding()
+   */
+  public String getEncoding() {
+    return "ISO-8859-1";
+  }
+
   /*
    * (non-Javadoc)
    * 

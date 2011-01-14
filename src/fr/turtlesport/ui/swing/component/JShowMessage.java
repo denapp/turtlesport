@@ -24,7 +24,7 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public final class JShowMessage {
+public final class JShowMessage  {
 
   /**
    * 
@@ -32,7 +32,7 @@ public final class JShowMessage {
   private JShowMessage() {
     super();
   }
-
+  
   /**
    * 
    * @param msg
@@ -406,5 +406,4 @@ public final class JShowMessage {
 
     return msg;
   }
-
 }

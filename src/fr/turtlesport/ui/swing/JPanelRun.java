@@ -478,7 +478,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
     // mis a jour nom de colonnes
     tableModelLap.performedLanguage();
 
-    if (!chartPanelHeartZone.getLocale().equals(lang.getLocale())) {
+    if (!chartPanelHeartZone.getLocale().equals(lang.getLocale())
+        && model != null) {
       try {
         model.updateHeartZone(this);
       }
@@ -648,7 +649,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
-    
+
     ModelPointsManager.getInstance().addChangeListener(tableModelLap);
   }
 
@@ -1120,8 +1121,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       JPanel panelButton = new JPanel();
       panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.Y_AXIS));
 
-      jButtonChartHeart = new JButton(ImagesRepository
-          .getImageIcon("statSmall.png"));
+      jButtonChartHeart = new JButton(ImagesRepository.getImageIcon("statSmall.png"));
       jButtonChartHeart.setPreferredSize(new Dimension(24, 24));
       jButtonTextHeart = new JButton(ImagesRepository.getImageIcon("list.png"));
       jButtonTextHeart.setPreferredSize(new Dimension(24, 24));
@@ -1199,8 +1199,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       JPanel panelButton = new JPanel();
       panelButton.setLayout(new BoxLayout(panelButton, BoxLayout.Y_AXIS));
 
-      jButtonChartSpeed = new JButton(ImagesRepository
-          .getImageIcon("statSmall.png"));
+      jButtonChartSpeed = new JButton(ImagesRepository.getImageIcon("statSmall.png"));
       jButtonChartSpeed.setPreferredSize(new Dimension(24, 24));
       jButtonTextSpeed = new JButton(ImagesRepository.getImageIcon("list.png"));
       jButtonTextSpeed.setPreferredSize(new Dimension(24, 24));
@@ -1287,8 +1286,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jPanelButtons.add(getJButtonSave());
       jPanelButtons.add(getJButtonDetails());
       if (Mail.isSupported()) {
-        jButtonEmail = new JButtonCustom(ImagesRepository
-            .getImageIcon("email.png"));
+        jButtonEmail = new JButtonCustom(ImagesRepository.getImageIcon("email.png"));
         Dimension dim = new Dimension(20, 20);
         jButtonEmail.setPreferredSize(dim);
         jButtonEmail.setMaximumSize(dim);
@@ -1307,8 +1305,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   public JButton getJButtonSave() {
     if (jButtonSave == null) {
-      jButtonSave = new JButtonCustom(ImagesRepository
-          .getImageIcon("media-floppy.png"));
+      jButtonSave = new JButtonCustom(ImagesRepository.getImageIcon("media-floppy.png"));
       Dimension dim = new Dimension(20, 20);
       jButtonSave.setPreferredSize(dim);
       jButtonSave.setMaximumSize(dim);
@@ -1321,8 +1318,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   public JButton getJButtonGoogleEarth() {
     if (jButtonGoogleEarth == null) {
-      jButtonGoogleEarth = new JButtonCustom(ImagesRepository
-          .getImageIcon("googleearth.png"));
+      jButtonGoogleEarth = new JButtonCustom(ImagesRepository.getImageIcon("googleearth.png"));
       Dimension dim = new Dimension(20, 20);
       jButtonGoogleEarth.setPreferredSize(dim);
       jButtonGoogleEarth.setMaximumSize(dim);
@@ -1335,8 +1331,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   public JButton getJButtonGoogleMap() {
     if (jButtonGoogleMap == null) {
-      jButtonGoogleMap = new JButtonCustom(ImagesRepository
-          .getImageIcon("googlemaps.png"));
+      jButtonGoogleMap = new JButtonCustom(ImagesRepository.getImageIcon("googlemaps.png"));
       Dimension dim = new Dimension(20, 20);
       jButtonGoogleMap.setPreferredSize(dim);
       jButtonGoogleMap.setMaximumSize(dim);
@@ -1353,8 +1348,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   public JButton getJButtonDelete() {
     if (jButtonDelete == null) {
-      jButtonDelete = new JButtonCustom(ImagesRepository
-          .getImageIcon("delete.png"));
+      jButtonDelete = new JButtonCustom(ImagesRepository.getImageIcon("delete.png"));
       Dimension dim = new Dimension(20, 20);
       jButtonDelete.setPreferredSize(dim);
       jButtonDelete.setMaximumSize(dim);
@@ -1367,8 +1361,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   public JButton getJButtonDetails() {
     if (jButtonDetails == null) {
-      jButtonDetails = new JButtonCustom(ImagesRepository
-          .getImageIcon("loupe.png"));
+      jButtonDetails = new JButtonCustom(ImagesRepository.getImageIcon("loupe.png"));
       Dimension dim = new Dimension(20, 20);
       jButtonDetails.setPreferredSize(dim);
       jButtonDetails.setMaximumSize(dim);
@@ -1598,8 +1591,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
                                                     35,
                                                     28,
                                                     30,
-                                                    35,
-                                                    35 };
+                                                    45,
+                                                    45 };
 
     private final SimpleDateFormat dfTime       = new SimpleDateFormat("kk:mm:ss");
 
@@ -1662,8 +1655,9 @@ public class JPanelRun extends JPanel implements LanguageListener,
         if (runLaps != null) {
           double value;
           for (int i = 0; i < runLaps.length; i++) {
-            value = DistanceUnit.convert(unitDistance, unit, runLaps[i]
-                .getTotalDist());
+            value = DistanceUnit.convert(unitDistance,
+                                         unit,
+                                         runLaps[i].getTotalDist());
             runLaps[i].setTotalDist((float) value);
             fireTableCellUpdated(i, 2);
             fireTableCellUpdated(i, 4);
@@ -1922,12 +1916,14 @@ public class JPanelRun extends JPanel implements LanguageListener,
      */
     public void actionPerformed(ActionEvent ae) {
       String name = LanguageManager.getManager().getCurrentLang()
-          .getDateTimeFormatterWithoutSep().format(ModelPointsManager
-              .getInstance().getDataRun().getTime());
+          .getDateTimeFormatterWithoutSep()
+          .format(ModelPointsManager.getInstance().getDataRun().getTime());
 
       final IGeoConvertRun cv = FactoryGeoConvertRun.getInstance(ext);
-      final File out = JFileSaver.showSaveDialog(MainGui.getWindow(), name, cv
-          .extension()[0], cv.description());
+      final File out = JFileSaver.showSaveDialog(MainGui.getWindow(),
+                                                 name,
+                                                 cv.extension()[0],
+                                                 cv.description());
 
       if (out != null) {
         MainGui.getWindow().beforeRunnableSwing();
@@ -1936,8 +1932,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
           public void run() {
             try {
               cv.convert(ModelPointsManager.getInstance().getDataRun(), out);
-              JShowMessage.ok(rb.getString("exportOK"), rb
-                  .getString("exportTitle"));
+              JShowMessage.ok(rb.getString("exportOK"),
+                              rb.getString("exportTitle"));
             }
             catch (GeoConvertException e) {
               log.error("", e);
@@ -2114,8 +2110,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
   private class DeleteActionListener implements ActionListener {
 
     public void actionPerformed(ActionEvent actionevent) {
-      if (!JShowMessage.question(rb.getString("questionDeleteRace"), rb
-          .getString("delete"))) {
+      if (!JShowMessage.question(rb.getString("questionDeleteRace"),
+                                 rb.getString("delete"))) {
         return;
       }
       MainGui.getWindow().beforeRunnableSwing();

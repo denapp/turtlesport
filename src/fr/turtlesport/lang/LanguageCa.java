@@ -36,6 +36,13 @@ public final class LanguageCa extends AbstractLanguage {
     return locale;
   }
 
+  /* (non-Javadoc)
+   * @see fr.turtlesport.lang.ILanguage#getEncoding()
+   */
+  public String getEncoding() {
+    return "ISO-8859-1";
+  }
+
   /*
    * (non-Javadoc)
    * 

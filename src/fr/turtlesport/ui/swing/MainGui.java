@@ -249,8 +249,9 @@ public class MainGui extends JFrame implements LanguageListener {
     jMenuItemRunDetail.setText(rb.getString("jMenuItemRunDetail"));
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
     if (jMenuItemRunEmail != null) {
-      jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail"));
+      jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail")); 
     }
+    jMenuItemRunGoogleMap.setText(rb.getString("jMenuItemRunGoogleMap"));
     jMenuItemRunGoogleEarth.setText(rb.getString("jMenuItemRunGoogleEarth"));
     jMenuRunExport.setText(rb.getString("jMenuRunExport"));
     jMenuItemRunExportGpx.setText(rb.getString("jMenuItemRunExportGpx"));

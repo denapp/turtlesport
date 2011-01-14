@@ -34,7 +34,7 @@ public class JMediaMapKit extends JXPanel {
 
   private JButtonCustom       jButtonPlay;
 
-  private JLabel              JLabelGeoPosition;
+  private JLabel              jLabelGeoPosition;
 
   private Timer               timer;
 
@@ -259,14 +259,14 @@ public class JMediaMapKit extends JXPanel {
    * @return the jLabelGeoPosition
    */
   protected JLabel getJLabelGeoPosition() {
-    if (JLabelGeoPosition == null) {
-      JLabelGeoPosition = new JLabel("  ");
-      JLabelGeoPosition.setAlignmentX(Component.RIGHT_ALIGNMENT);
-      JLabelGeoPosition.setFont(GuiFont.FONT_PLAIN_VERY_SMALL);
-      JLabelGeoPosition.setOpaque(false);
-      JLabelGeoPosition.setVisible(false);
+    if (jLabelGeoPosition == null) {
+      jLabelGeoPosition = new JLabel("  ");
+      jLabelGeoPosition.setAlignmentX(Component.RIGHT_ALIGNMENT);
+      jLabelGeoPosition.setFont(GuiFont.FONT_PLAIN_VERY_SMALL);
+      jLabelGeoPosition.setOpaque(false);
+      jLabelGeoPosition.setVisible(false);
     }
-    return JLabelGeoPosition;
+    return jLabelGeoPosition;
   }
 
   /**

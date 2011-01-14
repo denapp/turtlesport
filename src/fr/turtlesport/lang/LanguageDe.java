@@ -28,6 +28,15 @@ public final class LanguageDe extends AbstractLanguage {
   /*
    * (non-Javadoc)
    * 
+   * @see fr.turtlesport.lang.ILanguage#getEncoding()
+   */
+  public String getEncoding() {
+    return "ISO-8859-1";
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.turtlesport.lang.ILanguage#getLocale()
    */
   public Locale getLocale() {

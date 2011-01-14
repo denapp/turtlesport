@@ -112,22 +112,6 @@ public class JPanelMonth extends AbstractJPanelMonth {
       updateDate();
     }
 
-    public void changeMonth(Date date, Date[] dates) {
-      if (log.isInfoEnabled()) {
-        log.info(">>changeMonth date=" + date);
-      }
-
-      getCalendar().setTime(date);
-      getCalendar().set(Calendar.DAY_OF_MONTH, 1);
-      getCalendar().add(Calendar.MONTH, nbMonthLess);
-      updateDate();
-      fireCurrentDates(dates);
-
-      if (log.isInfoEnabled()) {
-        log.info("cal=" + getCalendar().getTime());
-        log.info("<<changeMonth");
-      }
-    }
   }
 
 }

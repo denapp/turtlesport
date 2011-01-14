@@ -26,6 +26,15 @@ public final class LanguageEs extends AbstractLanguage {
   public static LanguageEs getInstance() {
     return singleton;
   }
+  
+  
+  /* (non-Javadoc)
+   * @see fr.turtlesport.lang.ILanguage#getEncoding()
+   */
+  public String getEncoding() {
+    return "ISO-8859-1";
+  }
+
 
   /*
    * (non-Javadoc)
