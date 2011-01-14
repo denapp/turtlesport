@@ -81,4 +81,11 @@ public interface ILanguage {
    */
   boolean hasWebSiteTranslate();
 
+  /**
+   * Restitue l'encoding des fichiers properties.
+   * 
+   * @return  l'encoding des fichiers properties.
+   */
+  String getEncoding();
+
 }

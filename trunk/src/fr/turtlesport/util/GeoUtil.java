@@ -40,7 +40,7 @@ public final class GeoUtil {
     int valInt = Math.abs((int) value);
 
     st.append(valInt);
-    st.append("°");
+    st.append("\u00B0");
     double val = 60 * (Math.abs(value) - valInt);
     st.append((int) val);
     st.append("'");

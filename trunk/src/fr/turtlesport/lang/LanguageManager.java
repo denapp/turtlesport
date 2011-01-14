@@ -28,7 +28,8 @@ public final class LanguageManager {
       LanguageSv.getInstance(),
       LanguageEs.getInstance(),
       LanguageCa.getInstance(),
-      LanguageDe.getInstance(),                       };
+      LanguageDe.getInstance(),
+      LanguageHu.getInstance()                        };
 
   private static HashMap<String, ILanguage> mapLang;
 
@@ -101,8 +102,10 @@ public final class LanguageManager {
   public void addLanguageListener(LanguageListener l) {
     if (l != null) {
       listeners.add(l);
+      if (log.isDebugEnabled()) {
+        log.debug(">>addLanguageListener " + l.getClass());
+      }
     }
-    log.debug(">>addLanguageListener " + l.getClass());
   }
 
   /**
@@ -128,14 +131,14 @@ public final class LanguageManager {
    *          le langage.
    */
   public void fireLanguageChanged(ILanguage lang) {
-    this.currentLang = lang;
-    LanguageEvent e = new LanguageEvent(lang);
-    for (LanguageListener l : listeners) {
-      l.languageChanged(e);
-    }
-    // composant
-    JComponent.setDefaultLocale(lang.getLocale());
-    Locale.setDefault(lang.getLocale());
+      this.currentLang = lang;
+      LanguageEvent e = new LanguageEvent(lang);
+      for (LanguageListener l : listeners) {
+        l.languageChanged(e);
+      }
+      // composant
+      JComponent.setDefaultLocale(lang.getLocale());
+      Locale.setDefault(lang.getLocale());
   }
 
   /**
