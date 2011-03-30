@@ -21,8 +21,8 @@ import fr.turtlesport.geo.IGeoRoute;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.A1000RunTransferProtocol;
 import fr.turtlesport.protocol.data.AbstractLapType;
-import fr.turtlesport.protocol.data.D1009RunType;
-import fr.turtlesport.protocol.data.D304TrkPointType;
+import fr.turtlesport.protocol.data.AbstractRunType;
+import fr.turtlesport.protocol.data.AbstractTrkPointType;
 import fr.turtlesport.protocol.progress.IRunTransfertProgress;
 
 /**
@@ -205,7 +205,7 @@ public final class RunTableManager extends AbstractTableManager {
 
     // Calcul du nombre de line a sauvegarder
     int maxLine = 0;
-    for (D1009RunType runType : a1000.getListRunType()) {
+    for (AbstractRunType runType : a1000.getListRunType()) {
       // run
       maxLine++;
       // lap
@@ -220,7 +220,7 @@ public final class RunTableManager extends AbstractTableManager {
     try {
       int id;
       Hashtable<Integer, Integer> hashLap = new Hashtable<Integer, Integer>();
-      for (D1009RunType runType : a1000.getListRunType()) {
+      for (AbstractRunType runType : a1000.getListRunType()) {
 
         log.info("TrackIndex=" + runType.getTrackIndex());
 
@@ -286,7 +286,7 @@ public final class RunTableManager extends AbstractTableManager {
             RunTrkTableManager.getInstance().delete(id);
           }
           // insertion des points
-          ArrayList<D304TrkPointType> listPoint = runType.getListTrkPointType();
+          List<AbstractTrkPointType> listPoint = runType.getListTrkPointType();
           for (int i = 0; i < maxPoint; i++) {
             // notification
             if ((i + 1) % IRunTransfertProgress.POINT_NOTIFY == 0) {
@@ -537,8 +537,13 @@ public final class RunTableManager extends AbstractTableManager {
       }
 
       // insertion du run
-      id = store(data.getIdUser(), data.getSportType(), 0, 0, startTime, data
-          .getComments(), data.getEquipement());
+      id = store(data.getIdUser(),
+                 data.getSportType(),
+                 0,
+                 0,
+                 startTime,
+                 data.getComments(),
+                 data.getEquipement());
 
       // Lap
       // ------------
@@ -551,6 +556,92 @@ public final class RunTableManager extends AbstractTableManager {
                                              0,
                                              0,
                                              0);
+    }
+    catch (SQLException e) {
+      log.error("", e);
+      // Erreur rollback
+      DatabaseManager.rollbackTransaction();
+      DatabaseManager.getConnection().close();
+      throw e;
+    }
+    catch (RuntimeException e) {
+      log.error("", e);
+      // Erreur rollback
+      DatabaseManager.rollbackTransaction();
+      DatabaseManager.getConnection().close();
+      throw e;
+    }
+    catch (Throwable e) {
+      log.error("", e);
+      // Erreur rollback
+      DatabaseManager.rollbackTransaction();
+      DatabaseManager.getConnection().close();
+      throw new RuntimeException(e);
+    }
+
+    // ok -> commit
+    DatabaseManager.commitTransaction();
+    DatabaseManager.getConnection().close();
+
+    log.debug("<<store");
+  }
+
+  /**
+   * Insertion d'un run.
+   * 
+   * @param dataRun
+   * @param listTrks
+   * @param progress
+   * @throws SQLException
+   */
+  public void store(DataRun dataRun, List<DataRunTrk> listTrks) throws SQLException {
+    log.debug(">>store dataRun  listTrks");
+
+    if (dataRun == null || listTrks == null || listTrks.size() == 0) {
+      return;
+    }
+
+    // Debut de tansaction
+    DatabaseManager.beginTransaction();
+
+    try {
+      int id = dataRun.getId();
+
+      // update du run
+      StringBuilder st = new StringBuilder();
+      st.append("UPDATE ");
+      st.append(getTableName());
+      st.append(" SET start_time=?");
+      st.append(" WHERE id = ?");
+
+      Connection conn = DatabaseManager.getConnection();
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+
+      for (DataRunTrk trk : listTrks) {
+        if (trk.getTime() != null) {
+          pstmt.setTimestamp(1, trk.getTime());
+          break;
+        }
+      }
+      pstmt.setInt(2, id);
+      pstmt.executeUpdate();
+
+      // effacement des points pour un run existant
+      RunTrkTableManager.getInstance().delete(id);
+
+      // insertion des points
+      for (int i = 0; i < listTrks.size(); i++) {
+        DataRunTrk trk = listTrks.get(i);
+        // sauvegarde
+        RunTrkTableManager.getInstance().store(id,
+                                               trk.getLatitude(),
+                                               trk.getLongitude(),
+                                               trk.getTime(),
+                                               trk.getAltitude(),
+                                               trk.getDistance(),
+                                               trk.getHeartRate(),
+                                               trk.getCadence());
+      }
     }
     catch (SQLException e) {
       log.error("", e);
@@ -1284,8 +1375,8 @@ public final class RunTableManager extends AbstractTableManager {
 
     log.debug("<<updateSportType");
   }
-  
-  private int getIdUser(D1009RunType runType) {
+
+  private int getIdUser(AbstractRunType runType) {
     if (runType.getExtra() != null) {
       return ((DataRunExtra) runType.getExtra()).getIdUser();
     }

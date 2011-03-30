@@ -1,6 +1,6 @@
 package fr.turtlesport.db.progress;
 
-import fr.turtlesport.protocol.data.D1009RunType;
+import fr.turtlesport.protocol.data.AbstractRunType;
 
 /**
  * @author Denis Apparicio
@@ -33,7 +33,7 @@ public interface IRunStoreProgress {
    * @param run
    *          la course.
    */
-  void beginStore(D1009RunType run);
+  void beginStore(AbstractRunType run);
 
   /**
    * Fin sauvegarde.
@@ -41,7 +41,7 @@ public interface IRunStoreProgress {
    * @param run
    *          la course.
    */
-  void endStore(D1009RunType run);
+  void endStore(AbstractRunType run);
 
   /**
    * Debut transfert point.
@@ -59,7 +59,7 @@ public interface IRunStoreProgress {
    * @param currentPoint
    *          point courant &aagrve; sauvegarder.
    */
-  void storePoint(D1009RunType run, int currentPoint, int maxPoint);
+  void storePoint(AbstractRunType run, int currentPoint, int maxPoint);
 
   /**
    * Fin sauvegarde.

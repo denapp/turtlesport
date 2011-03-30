@@ -1,6 +1,6 @@
 package fr.turtlesport.db.progress;
 
-import fr.turtlesport.protocol.data.D1009RunType;
+import fr.turtlesport.protocol.data.AbstractRunType;
 
 /**
  * @author Denis Apparicio
@@ -21,7 +21,7 @@ public class RunStoreProgressAdaptor implements IRunStoreProgress {
    * 
    * @see fr.turtlesport.db.progress.IRunStoreProgress#beginStore(fr.turtlesport.protocol.data.D1009RunType)
    */
-  public void beginStore(D1009RunType run) {
+  public void beginStore(AbstractRunType run) {
 
   }
 
@@ -38,7 +38,7 @@ public class RunStoreProgressAdaptor implements IRunStoreProgress {
    * 
    * @see fr.turtlesport.db.progress.IRunStoreProgress#endStore(fr.turtlesport.protocol.data.D1009RunType)
    */
-  public void endStore(D1009RunType run) {
+  public void endStore(AbstractRunType run) {
   }
 
   /*
@@ -63,7 +63,7 @@ public class RunStoreProgressAdaptor implements IRunStoreProgress {
    * @see fr.turtlesport.db.progress.IRunStoreProgress#storePoint(fr.turtlesport.protocol.data.D1009RunType,
    *      int, int)
    */
-  public void storePoint(D1009RunType run, int currentPoint, int maxPoint) {
+  public void storePoint(AbstractRunType run, int currentPoint, int maxPoint) {
   }
 
 }

@@ -20,6 +20,8 @@ public class DataEquipement {
 
   private float   distance;
 
+  private float   distanceInit;
+
   private float   distanceMax;
 
   private String  path;
@@ -39,9 +41,20 @@ public class DataEquipement {
    *          nom de l'&eacute;quipement.
    */
   public DataEquipement(String name) {
+    this(name, 0);
+  }
+
+  /**
+   * Constructeur.
+   * 
+   * @param name
+   *          nom de l'&eacute;quipement.
+   */
+  public DataEquipement(String name, int distanceInit) {
     this.name = name;
     this.weight = (float) 0.300;
     this.distance = 0;
+    this.distanceInit = (distanceInit > 0) ? distanceInit : 0;
     this.distanceMax = 1000;
   }
 
@@ -126,6 +139,13 @@ public class DataEquipement {
   public float getDistance() {
     return distance;
   }
+  
+  /**
+   * @return the distance
+   */
+  public float getDistanceAll() {
+    return getDistance() + getDistanceInit();
+  }
 
   /**
    * @param distance
@@ -178,6 +198,20 @@ public class DataEquipement {
    */
   public void setDefault(boolean isDefault) {
     this.isDefault = isDefault;
+  }
+
+  /**
+   * @return
+   */
+  public float getDistanceInit() {
+    return distanceInit;
+  }
+
+  /**
+   * @param distanceInit
+   */
+  public void setDistanceInit(float distanceInit) {
+    this.distanceInit = distanceInit;
   }
 
 }

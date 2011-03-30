@@ -385,7 +385,7 @@ public class DatabaseManager {
           executeUpdate("DROP TABLE " + TABLE_RUN);
         }
         else {
-          // la table existe 
+          // la table existe
           if (rs.getMetaData().getColumnDisplaySize(8) != 500) {
             // on augmente la taille des commentaires
             releaseConnection(conn);
@@ -608,44 +608,50 @@ public class DatabaseManager {
                                                         + TABLE_EQUIPEMENT);
         rs = pstmt.executeQuery();
 
-        if (rs.getMetaData().getColumnCount() != 6) {
-          // table existe dans une ancienne version ( <= à 0.1.13)
-          boolean hasDefault = false;
-          while (rs.next()) {
-            if (listData == null) {
-              listData = new ArrayList<DataEquipement>();
+        switch (rs.getMetaData().getColumnCount()) {
+          case 5:
+            // table existe dans une ancienne version ( <= à 0.1.13)
+            boolean hasDefault = false;
+            while (rs.next()) {
+              if (listData == null) {
+                listData = new ArrayList<DataEquipement>();
+              }
+              DataEquipement de = new DataEquipement();
+              de.name = rs.getString("name");
+              de.alert = rs.getInt("alert");
+              de.weight = rs.getFloat("weight");
+              de.distanceMax = rs.getFloat("distanceMax");
+              de.image_path = rs.getString("image_path");
+              if (hasDefault) {
+                de.default_equipement = AbstractTableManager
+                    .convertToSmallInt(false);
+              }
+              else {
+                de.default_equipement = rs.getInt("default_equipement");
+                hasDefault = AbstractTableManager
+                    .convertToBoolean(de.default_equipement);
+              }
+              listData.add(de);
             }
-            DataEquipement de = new DataEquipement();
-            de.name = rs.getString("name");
-            de.alert = rs.getInt("alert");
-            de.weight = rs.getFloat("distanceMax");
-            de.distanceMax = rs.getFloat("distanceMax");
-            de.image_path = rs.getString("image_path");
-            if (hasDefault) {
-              de.default_equipement = AbstractTableManager
-                  .convertToSmallInt(false);
-            }
-            else {
-              de.default_equipement = rs.getInt("default_equipement");
-              hasDefault = AbstractTableManager
-                  .convertToBoolean(de.default_equipement);
-            }
-            listData.add(de);
-          }
-          releaseConnection(conn);
-          conn = null;
+            releaseConnection(conn);
+            conn = null;
+            break;
 
-          try {
-            executeUpdate("DROP INDEX TABLE_EQUIPEMENT_index1");
-          }
-          catch (Throwable e) {
-            log.error("", e);
-          }
-          executeUpdate("DROP TABLE " + TABLE_EQUIPEMENT);
-        }
-        else {
-          // la table existe
-          return;
+          case 6:
+            // table existe dans une ancienne version ( = 0.2)
+            // nouvelle version avec creation index
+            releaseConnection(conn);
+            conn = null;
+            StringBuilder st = new StringBuilder();
+            st.append("ALTER TABLE ");
+            st.append(TABLE_EQUIPEMENT);
+            st.append(" ADD COLUMN distance_init SMALLINT");
+            executeUpdate(st.toString());
+            return;
+
+          default:
+            // la table existe
+            return;
         }
       }
       finally {
@@ -667,6 +673,7 @@ public class DatabaseManager {
     st.append("distanceMax FLOAT, ");
     st.append("image_path VARCHAR(500), ");
     st.append("default_equipement SMALLINT, ");
+    st.append("distance_init FLOAT, ");
     st.append("PRIMARY KEY (name)");
     st.append(')');
 
@@ -678,7 +685,7 @@ public class DatabaseManager {
         st = new StringBuilder();
         st.append("INSERT INTO ");
         st.append(TABLE_EQUIPEMENT);
-        st.append(" VALUES(?, ?, ?, ?, ?, ?)");
+        st.append(" VALUES(?, ?, ?, ?, ?, ?, ?)");
 
         PreparedStatement pstmt = conn.prepareStatement(st.toString());
         for (DataEquipement de : listData) {
@@ -688,6 +695,7 @@ public class DatabaseManager {
           pstmt.setFloat(4, de.distanceMax);
           pstmt.setString(5, de.image_path);
           pstmt.setInt(6, de.default_equipement);
+          pstmt.setInt(7, 0);
           pstmt.executeUpdate();
         }
       }
