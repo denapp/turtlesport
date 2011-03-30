@@ -26,11 +26,11 @@ public final class Library {
    * et de son nom.
    * 
    * @param clazz
-   *          classe qui permet de d�duire le path.
+   *          classe qui permet de d&eacute;duire le path.
    * @param libname
    *          nom de la librairie.
    * @exception UnsatisfiedLinkError
-   *              si la librairie est non trouv�e.
+   *              si la librairie est non trouv&eacute;e.
    * @exception NullPointerException
    *              si <code>clazz</code> est <code>null</code> ou si
    *              <code>libname</code> est <code>null</code>.
@@ -60,10 +60,53 @@ public final class Library {
     log.debug("<<load");
   }
 
+  /**
+   * Chargement d'une librairie &agrave; partir de la localisation d'une classe
+   * et de son nom.
+   * 
+   * @param clazz
+   *          classe qui permet de d&eacute;duire le path.
+   * @param libname
+   *          nom de la librairie.
+   * @exception UnsatisfiedLinkError
+   *              si la librairie est non trouv&eacute;e.
+   * @exception NullPointerException
+   *              si <code>clazz</code> est <code>null</code> ou si
+   *              <code>libname</code> est <code>null</code>.
+   * @see java.lang.System#load(java.lang.String)
+   */
+  public static void loadThrow(Class<?> clazz, final String libname) {
+    log.debug(">>load");
+
+    // recuperation du path complet de la librairie.
+    String dirLocation = Location.dirNameExecution(clazz);
+    log.debug("dirLocation  <" + dirLocation + ">");
+    File libFile = new File(dirLocation, System.mapLibraryName(libname));
+    if (!libFile.isFile()) {
+      log.error("UnsatisfiedLinkError " + libFile.getAbsolutePath());
+      throw new UnsatisfiedLinkError();
+    }
+
+    // chargement de la librearie.
+    String path = libFile.getAbsolutePath();
+    log.info("chargement de <" + path + ">");
+
+    try {
+      System.load(path);
+    }
+    catch (UnsatisfiedLinkError e) {
+      log.error("", e);
+      throw e;
+    }
+    
+    log.debug("<<load");
+  }
+
   private static void unsatisfiedLinkError(String file) {
     ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
         .getManager().getCurrentLang(), Library.class);
-    String msg = MessageFormat.format(rb.getString("UnsatisfiedLinkError"), file);
+    String msg = MessageFormat.format(rb.getString("UnsatisfiedLinkError"),
+                                      file);
     throw new UnsatisfiedLinkError(msg);
   }
 }

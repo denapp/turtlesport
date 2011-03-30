@@ -41,6 +41,24 @@ public final class OperatingSystem {
   }
 
   /**
+   * D&eacute;termine si OS 32 bits.
+   * 
+   * @return <code>true</code> si OS 32 bits, <code>false</code> sinon.
+   */
+  public static boolean is32bits() {
+    return "32".equals(System.getProperty("sun.arch.data.model"));
+  }
+  
+  /**
+   * D&eacute;termine si OS 64 bits.
+   * 
+   * @return <code>true</code> si OS 64 bits, <code>false</code> sinon.
+   */
+  public static boolean is64bits() {
+    return "64".equals(System.getProperty("sun.arch.data.model"));
+  }
+  
+  /**
    * D&eacute;termine si kde.
    * 
    * @return <code>true</code> si kde, <code>false</code> sinon.
