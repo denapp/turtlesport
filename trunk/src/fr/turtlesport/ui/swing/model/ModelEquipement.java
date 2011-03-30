@@ -77,7 +77,7 @@ public class ModelEquipement {
     // mis a jour de la vue
     view.getJTextFieldWeight().setValue(data.getWeight());
     view.getJLabelValDistanceRun().setText(DistanceUnit.format(data
-        .getDistance()));
+        .getDistanceAll()));
     view.getJTextFieldDistanceMax().setValue(data.getDistanceMax());
 
     view.getJCheckBoxDefaultEquipment().setSelected(data.isDefault());

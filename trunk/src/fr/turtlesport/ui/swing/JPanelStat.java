@@ -480,7 +480,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
   public JFreeChart createChartDistanceWeek(String libRace) throws SQLException {
     List<DataStatYearWeek> resWeek = RunLapTableManager.getInstance()
-        .distanceByWeek(idUser);
+        .statByWeek(idUser);
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setDateFormatOverride(new SimpleDateFormat("w-yyyy",

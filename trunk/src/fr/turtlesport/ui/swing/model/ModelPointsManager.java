@@ -128,7 +128,7 @@ public final class ModelPointsManager {
     if (dataRun != null) {
       // Les points
       listTrks = RunTrkTableManager.getInstance().getTrks(dataRun.getId());
-      if (listTrks != null) {
+      if (listTrks != null && listTrks.size() > 0) {
         if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
           for (DataRunTrk t : listTrks) {
             t.setDistance((float) DistanceUnit.convert(DistanceUnit.unitKm(),
@@ -137,6 +137,16 @@ public final class ModelPointsManager {
                                                        t.getDistance()));
           }
         }
+        for (int i = 0; i < listTrks.size() - 1; i++) {
+          long time = listTrks.get(i + 1).getTime().getTime()
+                      - listTrks.get(i).getTime().getTime();
+          float dist = listTrks.get(i + 1).getDistance()
+                       - listTrks.get(i).getDistance();
+
+          double speed = (time == 0) ? 0.D : (dist / time) * 3600;
+          listTrks.get(i + 1).setSpeed(speed);
+        }
+        listTrks.get(0).setSpeed(listTrks.get(1).getSpeed());
       }
 
       // Les Laps

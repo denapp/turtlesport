@@ -361,7 +361,7 @@ public class JPanelRunSave extends JPanel {
             .retreive(name);
         if (data != null) {
           distanceRun = DistanceUnit.format(DistanceUnit.convert(DistanceUnit
-              .getDefaultUnit(), DistanceUnit.unitKm(), data.getDistance()));
+              .getDefaultUnit(), DistanceUnit.unitKm(), data.getDistanceAll()));
           distanceMax = DistanceUnit.format(DistanceUnit.convert(DistanceUnit
               .getDefaultUnit(), DistanceUnit.unitKm(), data.getDistanceMax()));
           isAlert = (data.getDistance() >= data.getDistanceMax());

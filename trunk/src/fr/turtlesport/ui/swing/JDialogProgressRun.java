@@ -49,7 +49,7 @@ import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.A1000RunTransferProtocol;
 import fr.turtlesport.protocol.data.AbstractLapType;
-import fr.turtlesport.protocol.data.D1009RunType;
+import fr.turtlesport.protocol.data.AbstractRunType;
 import fr.turtlesport.protocol.progress.IRunTransfertProgress;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTableCustom;
@@ -295,9 +295,9 @@ public class JDialogProgressRun extends JDialog implements
    * 
    * @see
    * fr.turtlesport.protocol.progress.IRunTransfertProgress#beginTransfertCourse
-   * (fr.turtlesport.protocol.data.D1009RunType)
+   * (fr.turtlesport.protocol.data.AbstractRunType)
    */
-  public void beginTransfertCourse(D1009RunType d1009) {
+  public void beginTransfertCourse(AbstractRunType rt) {
   }
 
   /*
@@ -307,10 +307,10 @@ public class JDialogProgressRun extends JDialog implements
    * fr.turtlesport.protocol.progress.IRunTransfertProgress#endTransfertCourse
    * (fr.turtlesport.protocol.data.D1009RunType)
    */
-  public void endTransfertCourse(D1009RunType d1009) {
-    TableRowObject row = tableModelRun.getTableRowObject(d1009);
+  public void endTransfertCourse(AbstractRunType rt) {
+    TableRowObject row = tableModelRun.getTableRowObject(rt);
     if (row != null) {
-      float dist = d1009.getComputeDistance();
+      float dist = rt.getComputeDistance();
       if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
         row.setDistance(DistanceUnit.convert(DistanceUnit.getDefaultUnit(),
                                              DistanceUnit.unitKm(),
@@ -332,19 +332,19 @@ public class JDialogProgressRun extends JDialog implements
    * turtlesport.protocol.data.D1009RunType,
    * fr.turtlesport.protocol.data.AbstractLapType)
    */
-  public void transfertLap(D1009RunType d1009, AbstractLapType lapType) {
-    if (d1009.sizeLapType() == 1) {
+  public void transfertLap(AbstractRunType runType, AbstractLapType lapType) {
+    if (runType.sizeLapType() == 1) {
       try {
         if (RunTableManager.getInstance().find(DataUser.getAllUser().getId(),
-                                               d1009.getComputeStartTime()) == -1) {
-          tableModelRun.addTransfertCourse(d1009);
+                                               runType.getComputeStartTime()) == -1) {
+          tableModelRun.addTransfertCourse(runType);
         }
       }
       catch (SQLException e) {
         log.error("", e);
       }
     }
-    TableRowObject row = tableModelRun.getTableRowObject(d1009);
+    TableRowObject row = tableModelRun.getTableRowObject(runType);
     if (row != null) {
       row.setDate(lapType.getStartTime());
       row.addProgressValue();
@@ -361,8 +361,8 @@ public class JDialogProgressRun extends JDialog implements
    * fr.turtlesport.protocol.progress.IRunTransfertProgress#transfertPoint(fr
    * .turtlesport.protocol.data.D1009RunType)
    */
-  public void transfertPoint(D1009RunType d1009) {
-    TableRowObject row = tableModelRun.getTableRowObject(d1009);
+  public void transfertPoint(AbstractRunType runType) {
+    TableRowObject row = tableModelRun.getTableRowObject(runType);
     if (row != null) {
       row.addProgressValue();
     }
@@ -421,7 +421,7 @@ public class JDialogProgressRun extends JDialog implements
    * fr.turtlesport.db.progress.IRunStoreProgress#beginStore(fr.turtlesport.
    * protocol.data.D1009RunType)
    */
-  public void beginStore(D1009RunType run) {
+  public void beginStore(AbstractRunType run) {
   }
 
   /*
@@ -439,7 +439,7 @@ public class JDialogProgressRun extends JDialog implements
    * fr.turtlesport.db.progress.IRunStoreProgress#endStore(fr.turtlesport.protocol
    * .data.D1009RunType)
    */
-  public void endStore(D1009RunType run) {
+  public void endStore(AbstractRunType run) {
     jProgressBar.setValue(jProgressBar.getMaximum());
     TableRowObject row = tableModelRun.getTableRowObject(run);
     if (row != null) {
@@ -465,7 +465,7 @@ public class JDialogProgressRun extends JDialog implements
    * fr.turtlesport.db.progress.IRunStoreProgress#storePoint(fr.turtlesport.
    * protocol.data.D1009RunType, int, int)
    */
-  public void storePoint(D1009RunType run, int currentPoint, int maxPoint) {
+  public void storePoint(AbstractRunType run, int currentPoint, int maxPoint) {
     TableRowObject row = tableModelRun.getTableRowObject(run);
     if (row != null) {
       row.endProgress();
@@ -914,13 +914,13 @@ public class JDialogProgressRun extends JDialog implements
     /**
      * Ajout d'une course.
      */
-    public void addTransfertCourse(D1009RunType d1009) {
+    public void addTransfertCourse(AbstractRunType runType) {
       int size = listRun.size();
 
-      TableRowObject rowObj = new TableRowObject(size, d1009);
+      TableRowObject rowObj = new TableRowObject(size, runType);
       listRun.add(rowObj);
 
-      rowObj.setActivity(d1009.getSportType());
+      rowObj.setActivity(runType.getSportType());
 
       fireTableRowsInserted(size, size);
       if (size == 0) {
@@ -929,12 +929,12 @@ public class JDialogProgressRun extends JDialog implements
     }
 
     /**
-     * @param d1009
+     * @param runType
      * @return
      */
-    protected TableRowObject getTableRowObject(D1009RunType d1009) {
+    protected TableRowObject getTableRowObject(AbstractRunType runType) {
       for (TableRowObject res : listRun) {
-        if (res.d1009.equals(d1009)) {
+        if (res.runType.equals(runType)) {
           return res;
         }
       }
@@ -1012,7 +1012,7 @@ public class JDialogProgressRun extends JDialog implements
    * 
    */
   private class TableRowObject {
-    private D1009RunType           d1009;
+    private AbstractRunType           runType;
 
     private int                    row;
 
@@ -1043,11 +1043,11 @@ public class JDialogProgressRun extends JDialog implements
      * @param row
      * @param index
      */
-    public TableRowObject(int row, D1009RunType d1009) {
+    public TableRowObject(int row, AbstractRunType runType) {
       super();
       this.row = row;
-      this.d1009 = d1009;
-      this.d1009.setExtra(new DataRunExtra());
+      this.runType = runType;
+      this.runType.setExtra(new DataRunExtra());
       if (defaultEquipement != null) {
         setEquipement(defaultEquipement);
       }
@@ -1063,10 +1063,10 @@ public class JDialogProgressRun extends JDialog implements
 
     public void setEquipement(String equipement) {
       this.equipement = equipement;
-      if (d1009.getExtra() == null) {
-        d1009.setExtra(new DataRunExtra());
+      if (runType.getExtra() == null) {
+        runType.setExtra(new DataRunExtra());
       }
-      ((DataRunExtra) d1009.getExtra()).setEquipement(equipement);
+      ((DataRunExtra) runType.getExtra()).setEquipement(equipement);
     }
 
     public String getEquipement() {
@@ -1085,14 +1085,14 @@ public class JDialogProgressRun extends JDialog implements
      */
     public void setComments(String comments) {
       this.comments = comments;
-      if (d1009.getExtra() == null) {
-        d1009.setExtra(new DataRunExtra());
+      if (runType.getExtra() == null) {
+        runType.setExtra(new DataRunExtra());
       }
       if (comments == null || "".equals(comments)) {
-        ((DataRunExtra) d1009.getExtra()).setComments(null);
+        ((DataRunExtra) runType.getExtra()).setComments(null);
       }
       else {
-        ((DataRunExtra) d1009.getExtra()).setComments(comments);
+        ((DataRunExtra) runType.getExtra()).setComments(comments);
       }
     }
 
@@ -1102,7 +1102,7 @@ public class JDialogProgressRun extends JDialog implements
 
     public void setUser(User user) {
       this.user = user;
-      ((DataRunExtra) d1009.getExtra()).setIdUser(user.getData().getId());
+      ((DataRunExtra) runType.getExtra()).setIdUser(user.getData().getId());
     }
 
     public AbstractDataActivity getActivity() {
@@ -1116,7 +1116,7 @@ public class JDialogProgressRun extends JDialog implements
       this.activity = activity;
 
       int viewRow = jTableRun.convertRowIndexToView(row);
-      d1009.setSportType(activity.getSportType());
+      runType.setSportType(activity.getSportType());
 
       tableModelRun.fireTableCellUpdated(viewRow, 4);
     }
@@ -1357,7 +1357,7 @@ public class JDialogProgressRun extends JDialog implements
           for (TableRowObject row : tableModelRun.listRun) {
             if (!row.isSave()) {
               log.warn("-->removeRunType");
-              a1000.removeRunType(row.d1009);
+              a1000.removeRunType(row.runType);
             }
             else if (row.getEquipement() != null
                      && !listEquipement.contains(row.getEquipement())) {

@@ -2,9 +2,10 @@ package fr.turtlesport.ui.swing.model;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import fr.turtlesport.db.DataRun;
-import fr.turtlesport.db.RunTrkTableManager;
+import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.JDialogRunDetail;
@@ -23,12 +24,15 @@ public class ModelRunDetail {
 
   private DataRun             dataRun;
 
+  private List<DataRunTrk>    listTrks;
+
   /**
    * 
    */
-  public ModelRunDetail(DataRun dataRun) {
+  public ModelRunDetail(DataRun dataRun, List<DataRunTrk> listTrks) {
     super();
     this.dataRun = dataRun;
+    this.listTrks = listTrks;
   }
 
   /**
@@ -60,12 +64,11 @@ public class ModelRunDetail {
         .getComputeDistanceTot()));
 
     // Temps tot
-    view.getJLabelValTimeTot().setText(TimeUnit
-        .formatHundredSecondeTime(dataRun.computeTimeTot()));
+    view.getJLabelValTimeTot()
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
 
     // recuperation des donnees
-    view.getTableModel().updateData(RunTrkTableManager.getInstance()
-        .getTrks(dataRun.getId()));
+    view.getTableModel().updateData(listTrks);
 
     log.debug("<<updateView");
   }
