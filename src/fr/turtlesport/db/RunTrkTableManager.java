@@ -12,6 +12,7 @@ import java.util.List;
 
 import fr.turtlesport.geo.IGeoPositionWithAlt;
 import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.protocol.data.AbstractTrkPointType;
 import fr.turtlesport.protocol.data.D304TrkPointType;
 import fr.turtlesport.util.GeoUtil;
 
@@ -59,7 +60,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
    * @param trk
    * @throws SQLException
    */
-  public void store(int id, D304TrkPointType trk) throws SQLException {
+  public void store(int id, AbstractTrkPointType trk) throws SQLException {
     log.debug(">>store id=" + id);
 
     if (trk == null) {

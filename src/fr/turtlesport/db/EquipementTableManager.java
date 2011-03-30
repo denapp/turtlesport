@@ -112,6 +112,7 @@ public final class EquipementTableManager extends AbstractTableManager {
         data.setDistanceMax(rs.getFloat(4));
         data.setPath(rs.getString(5));
         data.setDefault(convertToBoolean(rs.getInt(6)));
+        data.setDistanceInit(rs.getFloat(7));
 
         // recuperation de la distance parouru
         data.setDistance(distance(data.getName()));
@@ -224,7 +225,8 @@ public final class EquipementTableManager extends AbstractTableManager {
         data.setDistanceMax(rs.getFloat(4));
         data.setPath(rs.getString(5));
         data.setDefault(convertToBoolean(rs.getInt(6)));
-        
+        data.setDistanceInit(rs.getFloat(7));
+
         // recuperation de la distance parouru
         data.setDistance(distance(data.getName()));
         // recuperation des dates d'utilisation
@@ -319,8 +321,13 @@ public final class EquipementTableManager extends AbstractTableManager {
         file = null;
       }
     }
-    store(data.getName(), data.isAlert(), data.getWeight(), data
-        .getDistanceMax(), file, data.isDefault());
+    store(data.getName(),
+          data.isAlert(),
+          data.getWeight(),
+          data.getDistanceMax(),
+          data.getDistanceInit(),
+          file,
+          data.isDefault());
   }
 
   /**
@@ -337,7 +344,8 @@ public final class EquipementTableManager extends AbstractTableManager {
   public void store(String name,
                     boolean isAlert,
                     double weight,
-                    double distanceMax,
+                    float distanceMax,
+                    float distanceInit,
                     File file,
                     boolean isDefault) throws SQLException {
 
@@ -353,14 +361,14 @@ public final class EquipementTableManager extends AbstractTableManager {
       StringBuilder st = new StringBuilder();
       st.append("INSERT INTO ");
       st.append(getTableName());
-      st.append(" VALUES(?, ?, ?, ?, ?, ?)");
+      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
 
       pstmt.setString(1, name);
       pstmt.setInt(2, convertToSmallInt(isAlert));
       pstmt.setFloat(3, (float) weight);
-      pstmt.setFloat(4, (float) distanceMax);
+      pstmt.setFloat(4, distanceMax);
       if (file != null && file.isFile()) {
         pstmt.setString(5, file.getAbsolutePath());
       }
@@ -368,6 +376,7 @@ public final class EquipementTableManager extends AbstractTableManager {
         pstmt.setString(5, null);
       }
       pstmt.setInt(6, convertToSmallInt(isDefault));
+      pstmt.setFloat(7, distanceInit);
 
       pstmt.executeUpdate();
       pstmt.close();
