@@ -2,19 +2,19 @@ package fr.turtlesport;
 
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.Library;
+import fr.turtlesport.util.OperatingSystem;
 
 /**
  * @author Denis Apparicio
  */
 public final class UsbProtocol {
-  private static TurtleLogger    log;
+  private static TurtleLogger log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(UsbProtocol.class);
   }
-  
+
   /** Nom de la JNI. */
   private static final String LIBRARY_NAME = "turtleUsbjni";
-  
 
   /** Instance unique */
   private static UsbProtocol  singleton    = new UsbProtocol();
@@ -24,9 +24,23 @@ public final class UsbProtocol {
    */
   private UsbProtocol() {
     log.debug(">>UsbProtocol");
-    
-    // chargement de la librairie    
-    Library.load(UsbPacket.class, LIBRARY_NAME);
+
+    // chargement de la librairie
+    boolean isLoad = false;
+
+    if (OperatingSystem.isLinux() && OperatingSystem.is64bits()) {
+      String lib64 = LIBRARY_NAME + "64";
+      try {
+        Library.loadThrow(UsbPacket.class, lib64);
+        isLoad = true;
+      }
+      catch (Throwable e) {
+      }
+    }
+
+    if (!isLoad) {
+      Library.load(UsbPacket.class, LIBRARY_NAME);
+    }
     
     log.debug("<<UsbProtocol");
   }
@@ -84,10 +98,10 @@ public final class UsbProtocol {
    * 
    * @throws UsbProtocolException
    */
-  public synchronized UsbPacket read() throws UsbProtocolException {  
+  public synchronized UsbPacket read() throws UsbProtocolException {
     byte[] buf = readInner();
     log.debug(buf, "read");
-    
+
     return new UsbPacket(buf);
   }
 
