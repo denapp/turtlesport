@@ -3,6 +3,7 @@ package fr.turtlesport.ui.swing;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,10 +17,15 @@ import java.util.ResourceBundle;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -47,6 +53,7 @@ import fr.turtlesport.ui.swing.img.diagram.ImagesDiagramRepository;
 import fr.turtlesport.ui.swing.model.ModelActivity;
 import fr.turtlesport.ui.swing.model.ModelAthlete;
 import fr.turtlesport.ui.swing.model.ModelEquipement;
+import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
@@ -249,8 +256,7 @@ public class JPanelUserProfile extends JPanel implements LanguageListener,
               return;
             }
 
-            Activity activity = (Activity) tableModelActivity
-                .getValueAt(row, 0);
+            Activity activity = (Activity) tableModelActivity.getValueAt(row, 0);
             if (jPanelActivity.getModel() != activity.model) {
               switch (activity.model.getDataActivity().getSportType()) {
                 case DataActivityRun.SPORT_TYPE:
@@ -841,8 +847,8 @@ public class JPanelUserProfile extends JPanel implements LanguageListener,
 
     public void actionPerformed(ActionEvent e) {
       while (true) {
-        String name = JShowMessage.showInputDialog(rb.getString("name"), rb
-            .getString("addTitle"));
+        String name = JShowMessage.showInputDialog(rb.getString("name"),
+                                                   rb.getString("addTitle"));
         if (name == null || "".equals(name.trim())) {
           break;
         }
@@ -874,31 +880,86 @@ public class JPanelUserProfile extends JPanel implements LanguageListener,
 
     public void actionPerformed(ActionEvent e) {
       while (true) {
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new GridLayout(4, 1));
 
-        String name = JShowMessage.showInputDialog(rb.getString("name"), rb
-            .getString("addTitleEquipement"));
-        if (name == null || "".equals(name.trim())) {
-          break;
-        }
-        if (name.length() > 50) {
-          name = name.substring(0, 50);
-        }
-        if (tableModelEquipement.contains(name.trim())) {
-          JShowMessage.error(MessageFormat.format(rb
-              .getString("errorEquipementAlreadyExist"), name.trim()));
+        JLabel jLabelName = new JLabel(rb.getString("name"));
+        jLabelName.setFont(GuiFont.FONT_PLAIN);
+        String msg = MessageFormat.format(rb.getString("jLabelLibDistanceRun"),
+                                          DistanceUnit.getDefaultUnit());
+        JLabel jLabelDist = new JLabel(msg);
+        jLabelDist.setFont(GuiFont.FONT_PLAIN);
+        JTextField jTextFieldName = new JTextField();
+        jTextFieldName.setFont(GuiFont.FONT_PLAIN);
+        SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0,
+                                                                 0,
+                                                                 Integer.MAX_VALUE,
+                                                                 1);
+        JSpinner jSpinnerDist = new JSpinner(spinnerModel);
+        jSpinnerDist.setFont(GuiFont.FONT_PLAIN);
+
+        jPanel.add(jLabelName);
+        jPanel.add(jTextFieldName);
+        jPanel.add(jLabelDist);
+        jPanel.add(jSpinnerDist);
+
+        int rep = JOptionPane
+            .showConfirmDialog(MainGui.getWindow(),
+                               jPanel,
+                               rb.getString("addTitleEquipement"),
+                               JOptionPane.OK_CANCEL_OPTION,
+                               JOptionPane.QUESTION_MESSAGE);
+
+        if (rep == JOptionPane.OK_OPTION) {
+          String name = jTextFieldName.getText();
+          int initDistance = spinnerModel.getNumber().intValue();
+          if (name == null || "".equals(name.trim())) {
+            break;
+          }
+          if (name.length() > 50) {
+            name = name.substring(0, 50);
+          }
+          if (tableModelEquipement.contains(name.trim())) {
+            JShowMessage.error(MessageFormat.format(rb
+                .getString("errorEquipementAlreadyExist"), name.trim()));
+          }
+          else {
+            addEquipement(new DataEquipement(name, initDistance));
+            // on se positionne sur l equipement creee
+            jTableEquipement.getSelectionModel()
+                .setSelectionInterval(tableModelEquipement.getRowCount() - 1,
+                                      tableModelEquipement.getRowCount() - 1);
+
+            break;
+          }
         }
         else {
-          addEquipement(new DataEquipement(name));
-
-          // on se positionne sur l activite creee
-          jTableEquipement.getSelectionModel()
-              .setSelectionInterval(tableModelEquipement.getRowCount() - 1,
-                                    tableModelEquipement.getRowCount() - 1);
-
           break;
         }
-      }
 
+        // String name = JShowMessage.showInputDialog(rb.getString("name"), rb
+        // .getString("addTitleEquipement"));
+        // if (name == null || "".equals(name.trim())) {
+        // break;
+        // }
+        // if (name.length() > 50) {
+        // name = name.substring(0, 50);
+        // }
+        // if (tableModelEquipement.contains(name.trim())) {
+        // JShowMessage.error(MessageFormat.format(rb
+        // .getString("errorEquipementAlreadyExist"), name.trim()));
+        // }
+        // else {
+        // addEquipement(new DataEquipement(name));
+        //
+        // // on se positionne sur l activite creee
+        // jTableEquipement.getSelectionModel()
+        // .setSelectionInterval(tableModelEquipement.getRowCount() - 1,
+        // tableModelEquipement.getRowCount() - 1);
+        //
+        // break;
+        // }
+      }
     }
   }
 
@@ -936,8 +997,8 @@ public class JPanelUserProfile extends JPanel implements LanguageListener,
     private String getValue(String libelle) {
       String value = null;
       while (true) {
-        value = JShowMessage.showInputDialog(libelle, rb
-            .getString("addTitleAthlete"));
+        value = JShowMessage.showInputDialog(libelle,
+                                             rb.getString("addTitleAthlete"));
         if (value == null || "".equals(value.trim())) {
           break;
         }

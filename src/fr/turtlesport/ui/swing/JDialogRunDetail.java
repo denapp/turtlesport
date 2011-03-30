@@ -92,10 +92,10 @@ public class JDialogRunDetail extends JDialog {
     initialize();
   }
 
-  public static void prompt(DataRun dataRun) {
+  public static void prompt(DataRun dataRun, List<DataRunTrk> listTrks) {
 
     // mis a jour du model et affichage de l'IHM
-    ModelRunDetail model = new ModelRunDetail(dataRun);
+    ModelRunDetail model = new ModelRunDetail(dataRun, listTrks);
     JDialogRunDetail view = new JDialogRunDetail(MainGui.getWindow(), true);
     try {
       model.updateView(view);
@@ -395,12 +395,12 @@ public class JDialogRunDetail extends JDialog {
           return TimeUnit.formatHundredSecondeTime(data.getTotalTime());
 
         case 3: // Allure Moy.
-          return PaceUnit.computeAllure(data.getTotalDist(), data
-              .getTotalTime());
+          return PaceUnit.computeAllure(data.getTotalDist(),
+                                        data.getTotalTime());
 
         case 4: // Vitesse Moy.
-          return SpeedPaceUnit.computeFormatSpeed(data.getTotalDist(), data
-              .getTotalTime());
+          return SpeedPaceUnit.computeFormatSpeed(data.getTotalDist(),
+                                                  data.getTotalTime());
 
         case 5: // Frequence cardiaque moy.
           return data.getAvgHeartRate();

@@ -159,6 +159,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JMenuItemTurtle         jMenuItemRunDetail;
 
+  private JMenuItemTurtle         jMenuItemRunDetailGps;
+
   private JMenuItemTurtle         jMenuItemRunMap;
 
   private JMenuItemTurtle         jMenuItemRunGoogleEarth;
@@ -198,6 +200,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
   private JButtonCustom           jButtonGoogleMap;
 
   private JButtonCustom           jButtonDetails;
+
+  private JButtonCustom           jButtonDetailsGps;
 
   private JButtonCustom           jButtonEmail;
 
@@ -363,6 +367,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
     getJButtonGoogleEarth().setEnabled(b);
     getJButtonGoogleMap().setEnabled(b);
     getJButtonDetails().setEnabled(b);
+    getJButtonDetailsGps().setEnabled(b);
   }
 
   /**
@@ -436,6 +441,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
     jButtonGoogleMap
         .setToolTipText(rb.getString("jButtonGoogleMapToolTipText"));
     jButtonDetails.setToolTipText(rb.getString("jButtonDetailsToolTipText"));
+    jButtonDetailsGps.setToolTipText(rb
+        .getString("jButtonDetailsGpsToolTipText"));
     if (jButtonEmail != null) {
       jButtonEmail.setToolTipText(rb.getString("jButtonEmailToolTipText"));
     }
@@ -569,6 +576,11 @@ public class JPanelRun extends JPanel implements LanguageListener,
     MainGui.getWindow().getJMenuItemRunDetail().addActionListener(action);
     getJButtonDetails().addActionListener(action);
 
+    action = new DetailPointsActionListener();
+    getJMenuItemRunDetailGps().addActionListener(action);
+    MainGui.getWindow().getJMenuItemRunDetailGps().addActionListener(action);
+    getJButtonDetailsGps().addActionListener(action);
+
     action = new MapMercatorActionListener();
     getJMenuItemRunMap().addActionListener(action);
     MainGui.getWindow().getJMenuItemRunMap().addActionListener(action);
@@ -662,6 +674,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
     if (jPopupMenu == null) {
       jPopupMenu = new JPopupMenu();
       jPopupMenu.add(getJMenuItemRunDetail());
+      jPopupMenu.add(getJMenuItemRunDetailGps());
       jPopupMenu.add(getJMenuItemRunMap());
       jPopupMenu.add(getJMenuItemRunGoogleEarth());
       jPopupMenu.add(getJMenuItemRunGoogleMap());
@@ -695,6 +708,22 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jMenuItemRunDetail.setEnabled(false);
     }
     return jMenuItemRunDetail;
+  }
+
+  /**
+   * This method initializes jMenuItemRunDetail.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunDetailGps() {
+    if (jMenuItemRunDetailGps == null) {
+      jMenuItemRunDetailGps = new JMenuItemTurtle();
+      jMenuItemRunDetailGps.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunDetailGps.setAccelerator(MainGui.getWindow()
+          .getMenuProperties(), "jMenuItemRunDetailGps");
+      jMenuItemRunDetailGps.setEnabled(false);
+    }
+    return jMenuItemRunDetailGps;
   }
 
   /**
@@ -872,17 +901,16 @@ public class JPanelRun extends JPanel implements LanguageListener,
   public JTabbedPane getJTabbedPaneRace() {
     if (jTabbedPaneRace == null) {
       jTabbedPaneRace = new JTabbedPane();
+
       jTabbedPaneRace.setBorder(BorderFactory.createTitledBorder(""));
 
       jTabbedPaneRace.setFont(GuiFont.FONT_PLAIN);
       jTabbedPaneRace.addTab("Course", getJPanelRunSummary());
       jTabbedPaneRace.addTab("Notes", getJScrollPaneTextArea());
-      // jTabbedPaneRace
-      // .addTab("<html><body><font color=\"red\">\u2665</font></body></html>",
-      // getJPanelChartHeartZone());
-      jTabbedPaneRace
-          .addTab("<html><body><font color=\"red\">\u2665</font></body></html>",
-                  getJPanelChartHeart());
+      jTabbedPaneRace.addTab("",
+                             ImagesRepository.getImageIcon("heart.gif"),
+                             getJPanelChartHeart(),
+                             "");
       jTabbedPaneRace.addTab("Speed", getJPanelChartSpeed());
     }
     return jTabbedPaneRace;
@@ -1285,6 +1313,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jPanelButtons.add(getJButtonDelete());
       jPanelButtons.add(getJButtonSave());
       jPanelButtons.add(getJButtonDetails());
+      jPanelButtons.add(getJButtonDetailsGps());
       if (Mail.isSupported()) {
         jButtonEmail = new JButtonCustom(ImagesRepository.getImageIcon("email.png"));
         Dimension dim = new Dimension(20, 20);
@@ -1370,6 +1399,19 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     }
     return jButtonDetails;
+  }
+
+  public JButton getJButtonDetailsGps() {
+    if (jButtonDetailsGps == null) {
+      jButtonDetailsGps = new JButtonCustom(ImagesRepository.getImageIcon("gps.png"));
+      Dimension dim = new Dimension(20, 20);
+      jButtonDetailsGps.setPreferredSize(dim);
+      jButtonDetailsGps.setMaximumSize(dim);
+      jButtonDetailsGps.setEnabled(false);
+      jButtonDetailsGps.setOpaque(false);
+
+    }
+    return jButtonDetailsGps;
   }
 
   /**
@@ -2139,7 +2181,20 @@ public class JPanelRun extends JPanel implements LanguageListener,
   private class DetailActionListener implements ActionListener {
 
     public void actionPerformed(ActionEvent actionevent) {
-      JDialogRunDetail.prompt(ModelPointsManager.getInstance().getDataRun());
+      JDialogRunDetail.prompt(ModelPointsManager.getInstance().getDataRun(),
+                              ModelPointsManager.getInstance().getListTrks());
+    }
+  }
+
+  /**
+   * @author Denis Apparicio
+   * 
+   */
+  private class DetailPointsActionListener implements ActionListener {
+
+    public void actionPerformed(ActionEvent actionevent) {
+      JDialogRunPointsDetail.prompt(ModelPointsManager.getInstance()
+          .getDataRun(), ModelPointsManager.getInstance().getListTrks());
     }
   }
 

@@ -89,6 +89,8 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private JMenuItemTurtle      jMenuItemRunDetail;
 
+  private JMenuItemTurtle      jMenuItemRunDetailGps;
+
   private JMenuItemTurtle      jMenuItemQuit;
 
   private JMenu                jMenuAbout;
@@ -173,7 +175,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private JMenuItemTurtle      jMenuItemTwitter;
 
-  private JMenuItemTurtle jMenuItemRunGoogleMap;
+  private JMenuItemTurtle      jMenuItemRunGoogleMap;
 
   /**
    * 
@@ -247,9 +249,10 @@ public class MainGui extends JFrame implements LanguageListener {
 
     jMenuRun.setText(rb.getString("jMenuRun"));
     jMenuItemRunDetail.setText(rb.getString("jMenuItemRunDetail"));
+    jMenuItemRunDetailGps.setText(rb.getString("jMenuItemRunDetailGps"));
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
     if (jMenuItemRunEmail != null) {
-      jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail")); 
+      jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail"));
     }
     jMenuItemRunGoogleMap.setText(rb.getString("jMenuItemRunGoogleMap"));
     jMenuItemRunGoogleEarth.setText(rb.getString("jMenuItemRunGoogleEarth"));
@@ -349,8 +352,8 @@ public class MainGui extends JFrame implements LanguageListener {
    * Attende avant swing runnable.
    */
   public void beforeRunnableSwing() {
-    MainGui.getWindow().setCursor(Cursor
-        .getPredefinedCursor(Cursor.WAIT_CURSOR));
+    MainGui.getWindow()
+        .setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
   }
 
   /**
@@ -368,6 +371,7 @@ public class MainGui extends JFrame implements LanguageListener {
    */
   public void setEnableMenuRun(boolean b) {
     getJMenuItemRunDetail().setEnabled(b);
+    getJMenuItemRunDetailGps().setEnabled(b);
     getJMenuItemRunMap().setEnabled(b);
     getJMenuItemRunGoogleEarth().setEnabled(b);
     getJMenuItemRunGoogleMap().setEnabled(b);
@@ -628,8 +632,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private JXSplitButton getJXSplitButtonUser() {
     if (jXSplitButtonUser == null) {
-      jXSplitButtonUser = new JXSplitButton(ImagesMenuRepository
-          .getImageIcon("run.png"));
+      jXSplitButtonUser = new JXSplitButton(ImagesMenuRepository.getImageIcon("run.png"));
       jXSplitButtonUser.setFont(GuiFont.FONT_PLAIN);
       setUsers();
     }
@@ -659,9 +662,8 @@ public class MainGui extends JFrame implements LanguageListener {
     // Ajout des utilisateurs
     if (list != null) {
       for (int i = 0; i < list.size(); i++) {
-        jmiUser = new JCheckBoxMenuItemUser(list.get(i).getId(),
-                                            list.get(i).getFirstName() + " "
-                                                + list.get(i).getLastName());
+        jmiUser = new JCheckBoxMenuItemUser(list.get(i).getId(), list.get(i)
+            .getFirstName() + " " + list.get(i).getLastName());
         buttonGroupDropDown.add(jmiUser);
         jPopupMenuDropDown.add(jmiUser);
       }
@@ -695,6 +697,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuRun = new JMenu();
       jMenuRun.setFont(GuiFont.FONT_PLAIN);
       jMenuRun.add(getJMenuItemRunDetail());
+      jMenuRun.add(getJMenuItemRunDetailGps());
       jMenuRun.add(getJMenuItemRunMap());
       if (Mail.isSupported()) {
         jMenuRun.add(getJMenuItemRunEmail());
@@ -742,6 +745,22 @@ public class MainGui extends JFrame implements LanguageListener {
   }
 
   /**
+   * This method initializes jMenuItemRunDetail.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunDetailGps() {
+    if (jMenuItemRunDetailGps == null) {
+      jMenuItemRunDetailGps = new JMenuItemTurtle();
+      jMenuItemRunDetailGps.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunDetailGps
+          .setAccelerator(menuProperties, "jMenuItemRunDetailGps");
+      jMenuItemRunDetailGps.setEnabled(false);
+    }
+    return jMenuItemRunDetailGps;
+  }
+
+  /**
    * This method initializes jMenuItemRunMap.
    * 
    * @return javax.swing.JMenuItem
@@ -771,7 +790,7 @@ public class MainGui extends JFrame implements LanguageListener {
     }
     return jMenuItemRunGoogleEarth;
   }
-  
+
   /**
    * This method initializes jMenuItemRunGoogleEarth.
    * 
@@ -782,7 +801,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuItemRunGoogleMap = new JMenuItemTurtle();
       jMenuItemRunGoogleMap.setFont(GuiFont.FONT_PLAIN);
       jMenuItemRunGoogleMap.setAccelerator(menuProperties,
-                                             "jMenuItemRunGoogleMap");
+                                           "jMenuItemRunGoogleMap");
       jMenuItemRunGoogleMap.setEnabled(false);
     }
     return jMenuItemRunGoogleMap;
@@ -1621,19 +1640,19 @@ public class MainGui extends JFrame implements LanguageListener {
             boolean hasUpdate = Update.check();
             afterRunnableSwing();
             if (hasUpdate) {
-              JShowMessage.ok(rb.getString("MessageUpdateYes"), rb
-                  .getString("MessageUpdateTitle"));
+              JShowMessage.ok(rb.getString("MessageUpdateYes"),
+                              rb.getString("MessageUpdateTitle"));
             }
             else {
-              JShowMessage.ok(rb.getString("MessageUpdateNo"), rb
-                  .getString("MessageUpdateTitle"));
+              JShowMessage.ok(rb.getString("MessageUpdateNo"),
+                              rb.getString("MessageUpdateTitle"));
             }
           }
           catch (IOException ioe) {
             log.error("", ioe);
             afterRunnableSwing();
-            JShowMessage.error(rb.getString("MessageUpdateError"), rb
-                .getString("MessageUpdateTitle"));
+            JShowMessage.error(rb.getString("MessageUpdateError"),
+                               rb.getString("MessageUpdateTitle"));
           }
 
         }
@@ -1662,7 +1681,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
   public void setRightComponent(JPanel panel) {
     if (jSplitPaneCenter.getRightComponent() != null) {
-      
+
       // Suppression des listeners
       if (!(panel instanceof JPanelRun)) {
         ModelPointsManager.getInstance().removeAllChangeListener();
