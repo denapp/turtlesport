@@ -8,7 +8,8 @@ import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbProtocolException;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.AbstractLapType;
-import fr.turtlesport.protocol.data.D1009RunType;
+import fr.turtlesport.protocol.data.AbstractRunType;
+import fr.turtlesport.protocol.data.AbstractTrkPointType;
 import fr.turtlesport.protocol.data.D304TrkPointType;
 import fr.turtlesport.protocol.data.D311TrkHdrType;
 import fr.turtlesport.protocol.progress.IRunTransfertProgress;
@@ -20,40 +21,40 @@ import fr.turtlesport.util.ByteUtil;
  * 
  */
 public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
-  private static TurtleLogger     log;
+  private static TurtleLogger        log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(A1000RunTransferProtocol.class);
   }
 
   /** Command ID. */
-  private short                   commandIdType;
+  private short                      commandIdType;
 
   /** PID Transfer : Cmnd_Transfer_Run = 450. */
-  private static final short      COMMAND_TRANSFER_RUN  = 450;
+  private static final short         COMMAND_TRANSFER_RUN  = 450;
 
   /** PID Transfer : Cmnd_Transfer_Laps = 117. */
-  private static final short      COMMAND_TRANSFER_LAPS = 117;
+  private static final short         COMMAND_TRANSFER_LAPS = 117;
 
   /** PID Transfer : Cmnd_Transfer_Trk = 6. */
-  private static final short      COMMAND_TRANSFER_TRK  = 6;
+  private static final short         COMMAND_TRANSFER_TRK  = 6;
 
   /** Pid reponse : Pid_Run = 990. */
-  private static final short      PID_RUN               = 990;
+  private static final short         PID_RUN               = 990;
 
   /** Pid reponse : Pid_Lap = 149. */
-  private static final short      PID_LAP               = 149;
+  private static final short         PID_LAP               = 149;
 
   /** Pid reponse : Pid_Trk_Hdr = 99. */
-  private static final short      PID_TRK_HDR           = 99;
+  private static final short         PID_TRK_HDR           = 99;
 
   /** Pid reponse : Pid_Trk_Data = 1065. */
-  private static final short      PID_TRK_DATA          = 34;
+  private static final short         PID_TRK_DATA          = 34;
 
   /** Protocole associe a cette commande. */
-  private static final String     PROTOCOL_NAME         = "A1000";
+  private static final String        PROTOCOL_NAME         = "A1000";
 
   /** Liste des run. */
-  private ArrayList<D1009RunType> listRunType;
+  private ArrayList<AbstractRunType> listRunType;
 
   /**
    * 
@@ -66,7 +67,7 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
    * 
    * @return la liste des courses.
    */
-  public ArrayList<D1009RunType> getListRunType() {
+  public ArrayList<AbstractRunType> getListRunType() {
     return listRunType;
   }
 
@@ -75,13 +76,13 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
    * 
    * @return la course &agrave; ajouter.
    */
-  public void addRunType(D1009RunType run) {
+  public void addRunType(AbstractRunType run) {
     if (run == null) {
       return;
     }
     if (listRunType == null) {
       synchronized (A1000RunTransferProtocol.class) {
-        listRunType = new ArrayList<D1009RunType>();
+        listRunType = new ArrayList<AbstractRunType>();
       }
     }
     listRunType.add(run);
@@ -92,7 +93,7 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
    * 
    * @return la course &agrave; supprimer.
    */
-  public boolean removeRunType(D1009RunType run) {
+  public boolean removeRunType(AbstractRunType run) {
     if (run == null || listRunType == null) {
       return false;
     }
@@ -124,7 +125,7 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
       progress = new RunTransfertProgressAdaptor();
     }
 
-    Hashtable<Integer, D1009RunType> hashRunType = new Hashtable<Integer, D1009RunType>();
+    Hashtable<Integer, AbstractRunType> hashRunType = new Hashtable<Integer, AbstractRunType>();
     try {
       // Recuperation 0 a j-1
       // ------------------------------------------------------------
@@ -214,44 +215,17 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
   }
 
   /**
-   * Lecture PID record.
-   */
-  private int retrievePidRecords() throws UsbProtocolException {
-    log.debug(">>retrievePidRecords");
-
-    int nbPaquet = 0;
-
-    // Lecture
-    UsbPacket packet = GarminDevice.getDevice().read();
-
-    // Premier paquet Pid_Records (spec 5.4)
-    if (packet.getPacketType() == PACKET_TYPE_APP_LAYER
-        && packet.getPacketID() == PID_RECORDS) {
-      nbPaquet = ByteUtil.toShort(packet.getData()[0], packet.getData()[1]);
-      log.debug("nbPaquet=" + nbPaquet);
-    }
-    else {
-      log.warn("packet.getPacketType()=" + packet.getPacketType());
-      log.warn("packet.getPacketID()=" + packet.getPacketID());
-      log.warn("PidRecords attendu");
-    }
-
-    log.debug("<<retrievePidRecords");
-    return nbPaquet;
-  }
-
-  /**
    * Recuperation des runs.
    */
   private void retrievePidRun(int nbPaquet,
-                              Hashtable<Integer, D1009RunType> hashRunType,
+                              Hashtable<Integer, AbstractRunType> hashRunType,
                               IRunTransfertProgress progress) throws UsbProtocolException {
     log.info(">>retrievePidRun nbPaquet=" + nbPaquet);
 
     UsbPacket packet;
-    D1009RunType d1009;
+    AbstractRunType runType;
     int nbPacketRead = 0;
-    int nbPacketD1009 = 0;
+    int nbPacketRunType = 0;
 
     nbPaquet++;
     while (!progress.abortTransfert()) {
@@ -266,33 +240,33 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
 
       if (packet.getPacketType() == PACKET_TYPE_APP_LAYER
           && packet.getPacketID() == PID_RUN) {
-        d1009 = new D1009RunType();
-        d1009.parse(packet);
+        runType = AbstractRunType.newInstance();
+        runType.parse(packet);
         if (log.isInfoEnabled()) {
           StringBuilder st = new StringBuilder();
-          st.append("D1009RunType trackIndex=");
-          st.append(d1009.getTrackIndex());
+          st.append("AbstractRunType trackIndex=");
+          st.append(runType.getTrackIndex());
           st.append("; firstLapIndex=");
-          st.append(d1009.getFirstLapIndex());
+          st.append(runType.getFirstLapIndex());
           st.append("; lastLapIndex=");
-          st.append(d1009.getLastLapIndex());
-          st.append("; dist=");
-          st.append(d1009.getQuickWorkout().getDistance());
-          st.append("; time=");
-          st.append(d1009.getQuickWorkout().getTime());
+          st.append(runType.getLastLapIndex());
+          // st.append("; dist=");
+          // st.append(runType.getQuickWorkout().getDistance());
+          // st.append("; time=");
+          // st.append(runType.getQuickWorkout().getTime());
           log.info(st.toString());
         }
 
         // notification
-        progress.beginTransfertCourse(d1009);
+        progress.beginTransfertCourse(runType);
 
-        nbPacketD1009++;
-        if (d1009.hasTrack()) {
-          hashRunType.put(d1009.getTrackIndex(), d1009);
-          addRunType(d1009);
+        nbPacketRunType++;
+        if (runType.hasTrack()) {
+          hashRunType.put(runType.getTrackIndex(), runType);
+          addRunType(runType);
         }
         else {
-          log.warn("d1009 pas de track");
+          log.warn("AbstractRunType pas de track");
         }
 
       }
@@ -316,8 +290,8 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
       st.append(nbPaquet);
       st.append("; nbPacketRead=");
       st.append(nbPacketRead);
-      st.append(" ; nbPacketD1009=");
-      st.append(nbPacketD1009);
+      st.append(" ; nbPacketRunType=");
+      st.append(nbPacketRunType);
 
       log.warn(st.toString());
     }
@@ -397,15 +371,15 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
    * Recuperation des points.
    */
   private void retrievePidTracks(int nbPaquet,
-                                 Hashtable<Integer, D1009RunType> hashRunType,
+                                 Hashtable<Integer, AbstractRunType> hashRunType,
                                  IRunTransfertProgress progress) throws UsbProtocolException {
     log.info(">>retrievePidTracks nbPaquet=" + nbPaquet);
 
     UsbPacket packet;
     D311TrkHdrType d311 = null;
-    D304TrkPointType d304;
+    AbstractTrkPointType trkPointType;
     int nbPacketRead = 0;
-    int nbPacketD304 = 0;
+    int nbPacketTrkPointType = 0;
     int nbPacketD311 = 0;
 
     do {
@@ -423,9 +397,9 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
 
         // notification fin de transfert course precedente.
         if (d311 != null) {
-          D1009RunType d1009 = hashRunType.get(d311.getIndex());
-          if (d1009 != null) {
-            progress.endTransfertCourse(d1009);
+          AbstractRunType runType = hashRunType.get(d311.getIndex());
+          if (runType != null) {
+            progress.endTransfertCourse(runType);
           }
         }
 
@@ -440,19 +414,19 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
           log.warn("d311 est null");
         }
         else {
-          d304 = new D304TrkPointType();
-          d304.parse(packet);
+          trkPointType = AbstractTrkPointType.newInstance();
+          trkPointType.parse(packet);
           // ajout du point au run
-          D1009RunType d1009 = hashRunType.get(d311.getIndex());
-          if (d1009 != null) {
-            d1009.addTrkPointType(d304);
+          AbstractRunType runType = hashRunType.get(d311.getIndex());
+          if (runType != null) {
+            runType.addTrkPointType(trkPointType);
           }
-          nbPacketD304++;
-          log.debug("D304TrkPointType time=" + d304.getTime());
+          nbPacketTrkPointType++;
+          log.debug("AbstractRunType time=" + trkPointType.getTime());
 
           // notification
-          if (nbPacketD304 % progress.intervalNotify() == 0) {
-            progress.transfertPoint(d1009);
+          if (nbPacketTrkPointType % progress.intervalNotify() == 0) {
+            progress.transfertPoint(runType);
           }
         }
       }
@@ -474,9 +448,9 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
 
     // notification fin de transfert course precedente.
     if (d311 != null) {
-      D1009RunType d1009 = hashRunType.get(d311.getIndex());
-      if (d1009 != null) {
-        progress.endTransfertCourse(d1009);
+      AbstractRunType runType = hashRunType.get(d311.getIndex());
+      if (runType != null) {
+        progress.endTransfertCourse(runType);
       }
     }
 
@@ -486,8 +460,8 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
       st.append(nbPaquet);
       st.append("; nbPacketRead=");
       st.append(nbPacketRead);
-      st.append(" ; nbPacketD304=");
-      st.append(nbPacketD304);
+      st.append(" ; nbPacketTrkPointType=");
+      st.append(nbPacketTrkPointType);
       st.append(" ; nbPacketD311=");
       st.append(nbPacketD311);
 
@@ -510,7 +484,7 @@ public class A1000RunTransferProtocol extends AbstractTransfertProtocol {
     int firstIndex, lastIndex;
 
     // recherche de la course
-    for (D1009RunType runType : listRunType) {
+    for (AbstractRunType runType : listRunType) {
       firstIndex = runType.getFirstLapIndex();
       lastIndex = runType.getLastLapIndex();
       if (firstIndex <= lapType.getIndex() && lapType.getIndex() <= lastIndex) {

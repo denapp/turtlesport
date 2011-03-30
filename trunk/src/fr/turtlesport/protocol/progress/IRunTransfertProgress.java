@@ -1,7 +1,7 @@
 package fr.turtlesport.protocol.progress;
 
 import fr.turtlesport.protocol.data.AbstractLapType;
-import fr.turtlesport.protocol.data.D1009RunType;
+import fr.turtlesport.protocol.data.AbstractRunType;
 
 /**
  * @author Denis Apparicio
@@ -44,7 +44,7 @@ public interface IRunTransfertProgress {
    * @param run
    *          la course.
    */
-  void beginTransfertCourse(D1009RunType run);
+  void beginTransfertCourse(AbstractRunType run);
 
   /**
    * Fin transfert course.
@@ -52,7 +52,7 @@ public interface IRunTransfertProgress {
    * @param run
    *          la course.
    */
-  void endTransfertCourse(D1009RunType run);
+  void endTransfertCourse(AbstractRunType run);
 
   /**
    * D&eacute;but transfert point.
@@ -68,7 +68,7 @@ public interface IRunTransfertProgress {
    * @param run
    *          la course.
    */
-  void transfertPoint(D1009RunType run);
+  void transfertPoint(AbstractRunType run);
 
   /**
    * D&eacute;but transfert tour interm&eacute;diaire.
@@ -86,7 +86,7 @@ public interface IRunTransfertProgress {
    * @param lapType
    *          le tour interm&eacute;diaire.
    */
-  void transfertLap(D1009RunType run, AbstractLapType lapType);
+  void transfertLap(AbstractRunType run, AbstractLapType lapType);
 
   /**
    * Notification points.

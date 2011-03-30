@@ -1,5 +1,7 @@
 package fr.turtlesport.protocol.data;
 
+import java.util.ArrayList;
+
 import fr.turtlesport.UsbPacketInputStream;
 import fr.turtlesport.log.TurtleLogger;
 
@@ -26,105 +28,42 @@ import fr.turtlesport.log.TurtleLogger;
  * @author Denis Apparicio
  * 
  */
-public class D1002WorkoutType extends AbstractData {
-  private static TurtleLogger log;
+public class D1002WorkoutType extends AbstractWorkout {
+  private static TurtleLogger   log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(D1002WorkoutType.class);
   }
 
-  /** Nombre d'etapes valide. */
-  private int                 numValidSteps;
-
-  /** Etapes. */
-  private D1002Step[]         steps;
-
-  /** Nom. */
-  private String              name;
-
-  /** Type de sport. */
-  private int                 sportType;
+  protected static final String PROTOCOL = "D1002";
 
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.data.AbstractData#parse(fr.turtlesport.UsbPacketInputStream)
+   * @see fr.turtlesport.protocol.data.AbstractData#parse(fr.turtlesport.
+   * UsbPacketInputStream)
    */
   @Override
   public void parse(UsbPacketInputStream input) {
-    log.debug(">>decode");
+    log.debug(">>parse");
 
-    numValidSteps = input.readInt();
+    int numValidSteps = input.readInt();
 
-    steps = new D1002Step[numValidSteps];
-    for (int i = 0; i < numValidSteps; i++) {
-      steps[i] = new D1002Step();
-      steps[i].parse(input);
+    listSteps = new ArrayList<AbstractStep>();
+    int i = 0;
+    for (i = 0; i < numValidSteps; i++) {
+      D1002Step d1002 = new D1002Step();
+      listSteps.add(d1002);
+      d1002.parse(input);
+    }
+    for (; i < MAX_VALID_STEP; i++) {
+      D1002Step d1002 = new D1002Step();
+      d1002.parse(input);
     }
 
-    name = input.readString(16);
-    sportType = input.read();
+    setName(input.readString(16));
+    setSportType(input.read());
 
-    log.debug("<<decode");
-  }
-
-  /**
-   * @return the name
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * @param name
-   *          the name to set
-   */
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  /**
-   * @return the numValidSteps
-   */
-  public int getNumValidSteps() {
-    return numValidSteps;
-  }
-
-  /**
-   * @param numValidSteps
-   *          the numValidSteps to set
-   */
-  public void setNumValidSteps(int numValidSteps) {
-    this.numValidSteps = numValidSteps;
-  }
-
-  /**
-   * @return the sportType
-   */
-  public int getSportType() {
-    return sportType;
-  }
-
-  /**
-   * @param sportType
-   *          the sportType to set
-   */
-  public void setSportType(int sportType) {
-    this.sportType = sportType;
-  }
-
-  /**
-   * @return the steps
-   */
-  public D1002Step[] getSteps() {
-    return steps;
-  }
-
-  /**
-   * @param steps
-   *          the steps to set
-   */
-  public void setSteps(D1002Step[] steps) {
-    this.steps = steps;
+    log.debug("<<parse");
   }
 
 }

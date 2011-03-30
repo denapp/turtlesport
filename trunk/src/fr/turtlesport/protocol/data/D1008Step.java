@@ -20,187 +20,45 @@ import fr.turtlesport.log.TurtleLogger;
  * @author Denis Apparicio
  * 
  */
-public class D1008Step extends AbstractData {
+public class D1008Step extends AbstractStep {
   private static TurtleLogger log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(D1008Step.class);
   }
 
-  /** Longueur a lire. */
-  private static final int    LENGTH = 31;
-
-  /** Nom de l'etape. */
-  private String              customName;
-
-  /** Zone de FC basse. */
-  private float               targetCustomZoneLow;
-
-  /** Zone de FC haute. */
-  private float               targetCustomZoneHigh;
-
-  /** Duree. */
-  private int                 durationValue;
-
-  /** Intensite. */
-  private int                 intensity;
-
-  /** Type de duree. */
-  private int                 durationType;
-
-  /** Type de duree. */
-  private int                 targetType;
-
-  /** Type de duree. */
-  private int                 targetValue;
-
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.data.AbstractData#parse(fr.turtlesport.UsbPacketInputStream)
+   * @see fr.turtlesport.protocol.data.AbstractData#parse(fr.turtlesport.
+   * UsbPacketInputStream)
    */
   @Override
   public void parse(UsbPacketInputStream input) {
     log.debug(">>parse");
 
-    customName = input.readString(16);
-    targetCustomZoneLow = input.readFloat();
-    targetCustomZoneHigh = input.readFloat();
-    durationValue = input.readShort();
-    intensity = input.read();
-    durationType = input.read();
-    targetType = input.read();
-    targetValue = input.read();
-    input.readUnusedShort();
+    setCustomName(input.readString(16));
+    setTargetCustomZoneLow(input.readFloat());
+    setTargetCustomZoneHigh(input.readFloat());
+    setDurationValue(input.readShort());
+    setIntensity(input.read());
+    setDurationType(input.read());
+    setTargetType(input.read());
+    setTargetValue(input.read());
+    input.readShort();
 
     log.debug("<<parse");
   }
 
-  /**
-   * 
-   */
-  protected static void readUnsed(UsbPacketInputStream input) {
-    log.debug("readUnsed");
-    input.readUnused(LENGTH);
-  }
-
-  /**
-   * @return the customName
-   */
-  public String getCustomName() {
-    return customName;
-  }
-
-  /**
-   * @param customName
-   *          the customName to set
-   */
-  public void setCustomName(String customName) {
-    this.customName = customName;
-  }
-
-  /**
-   * @return the durationType
-   */
-  public int getDurationType() {
-    return durationType;
-  }
-
-  /**
-   * @param durationType
-   *          the durationType to set
-   */
-  public void setDurationType(int durationType) {
-    this.durationType = durationType;
-  }
-
-  /**
-   * @return the durationValue
-   */
-  public int getDurationValue() {
-    return durationValue;
-  }
-
-  /**
-   * @param durationValue
-   *          the durationValue to set
-   */
-  public void setDurationValue(int durationValue) {
-    this.durationValue = durationValue;
-  }
-
-  /**
-   * @return the intensity
-   */
-  public int getIntensity() {
-    return intensity;
-  }
-
-  /**
-   * @param intensity
-   *          the intensity to set
-   */
-  public void setIntensity(int intensity) {
-    this.intensity = intensity;
-  }
-
-  /**
-   * @return the targetCustomZoneHigh
-   */
-  public float getTargetCustomZoneHigh() {
-    return targetCustomZoneHigh;
-  }
-
-  /**
-   * @param targetCustomZoneHigh
-   *          the targetCustomZoneHigh to set
-   */
-  public void setTargetCustomZoneHigh(float targetCustomZoneHigh) {
-    this.targetCustomZoneHigh = targetCustomZoneHigh;
-  }
-
-  /**
-   * @return the targetCustomZoneLow
-   */
-  public float getTargetCustomZoneLow() {
-    return targetCustomZoneLow;
-  }
-
-  /**
-   * @param targetCustomZoneLow
-   *          the targetCustomZoneLow to set
-   */
-  public void setTargetCustomZoneLow(float targetCustomZoneLow) {
-    this.targetCustomZoneLow = targetCustomZoneLow;
-  }
-
-  /**
-   * @return the targetType
-   */
-  public int getTargetType() {
-    return targetType;
-  }
-
-  /**
-   * @param targetType
-   *          the targetType to set
-   */
-  public void setTargetType(int targetType) {
-    this.targetType = targetType;
-  }
-
-  /**
-   * @return the targetValue
-   */
-  public int getTargetValue() {
-    return targetValue;
-  }
-
-  /**
-   * @param targetValue
-   *          the targetValue to set
-   */
-  public void setTargetValue(int targetValue) {
-    this.targetValue = targetValue;
+  protected void parseUnused(UsbPacketInputStream input) {
+    input.readString(16);
+    input.readFloat();
+    input.readFloat();
+    input.readShort();
+    input.read();
+    input.read();
+    input.read();
+    input.read();
+    input.readShort();
   }
 
 }
