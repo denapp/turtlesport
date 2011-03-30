@@ -73,6 +73,15 @@ public final class DistanceUnit extends Unit {
   }
 
   /**
+   * Restitue l'unit&eacute; de vitesse par d&eacute;faut.
+   * 
+   * @return l'unit&eacute; de vitesse par d&eacute;faut.
+   */
+  public static String getDefaultLowUnit() {
+    return isDefaultUnitKm() ? "m" : "ft";
+  }
+
+  /**
    * D&eacute;termine si l'unit&eacute; par d&eacute;faut est le km.
    * 
    * @return <code>true</code> si l'unit&eacute; par d&eacute;faut est le km.
