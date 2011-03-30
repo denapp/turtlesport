@@ -21,6 +21,31 @@ public final class GeoUtil {
   private static final double VAL     = 180.0 / Math.pow(2, 31);
 
   /**
+   * Restitue la latitude sous forme textuelle.
+   * 
+   * @return la latitude sous forme textuelle.
+   */
+  public static String latitude(double gLatitude) {
+    StringBuilder st = new StringBuilder();
+    toDegree(st, gLatitude);
+    st.append((gLatitude < 0) ? "S" : "N");
+    return st.toString();
+  }
+
+  /**
+   * Restitue la position sous forme textuelle.
+   * 
+   * @return la position sous forme textuelle.
+   */
+  public static String longititude(double gLongitude) {
+    StringBuilder st = new StringBuilder();
+    toDegree(st, gLongitude);
+    st.append((gLongitude < 0) ? "W" : "E");
+
+    return st.toString();
+  }
+
+  /**
    * Restitue la position sous forme textuelle.
    * 
    * @return la position sous forme textuelle.
@@ -42,12 +67,23 @@ public final class GeoUtil {
     st.append(valInt);
     st.append("\u00B0");
     double val = 60 * (Math.abs(value) - valInt);
+    if (val < 10) {
+      st.append(0);
+    }
     st.append((int) val);
     st.append("'");
     val = 60 * (val - ((int) val));
+    if (val < 10) {
+      st.append(0);
+    }
     st.append((int) val);
     st.append('.');
-    st.append((int) ((val - (int) val) * 100));
+
+    valInt = (int) ((val - (int) val) * 100);
+    if (valInt < 10) {
+      st.append(0);
+    }
+    st.append(valInt);
     st.append("'' ");
   }
 
@@ -151,8 +187,10 @@ public final class GeoUtil {
     if (geo1.isInvalidPosition() || geo2.isInvalidPosition()) {
       return 0;
     }
-    return Wgs84.computeWsg84(geo1.getLatitude(), geo1.getLongitude(), geo2
-        .getLatitude(), geo2.getLongitude());
+    return Wgs84.computeWsg84(geo1.getLatitude(),
+                              geo1.getLongitude(),
+                              geo2.getLatitude(),
+                              geo2.getLongitude());
   }
 
   /**
