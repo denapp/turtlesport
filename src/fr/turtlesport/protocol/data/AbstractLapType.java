@@ -89,7 +89,10 @@ public abstract class AbstractLapType extends AbstractData {
     }
     log.debug(PROTOCOL + "-->" + data[0]);
 
-    if (D1015LapType.PROTOCOL.equals(data[0])) {
+    if (D1001LapType.PROTOCOL.equals(data[0])) {
+      res = new D1001LapType();
+    }
+    else if (D1015LapType.PROTOCOL.equals(data[0])) {
       res = new D1015LapType();
     }
     else if (D1011LapType.PROTOCOL.equals(data[0])) {
@@ -113,14 +116,14 @@ public abstract class AbstractLapType extends AbstractData {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.data.AbstractData#parse(fr.turtlesport.UsbPacketInputStream)
+   * @see fr.turtlesport.protocol.data.AbstractData#parse(fr.turtlesport.
+   * UsbPacketInputStream)
    */
   @Override
   public void parse(UsbPacketInputStream input) {
     log.debug(">>parse");
 
-    index = input.readShort();
-    input.readUnusedShort();
+    beginParse(input);
 
     startTime = input.readTime();
     totalTime = input.readInt();
@@ -134,10 +137,20 @@ public abstract class AbstractLapType extends AbstractData {
     avgHeartRate = input.read();
     maxHeartRate = input.read();
     intensity = input.read();
-    avgCadence = input.read();
-    triggerMethod = input.read();
+
+    nextParse(input);
 
     log.debug("<<parse");
+  }
+
+  protected void beginParse(UsbPacketInputStream input) {
+    index = input.readShort();
+    input.readUnusedShort();
+  }
+
+  protected void nextParse(UsbPacketInputStream input) {
+    avgCadence = input.read();
+    triggerMethod = input.read();
   }
 
   /**

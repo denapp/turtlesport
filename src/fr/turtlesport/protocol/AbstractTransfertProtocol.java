@@ -158,6 +158,34 @@ public abstract class AbstractTransfertProtocol {
 
     log.debug("<<sendRecord");
   }
+  
+  /**
+   * Lecture PID record.
+   */
+  public int retrievePidRecords() throws UsbProtocolException {
+    log.debug(">>retrievePidRecords");
+
+    int nbPaquet = 0;
+
+    // Lecture
+    UsbPacket packet = GarminDevice.getDevice().read();
+
+    // Premier paquet Pid_Records (spec 5.4)
+    if (packet.getPacketType() == PACKET_TYPE_APP_LAYER
+        && packet.getPacketID() == PID_RECORDS) {
+      nbPaquet = ByteUtil.toShort(packet.getData()[0], packet.getData()[1]);
+      log.debug("nbPaquet=" + nbPaquet);
+    }
+    else {
+      log.warn("packet.getPacketType()=" + packet.getPacketType());
+      log.warn("packet.getPacketID()=" + packet.getPacketID());
+      log.warn("PidRecords attendu");
+    }
+
+    log.debug("<<retrievePidRecords");
+    return nbPaquet;
+  }
+
 
   /**
    * Initialisation avant r&eacute;cup&eacute;ration des courses.

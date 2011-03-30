@@ -1,7 +1,7 @@
 package fr.turtlesport.protocol.progress;
 
 import fr.turtlesport.protocol.data.AbstractLapType;
-import fr.turtlesport.protocol.data.D1009RunType;
+import fr.turtlesport.protocol.data.AbstractRunType;
 
 /**
  * @author Denis Apparicio
@@ -30,7 +30,7 @@ public class RunTransfertProgressAdaptor implements IRunTransfertProgress {
    * 
    * @see fr.turtlesport.protocol.progress.IRunTransfertProgress#beginTransfertCourse(fr.turtlesport.protocol.data.D1009RunType)
    */
-  public void beginTransfertCourse(D1009RunType run) {
+  public void beginTransfertCourse(AbstractRunType run) {
   }
 
   /*
@@ -54,7 +54,7 @@ public class RunTransfertProgressAdaptor implements IRunTransfertProgress {
    * 
    * @see fr.turtlesport.protocol.progress.IRunTransfertProgress#endTransfertCourse(fr.turtlesport.protocol.data.D1009RunType)
    */
-  public void endTransfertCourse(D1009RunType run) {
+  public void endTransfertCourse(AbstractRunType run) {
   }
 
   /*
@@ -71,7 +71,7 @@ public class RunTransfertProgressAdaptor implements IRunTransfertProgress {
    * @see fr.turtlesport.protocol.progress.IRunTransfertProgress#transfertLap(fr.turtlesport.protocol.data.D1009RunType,
    *      fr.turtlesport.protocol.data.AbstractLapType)
    */
-  public void transfertLap(D1009RunType run, AbstractLapType lapType) {
+  public void transfertLap(AbstractRunType run, AbstractLapType lapType) {
   }
 
   /*
@@ -79,7 +79,7 @@ public class RunTransfertProgressAdaptor implements IRunTransfertProgress {
    * 
    * @see fr.turtlesport.protocol.progress.IRunTransfertProgress#transfertPoint(fr.turtlesport.protocol.data.D1009RunType)
    */
-  public void transfertPoint(D1009RunType run) {
+  public void transfertPoint(AbstractRunType run) {
   }
 
   /*

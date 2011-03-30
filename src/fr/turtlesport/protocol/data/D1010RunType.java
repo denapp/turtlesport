@@ -24,11 +24,12 @@ import fr.turtlesport.log.TurtleLogger;
  * @author Denis Apparicio
  * 
  */
-public class D1010RunType extends AbstractData {
+public class D1010RunType extends AbstractRunType {
   private static TurtleLogger log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(D1010RunType.class);
   }
+  protected static final String PROTOCOL = "D1010";
 
   // Constantes programme type
   private static final int    PROGRAM_TYPE_NONE            = 0;
@@ -38,24 +39,6 @@ public class D1010RunType extends AbstractData {
   private static final int    PROGRAM_TYPE_WORKOUT         = 2;
 
   private static final int    PROGRAM_TYPE_AUTO_MULTISPORT = 3;
-
-  /** Index de la track. */
-  private int                 trackIndex;
-
-  /** Index du premier intermediaire. */
-  private int                 firstLapIndex;
-
-  /** Index du dernier intermediaire. */
-  private int                 lastLapIndex;
-
-  /** Type de sport. */
-  private int                 sportType;
-
-  /** Type de programme. */
-  private int                 programType;
-
-  /** Multisport. */
-  private int                 multisport;
 
   /** Partenaire virtuel. */
   private D1010VirtualPartner virtualPartner;
@@ -72,13 +55,14 @@ public class D1010RunType extends AbstractData {
   public void parse(UsbPacketInputStream input) {
     log.debug(">>decode");
 
-    trackIndex = input.readInt();
-    firstLapIndex = input.readInt();
-    lastLapIndex = input.readInt();
-    sportType = input.read();
-    programType = input.read();
-    multisport = input.read();
-    input.read();
+    setTrackIndex(input.readInt());
+    setFirstLapIndex(input.readInt());
+    setLastLapIndex(input.readInt());
+    setSportType(input.read());
+    setProgramType(input.read());
+    setMultisport(input.read());
+    
+    input.readUnused();
 
     virtualPartner = new D1010VirtualPartner();
     virtualPartner.parse(input);
@@ -93,118 +77,28 @@ public class D1010RunType extends AbstractData {
    * @return
    */
   public boolean isPogramTypeNone() {
-    return (programType == PROGRAM_TYPE_NONE);
+    return (getProgramType() == PROGRAM_TYPE_NONE);
   }
 
   /**
    * @return
    */
   public boolean isPogramTypeVirtualPartner() {
-    return (programType == PROGRAM_TYPE_VIRTUAL_PARTNER);
+    return (getProgramType() == PROGRAM_TYPE_VIRTUAL_PARTNER);
   }
 
   /**
    * @return
    */
   public boolean isPogramTypeWorkout() {
-    return (programType == PROGRAM_TYPE_WORKOUT);
+    return (getProgramType() == PROGRAM_TYPE_WORKOUT);
   }
 
   /**
    * @return
    */
   public boolean isPogramTypeAutoMultisport() {
-    return (programType == PROGRAM_TYPE_AUTO_MULTISPORT);
-  }
-
-  /**
-   * @return the firstLapIndex
-   */
-  public int getFirstLapIndex() {
-    return firstLapIndex;
-  }
-
-  /**
-   * @param firstLapIndex
-   *          the firstLapIndex to set
-   */
-  public void setFirstLapIndex(int firstLapIndex) {
-    this.firstLapIndex = firstLapIndex;
-  }
-
-  /**
-   * @return the lastLapIndex
-   */
-  public int getLastLapIndex() {
-    return lastLapIndex;
-  }
-
-  /**
-   * @param lastLapIndex
-   *          the lastLapIndex to set
-   */
-  public void setLastLapIndex(int lastLapIndex) {
-    this.lastLapIndex = lastLapIndex;
-  }
-
-  /**
-   * @return the multisport
-   */
-  public int getMultisport() {
-    return multisport;
-  }
-
-  /**
-   * @param multisport
-   *          the multisport to set
-   */
-  public void setMultisport(int multisport) {
-    this.multisport = multisport;
-  }
-
-  /**
-   * @return the programType
-   */
-  public int getProgramType() {
-    return programType;
-  }
-
-  /**
-   * @param programType
-   *          the programType to set
-   */
-  public void setProgramType(int programType) {
-    this.programType = programType;
-  }
-
-  /**
-   * @return the sportType
-   */
-  public int getSportType() {
-    return sportType;
-  }
-
-  /**
-   * @param sportType
-   *          the sportType to set
-   */
-  public void setSportType(int sportType) {
-    this.sportType = sportType;
-  }
-
-  /**
-   * @return the trackIndex
-   */
-  public int getTrackIndex() {
-    return trackIndex;
-  }
-
-  /**
-   * @param trackIndex
-   *          the trackIndex to set
-   */
-  public void setTrackIndex(int trackIndex) {
-    this.trackIndex = trackIndex;
+    return (getProgramType() == PROGRAM_TYPE_AUTO_MULTISPORT);
   }
 
   /**

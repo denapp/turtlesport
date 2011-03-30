@@ -1,5 +1,7 @@
 package fr.turtlesport.protocol.data;
 
+import java.util.ArrayList;
+
 import fr.turtlesport.UsbPacketInputStream;
 import fr.turtlesport.log.TurtleLogger;
 
@@ -26,140 +28,42 @@ import fr.turtlesport.log.TurtleLogger;
  * @author Denis Apparicio
  * 
  */
-public class D1008WorkoutType extends AbstractData {
-  private static TurtleLogger log;
+public class D1008WorkoutType extends AbstractWorkout {
+  private static TurtleLogger   log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(D1008WorkoutType.class);
   }
 
-  /** Nombre max de lap valide */
-  private static final int    MAX_VALID_STEP = 20;
-
-  /** Nombre etape valide (1-20). */
-  private int                 numValidSteps;
-
-  /** Etapes. */
-  private D1008Step[]         steps;
-
-  /** Nom de l'etape. */
-  private String              name;
-
-  /** Type de sport. */
-  private int                 sportType;
+  protected static final String PROTOCOL = "D1008";
 
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.protocol.data.AbstractData#parse(fr.turtlesport.UsbPacketInputStream)
+   * @see fr.turtlesport.protocol.data.AbstractData#parse(fr.turtlesport.
+   * UsbPacketInputStream)
    */
   @Override
   public void parse(UsbPacketInputStream input) {
     log.debug(">>parse");
 
-    numValidSteps = input.readInt();
+    int numValidSteps = input.readInt();
 
-    steps = new D1008Step[numValidSteps];
+    listSteps = new ArrayList<AbstractStep>();
     int i = 0;
     for (i = 0; i < numValidSteps; i++) {
-      steps[i] = new D1008Step();
-      steps[i].parse(input);
+      D1008Step d1008 = new D1008Step();
+      d1008.parse(input);
+      listSteps.add(d1008);
     }
+    D1008Step d1008 = new D1008Step();
     for (; i < MAX_VALID_STEP; i++) {
-      D1008Step.readUnsed(input);
+      d1008.parse(input);
     }
 
-    name = input.readString(16);
-    sportType = input.read();
+    setName(input.readString(16));
+    setSportType(input.read());
 
     log.debug("<<parse");
   }
 
-  /**
-   * @return the name
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * @param name
-   *          the name to set
-   */
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  /**
-   * @return the numValidSteps
-   */
-  public int getNumValidSteps() {
-    return numValidSteps;
-  }
-
-  /**
-   * @param numValidSteps
-   *          the numValidSteps to set
-   */
-  public void setNumValidSteps(int numValidSteps) {
-    this.numValidSteps = numValidSteps;
-  }
-
-  /**
-   * @return the steps
-   */
-  public D1008Step[] getSteps() {
-    return steps;
-  }
-
-  /**
-   * @param steps
-   *          the steps to set
-   */
-  public void setSteps(D1008Step[] steps) {
-    this.steps = steps;
-  }
-
-  /**
-   * @return the sportType
-   */
-  public int getSportType() {
-    return sportType;
-  }
-
-  /**
-   * @param sportType
-   *          the sportType to set
-   */
-  public void setSportType(int sportType) {
-    this.sportType = sportType;
-  }
-
-  /**
-   * D&eacute;termine si le sport est de la course &agrve; pied.
-   * 
-   * @return <code>true</code> si course &agrve; pied.
-   */
-  public boolean isSportRunning() {
-    return isSportRunning(sportType);
-  }
-
-  /**
-   * D&eacute;termine si le sport est du v&eacute,lo.
-   * 
-   * @return <code>true</code> si le sport est du v&eacute,lo.
-   */
-  public boolean isSportBike() {
-    return isSportBike(sportType);
-  }
-
-  /**
-   * D&eacute;termine si le sport n'est pas v&eacute,lo ou de la la course
-   * &agrve; pied.
-   * 
-   * @return <code>true</code> si n'est pas v&eacute,lo ou de la la course
-   *         &agrve; pied.
-   */
-  public boolean isSportOther() {
-    return isSportOther(sportType);
-  }
 }

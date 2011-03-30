@@ -605,29 +605,6 @@ public class A1006Course extends AbstractTransfertProtocol {
     log.debug("<<sendXferCmplt");
   }
 
-  private int retrievePidRecords() throws UsbProtocolException {
-    log.debug(">>retrievePidRecords");
-
-    int nbPaquet = 0;
-
-    // Lecture
-    UsbPacket packet = GarminDevice.getDevice().read();
-
-    // Premier paquet Pid_Records (spec 5.4)
-    if (packet.getPacketType() == PACKET_TYPE_APP_LAYER
-        && packet.getPacketID() == PID_RECORDS) {
-      nbPaquet = ByteUtil.toShort(packet.getData()[0], packet.getData()[1]);
-    }
-    else {
-      log.warn("packet.getPacketType()=" + packet.getPacketType());
-      log.warn("packet.getPacketID()=" + packet.getPacketID());
-      log.warn("PidRecords attendu");
-    }
-
-    log.debug("<<retrievePidRecords");
-    return nbPaquet;
-  }
-
   /**
    * Recuperation des courses.
    */
