@@ -218,24 +218,36 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     paintGrid(g2);
     if (model != null && model.indexX2 != 0) {
       paintPoints(g2);
+      paintInterval(g2);
     }
+    paintYAxis(g2);
 
     g2.setFont(GuiFont.FONT_PLAIN_SMALL);
     int x = WIDTH_TITLE_1;
     if (model.isVisibleY1()) {
       g2.setColor(COLORY1);
-      String s = rb.getString("unitY1");
+      String s ="\u2665 (bmp)";
       g2.drawString(s, WIDTH_TITLE_1, 10);
       x += g2.getFontMetrics().stringWidth(s) + 10;
     }
     if (model.isVisibleY2()) {
       g2.setColor(COLORY2);
-      g2.drawString(rb.getString("unitY2"), x, 10);
+      String s = rb.getString("unitY2");
+      g2.drawString(s, x, 10);
+      x += g2.getFontMetrics().stringWidth(s) + 10;
     }
     if (model.isVisibleY3()) {
       g2.setColor(COLORY3);
-      g2.drawString(rb.getString("unitY3"), x, 10);
+      String unit = null;
+      if (model.isVisiblePace()) {
+        unit = rb.getString("allure") + " ("+  PaceUnit.getDefaultUnit() + ")";
+      }
+      else {
+        unit = rb.getString("speed") + " ("+  SpeedUnit.getDefaultUnit() + ")";
+      }
+      g2.drawString(unit, x, 10);
     }
+    
     OutputStream out = null;
     try {
       out = new FileOutputStream(file);
@@ -1086,17 +1098,17 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         }
         else {
           mouseX = computeRelativeX(model.getX(index));
-        
-        currentTime = getTime(index);
-        currentDistance = getX(index);
-        currentY1 = getY1(index);
-        currentY2 = getY2(index);
-        currentY3 = getY3(index);
 
-        tabMouseY[0] = computeRelativeY1(currentY1);
-        tabMouseY[1] = computeRelativeY2(currentY2);
-        tabMouseY[2] = computeRelativeY3(currentY3);
-        repaint();
+          currentTime = getTime(index);
+          currentDistance = getX(index);
+          currentY1 = getY1(index);
+          currentY2 = getY2(index);
+          currentY3 = getY3(index);
+
+          tabMouseY[0] = computeRelativeY1(currentY1);
+          tabMouseY[1] = computeRelativeY2(currentY2);
+          tabMouseY[2] = computeRelativeY3(currentY3);
+          repaint();
         }
       }
     }
