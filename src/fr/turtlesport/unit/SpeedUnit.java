@@ -5,7 +5,7 @@ import java.text.DecimalFormat;
 import fr.turtlesport.unit.event.Unit;
 
 /**
- * @author denis
+ * @author Denis Apparicio
  * 
  */
 public final class SpeedUnit extends Unit {
