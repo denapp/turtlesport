@@ -7,7 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * @author denis
+ * @author Denis Apparicio
  * 
  */
 public final class TimeUnit {
