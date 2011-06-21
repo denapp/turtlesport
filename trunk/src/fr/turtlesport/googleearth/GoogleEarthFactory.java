@@ -17,7 +17,7 @@ public final class GoogleEarthFactory {
   }
 
   /**
-   * Restitue l'interface IGoogleEarth sp&eacute;cifique &agrave;  l'OS.
+   * Restitue l'interface IGoogleEarth sp&eacute;cifique &agrave; l'OS.
    * 
    * @return <code>IGoogleEarth</code> de  l'OS.
    */
