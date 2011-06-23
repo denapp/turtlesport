@@ -6,21 +6,31 @@
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{14B614CA-42E0-4545-A272-B1248809E95D}
-AppName=Turtle Sport
-AppVerName=TurtleSport 0.2
+AppName=Turtle Sport v0.3
+AppVerName=Turtle Sport v0.3
+AppVersion=0.3
 AppPublisher=TurtleSport
 AppPublisherURL=http://turtlesport.sourceforge.net
 AppSupportURL=http://turtlesport.sourceforge.net
 AppUpdatesURL=http://turtlesport.sourceforge.net
 DefaultDirName={pf}\turtlesport
 DefaultGroupName=Turtle Sport
-OutputBaseFilename=turtlesport-win-0.2
+OutputBaseFilename=turtlesport-win-0.3
 Compression=lzma
 SolidCompression=yes
+WizardSmallImageFile=Turtle-55.bmp
+WizardImageFile=wizardImage.bmp
+LicenseFile=lgpl-2.1.txt
+SetupIconFile=turtleSport.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
+Name: "german"; MessagesFile: "compiler:Languages\German.isl"
+Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
+Name: "catalan"; MessagesFile: "compiler:Languages\Catalan.isl"
+Name: "Hungarian"; MessagesFile: "compiler:Languages\Hungarian.isl"
+Name: "swedish"; MessagesFile: "compiler:Languages\Swedish.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
