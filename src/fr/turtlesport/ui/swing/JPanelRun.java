@@ -250,6 +250,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JPanel                  jPanelTextSpeed;
 
+  private JPanelMeteo             jPanelMeteo;
+
   /**
    * This is the default constructor.
    */
@@ -388,7 +390,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
    * event.UnitEvent)
    */
   public void unitChanged(UnitEvent event) {
-    // run summary
     model.performedUnit(this, event);
   }
 
@@ -400,6 +401,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
   public void completedRemoveUnitListener() {
     UnitManager.getManager().removeUnitListener(jDiagram);
     UnitManager.getManager().removeUnitListener(jPanelMap);
+    UnitManager.getManager().removeUnitListener(jPanelMeteo);
   }
 
   /*
@@ -430,6 +432,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
   public void completedRemoveLanguageListener() {
     LanguageManager.getManager().removeLanguageListener(jDiagram);
     LanguageManager.getManager().removeLanguageListener(jPanelMap);
+    LanguageManager.getManager().removeLanguageListener(getJPanelMeteo());
   }
 
   private void performedLanguage(ILanguage lang) {
@@ -451,9 +454,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
     jLabelLibAllure.setText(rb.getString("jLabelLibAllure"));
     jLabelLibSpeedMoy.setText(rb.getString("jLabelLibSpeedMoy"));
     jLabelLibCalories.setText(rb.getString("jLabelLibCalories"));
-    String lib = rb.getString("jLabelLibNotes");
-    getJTabbedPaneRace().setTitleAt(0, rb.getString("tabPane1"));
-    getJTabbedPaneRace().setTitleAt(1, lib.substring(0, lib.length() - 2));
     getJButtonNext().setToolTipText(rb.getString("jButtonNextToolTipText"));
     getJButtonPrev().setToolTipText(rb.getString("jButtonPrevToolTipText"));
     jLabelLibHeart.setText(rb.getString("jLabelLibHeart"));
@@ -479,8 +479,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     // tabepane
     jTabbedPaneRace.setTitleAt(0, rb.getString("tabPane0"));
-    jTabbedPaneRace.setTitleAt(1, rb.getString("tabPane1"));
     jTabbedPaneRace.setTitleAt(3, rb.getString("tabPane3"));
+    jTabbedPaneRace.setTitleAt(4, rb.getString("tabPane4"));
 
     // mis a jour nom de colonnes
     tableModelLap.performedLanguage();
@@ -663,6 +663,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
     UnitManager.getManager().addUnitListener(this);
 
     ModelPointsManager.getInstance().addChangeListener(tableModelLap);
+    ModelPointsManager.getInstance().addChangeListener(getJPanelMeteo());
   }
 
   /**
@@ -906,14 +907,25 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
       jTabbedPaneRace.setFont(GuiFont.FONT_PLAIN);
       jTabbedPaneRace.addTab("Course", getJPanelRunSummary());
-      jTabbedPaneRace.addTab("Notes", getJScrollPaneTextArea());
-      jTabbedPaneRace.addTab("",
+      jTabbedPaneRace.addTab(null,
+                             ImagesRepository.getImageIcon("book-open.png"),
+                             getJScrollPaneTextArea(),
+                             null);
+      jTabbedPaneRace.addTab(null,
                              ImagesRepository.getImageIcon("heart.gif"),
                              getJPanelChartHeart(),
-                             "");
+                             null);
       jTabbedPaneRace.addTab("Speed", getJPanelChartSpeed());
+      jTabbedPaneRace.addTab("Meteo", getJPanelMeteo());
     }
     return jTabbedPaneRace;
+  }
+
+  public JPanelMeteo getJPanelMeteo() {
+    if (jPanelMeteo == null) {
+      jPanelMeteo = new JPanelMeteo();
+    }
+    return jPanelMeteo;
   }
 
   /**
@@ -2011,7 +2023,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
             // Determine si google earth est installe
             if (!ge.isInstalled()) {
-              JShowMessage.error(rb.getString("installGoogleEarth"));
+              JShowMessage.error(rb.getString("errorInstallGoogleEarth"));
             }
             else {
               // recuperation des pistes
@@ -2243,7 +2255,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
     public ActivityComboBoxModel() {
       super();
 
-      addElement("");
       try {
         List<AbstractDataActivity> list = UserActivityTableManager
             .getInstance().retreive();
@@ -2257,14 +2268,21 @@ public class JPanelRun extends JPanel implements LanguageListener,
     }
 
     public void setSelectedActivity(int sportType) {
-      for (int i = 1; i < getSize(); i++) {
+      for (int i = 0; i < getSize(); i++) {
         AbstractDataActivity d = (AbstractDataActivity) getElementAt(i);
         if (d.getSportType() == sportType) {
           setSelectedItem(d);
           return;
         }
       }
-      setSelectedItem("");
+
+      for (int i = 0; i < getSize(); i++) {
+        AbstractDataActivity d = (AbstractDataActivity) getElementAt(i);
+        if (d.getSportType() == DataActivityOther.SPORT_TYPE) {
+          setSelectedItem(d);
+          return;
+        }
+      }
     }
 
     public int getSportType() {

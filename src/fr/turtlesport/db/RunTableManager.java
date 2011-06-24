@@ -707,6 +707,9 @@ public final class RunTableManager extends AbstractTableManager {
 
         // suppression des points
         RunTrkTableManager.getInstance().delete(id);
+        
+        // suppression de la meteo
+        MeteoTableManager.getInstance().delete(id);
       }
 
     }

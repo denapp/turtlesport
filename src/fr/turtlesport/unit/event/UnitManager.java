@@ -147,6 +147,16 @@ public final class UnitManager {
   }
 
   /**
+   * D&eacute;clenche le changement d'unit&eacute; de temp&eacute;rature.
+   * 
+   * @param unit
+   *          la nouvelle unit&eacute;.
+   */
+  public void fireTemperatureChanged(String unit) {
+    fireUnitChanged(UnitEvent.TEMPERATURE, unit);
+  }
+
+  /**
    * D&eacute;clenche le changement d'unit&eacute;.
    * 
    * @param type

@@ -9,6 +9,14 @@ import java.io.File;
 public interface IGoogleEarth {
 
   /**
+   * D&eacute;termine si le chemin est configurable ou s'il est
+   * d&eacute;tect&eacute; automatiquement.
+   * 
+   * @return <code>true</code>si googleearth est configurable
+   */
+  boolean isConfigurable();
+
+  /**
    * Ouverture d'un fichier gooogle-earth.
    * 
    * @param kmFile

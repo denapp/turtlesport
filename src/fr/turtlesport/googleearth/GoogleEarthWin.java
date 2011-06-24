@@ -57,6 +57,10 @@ public final class GoogleEarthWin extends AbstractGoogleEarth {
 
     // Valeur de la cle
     command = RegistryWin.localMachine().get(SUBKEY, null);
+    if (log.isDebugEnabled()) {
+      log.debug("SUBKEY=" + SUBKEY);
+      log.debug("command=" + command);
+    }
     if (command != null) {
       command = command.replace('\"', ' ');
     }
@@ -78,7 +82,8 @@ public final class GoogleEarthWin extends AbstractGoogleEarth {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.googleearth.AbstractGoogleEarth#getOpenCommand(java.io.File)
+   * @see
+   * fr.turtlesport.googleearth.AbstractGoogleEarth#getOpenCommand(java.io.File)
    */
   @Override
   public String getOpenCommand(File file) {
@@ -113,6 +118,15 @@ public final class GoogleEarthWin extends AbstractGoogleEarth {
 
     log.debug("<<getOpenCommand");
     return cmd;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.googleearth.IGoogleEarth#isConfigurable()
+   */
+  public boolean isConfigurable() {
+    return false;
   }
 
 }
