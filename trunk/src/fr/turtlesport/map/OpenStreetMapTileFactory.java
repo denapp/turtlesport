@@ -51,6 +51,21 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     hashDiskCache.put(tileProviderInfo.getName(),
                       new DiskTitleCache(dir, tileProviderInfo));
 
+    // MapQuest-OSM
+//    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://otile1.mqcdn.com/tiles/1.0.0/osm",
+//                                                         "MapQuest-OSM");
+//    dir = new File(dirCache, tileProviderInfo.getName());
+//    hashDiskCache.put(tileProviderInfo.getName(),
+//                      new DiskTitleCache(dir, tileProviderInfo));
+
+
+    // MapQuest-Aerial
+//    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://oatile2.mqcdn.com/naip",
+//                                                         "MapQuest-Aerial");
+//    dir = new File(dirCache, tileProviderInfo.getName());
+//    hashDiskCache.put(tileProviderInfo.getName(),
+//                      new DiskTitleCache(dir, tileProviderInfo));
+
   }
 
   /**
@@ -89,7 +104,10 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     String[] names = { TurtleEmptyTileFactory.NAME,
         "mapnik",
         "osma",
-        "cyclemap" };
+        "cyclemap",
+        //"MapQuest-OSM",
+        //"MapQuest-Aerial"
+        };
     return names;
   }
 

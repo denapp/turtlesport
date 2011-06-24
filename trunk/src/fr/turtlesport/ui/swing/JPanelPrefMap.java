@@ -2,14 +2,21 @@ package fr.turtlesport.ui.swing;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ResourceBundle;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import org.jdesktop.swingx.JXHyperlink;
 
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
@@ -17,6 +24,7 @@ import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.map.OpenStreetMapTileFactory;
 import fr.turtlesport.ui.swing.component.PanelPrefListener;
+import fr.turtlesport.util.BrowserUtil;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -36,7 +44,17 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
 
   private JButton         jButtonDelete;
 
+  private JLabel          jLabelOpenStreeetMap;
+
   private ResourceBundle  rb;
+
+  private JPanel          jPanelSouth;
+
+  private JXHyperlink     jxHyperlinkOpenStreetMap;
+
+  private JXHyperlink     jxHyperlinklicence;
+
+  private JLabel jLabelLicence;
 
   /**
    * 
@@ -53,7 +71,6 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
    */
   public void viewChanged() {
   }
-  
 
   /*
    * (non-Javadoc)
@@ -89,6 +106,7 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
     jPanelTitle.setTitle(rb.getString("title"));
     jLabelLibCacheSize.setText(rb.getString("jLabelLibCacheSize"));
     jButtonDelete.setText(rb.getString("jButtonDelete"));
+    jLabelLicence.setText(rb.getString("licence"));
   }
 
   /**
@@ -104,6 +122,7 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
     this.setSize(534, 218);
     this.add(getJPanelTitle(), BorderLayout.NORTH);
     this.add(getJPanelCenter(), BorderLayout.CENTER);
+    this.add(getJPanelSouth(), BorderLayout.SOUTH);
 
     // value
     // Efface le cache disque
@@ -165,6 +184,60 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
       jPanelCenter.add(getJButtonDelete(), null);
     }
     return jPanelCenter;
+  }
+
+  /**
+   * This method initializes jPanelCenter
+   * 
+   * @return javax.swing.JPanel
+   */
+  private JPanel getJPanelSouth() {
+    if (jPanelSouth == null) {
+      jLabelOpenStreeetMap = new JLabel();
+      jLabelOpenStreeetMap.setFont(GuiFont.FONT_PLAIN);
+      jLabelOpenStreeetMap
+          .setText("<html><body>Data/Maps Copyright &#169; 2011</body></html>");
+
+      jxHyperlinkOpenStreetMap = new JXHyperlink();
+      jxHyperlinkOpenStreetMap.setText("OpenStreetMap Contributors");
+      jxHyperlinkOpenStreetMap.setFont(GuiFont.FONT_PLAIN);
+      jxHyperlinkOpenStreetMap.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          try {
+            BrowserUtil.browse(new URI("http://www.openstreetmap.org"));
+          }
+          catch (URISyntaxException e1) {
+          }
+        }
+      });
+       jLabelLicence = new JLabel(" Licence");
+      jLabelLicence.setFont(GuiFont.FONT_PLAIN);
+      jxHyperlinklicence = new JXHyperlink();
+      jxHyperlinklicence.setText("CC-BY-SA");
+      jxHyperlinklicence.setFont(GuiFont.FONT_PLAIN);
+      jxHyperlinklicence.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          try {
+            BrowserUtil
+                .browse(new URI("http://creativecommons.org/licenses/by-sa/2.0/"));
+          }
+          catch (URISyntaxException e1) {
+          }
+        }
+      });
+
+      jPanelSouth = new JPanel();
+      FlowLayout flowLayout = new FlowLayout();
+      flowLayout.setAlignment(FlowLayout.LEFT);
+      jPanelSouth.setLayout(flowLayout);
+      jPanelSouth.setAlignmentY(TOP_ALIGNMENT);
+      jPanelSouth.add(jLabelOpenStreeetMap, null);
+      jPanelSouth.add(jxHyperlinkOpenStreetMap, null);
+      jPanelSouth.add(jLabelLicence, null);
+      jPanelSouth.add(jxHyperlinklicence, null);
+
+    }
+    return jPanelSouth;
   }
 
   /**

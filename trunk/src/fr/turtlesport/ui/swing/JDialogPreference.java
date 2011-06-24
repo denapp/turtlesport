@@ -17,6 +17,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.ConfigurationException;
+import fr.turtlesport.googleearth.GoogleEarthFactory;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
@@ -25,7 +26,6 @@ import fr.turtlesport.mail.Mail;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.model.ModelPref;
 import fr.turtlesport.unit.event.UnitManager;
-import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -153,7 +153,7 @@ public class JDialogPreference extends JDialog implements LanguageListener {
 
     rb = ResourceBundleUtility.getBundle(lang, ModelPref.class);
     modelPrefGen.setTitle(rb.getString("modelPrefGen"));
-    if (!OperatingSystem.isMacOSX()) {
+    if (GoogleEarthFactory.getDefault().isConfigurable()) {
       modelPrefGoogleEarth.setTitle(rb.getString("modelPrefGoogleEarth"));
     }
     modelPrefUnit.setTitle(rb.getString("modelPrefUnit"));
@@ -201,7 +201,7 @@ public class JDialogPreference extends JDialog implements LanguageListener {
                                   JPanelPrefUnits.class);
     jTreePref.addObject(node, modelPrefUnit);
 
-    if (!OperatingSystem.isMacOSX()) {
+    if (GoogleEarthFactory.getDefault().isConfigurable()) {
       modelPrefGoogleEarth = new ModelPref("Google EarthFQSfqSF",
                                            JPanelPrefGoogleEarth.class);
       jTreePref.addObject(modelPrefGoogleEarth);

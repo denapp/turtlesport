@@ -45,6 +45,8 @@ public class DatabaseManager {
 
   protected static final String          TABLE_USER_ACTIVITY = "APP.TURTLEUSERACTIVITY";
 
+  protected static final String          TABLE_METEO         = "APP.RUNMETEO";
+
   // We want to keep the same connection for a given thread
   // as long as we're in the same transaction
   private static ThreadLocal<Connection> tranConnection      = new ThreadLocal<Connection>();
@@ -80,6 +82,7 @@ public class DatabaseManager {
     if (isDropTables) {
       dropTables();
     }
+//    executeUpdate("DROP TABLE " + TABLE_METEO);
 
     isInit = true;
 
@@ -233,6 +236,9 @@ public class DatabaseManager {
 
       executeUpdate("DROP TABLE " + TABLE_USER_ACTIVITY);
       executeUpdate("DROP INDEX TABLE_USER_ACTIVITY_index1");
+
+      executeUpdate("DROP TABLE " + TABLE_METEO);
+      executeUpdate("DROP INDEX TABLE_METEO_index1");
     }
     catch (SQLException sqle) {
       if (!tableDoesntExist(sqle.getSQLState())) {
@@ -346,6 +352,9 @@ public class DatabaseManager {
 
     // TABLE_USER_ZONES
     createTableUserActivity();
+
+    // TABLE_METEO
+    createTableMeteo();
 
     log.debug("<<createTables");
   }
@@ -550,6 +559,39 @@ public class DatabaseManager {
     st.append("TABLE_RUN_LAP_index1");
     st.append(" ON ");
     st.append(TABLE_RUN_LAP);
+    st.append("(id)");
+    executeUpdate(st.toString());
+  }
+
+  private static void createTableMeteo() throws SQLException {
+    if (tableExists(TABLE_METEO)) {
+      return;
+    }
+
+    log.info("createTableMeteo");
+
+    StringBuilder st = new StringBuilder();
+    st.append("CREATE TABLE ");
+    st.append(TABLE_METEO);
+    st.append('(');
+    st.append("id INT, ");
+    st.append("time TIMESTAMP, ");
+    st.append("condition SMALLINT, ");
+    st.append("temperature SMALLINT, ");
+    st.append("humidity SMALLINT, ");
+    st.append("wind_speed FLOAT, ");
+    st.append("wind_dir VARCHAR(20), ");
+    st.append("pression SMALLINT, ");
+    st.append("visibility FLOAT, ");
+    st.append("PRIMARY KEY (id)");
+    st.append(')');
+    executeUpdate(st.toString());
+
+    st = new StringBuilder();
+    st.append("CREATE INDEX ");
+    st.append("TABLE_METEO_index1");
+    st.append(" ON ");
+    st.append(TABLE_METEO);
     st.append("(id)");
     executeUpdate(st.toString());
   }

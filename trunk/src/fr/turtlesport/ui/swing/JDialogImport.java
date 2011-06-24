@@ -1832,7 +1832,6 @@ public final class JDialogImport extends JDialog implements
 
         case 1:// une selection
           int viewRow = jTable.getSelectedRow();
-          System.out.println("viewRow=" + viewRow);
 
           if (viewRow < 0) {
             jLabelTextTable.setText(" ");
@@ -1877,9 +1876,6 @@ public final class JDialogImport extends JDialog implements
         default: // multi-selection
           jLabelTextTable.setText(" ");
           jButtonDelete.setEnabled(true);
-          System.out.println("tabIndex[0]=" + tabIndex[0]);
-          System.out.println("tabIndex[1]=" + tabIndex[1]);
-
           break;
       }
 

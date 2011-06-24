@@ -753,8 +753,8 @@ public class MainGui extends JFrame implements LanguageListener {
     if (jMenuItemRunDetailGps == null) {
       jMenuItemRunDetailGps = new JMenuItemTurtle();
       jMenuItemRunDetailGps.setFont(GuiFont.FONT_PLAIN);
-      jMenuItemRunDetailGps
-          .setAccelerator(menuProperties, "jMenuItemRunDetailGps");
+      jMenuItemRunDetailGps.setAccelerator(menuProperties,
+                                           "jMenuItemRunDetailGps");
       jMenuItemRunDetailGps.setEnabled(false);
     }
     return jMenuItemRunDetailGps;

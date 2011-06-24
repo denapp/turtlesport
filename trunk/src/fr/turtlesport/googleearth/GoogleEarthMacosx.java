@@ -65,4 +65,13 @@ public class GoogleEarthMacosx implements IGoogleEarth {
     }
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.googleearth.IGoogleEarth#isConfigurable()
+   */
+  public boolean isConfigurable() {
+    return false;
+  }
+
 }

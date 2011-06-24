@@ -45,7 +45,8 @@ public final class GoogleEarthLinux extends AbstractGoogleEarth {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.googleearth.AbstractGoogleEarth#getOpenCommand(java.io.File)
+   * @see
+   * fr.turtlesport.googleearth.AbstractGoogleEarth#getOpenCommand(java.io.File)
    */
   @Override
   public String getOpenCommand(File file) {
@@ -61,6 +62,15 @@ public final class GoogleEarthLinux extends AbstractGoogleEarth {
 
     log.debug("<<getOpenCommand");
     return cmd;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.googleearth.IGoogleEarth#isConfigurable()
+   */
+  public boolean isConfigurable() {
+    return true;
   }
 
 }

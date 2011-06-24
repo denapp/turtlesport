@@ -16,6 +16,7 @@ import fr.turtlesport.ui.swing.component.PanelPrefListener;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.HeightUnit;
 import fr.turtlesport.unit.SpeedPaceUnit;
+import fr.turtlesport.unit.TemperatureUnit;
 import fr.turtlesport.unit.WeightUnit;
 import fr.turtlesport.unit.event.UnitManager;
 import fr.turtlesport.util.ResourceBundleUtility;
@@ -45,6 +46,10 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
   private JLabel          jLabelLibHeight;
 
   private JComboBox       jComboBoxHeight;
+
+  private JLabel          jLabelLibTemperature;
+
+  private JComboBox       jComboBoxTemperature;
 
   private ResourceBundle  rb;
 
@@ -144,6 +149,13 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
         UnitManager.getManager().fireHeightChanged(value);
       }
     });
+    jComboBoxTemperature.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        String value = (String) ((JComboBox) e.getSource()).getSelectedItem();
+        Configuration.getConfig().addProperty("units", "temperature", value);
+        UnitManager.getManager().fireTemperatureChanged(value);
+      }
+    });
   }
 
   /**
@@ -186,6 +198,11 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
       jLabelLibHeight.setText(rb.getString("jLabelLibHeight"));
       jLabelLibHeight.setFont(GuiFont.FONT_PLAIN);
 
+      jLabelLibTemperature = new JLabel();
+      jLabelLibTemperature.setBounds(new Rectangle(5, 125, 150, 23));
+      jLabelLibTemperature.setText(rb.getString("jLabelLibTemperature"));
+      jLabelLibTemperature.setFont(GuiFont.FONT_PLAIN);
+
       jPanelCenter = new JPanel();
       jPanelCenter.setLayout(null);
       jPanelCenter.add(jLabelLibDistance, null);
@@ -196,6 +213,8 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
       jPanelCenter.add(getJComboBoxWeight(), null);
       jPanelCenter.add(jLabelLibHeight, null);
       jPanelCenter.add(getJComboBoxHeight(), null);
+      jPanelCenter.add(jLabelLibTemperature, null);
+      jPanelCenter.add(getJComboBoxTemperature(), null);
     }
     return jPanelCenter;
   }
@@ -258,6 +277,21 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
       jComboBoxHeight.setBounds(new Rectangle(120, 95, 100, 23));
     }
     return jComboBoxHeight;
+  }
+
+  /**
+   * This method initializes jComboBoxWeight
+   * 
+   * @return javax.swing.JComboBox
+   */
+  private JComboBox getJComboBoxTemperature() {
+    if (jComboBoxTemperature == null) {
+      jComboBoxTemperature = new JComboBox(TemperatureUnit.units());
+      jComboBoxTemperature.setSelectedItem(TemperatureUnit.getDefaultUnit());
+      jComboBoxTemperature.setFont(GuiFont.FONT_PLAIN);
+      jComboBoxTemperature.setBounds(new Rectangle(120, 125, 100, 23));
+    }
+    return jComboBoxTemperature;
   }
 
 }

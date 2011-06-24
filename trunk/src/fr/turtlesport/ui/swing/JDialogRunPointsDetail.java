@@ -1,7 +1,6 @@
 package fr.turtlesport.ui.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -9,12 +8,10 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -22,24 +19,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.UIManager;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumnModel;
 
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTableCustom;
-import fr.turtlesport.ui.swing.img.ImagesRepository;
-import fr.turtlesport.ui.swing.model.ModelRunPointsDetail;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
 import fr.turtlesport.unit.SpeedUnit;
@@ -52,77 +38,75 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * 
  */
 public class JDialogRunPointsDetail extends JDialog {
-  private static TurtleLogger         log;
+  private static TurtleLogger log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JDialogRunPointsDetail.class);
   }
 
-  private JButton                     jButtonCancel;
+  private JPanel              jPanelDistance;
 
-  private JButton                     jButtonDelete;
+  private JLabel              jLabelValDistanceTot;
 
-  private JPanel                      jPanelDistance;
+  private JLabel              jLabelLibDistanceTot;
 
-  private JLabel                      jLabelValDistanceTot;
+  private JLabel              jLabelLibTimeTot;
 
-  private JLabel                      jLabelLibDistanceTot;
+  private JLabel              jLabelValTimeTot;
 
-  private JLabel                      jLabelLibTimeTot;
+  private JPanel              jContentPane;
 
-  private JLabel                      jLabelValTimeTot;
+  private JTableCustom        jTable;
 
-  private JPanel                      jContentPane;
+  private JScrollPane         jPanelTable;
 
-  private JTableCustom                jTable;
+  private TableModelPoints    tableModel;
 
-  private JScrollPane                 jPanelTable;
+  private ResourceBundle      rb;
 
-  private TableModelPoints            tableModel;
+  private JLabel              jLabelTitle;
 
-  private ResourceBundle              rb;
+  private JButton             jButtonOK;
 
-  private JLabel                      jLabelTitle;
-
-  private JButton                     jButtonSave;
-
-  private JButton                     jButtonSelect;
-
-  private JButton                     jButtonUnselect;
-
-  private JPanel                      jPanelButton;
-
-  private JTableListSelectionListener jTableListSelectionListener;
-
-  private ModelRunPointsDetail        model;
+  private JPanel              jPanelButton;
 
   /**
    * @param owner
    * @param modal
    */
-  public JDialogRunPointsDetail(Frame owner,
-                                boolean modal,
-                                ModelRunPointsDetail model) {
+  public JDialogRunPointsDetail(Frame owner, boolean modal) {
     super(owner, modal);
     initialize();
-    this.model = model;
   }
 
   public static void prompt(DataRun dataRun, List<DataRunTrk> listTrks) {
 
     // mis a jour du model et affichage de l'IHM
-    ModelRunPointsDetail model = new ModelRunPointsDetail(dataRun, listTrks);
     JDialogRunPointsDetail view = new JDialogRunPointsDetail(MainGui.getWindow(),
-                                                             true,
-                                                             model);
+                                                             true);
+
+    // model
+    String value = LanguageManager.getManager().getCurrentLang()
+        .getDateFormatter().format(dataRun.getTime())
+                   + "   "
+                   + new SimpleDateFormat("kk:mm:ss").format(dataRun.getTime());
+
+    view.getJLabelTitle().setText(value);
+
     try {
-      model.updateView(view);
+      // Distance tot
+      view.getJLabelValDistanceTot()
+          .setText(DistanceUnit.formatWithUnit(dataRun.getComputeDistanceTot()));
+
+      // Temps tot
+      view.getJLabelValTimeTot()
+          .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
     }
     catch (SQLException e) {
       log.error("", e);
-      ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-          .getManager().getCurrentLang(), JDialogRunPointsDetail.class);
-      JShowMessage.error(rb.getString("errorSQL"));
     }
+    view.tableModel.updateData(listTrks);
+    
+    // show
     view.pack();
     view.setLocationRelativeTo(MainGui.getWindow());
     view.setVisible(true);
@@ -137,42 +121,19 @@ public class JDialogRunPointsDetail extends JDialog {
         .getCurrentLang(), getClass());
 
     this.setContentPane(getJContentPane());
+    setTitle(rb.getString("title"));
     jLabelLibDistanceTot.setText(rb.getString("jLabelLibDistanceTot"));
     jLabelLibTimeTot.setText(rb.getString("jLabelLibTimeTot"));
-    jButtonSave.setText(rb.getString("jButtonSave"));
-    jButtonCancel.setText(LanguageManager.getManager().getCurrentLang()
-        .cancel());
-    jButtonDelete.setText(rb.getString("jButtonDelete"));
-    jButtonSelect.setText(rb.getString("jButtonSelect"));
-    jButtonUnselect.setText(rb.getString("jButtonUnselect"));
-
+    jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());
     this.setPreferredSize(new Dimension(795, 470));
 
     // Evenement
-    getRootPane().setDefaultButton(jButtonCancel);
-    jButtonCancel.addActionListener(new ActionListener() {
+    getRootPane().setDefaultButton(jButtonOK);
+    jButtonOK.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         dispose();
       }
     });
-    jButtonSave.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        try {
-          model.savePoints(JDialogRunPointsDetail.this);
-        }
-        catch (SQLException e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        }
-      }
-    });
-    jButtonDelete.addActionListener(new DeleteActionListener());
-    jButtonSelect.addActionListener(new SelectActionListener(true));
-    jButtonUnselect.addActionListener(new SelectActionListener(false));
-
-    jTableListSelectionListener = new JTableListSelectionListener();
-    jTable.getSelectionModel()
-        .addListSelectionListener(jTableListSelectionListener);
   }
 
   /**
@@ -263,42 +224,6 @@ public class JDialogRunPointsDetail extends JDialog {
       jTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
       jTable.setSortable(false);
 
-      // header corbeille
-      TableCellRenderer iconHeaderRenderer = new DefaultTableCellRenderer() {
-        public Component getTableCellRendererComponent(JTable table,
-                                                       Object value,
-                                                       boolean isSelected,
-                                                       boolean hasFocus,
-                                                       int row,
-                                                       int column) {
-          // Inherit the colors and font from the header component
-          if (table != null) {
-            JTableHeader header = table.getTableHeader();
-            if (header != null) {
-              setForeground(header.getForeground());
-              setBackground(header.getBackground());
-              setFont(header.getFont());
-            }
-          }
-
-          if (value instanceof HeaderIcon) {
-            setIcon(((HeaderIcon) value).icon);
-          }
-          else {
-            setText((value == null) ? "" : value.toString());
-            setIcon(null);
-          }
-          setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-          setHorizontalAlignment(JLabel.CENTER);
-          return this;
-        }
-      };
-
-      HeaderIcon hi = new HeaderIcon(ImagesRepository.getImageIcon("trash.png"));
-      TableColumnModel columnModel = jTable.getTableHeader().getColumnModel();
-      columnModel.getColumn(0).setHeaderRenderer(iconHeaderRenderer);
-      jTable.getColumnModel().getColumn(0).setHeaderValue(hi);
-
       jTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
       jTable.getTableHeader().setFont(GuiFont.FONT_PLAIN);
       jTable.setSortable(true);
@@ -311,65 +236,17 @@ public class JDialogRunPointsDetail extends JDialog {
     if (jPanelButton == null) {
       jPanelButton = new JPanel();
       jPanelButton.setLayout(new FlowLayout(FlowLayout.RIGHT));
-      jPanelButton.add(getJButtonDelete(), null);
-      jPanelButton.add(getJButtonUnselect(), null);
-      jPanelButton.add(getJButtonSelect(), null);
-      jPanelButton.add(getJButtonSave(), null);
-      jPanelButton.add(getJButtonCancel(), null);
+      jPanelButton.add(getJButtonOK(), null);
     }
     return jPanelButton;
   }
 
-  /**
-   * This method initializes jButton
-   * 
-   * @return javax.swing.JButton
-   */
-  private JButton getJButtonSelect() {
-    if (jButtonSelect == null) {
-      jButtonSelect = new JButton();
-      jButtonSelect.setFont(GuiFont.FONT_PLAIN);
-      jButtonSelect.setText(rb.getString("jButtonSelect"));
+  private JButton getJButtonOK() {
+    if (jButtonOK == null) {
+      jButtonOK = new JButton();
+      jButtonOK.setFont(GuiFont.FONT_PLAIN);
     }
-    return jButtonSelect;
-  }
-
-  /**
-   * This method initializes jButton
-   * 
-   * @return javax.swing.JButton
-   */
-  private JButton getJButtonUnselect() {
-    if (jButtonUnselect == null) {
-      jButtonUnselect = new JButton();
-      jButtonUnselect.setFont(GuiFont.FONT_PLAIN);
-      jButtonUnselect.setText(rb.getString("jButtonUnselect"));
-    }
-    return jButtonUnselect;
-  }
-
-  private JButton getJButtonSave() {
-    if (jButtonSave == null) {
-      jButtonSave = new JButton();
-      jButtonSave.setFont(GuiFont.FONT_PLAIN);
-    }
-    return jButtonSave;
-  }
-
-  private JButton getJButtonCancel() {
-    if (jButtonCancel == null) {
-      jButtonCancel = new JButton();
-      jButtonCancel.setFont(GuiFont.FONT_PLAIN);
-    }
-    return jButtonCancel;
-  }
-
-  private JButton getJButtonDelete() {
-    if (jButtonDelete == null) {
-      jButtonDelete = new JButton();
-      jButtonDelete.setFont(GuiFont.FONT_PLAIN);
-    }
-    return jButtonDelete;
+    return jButtonOK;
   }
 
   /**
@@ -378,57 +255,47 @@ public class JDialogRunPointsDetail extends JDialog {
    */
   public class TableModelPoints extends AbstractTableModel {
 
-    private String[]            columnNames = { " ",
-                                                " ",
-                                                "Temps",
-                                                "Distance totale",
-                                                "Distance",
-                                                "bmp",
-                                                "vitesse",
-                                                "allure",
-                                                "Longitude",
-                                                "Latitude" };
+    private String[]        columnNames = { " ",
+                                            "Temps",
+                                            "Distance totale",
+                                            "Distance",
+                                            "bmp",
+                                            "vitesse",
+                                            "allure",
+                                            "Longitude",
+                                            "Latitude" };
 
-    private final int[]         columWidth  = { 20,
-                                                30,
-                                                40,
-                                                40,
-                                                20,
-                                                30,
-                                                40,
-                                                40,
-                                                60,
-                                                60 };
+    private final int[]     columWidth  = { 20, 40, 40, 20, 30, 40, 40, 60, 60 };
 
-    public List<TableRowObject> listRowObject;
+    public List<DataRunTrk> listTrks;
 
     public TableModelPoints() {
 
       for (int i = 0; i < columnNames.length; i++) {
         switch (i) {
-          case 3:
+          case 2:
             columnNames[i] = DistanceUnit.getDefaultUnit();
             break;
 
-          case 4:
+          case 3:
             columnNames[i] = DistanceUnit.getDefaultLowUnit();
             break;
 
-          case 5:
+          case 4:
             columnNames[i] = "<html><body><font color=\"red\">\u2665</font></body></html>";
             break;
 
-          case 6:
+          case 5:
             columnNames[i] = SpeedUnit.getDefaultUnit();
             break;
 
-          case 7:
+          case 6:
             columnNames[i] = PaceUnit.getDefaultUnit();
             break;
 
-          case 2:
+          case 1:
+          case 7:
           case 8:
-          case 9:
             columnNames[i] = rb.getString("TableModel_header" + i);
             break;
 
@@ -446,7 +313,7 @@ public class JDialogRunPointsDetail extends JDialog {
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-      return columnIndex == 0;
+      return false;
     }
 
     /**
@@ -464,7 +331,7 @@ public class JDialogRunPointsDetail extends JDialog {
      */
     @Override
     public Class<?> getColumnClass(int c) {
-      return (c == 0) ? Boolean.class : String.class;
+      return String.class;
     }
 
     /*
@@ -492,7 +359,7 @@ public class JDialogRunPointsDetail extends JDialog {
      * @see javax.swing.table.TableModel#getRowCount()
      */
     public int getRowCount() {
-      return (listRowObject == null) ? 0 : listRowObject.size();
+      return (listTrks == null) ? 0 : listTrks.size();
     }
 
     /*
@@ -503,11 +370,6 @@ public class JDialogRunPointsDetail extends JDialog {
      */
     @Override
     public void setValueAt(Object value, int rowIndex, int columnIndex) {
-      if (columnIndex == 0) {
-        listRowObject.get(rowIndex).isDel = (Boolean) value;
-        fireTableCellUpdated(jTable.convertRowIndexToView(rowIndex),
-                             columnIndex);
-      }
     }
 
     /*
@@ -517,34 +379,31 @@ public class JDialogRunPointsDetail extends JDialog {
      */
     public Object getValueAt(int rowIndex, int columnIndex) {
 
-      DataRunTrk data = listRowObject.get(rowIndex).trk;
+      DataRunTrk data = listTrks.get(rowIndex);
 
       switch (columnIndex) {
         case 0:
-          return listRowObject.get(rowIndex).isDel;
-
-        case 1:
           return rowIndex + 1;
 
-        case 2: // Temps
+        case 1: // Temps
           return TimeUnit.formatMilliSecondeTime(data.getTime().getTime()
-                                                 - listRowObject.get(0).trk
-                                                     .getTime().getTime());
+                                                 - listTrks.get(0).getTime()
+                                                     .getTime());
 
-        case 3: // Distance Totale
+        case 2: // Distance Totale
           return DistanceUnit.formatMetersInKm(data.getDistance());
 
-        case 4: // Distance
+        case 3: // Distance
           if (rowIndex != 0) {
-            return (int) (data.getDistance() - listRowObject.get(rowIndex - 1).trk
+            return (int) (data.getDistance() - listTrks.get(rowIndex - 1)
                 .getDistance());
           }
           return " ";
 
-        case 5: // bmp
+        case 4: // bmp
           return (data.getHeartRate() == 0) ? "-" : data.getHeartRate();
 
-        case 6: // km/h
+        case 5: // km/h
           if (rowIndex != 0) {
             if (DistanceUnit.isDefaultUnitKm()) {
               return SpeedUnit.format(data.getSpeed());
@@ -554,7 +413,7 @@ public class JDialogRunPointsDetail extends JDialog {
           }
           return " ";
 
-        case 7: // mn/km/h
+        case 6: // mn/km/h
           // if (data.getPace() == 0) {
           // return "-";
           // }
@@ -566,11 +425,11 @@ public class JDialogRunPointsDetail extends JDialog {
           }
           return " ";
 
-        case 8: // Longitude
+        case 7: // Longitude
           return data.isValidGps() ? GeoUtil.longititude(GeoUtil
               .makeLatitudeFromGarmin(data.getLongitude())) : "";
 
-        case 9: // Latitude.
+        case 8: // Latitude.
           return data.isValidGps() ? GeoUtil.latitude(GeoUtil
               .makeLatitudeFromGarmin(data.getLatitude())) : "";
 
@@ -585,103 +444,8 @@ public class JDialogRunPointsDetail extends JDialog {
      * @param runLaps
      */
     public void updateData(List<DataRunTrk> listTrks) {
-      listRowObject = new ArrayList<JDialogRunPointsDetail.TableRowObject>();
-      if (listTrks != null) {
-        for (DataRunTrk t : listTrks) {
-          listRowObject.add(new TableRowObject(t));
-        }
-      }
+      this.listTrks = listTrks;
     }
   }
 
-  class HeaderIcon {
-    HeaderIcon(Icon icon) {
-      this.icon = icon;
-    }
-
-    Icon icon;
-  }
-
-  public class TableRowObject {
-    public DataRunTrk trk;
-
-    public boolean    isDel = false;
-
-    public TableRowObject(DataRunTrk trk) {
-      this.trk = trk;
-    }
-
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  private class JTableListSelectionListener implements ListSelectionListener {
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event
-     * .ListSelectionEvent)
-     */
-    public void valueChanged(ListSelectionEvent e) {
-      if (e != null && e.getValueIsAdjusting()) {
-        return;
-      }
-      ListSelectionModel lsm = (ListSelectionModel) e.getSource();
-      int minIndex = lsm.getMinSelectionIndex();
-      int maxIndex = lsm.getMaxSelectionIndex();
-      if (minIndex >= 0 && maxIndex > minIndex) {
-        TableModelPoints model = (TableModelPoints) jTable.getModel();
-        for (int i = minIndex; i <= maxIndex; i++) {
-          model.listRowObject.get(i).isDel = true;
-        }
-      }
-    }
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  private class SelectActionListener implements ActionListener {
-    private boolean isSelect;
-
-    public SelectActionListener(boolean isSelect) {
-      this.isSelect = isSelect;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent actionevent) {
-      for (TableRowObject row : tableModel.listRowObject) {
-        row.isDel = isSelect;
-      }
-      tableModel.fireTableDataChanged();
-    }
-  }
-
-  private class DeleteActionListener implements ActionListener {
-
-    public void actionPerformed(ActionEvent e) {
-      int originalSize = tableModel.listRowObject.size();
-      Iterator<TableRowObject> it = tableModel.listRowObject.iterator();
-      while (it.hasNext()) {
-        if (it.next().isDel) {
-          it.remove();
-        }
-      }
-
-      if (originalSize != tableModel.listRowObject.size()) {
-        getJTable().tableChanged(new TableModelEvent(tableModel));
-        model.deletePoints(JDialogRunPointsDetail.this);
-      }
-    }
-  }
 }

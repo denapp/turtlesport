@@ -7,17 +7,19 @@ package fr.turtlesport.unit.event;
 public class UnitEvent {
 
   /** Les types. */
-  protected static final int DISTANCE   = 1;
+  protected static final int DISTANCE    = 1;
 
-  protected static final int PACE       = 2;
+  protected static final int PACE        = 2;
 
-  protected static final int SPEED      = 3;
+  protected static final int SPEED       = 3;
 
-  protected static final int SPEED_PACE = 4;
+  protected static final int SPEED_PACE  = 4;
 
-  protected static final int WEIGHT     = 5;
+  protected static final int WEIGHT      = 5;
 
-  protected static final int HEIGHT     = 6;
+  protected static final int HEIGHT      = 6;
+
+  protected static final int TEMPERATURE = 7;
 
   /** Le type. */
   private int                type;
@@ -86,7 +88,7 @@ public class UnitEvent {
   public boolean isEventSpeedAndPace() {
     return (type == SPEED_PACE);
   }
-  
+
   /**
    * D&eacute;termine si type vitesse.
    * 
@@ -112,6 +114,15 @@ public class UnitEvent {
    */
   public boolean isEventHeight() {
     return (type == HEIGHT);
+  }
+
+  /**
+   * D&eacute;termine si type temp&eacute;rature.
+   * 
+   * @return <code>true</code> si type temp&eacute;rature, <code>false</code> sinon.
+   */
+  public boolean isEventTemperature() {
+    return (type == TEMPERATURE);
   }
 
 }

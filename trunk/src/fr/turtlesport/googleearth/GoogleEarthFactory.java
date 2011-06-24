@@ -19,19 +19,21 @@ public final class GoogleEarthFactory {
   /**
    * Restitue l'interface IGoogleEarth sp&eacute;cifique &agrave; l'OS.
    * 
-   * @return <code>IGoogleEarth</code> de  l'OS.
+   * @return <code>IGoogleEarth</code> de l'OS.
    */
   public static IGoogleEarth getDefault() {
     if (googleEarth == null) {
       synchronized (GoogleEarthFactory.class) {
-        if (OperatingSystem.isWindows()) {
-          googleEarth = new GoogleEarthWin();
-        }
-        else if (OperatingSystem.isMacOSX()) {
-          googleEarth = new GoogleEarthMacosx();
-        }
-        else {
-          googleEarth = new GoogleEarthLinux();
+        if (googleEarth == null) {
+          if (OperatingSystem.isWindows()) {
+            googleEarth = new GoogleEarthWin();
+          }
+          else if (OperatingSystem.isMacOSX()) {
+            googleEarth = new GoogleEarthMacosx();
+          }
+          else {
+            googleEarth = new GoogleEarthLinux();
+          }
         }
       }
     }
