@@ -99,7 +99,7 @@
 				<path refid="app.classpath" />
 			</classpath>
 		</javac>
-
+<!--
 		<javac compiler="javac1.5" srcdir="${test}" destdir="${destTest}" debug="yes" deprecation="on" encoding="ISO-8859-1">
 			<compilerarg value="-Xlint:unchecked" />
 			<classpath>
@@ -107,6 +107,7 @@
 				<pathelement path="${dest}" />
 			</classpath>
 		</javac>
+		-->
 	</target>
 
 	<!--  ================================================================== -->
@@ -251,7 +252,7 @@
 		<!--
 	      <desktopEntry toFile="${release}/turtlesport.desktop"
 	      	                      name="turtlesport" 
-	      	                      icon="atunes125" 
+	      	                      icon="turtlesport125" 
 	      	                      exec="turtlesport" 
 	      	                      categories="Audio;AudioVideo;"
 	      	                      type="Application">
@@ -261,8 +262,7 @@
             <comment value="Turtle Sport garmin" />
             <comment lang="de" value="Turtle Sport garmin" />
 		</desktopEntry>
--->
-
+		-->
 		<deb todir="${release}" package="turtlesport" section="utils" depends="sun-java6-jre|sun-java6-jdk|openjdk-6-jre|openjdk-6-jdk">
 			<version upstream="${version}" />
 			<maintainer name="Turtle Sport team" email="turtlesport@sourceforge.net" />
