@@ -113,7 +113,7 @@ public final class TemperatureUnit extends Unit {
       return convertToFahrenheit(value);
     }
     if (isDegree(unit1) && isFahrenheit(unit2)) {
-      convertToDegree(value);
+      return convertToDegree(value);
     }
     throw new IllegalArgumentException(unit1 + "->" + unit2);
   }

@@ -87,10 +87,10 @@ public class DatabaseManager {
     isInit = true;
 
     // create function
-    createFunctions();
+ //   createFunctions();
 
     // create tables
-    createTables(null);
+ //   createTables(null);
 
     log.debug("<<initDatabase");
   }
