@@ -37,19 +37,19 @@ public class IconListRenderer extends DefaultListCellRenderer {
                                                                isSelected,
                                                                cellHasFocus);
 
+    // Set icon to display for value
+    if (isSelected) {
+      label.setBackground(list.getSelectionBackground());
+      label.setForeground(list.getSelectionForeground());
+    }
+    else {
+      label.setBackground(list.getBackground());
+      label.setForeground(list.getForeground());
+    }
+
     // Get icon to use for the list item value
     Icon icon = icons.get(value);
     label.setIcon(icon);
-
-    // Set icon to display for value
-//    if (isSelected) {
-//      label.setBackground(list.getSelectionBackground());
-//      label.setForeground(list.getSelectionForeground());
-//    }
-//    else {
-//      label.setBackground(list.getBackground());
-//      label.setForeground(list.getForeground());
-//    }
 
     return label;
   }

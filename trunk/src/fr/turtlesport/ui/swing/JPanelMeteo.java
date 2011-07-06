@@ -131,7 +131,10 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     }
 
     jComboboxImgMeteo = new JComboBox(values);
-    jComboboxImgMeteo.setRenderer(new IconListRenderer(map));
+    IconListRenderer renderer = new IconListRenderer(map);
+    jComboboxImgMeteo.setRenderer(renderer);
+    renderer.setPreferredSize(new Dimension(40,40));
+    
     jComboboxImgMeteo.setSelectedIndex(values.length - 1);
     jComboboxImgMeteo.setFont(new Font("SansSerif", Font.PLAIN, 0));
     // jComboboxImgMeteo.setVerticalTextPosition(JLabel.BOTTOM);
@@ -454,7 +457,7 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     }
 
     jComboboxImgMeteo.setSelectedIndex(jComboboxImgMeteo.getItemCount() - 1);
-    jLabelTemperature.setText("- " +TemperatureUnit.getDefaultUnit());
+    jLabelTemperature.setText("- " + TemperatureUnit.getDefaultUnit());
     spinner.setValue("- " + TemperatureUnit.getDefaultUnit());
     spinnerModel.setValue(jLabelTemperature.getText());
     jLabelWindSpeed.setText("- km/h");
@@ -651,8 +654,8 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     private void updateDB() {
       try {
         DataRun run = ModelPointsManager.getInstance().getDataRun();
-        int realValue = (int) ((TemperatureUnit.isDefaultUnitDegree()) ? value
-            : TemperatureUnit.convertToDegree(value));
+        int realValue = (TemperatureUnit.isDefaultUnitDegree()) ? value
+            : (int) Math.rint(TemperatureUnit.convertToDegree(value));
         if (run != null && meteo != null && meteo.getTemperature() != realValue) {
           meteo.setTemperature(realValue);
           if (isInDataBase) {
