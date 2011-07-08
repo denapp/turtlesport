@@ -10,11 +10,9 @@ import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.AbstractLapType;
 import fr.turtlesport.protocol.data.AbstractRunType;
 import fr.turtlesport.protocol.data.AbstractTrkPointType;
-import fr.turtlesport.protocol.data.D304TrkPointType;
 import fr.turtlesport.protocol.data.D311TrkHdrType;
 import fr.turtlesport.protocol.progress.IRunTransfertProgress;
 import fr.turtlesport.protocol.progress.RunTransfertProgressAdaptor;
-import fr.turtlesport.util.ByteUtil;
 
 /**
  * @author Denis Apparicio
