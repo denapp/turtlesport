@@ -34,6 +34,7 @@ import fr.turtlesport.unit.SpeedUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
+import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -133,8 +134,8 @@ public class JPanelGraph extends JPanel implements LanguageListener,
                         + PaceUnit.getDefaultUnit() + ")");
 
     jComboBoxX.removeAllItems();
-    jComboBoxX.addItem(MessageFormat.format(rb.getString("unitX"), DistanceUnit
-        .getDefaultUnit()));
+    jComboBoxX.addItem(MessageFormat.format(rb.getString("unitX"),
+                                            DistanceUnit.getDefaultUnit()));
     jComboBoxX.addItem(rb.getString("time"));
   }
 
@@ -337,6 +338,10 @@ public class JPanelGraph extends JPanel implements LanguageListener,
   private JComboBox getJComboBoxY3() {
     if (jComboBoxY3 == null) {
       jComboBoxY3 = new JComboBox();
+      jComboBoxY3.setFont(GuiFont.FONT_PLAIN_VERY_SMALL);
+      if (OperatingSystem.isMacOSX()) {
+        jComboBoxY3.setBackground(JDiagramComponent.COLORY3);
+      }
       jComboBoxY3.setRenderer(new MyDefaultListCellRenderer());
       jComboBoxY3.setOpaque(true);
     }

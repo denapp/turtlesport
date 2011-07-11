@@ -1356,7 +1356,6 @@ public class JDialogProgressRun extends JDialog implements
           // On ne garde que les run selectionne et on recupere les equipements.
           for (TableRowObject row : tableModelRun.listRun) {
             if (!row.isSave()) {
-              log.warn("-->removeRunType");
               a1000.removeRunType(row.runType);
             }
             else if (row.getEquipement() != null
