@@ -15,8 +15,9 @@ import java.util.ResourceBundle;
 import javax.swing.AbstractSpinnerModel;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.SwingConstants;
@@ -36,8 +37,8 @@ import fr.turtlesport.meteo.DataMeteo;
 import fr.turtlesport.meteo.StationMeteo;
 import fr.turtlesport.meteo.Wundergound;
 import fr.turtlesport.ui.swing.component.GeoPositionMapKit;
-import fr.turtlesport.ui.swing.component.IconListRenderer;
 import fr.turtlesport.ui.swing.component.JButtonDim;
+import fr.turtlesport.ui.swing.component.JXSplitButton;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.model.ChangePointsEvent;
 import fr.turtlesport.ui.swing.model.ChangePointsListener;
@@ -63,7 +64,7 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
 
   private JLabel                  jLabelWindSpeed;
 
-  private JComboBox               jComboboxImgMeteo;
+  private JXSplitButton           jxSplitButtonImgMeteo;
 
   private JLabel                  jLabelTemperature;
 
@@ -125,27 +126,33 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     List<ImageIcon> listIcon = DataMeteo.getIcons();
     HashMap<String, ImageIcon> map = new HashMap<String, ImageIcon>();
     String[] values = new String[listIcon.size()];
+    JPopupMenu popupMenu = new JPopupMenu();
+    
     for (int i = 0; i < listIcon.size(); i++) {
       values[i] = Integer.toString(i);
       map.put(values[i], listIcon.get(i));
+      
+      JMenuItem item =  new JMenuItem(listIcon.get(i));
+      popupMenu.add(item);
+      final int index = i;
+      final ActionListener itemListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {       
+          jxSplitButtonImgMeteo.setSelectedIndex(index);
+        }
+      };
+      item.addActionListener(itemListener);
     }
 
-    jComboboxImgMeteo = new JComboBox(values);
-    IconListRenderer renderer = new IconListRenderer(map);
-    jComboboxImgMeteo.setRenderer(renderer);
-    renderer.setPreferredSize(new Dimension(40,40));
-    
-    jComboboxImgMeteo.setSelectedIndex(values.length - 1);
-    jComboboxImgMeteo.setFont(new Font("SansSerif", Font.PLAIN, 0));
-    // jComboboxImgMeteo.setVerticalTextPosition(JLabel.BOTTOM);
-    // jComboboxImgMeteo.setHorizontalTextPosition(JLabel.CENTER);
+    jxSplitButtonImgMeteo = new JXSplitButton(null, null, popupMenu);
+    //jxSplitButtonImgMeteo.setSelectedIndex(values.length - 1);
+    jxSplitButtonImgMeteo.setFont(new Font("SansSerif", Font.PLAIN, 0));
     GridBagConstraints gbc_jLabelImgMeteo = new GridBagConstraints();
     gbc_jLabelImgMeteo.gridheight = 1;
     gbc_jLabelImgMeteo.fill = GridBagConstraints.VERTICAL;
     gbc_jLabelImgMeteo.insets = new Insets(5, 0, 5, 5);
     gbc_jLabelImgMeteo.gridx = 0;
     gbc_jLabelImgMeteo.gridy = 0;
-    add(jComboboxImgMeteo, gbc_jLabelImgMeteo);
+    add(jxSplitButtonImgMeteo, gbc_jLabelImgMeteo);
 
     jLabelTemperature = new JLabel("15 " + TemperatureUnit.getDefaultUnit());
     jLabelTemperature.setHorizontalAlignment(SwingConstants.LEFT);
@@ -307,18 +314,19 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
 
-    jComboboxImgMeteo.addActionListener(new ActionListener() {
+    jxSplitButtonImgMeteo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
           DataRun run = ModelPointsManager.getInstance().getDataRun();
           if (run != null
               && meteo != null
-              && meteo.getImageIconIndex() != jComboboxImgMeteo
+              && meteo.getImageIconIndex() != jxSplitButtonImgMeteo
                   .getSelectedIndex()) {
-            meteo.setImageIconIndex(jComboboxImgMeteo.getSelectedIndex());
+            meteo.setImageIconIndex(jxSplitButtonImgMeteo.getSelectedIndex());
             if (isInDataBase) {
               MeteoTableManager.getInstance()
-                  .updateCondition(run, jComboboxImgMeteo.getSelectedIndex());
+                  .updateCondition(run,
+                                   jxSplitButtonImgMeteo.getSelectedIndex());
             }
             else {
               isInDataBase = true;
@@ -383,6 +391,9 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
    * event.UnitEvent)
    */
   public void unitChanged(UnitEvent event) {
+    if (meteo == null) {
+      return;
+    }
     if (event.isEventTemperature()) {
       if (TemperatureUnit.isDefaultUnitDegree()) {
         spinnerModel.value = (int) TemperatureUnit
@@ -456,7 +467,8 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
       isInDataBase = false;
     }
 
-    jComboboxImgMeteo.setSelectedIndex(jComboboxImgMeteo.getItemCount() - 1);
+    jxSplitButtonImgMeteo
+        .setSelectedIndex(jxSplitButtonImgMeteo.getItemCount() - 1);
     jLabelTemperature.setText("- " + TemperatureUnit.getDefaultUnit());
     spinner.setValue("- " + TemperatureUnit.getDefaultUnit());
     spinnerModel.setValue(jLabelTemperature.getText());
@@ -543,7 +555,7 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
         jBusyLabel.setVisible(false);
 
         if (meteo != null) {
-          jComboboxImgMeteo.setSelectedIndex((meteo.getImageIconIndex()));
+          jxSplitButtonImgMeteo.setSelectedIndex((meteo.getImageIconIndex()));
           if (meteo.isTemperatureValid()) {
             String value;
             if (TemperatureUnit.isDefaultUnitDegree()) {

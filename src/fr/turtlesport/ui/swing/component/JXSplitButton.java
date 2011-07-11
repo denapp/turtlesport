@@ -22,6 +22,7 @@ import javax.swing.DefaultButtonModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -54,6 +55,8 @@ public class JXSplitButton extends JButton implements SwingConstants {
   private boolean    popupVisible    = false;
 
   private boolean    isPainting      = false;
+
+  private int        selectedIndex   = 0;
 
   // Constructors...
 
@@ -221,6 +224,34 @@ public class JXSplitButton extends JButton implements SwingConstants {
   private void dropDownMenuPopupMenuCanceled(PopupMenuEvent e) {
     popupVisible = false;
     JXSplitButton.this.getModel().setSelected(false);
+  }
+
+  /**
+   * @return Restitue le nombre d'item
+   */
+  public int getItemCount() {
+    return (dropDownMenu == null ? 0 : dropDownMenu.getComponentCount());
+  }
+
+  /**
+   * @param i
+   */
+  public void setSelectedIndex(int i) {
+    if (dropDownMenu != null
+        && dropDownMenu.getComponent(i) instanceof JMenuItem) {
+      JMenuItem item = (JMenuItem) dropDownMenu.getComponent(i);
+      setIcon(item.getIcon());
+      selectedIndex = 0;
+    }
+  }
+
+  /**
+   * Restitue l'index selectionn
+   * 
+   * @return
+   */
+  public int getSelectedIndex() {
+    return selectedIndex;
   }
 
   // Properties...
@@ -587,4 +618,5 @@ public class JXSplitButton extends JButton implements SwingConstants {
       return (ret);
     }
   }
+
 }
