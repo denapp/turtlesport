@@ -119,6 +119,7 @@ public final class ModelPointsManager {
 
     this.dataRun = dataRun;
     listGeo = null;
+    listTrks = null;
     lapGeoBegin = null;
     lapGeoEnd = null;
     currentMapPoint = 0;

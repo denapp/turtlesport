@@ -36,7 +36,7 @@ import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.JPanelRun;
 import fr.turtlesport.ui.swing.MainGui;
 import fr.turtlesport.ui.swing.SwingLookAndFeel;
-import fr.turtlesport.ui.swing.component.calendar.JPanelCalendar;
+import fr.turtlesport.ui.swing.component.calendar.JPanelListDateRun;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
 import fr.turtlesport.unit.SpeedPaceUnit;
@@ -84,7 +84,32 @@ public class ModelRun {
     dataRun = RunTableManager.getInstance().findNext(MainGui.getWindow()
                                                          .getCurrentIdUser(),
                                                      date);
+    // mis a jour de la vue
+    update(view);
 
+    log.info("<<updateView");
+  }
+
+  /**
+   * Mis &aecute; jour de la vue.
+   * 
+   * @param view
+   * @throws SQLException
+   */
+  public void updateView(JPanelRun view, DataRun run) throws SQLException {
+    if (log.isInfoEnabled()) {
+      log.info(">>updateView");
+    }
+
+    if (run == null) {
+      eraseGui(view);
+      dataRun = null;
+      return;
+    }
+
+    // recuperation des donnees
+    dataRun = RunTableManager.getInstance().retreiveWithID(run.getId());
+    
     // mis a jour de la vue
     update(view);
 
@@ -107,9 +132,9 @@ public class ModelRun {
     update(view);
 
     // mis a jour du calendrier
-    JPanelCalendar jPanelCalendar = MainGui.getWindow().getJPanelCalendar();
-    if (jPanelCalendar != null) {
-      jPanelCalendar.fireDateChanged(dataRun.getTime());
+    JPanelListDateRun jPanelView = MainGui.getWindow().getListDateRun();
+    if (jPanelView != null) {
+      jPanelView.fireDateChanged(dataRun.getTime());
     }
 
     log.debug(">>updateViewNext");
@@ -131,7 +156,7 @@ public class ModelRun {
     update(view);
 
     // mis a jour du calendrier
-    JPanelCalendar jPanelCalendar = MainGui.getWindow().getJPanelCalendar();
+    JPanelListDateRun jPanelCalendar = MainGui.getWindow().getListDateRun();
     if (jPanelCalendar != null) {
       jPanelCalendar.fireDateChanged(dataRun.getTime());
     }
@@ -152,19 +177,13 @@ public class ModelRun {
       double distTot = 0;
       int timeTot = 0;
       try {
-        distTot = DistanceUnit.convert(dataRun.getUnit(),
-                                       e.getUnit(),
-                                       dataRun.getComputeDistanceTot());
-        dataRun.setComputeDistanceTot(distTot);
         timeTot = dataRun.computeTimeTot();
-
         dataRun.setUnit(e.getUnit());
+        distTot = dataRun.getComputeDistanceTot();
       }
       catch (SQLException sqle) {
         // ne peut arriver
       }
-
-      dataRun.setComputeDistanceTot(distTot);
 
       // distance
       view.getJLabelValDistTot().setText(DistanceUnit.formatWithUnit(distTot));
@@ -283,14 +302,9 @@ public class ModelRun {
     }
 
     int value;
-    if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
+    if (!dataRun.getUnit().equals(DistanceUnit.getDefaultUnit())) {
       // distance
-      dataRun
-          .setComputeDistanceTot(DistanceUnit.convert(DistanceUnit.unitKm(),
-                                                      DistanceUnit
-                                                          .getDefaultUnit(),
-                                                      dataRun
-                                                          .getComputeDistanceTot()));
+      dataRun.setUnit(DistanceUnit.getDefaultUnit());
     }
 
     // distance
@@ -417,9 +431,9 @@ public class ModelRun {
     RunTableManager.getInstance().delete(dataRun.getId());
 
     // suppression de la date du calendrier si besoin
-    JPanelCalendar jPanelCalendar = MainGui.getWindow().getJPanelCalendar();
-    if (jPanelCalendar != null) {
-      jPanelCalendar.fireDateDeleted(dataRun.getTime());
+    JPanelListDateRun jPanelListDataRun = MainGui.getWindow().getListDateRun();
+    if (jPanelListDataRun != null) {
+      jPanelListDataRun.fireDateDeleted(dataRun.getTime());
     }
 
     if (view.getJButtonNext().isEnabled()) {
