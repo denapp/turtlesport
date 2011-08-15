@@ -122,6 +122,7 @@ public class GoogleMapGeo implements IGeoConvertRun {
       IGeoPosition mStart = markerStart(trks);
       IGeoPosition mStop = markerEnd(trks);
 
+      dataRun.setUnit(DistanceUnit.getDefaultUnit());
       while ((line = reader.readLine()) != null) {
         if (line.startsWith(MAP_BOUNDS)) {
           mapBounds(writer, line, sw, ne);
@@ -370,14 +371,6 @@ public class GoogleMapGeo implements IGeoConvertRun {
                         BufferedWriter writer,
                         String line) throws IOException, SQLException {
     line = line.substring(DISTANCE.length());
-
-    if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
-      // distance
-      dataRun.setComputeDistanceTot(DistanceUnit
-          .convert(DistanceUnit.unitKm(),
-                   DistanceUnit.getDefaultUnit(),
-                   dataRun.getComputeDistanceTot()));
-    }
 
     writer.write(MessageFormat.format(line,
                                       rb.getString("DISTANCE"),
