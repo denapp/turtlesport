@@ -7,6 +7,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -23,7 +24,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
-import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 
 import fr.turtlesport.Configuration;
@@ -53,8 +55,16 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JDiagramComponent extends JComponent implements LanguageListener,
-                                                 UnitListener {
+public class JDiagramComponent extends JPanel implements LanguageListener,
+                                             UnitListener {
+  private BufferedImage               bimg;
+
+  private Toolkit                     toolkit;
+
+  private int                         biw, bih;
+
+  private boolean                     clearOnce;
+
   // Mouse position
   private int                         mouseX         = 0;
 
@@ -91,10 +101,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
   public static final Color           COLORY1        = Color.RED;
 
   public static final Color           COLORY2        = Color.BLUE;
-
-  // public static final Color COLORY3 = new Color(0x2d,
-  // 0xd9,
-  // 0x27);
 
   public static final Color           COLORY3        = new Color(0x00,
                                                                  0x8b,
@@ -153,7 +159,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
   }
 
   /*
-   * FONT_PLAIN_SMALL (non-Javadoc)
+   * (non-Javadoc)
    * 
    * @see fr.turtlesport.unit.event.UnitListener#completedRemoveUnitListener()
    */
@@ -184,6 +190,10 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
    * Coordonnees max des points.
    */
   private void initialize() {
+    toolkit = getToolkit();
+    setDoubleBuffered(true);
+    setIgnoreRepaint(true);
+
     model = new TablePointsModel();
 
     mouseMotionListener = new MyMouseMotionListener();
@@ -226,7 +236,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     int x = WIDTH_TITLE_1;
     if (model.isVisibleY1()) {
       g2.setColor(COLORY1);
-      String s ="\u2665 (bmp)";
+      String s = "\u2665 (bmp)";
       g2.drawString(s, WIDTH_TITLE_1, 10);
       x += g2.getFontMetrics().stringWidth(s) + 10;
     }
@@ -240,14 +250,14 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
       g2.setColor(COLORY3);
       String unit = null;
       if (model.isVisiblePace()) {
-        unit = rb.getString("allure") + " ("+  PaceUnit.getDefaultUnit() + ")";
+        unit = rb.getString("allure") + " (" + PaceUnit.getDefaultUnit() + ")";
       }
       else {
-        unit = rb.getString("speed") + " ("+  SpeedUnit.getDefaultUnit() + ")";
+        unit = rb.getString("speed") + " (" + SpeedUnit.getDefaultUnit() + ")";
       }
       g2.drawString(unit, x, 10);
     }
-    
+
     OutputStream out = null;
     try {
       out = new FileOutputStream(file);
@@ -263,11 +273,75 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
   /*
    * (non-Javadoc)
    * 
+   * @see javax.swing.JComponent#paintImmediately(int, int, int, int)
+   */
+  public void paintImmediately(int x, int y, int w, int h) {
+    RepaintManager repaintManager = null;
+    boolean save = true;
+    if (!isDoubleBuffered()) {
+      repaintManager = RepaintManager.currentManager(this);
+      save = repaintManager.isDoubleBufferingEnabled();
+      repaintManager.setDoubleBufferingEnabled(false);
+    }
+    super.paintImmediately(x, y, w, h);
+
+    if (repaintManager != null) {
+      repaintManager.setDoubleBufferingEnabled(save);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see javax.swing.JComponent#paint(java.awt.Graphics)
    */
   @Override
-  public void paintComponent(Graphics g) {
-    Graphics2D g2 = (Graphics2D) g;
+  public void paint(Graphics g) {
+    Dimension d = getSize();
+
+    if (bimg == null || biw != d.width || bih != d.height) {
+      bimg = (BufferedImage) ((Graphics2D) g).getDeviceConfiguration()
+          .createCompatibleImage(d.width, d.height);
+      biw = d.width;
+      bih = d.height;
+      clearOnce = true;
+    }
+
+    Graphics2D g2 = createGraphics2D(d.width, d.height, bimg, g);
+    render(d.width, d.height, g2);
+    g2.dispose();
+
+    if (bimg != null) {
+      g.drawImage(bimg, 0, 0, null);
+      toolkit.sync();
+    }
+  }
+
+  private Graphics2D createGraphics2D(int width,
+                                      int height,
+                                      BufferedImage bi,
+                                      Graphics g) {
+
+    Graphics2D g2 = null;
+
+    if (bi != null) {
+      g2 = bi.createGraphics();
+    }
+    else {
+      g2 = (Graphics2D) g;
+    }
+
+    g2.setBackground(getBackground());
+
+    if (clearOnce) {
+      g2.clearRect(0, 0, width, height);
+      clearOnce = false;
+    }
+
+    return g2;
+  }
+
+  private void render(int w, int h, Graphics2D g2) {
     paintGrid(g2);
     if (model != null && model.indexX2 != 0) {
       paintPoints(g2);
@@ -280,6 +354,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
       }
     }
     paintYAxis(g2);
+
   }
 
   /**
@@ -474,11 +549,6 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         // remplissage
         pol.addPoint(x1, ya1);
         pol.addPoint(x2, ya2);
-
-        // g2.setComposite(AC_TRANSPARENT); xPoints[0] = x1; xPoints[1] = x1;
-        // xPoints[2] = x2; xPoints[3] = x2; yPoints[0] = tot; yPoints[1] = ya1;
-        // yPoints[2] = ya2; yPoints[3] = tot; g2.fillPolygon(xPoints, yPoints,
-        // xPoints.length); g2.setComposite(AlphaComposite.SrcOver);
       }
 
       if (model.isVisibleY3()) {
@@ -495,6 +565,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     g2.setComposite(AC_TRANSPARENT);
     g2.fillPolygon(pol);
     g2.setComposite(AlphaComposite.SrcOver);
+
   }
 
   /**
@@ -1077,6 +1148,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         inter[1] = inter[0] + runLaps[index].getTotalDist();
         this.intervalX1 = (int) inter[0];
         this.intervalX2 = (int) inter[1];
+        revalidate();
         repaint();
       }
 
@@ -1094,6 +1166,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         int index = e.getTrkIndexCurrentPoint();
         if (e.isCurrentLastPoint()) {
           mouseX = computeRelativeX(model.getGridXMax());
+          revalidate();
           repaint();
         }
         else {
@@ -1108,6 +1181,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
           tabMouseY[0] = computeRelativeY1(currentY1);
           tabMouseY[1] = computeRelativeY2(currentY2);
           tabMouseY[2] = computeRelativeY3(currentY3);
+          revalidate();
           repaint();
         }
       }
@@ -1147,6 +1221,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
     }
 
     public void changeVisible() {
+      revalidate();
       repaint();
     }
 
@@ -1290,6 +1365,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
 
       if (points == null || points.size() == 0) {
         initialize();
+        revalidate();
         repaint();
         return;
       }
@@ -1407,6 +1483,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
         }
       }
 
+      revalidate();
       repaint();
     }
 
@@ -1447,6 +1524,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
       if (model.isFilter()) {
         applyFilterSavitzyGolay();
       }
+      revalidate();
       repaint();
     }
 
@@ -1633,6 +1711,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
                                      / (gridY3Pace.length - 1));
       }
 
+      revalidate();
       repaint();
     }
   }
@@ -1650,6 +1729,7 @@ public class JDiagramComponent extends JComponent implements LanguageListener,
      */
     public void mouseMoved(MouseEvent e) {
       mouseX = e.getX();
+      revalidate();
       repaint();
     }
   }
