@@ -82,15 +82,15 @@ public class DatabaseManager {
     if (isDropTables) {
       dropTables();
     }
-//    executeUpdate("DROP TABLE " + TABLE_METEO);
+    // executeUpdate("DROP TABLE " + TABLE_METEO);
 
     isInit = true;
 
     // create function
- //   createFunctions();
+    createFunctions();
 
     // create tables
- //   createTables(null);
+    createTables(null);
 
     log.debug("<<initDatabase");
   }
@@ -373,7 +373,7 @@ public class DatabaseManager {
         rs = pstmt.executeQuery();
 
         if (rs.getMetaData().getColumnCount() != 8) {
-          // table existe dans une ancienne version ( < à 0.1.13)
+          // table existe dans une ancienne version ( < 0.1.13)
           while (rs.next()) {
             if (listData == null) {
               listData = new ArrayList<DataRun>();

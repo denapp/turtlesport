@@ -707,7 +707,7 @@ public final class RunTableManager extends AbstractTableManager {
 
         // suppression des points
         RunTrkTableManager.getInstance().delete(id);
-        
+
         // suppression de la meteo
         MeteoTableManager.getInstance().delete(id);
       }
@@ -986,9 +986,63 @@ public final class RunTableManager extends AbstractTableManager {
 
     long delay = -System.currentTimeMillis() - start;
     if (log.isInfoEnabled()) {
+      log.info(dataRun.getTime());
       log.info("<<findNextOrPrev delay=" + delay + "ms");
     }
     return dataRun;
+  }
+
+  /**
+   * Recuperation des run d'un utilisateur.
+   * 
+   * @param idUser
+   * @param date
+   * 
+   * @return
+   * @throws SQLException
+   */
+  public List<DataRun> retreiveDesc(int idUser) throws SQLException {
+    if (log.isInfoEnabled()) {
+      log.info(">>retreiveDesc  idUser=" + idUser);
+    }
+    List<DataRun> listRun = new ArrayList<DataRun>();
+
+    long startTime = System.currentTimeMillis();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT id, sport_type, start_time FROM ");
+      st.append(getTableName());
+      if (!DataUser.isAllUser(idUser)) {
+        st.append(" WHERE id_user=?");
+      }
+      st.append(" ORDER BY start_time DESC");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        DataRun dataRun = new DataRun();
+        dataRun.setId(rs.getInt("id"));
+        dataRun.setSportType(rs.getInt("sport_type"));
+        dataRun.setTime(rs.getTimestamp("start_time"));
+        listRun.add(dataRun);
+        log.debug("id" + dataRun.getId());
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      long delay = System.currentTimeMillis() - startTime;
+      log.info(">>retreiveDesc  idUser=" + idUser + " delay=" + delay + "ms");
+    }
+    return listRun;
   }
 
   /**
@@ -1049,6 +1103,54 @@ public final class RunTableManager extends AbstractTableManager {
   }
 
   /**
+   * Recuperation des run d'un utilisateur.
+   * 
+   * @param id
+   * 
+   * @return
+   * @throws SQLException
+   */
+  public DataRun retreiveWithID(int id) throws SQLException {
+    if (log.isInfoEnabled()) {
+      log.info(">>retreive  idUser=" + id);
+    }
+    
+    DataRun dataRun = null;
+    
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT * FROM ");
+      st.append(getTableName());
+      st.append(" WHERE id=?");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, id);
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        dataRun = new DataRun();
+        dataRun.setId(rs.getInt("id"));
+        dataRun.setSportType(rs.getInt("sport_type"));
+        dataRun.setProgramType(rs.getInt("program_type"));
+        dataRun.setMultisport(rs.getInt("multisport"));
+        dataRun.setTime(rs.getTimestamp("start_time"));
+        dataRun.setComments(rs.getString("comments"));
+        dataRun.setEquipement(rs.getString("equipement"));
+        log.debug("id" + dataRun.getId());
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      log.info("<<retreive  id=" + id);
+    }
+    return dataRun;
+  }
+
+  /**
    * R&eaute;cup&eaute;ration des dates.
    * 
    * @param idUser
@@ -1070,13 +1172,15 @@ public final class RunTableManager extends AbstractTableManager {
       st.append("SELECT start_time FROM ");
       st.append(getTableName());
       if (!DataUser.isAllUser(idUser)) {
-        st.append("WHERE id_user=?");
+        st.append(" WHERE id_user=?");
       }
+      st.append(" ORDER BY start_time DESC");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       if (!DataUser.isAllUser(idUser)) {
         pstmt.setInt(1, idUser);
       }
+
       ResultSet rs = pstmt.executeQuery();
 
       listDates = new ArrayList<Date>();

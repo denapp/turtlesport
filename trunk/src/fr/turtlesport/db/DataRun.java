@@ -69,7 +69,10 @@ public class DataRun {
    * @param unit
    *          la nouvelle valeur.
    */
-  public void setUnit(String unit) {
+  public synchronized void setUnit(String unit) {
+    if (distanceTot != -1 && !this.unit.equals(unit)) {
+      distanceTot = DistanceUnit.convert(this.unit, unit, distanceTot);
+    }
     this.unit = unit;
   }
 
@@ -237,6 +240,12 @@ public class DataRun {
   public double getComputeDistanceTot() throws SQLException {
     if (distanceTot == -1) {
       distanceTot = RunLapTableManager.getInstance().distanceTot(id);
+      unit = DistanceUnit.getDefaultUnit();
+      if (!DistanceUnit.isDefaultUnitKm()) {
+        distanceTot = DistanceUnit.convert(DistanceUnit.unitKm(),
+                                           unit,
+                                           distanceTot);
+      }
     }
     return distanceTot;
   }
