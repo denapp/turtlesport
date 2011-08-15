@@ -50,6 +50,22 @@ public final class LanguageEn extends AbstractLanguage {
     return new SimpleDateFormat("MM/dd/yyyy", getLocale());
   }
 
+  /* (non-Javadoc)
+   * @see fr.turtlesport.lang.ILanguage#getDateTimeShortFormatter()
+   */
+  public DateFormat getDateTimeShortFormatter() {
+    return new SimpleDateFormat("MM/dd/yy HH:mm", getLocale());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#getDateTimeShortWithoutYearFormatter()
+   */
+  public DateFormat getDateTimeShortWithoutYearFormatter() {
+    return new SimpleDateFormat("MM/dd HH:mm", getLocale());
+  }
+
   /*
    * (non-Javadoc)
    * 

@@ -36,7 +36,9 @@ public final class LanguageCa extends AbstractLanguage {
     return locale;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.turtlesport.lang.ILanguage#getEncoding()
    */
   public String getEncoding() {
@@ -50,6 +52,24 @@ public final class LanguageCa extends AbstractLanguage {
    */
   public DateFormat getDateFormatter() {
     return new SimpleDateFormat("dd/MM/yyyy", getLocale());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#getDateTimeShortFormatter()
+   */
+  public DateFormat getDateTimeShortFormatter() {
+    return new SimpleDateFormat("dd/MM/yy HH:mm", getLocale());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#getDateTimeShortWithoutYearFormatter()
+   */
+  public DateFormat getDateTimeShortWithoutYearFormatter() {
+    return new SimpleDateFormat("dd/MM HH:mm", getLocale());
   }
 
   /*
@@ -85,7 +105,7 @@ public final class LanguageCa extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#cancel()
    */
   public String cancel() {
-    return "Cancel·la";
+    return "Cancel lar";
   }
 
   /*

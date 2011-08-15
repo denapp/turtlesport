@@ -40,6 +40,20 @@ public interface ILanguage {
   DateFormat getDateFormatter();
 
   /**
+   * Restitue le formatter pour une date (JJ/MM/AA HH:MM).
+   * 
+   * @return le formatter pour une date.
+   */
+  DateFormat getDateTimeShortFormatter();
+
+  /**
+   * Restitue le formatter pour une date (JJ/MM/AA HH:MM).
+   * 
+   * @return le formatter pour une date.
+   */
+  DateFormat getDateTimeShortWithoutYearFormatter();
+
+  /**
    * Restitue le formatter pour une date sans separator.
    * 
    * @return le formatter pour une date.
