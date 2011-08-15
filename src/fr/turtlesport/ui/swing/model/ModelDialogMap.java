@@ -154,14 +154,9 @@ public class ModelDialogMap {
     }
 
     int value;
-    if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
+    if (!dataRun.getUnit().equals(DistanceUnit.getDefaultUnit())) {
       // distance
-      dataRun
-          .setComputeDistanceTot(DistanceUnit.convert(DistanceUnit.unitKm(),
-                                                      DistanceUnit
-                                                          .getDefaultUnit(),
-                                                      dataRun
-                                                          .getComputeDistanceTot()));
+      dataRun.setUnit(DistanceUnit.getDefaultUnit());
     }
 
     // distance
