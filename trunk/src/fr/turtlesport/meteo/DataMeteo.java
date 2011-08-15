@@ -179,7 +179,7 @@ public class DataMeteo {
       DataMeteo d = new DataMeteo(date);
       d.temperature = (int) Float.parseFloat(datas[1]);
       d.humidity = (int) Float.parseFloat(datas[3]);
-      d.pressurehPa = Integer.parseInt(datas[4]);
+      d.pressurehPa =(int)  Float.parseFloat(datas[4]);
       d.visibility = Float.parseFloat(datas[5]);
 
       d.windDirection = datas[6];
