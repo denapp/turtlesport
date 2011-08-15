@@ -2,6 +2,7 @@ package fr.turtlesport.ui.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -12,10 +13,11 @@ import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
+import fr.turtlesport.ui.swing.component.JPanelBackgroundImage;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 
 /**
- * Splashscreen Outils Caisse.
+ * Splashscreen.
  * 
  * @author Denis Apparicio
  * 
@@ -58,14 +60,13 @@ public class JSplashScreen extends JWindow {
   private JPanel getJContentPane() {
     if (jContentPane == null) {
       jLabelSplash = new JLabel();
-      ImageIcon icon = ImagesRepository.getImageIcon("splash.png");
+      ImageIcon icon = ImagesRepository.getImageIcon("splash.jpg");
       jLabelSplash.setIcon(icon);
       jLabelSplash.setSize(icon.getIconWidth(), icon.getIconHeight());
 
-      jContentPane = new JPanel();
+      jContentPane = new JPanelBackgroundImage(ImagesRepository.getImage("splash.jpg"));
       jContentPane.setLayout(new BorderLayout());
       jContentPane.setBorder(BorderFactory.createLineBorder(Color.black, 1));
-      jContentPane.add(jLabelSplash, java.awt.BorderLayout.CENTER);
       jContentPane.add(getJPanelStatus(), java.awt.BorderLayout.SOUTH);
     }
     return jContentPane;
@@ -78,17 +79,12 @@ public class JSplashScreen extends JWindow {
    */
   private JPanel getJPanelStatus() {
     if (jPanelStatus == null) {
-      Color color = new Color(120, 207, 67);
-
       status = new Status();
-      status.setFont(GuiFont.FONT_PLAIN);
-      status.setBackground(color);
       status.setBounds(0, 0, 412, 20);
 
       jPanelStatus = new JPanel();
-      jPanelStatus.setBackground(color);
+      jPanelStatus.setOpaque(true);
       jPanelStatus.setLayout(new BoxLayout(jPanelStatus, BoxLayout.Y_AXIS));
-      jPanelStatus.add(status, null);
       jPanelStatus.add(getJProgressBar(), null);
     }
     return jPanelStatus;
@@ -102,6 +98,7 @@ public class JSplashScreen extends JWindow {
   private JProgressBar getJProgressBar() {
     if (jProgressBar == null) {
       jProgressBar = new JProgressBar();
+      jProgressBar.setPreferredSize(new Dimension(412, 10));
       jProgressBar.setIndeterminate(true);
     }
     return jProgressBar;

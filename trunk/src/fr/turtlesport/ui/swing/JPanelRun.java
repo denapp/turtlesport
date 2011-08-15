@@ -15,6 +15,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -268,7 +269,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
    */
   public void userSelect(int idUser) throws SQLException {
     if (!DataUser.isAllUser(idUser)) {
-      model.updateView(this, null);
+      model.updateView(this, (Date) null);
     }
     else {
       model.updateViewButtons(this);
@@ -1972,13 +1973,12 @@ public class JPanelRun extends JPanel implements LanguageListener,
       String name = LanguageManager.getManager().getCurrentLang()
           .getDateTimeFormatterWithoutSep()
           .format(ModelPointsManager.getInstance().getDataRun().getTime());
-
       final IGeoConvertRun cv = FactoryGeoConvertRun.getInstance(ext);
+      System.out.println(name + " " +cv.extension()[0] + " "+cv.description());
       final File out = JFileSaver.showSaveDialog(MainGui.getWindow(),
                                                  name,
                                                  cv.extension()[0],
                                                  cv.description());
-
       if (out != null) {
         MainGui.getWindow().beforeRunnableSwing();
 

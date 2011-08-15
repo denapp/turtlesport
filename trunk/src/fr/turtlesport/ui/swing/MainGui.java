@@ -41,6 +41,7 @@ import javax.swing.WindowConstants;
 import fr.turtlesport.Configuration;
 import fr.turtlesport.Launcher;
 import fr.turtlesport.MacOSXTurleApp;
+import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.UserTableManager;
 import fr.turtlesport.lang.ILanguage;
@@ -55,11 +56,11 @@ import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JXSplitButton;
 import fr.turtlesport.ui.swing.component.calendar.JPanelCalendar;
+import fr.turtlesport.ui.swing.component.calendar.JPanelListDateRun;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.img.menu.ImagesMenuRepository;
 import fr.turtlesport.ui.swing.model.ModelMapkitManager;
 import fr.turtlesport.ui.swing.model.ModelPointsManager;
-import fr.turtlesport.ui.swing.model.ModelRunCalendar;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
 import fr.turtlesport.update.Update;
@@ -325,7 +326,8 @@ public class MainGui extends JFrame implements LanguageListener {
           ((UserListener) jSplitPaneCenter.getRightComponent())
               .userSelect(currentIdUser);
           if (!DataUser.isAllUser(currentIdUser)) {
-            ((JPanelCalendar) jSplitPaneCenter.getLeftComponent())
+            ModelPointsManager.getInstance().setDataRun(this, null);
+            ((JPanelListDateRun) jSplitPaneCenter.getLeftComponent())
                 .fireDatesUnselect();
           }
         }
@@ -1117,7 +1119,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jSplitPaneCenter.setOneTouchExpandable(true);
       jSplitPaneCenter.setLeftComponent(new JPanel());
       jSplitPaneCenter.setRightComponent(new JPanel());
-      jSplitPaneCenter.setDividerLocation(204);
+      updateDividerLocation();
     }
     return jSplitPaneCenter;
   }
@@ -1237,10 +1239,6 @@ public class MainGui extends JFrame implements LanguageListener {
       }
     }
 
-    public String getUrl() {
-      return url;
-    }
-
     public void setUrl(String url) {
       this.url = url;
     }
@@ -1351,27 +1349,32 @@ public class MainGui extends JFrame implements LanguageListener {
    * Mis &agrave; jour des dates du calendrier. Si une date du calendrier
    * &eacute;tait d&eacute;j&agrave; selectionn&eacute;e, on garde la selection.
    */
-  protected void fireHistoric() {
-    JPanelCalendar panel = null;
+  public void fireHistoric() {
+    JPanelListDateRun panel = null;
 
     try {
       // mis a jour de la vue
-      if (jSplitPaneCenter.getLeftComponent() instanceof JPanelCalendar) {
-        panel = (JPanelCalendar) jSplitPaneCenter.getLeftComponent();
+      if (jSplitPaneCenter.getLeftComponent() instanceof JPanelListDateRun) {
+        panel = (JPanelListDateRun) jSplitPaneCenter.getLeftComponent();
       }
       else {
-        panel = new JPanelCalendar();
-        panel.setModel(new ModelRunCalendar());
+        panel = new JPanelListDateRun();
       }
-
+      // mises a jour des dates
       panel.fireHistoric(currentIdUser);
+      // mise a jour de la date selectionne
+      DataRun run = ModelPointsManager.getInstance().getDataRun();
+      if (run != null) {
+        panel.fireDateChanged(run.getTime());
+      }
     }
     catch (SQLException e) {
       log.error("", e);
     }
     finally {
-      if (!(jSplitPaneCenter.getLeftComponent() instanceof JPanelCalendar)) {
+      if (!(jSplitPaneCenter.getLeftComponent() instanceof JPanelListDateRun)) {
         jSplitPaneCenter.setLeftComponent(panel);
+        MainGui.getWindow().updateDividerLocation();
       }
     }
   }
@@ -1393,7 +1396,6 @@ public class MainGui extends JFrame implements LanguageListener {
     catch (SQLException e) {
       log.error("", e);
     }
-
   }
 
   /**
@@ -1665,9 +1667,9 @@ public class MainGui extends JFrame implements LanguageListener {
   /**
    * @return
    */
-  public JPanelCalendar getJPanelCalendar() {
+  public JPanelListDateRun getListDateRun() {
     Object obj = jSplitPaneCenter.getLeftComponent();
-    return (obj instanceof JPanelCalendar) ? (JPanelCalendar) obj : null;
+    return (obj instanceof JPanelListDateRun) ? (JPanelListDateRun) obj : null;
   }
 
   /**
@@ -1702,13 +1704,18 @@ public class MainGui extends JFrame implements LanguageListener {
     }
 
     // Deselection des dates du calendar
-    JPanelCalendar panelCalendar = getJPanelCalendar();
+    JPanelListDateRun panelCalendar = getListDateRun();
     if (panelCalendar != null) {
       panelCalendar.fireDatesUnselect();
     }
 
     jSplitPaneCenter.setRightComponent(panel);
-    jSplitPaneCenter.setDividerLocation(jSplitPaneCenter.getDividerLocation());
+    updateDividerLocation();
+  }
+
+  private void updateDividerLocation() {
+    // jSplitPaneCenter.setDividerLocation(204);
+    jSplitPaneCenter.setDividerLocation(230);
   }
 
   /**
