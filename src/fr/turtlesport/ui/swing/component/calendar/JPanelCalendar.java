@@ -25,7 +25,7 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JPanelCalendar extends JPanel implements LanguageListener {
+public class JPanelCalendar extends JPanel implements IListDateRunFire, LanguageListener {
   private static TurtleLogger            log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelCalendar.class);
@@ -49,12 +49,15 @@ public class JPanelCalendar extends JPanel implements LanguageListener {
   public JPanelCalendar() {
     super();
     initialize();
+    setModel(new ModelRunCalendar());
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.lang.LanguageListener#languageChanged(fr.turtlesport.lang.LanguageEvent)
+   * @see
+   * fr.turtlesport.lang.LanguageListener#languageChanged(fr.turtlesport.lang
+   * .LanguageEvent)
    */
   public void languageChanged(final LanguageEvent event) {
   }
@@ -76,27 +79,17 @@ public class JPanelCalendar extends JPanel implements LanguageListener {
    * @param listener
    *          le <code>CalendarDayListener</code> &aecute; ajouter.
    */
-  public void addCalendarDayListener(CalendarDayListener listener) {
+  private void addCalendarDayListener(CalendarDayListener listener) {
     if (listener != null) {
       listListener.add(listener);
     }
   }
 
-  /**
-   * Supprime un <code>CalendarListener</code>.
+  /*
+   * (non-Javadoc)
    * 
-   * @param listener
-   *          le <code>CalendarListener</code> &aecute; ajouter.
-   */
-  public void removeCalendarDayListener(CalendarDayListener listener) {
-    if (listener != null) {
-      listListener.remove(listener);
-    }
-  }
-
-  /**
-   * Notifie aucune date selectionn&eacute;e.
-   * 
+   * @see
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRun#fireDatesUnselect()
    */
   public void fireDatesUnselect() {
     log.debug(">>fireDatesUnselect");
@@ -108,10 +101,12 @@ public class JPanelCalendar extends JPanel implements LanguageListener {
     log.debug("<<fireDatesUnselect");
   }
 
-  /**
-   * Notifie jour actif selecsionn&eacute;.
+  /*
+   * (non-Javadoc)
    * 
-   * @param date
+   * @see
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRun#fireDateChanged
+   * (java.util.Date)
    */
   public void fireDateChanged(Date date) {
     log.debug(">>fireDateChanged");
@@ -130,29 +125,31 @@ public class JPanelCalendar extends JPanel implements LanguageListener {
     log.debug("<<fireDateChanged");
   }
 
-  /**
-   * Mis a jour du calendrier.
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRun#fireHistoric(int)
    */
   public void fireHistoric(int idUser) throws SQLException {
     model.setIdUser(idUser);
     model.updateView(this);
-    //mis a jour des boutons date en cours
+    
+    // mis a jour des boutons date en cours
     if (MainGui.getWindow().getRightComponent() instanceof JPanelRun) {
       JPanelRun p = (JPanelRun) MainGui.getWindow().getRightComponent();
       p.fireHistoric();
     }
-    
   }
 
-  /**
-   * Notifie suppression d'une date.
+  /*
+   * (non-Javadoc)
    * 
-   * @param date
+   * @see
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRun#fireDateDeleted
+   * (java.util.Date)
    */
   public void fireDateDeleted(Date date) {
-    log.debug(">>fireDateChanged");
-    model.retreiveDate(this, date);
-    log.debug("<<fireDateChanged");
   }
 
   /**
@@ -161,10 +158,10 @@ public class JPanelCalendar extends JPanel implements LanguageListener {
    * @param event
    */
   protected void fireCalendarSelectActiveDayPerformed(JLabelDay source) {
-    
+
     if (source != null) {
       JPanelRun panelRun = null;
-      
+
       Object obj = MainGui.getWindow().getRightComponent();
       if (!(obj instanceof JPanelRun)) {
         panelRun = new JPanelRun();
@@ -177,7 +174,7 @@ public class JPanelCalendar extends JPanel implements LanguageListener {
       // Recuperation du run.
       try {
         ModelRun model = panelRun.getModel();
-        model.updateView(panelRun, source.getDate());        
+        model.updateView(panelRun, source.getDate());
       }
       catch (SQLException e) {
         log.error("", e);
@@ -185,19 +182,20 @@ public class JPanelCalendar extends JPanel implements LanguageListener {
             .getManager().getCurrentLang(), JPanelCalendar.class);
         JShowMessage.error(rb.getString("errorSQL"));
       }
-      
+
     }
 
     for (CalendarDayListener dl : listListener) {
       dl.selectActiveDay(source);
     }
-    
+
   }
 
-  /**
-   * Notifie jour actif selecsionn&eacute;.
+  /*
+   * (non-Javadoc)
    * 
-   * @param event
+   * @see fr.turtlesport.ui.swing.component.calendar.IListDateRun#
+   * fireCalendarSelectActiveDayPerformed(java.util.Date)
    */
   public void fireCalendarSelectActiveDayPerformed(Date date) {
     Calendar cal = Calendar.getInstance();
@@ -207,17 +205,10 @@ public class JPanelCalendar extends JPanel implements LanguageListener {
     }
   }
 
-  /**
-   * @return the model
-   */
   public ModelRunCalendar getModel() {
     return model;
   }
 
-  /**
-   * @param model
-   *          the model to set
-   */
   public void setModel(ModelRunCalendar model) {
     this.model = model;
   }
