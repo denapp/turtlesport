@@ -52,7 +52,7 @@ public final class JFileSaver {
     final String suffix = (ext.charAt(0) == '.') ? ext : '.' + ext;
     File out = null;    
     if (OperatingSystem.isMacOSX()) {
-      // MacOSX
+      // Bug sous Mac OS X les extenions ne sont pas affichees et retournees
       FileDialog dlg = new FileDialog(MainGui.getWindow());
       dlg.setLocale(LanguageManager.getManager().getLocale());
       dlg.setMode(FileDialog.SAVE);
@@ -63,10 +63,12 @@ public final class JFileSaver {
           return name.endsWith(suffix);
         }
       });
-
       dlg.setVisible(true);
       String fileName = dlg.getFile();
       if (fileName != null) {
+        if (!fileName.endsWith(suffix)) {
+          fileName = fileName + suffix;
+        }
         out = new File(dlg.getDirectory() + File.separator + fileName);
       }
     }

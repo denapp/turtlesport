@@ -68,7 +68,7 @@ public class JTurtleMapKit extends JXPanel {
 
   private Dimension               dimButton      = new Dimension(20, 20);
 
-  private JXMapViewer             mainMap;
+  private JTurtleMapViewer             mainMap;
 
   private JPanel                  jPanelButton;
 
@@ -217,7 +217,8 @@ public class JTurtleMapKit extends JXPanel {
   private void initialize() {
     GridBagConstraints gridBagConstraints;
 
-    mainMap = new JXMapViewer();
+    mainMap = new JTurtleMapViewer();
+
     mainMap.setLayout(new GridBagLayout());
     mainMap.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 
@@ -630,7 +631,7 @@ public class JTurtleMapKit extends JXPanel {
      * fr.turtlesport.ui.swing.component.ChangePointsListener#changedPoint(fr
      * .turtlesport.ui.swing.component.ChangePointsEvent)
      */
-    public void changedPoint(ChangePointsEvent e) {
+    public void changedPoint(final ChangePointsEvent e) {
       mainMap.repaint();
       JTurtleMapKit.this.jMediaMapKit.firePogressBarPlayUpdate(e
           .getMapIndexCurrentPoint(), e.getMapCurrentPoint());
