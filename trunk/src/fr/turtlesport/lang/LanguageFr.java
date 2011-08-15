@@ -55,6 +55,24 @@ public final class LanguageFr extends AbstractLanguage {
   /*
    * (non-Javadoc)
    * 
+   * @see fr.turtlesport.lang.ILanguage#getDateTimeShortFormatter()
+   */
+  public DateFormat getDateTimeShortFormatter() {
+    return new SimpleDateFormat("dd/MM/yy HH:mm", getLocale());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.lang.ILanguage#getDateTimeShortWithoutYearFormatter()
+   */
+  public DateFormat getDateTimeShortWithoutYearFormatter() {
+    return new SimpleDateFormat("dd/MM HH:mm", getLocale());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.turtlesport.lang.ILanguage#getDateTimeFormatterWithoutSep()
    */
   public DateFormat getDateTimeFormatterWithoutSep() {
