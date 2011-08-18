@@ -3,6 +3,7 @@ package fr.turtlesport.geo;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import fr.turtlesport.geo.garmin.fit.FitFile;
 import fr.turtlesport.geo.garmin.hst.HstFile;
 import fr.turtlesport.geo.garmin.tcx.TcxFile;
 import fr.turtlesport.geo.gpx.GpxFile;
@@ -21,6 +22,9 @@ public final class FactoryGeoLoad {
 
   /** Pour conversion hst. */
   public static final String HST = "hst";
+
+  /** Pour conversion FIT. */
+  public static final String FIT = "fit";
 
   private FactoryGeoLoad() {
   }
@@ -41,6 +45,9 @@ public final class FactoryGeoLoad {
     }
     if (HST.equals(extension)) {
       return new HstFile();
+    }
+    if (FIT.equals(extension)) {
+      return new FitFile();
     }
 
     throw new IllegalArgumentException();
@@ -79,6 +86,9 @@ public final class FactoryGeoLoad {
     }
     else if (isIn(HstFile.EXT, ext)) {
       geo = new HstFile();
+    }
+    else if (isIn(FitFile.EXT, ext)) {
+      geo = new FitFile();
     }
     else {
       throw new IllegalArgumentException();

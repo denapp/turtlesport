@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 import javax.swing.filechooser.FileFilter;
 
 import fr.turtlesport.geo.IGeoFileDesc;
+import fr.turtlesport.geo.garmin.fit.FitFile;
 import fr.turtlesport.geo.garmin.hst.HstFile;
 import fr.turtlesport.geo.garmin.tcx.TcxFile;
 import fr.turtlesport.geo.gpx.GpxFile;
@@ -90,6 +91,12 @@ public class ImportFileFilter extends FileFilter {
       st.append(s);
       st.append(',');
     }
+    for (String s : new FitFile().extension()) {
+      list.add(s);
+      st.append("*.");
+      st.append(s);
+      st.append(',');
+    }
 
     ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
         .getManager().getCurrentLang(), MainGui.class);
@@ -116,9 +123,10 @@ public class ImportFileFilter extends FileFilter {
     list.add(new ImportFileFilter(new HstFile()));
     // tcx
     list.add(new ImportFileFilter(new TcxFile()));
+    // fit
+    list.add(new ImportFileFilter(new FitFile()));
 
     return list;
-
   }
 
   /*

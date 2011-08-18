@@ -54,7 +54,7 @@ public class ModelRun {
     log = (TurtleLogger) TurtleLogger.getLogger(ModelRun.class);
   }
 
-  private DataRun             dataRun;
+  public DataRun              dataRun;
 
   /**
    * 
@@ -109,7 +109,7 @@ public class ModelRun {
 
     // recuperation des donnees
     dataRun = RunTableManager.getInstance().retreiveWithID(run.getId());
-    
+
     // mis a jour de la vue
     update(view);
 
@@ -237,12 +237,9 @@ public class ModelRun {
     // --------------------------------------------------------------------------------
     boolean hasPoint = ModelPointsManager.getInstance().hasPoints();
     view.setEnableMenuRun(hasPoint);
-    view.getJMenuItemRunSave().setEnabled(true);
     view.getJMenuItemRunDelete().setEnabled(true);
-    view.getJButtonSave().setEnabled(true);
     view.getJButtonDelete().setEnabled(true);
     MainGui.getWindow().setEnableMenuRun(hasPoint);
-    MainGui.getWindow().getJMenuItemRunSave().setEnabled(true);
     MainGui.getWindow().getJMenuItemRunDelete().setEnabled(true);
 
     // Pour les boutons de navigation avec CDE/Motif
@@ -274,7 +271,6 @@ public class ModelRun {
     view.getJTextFieldNotes().setText("");
     view.getJButtonNext().setEnabled(false);
     view.getJButtonPrev().setEnabled(false);
-    view.getJButtonSave().setEnabled(false);
     view.getJButtonGoogleEarth().setEnabled(false);
     view.getJButtonGoogleMap().setEnabled(false);
     if (view.getJButtonEmail() != null) {
@@ -383,37 +379,72 @@ public class ModelRun {
   }
 
   /**
-   * Sauvegarde.
+   * Sauvegarde des commentaires.
    */
-  public void save(JPanelRun view) throws SQLException {
+  public void saveComments(JPanelRun view) throws SQLException {
     if (dataRun == null) {
       return;
     }
 
-    String comments = "";
-    String newComments = "";
-    if (dataRun.getComments() != null) {
-      comments = dataRun.getComments();
+    String comments = dataRun.getComments();
+    if (comments == null) {
+      comments = "";
     }
-    newComments = view.getJTextFieldNotes().getText();
 
-    String equipment = "";
-    String newEquipment = "";
-    if (dataRun.getEquipement() != null) {
-      equipment = dataRun.getComments();
+    String newComments = view.getJTextFieldNotes().getText();
+    if (newComments == null) {
+      newComments = "";
     }
-    newEquipment = (String) view.getModelEquipements().getSelectedItem();
+
+    if (!newComments.equals(comments)) {
+      RunTableManager.getInstance()
+          .updateComments(dataRun.getId(), newComments);
+      dataRun.setComments(newComments);
+    }
+  }
+
+  /**
+   * Sauvegarde de &eacute;quipement.
+   */
+  public void saveEquipment(JPanelRun view) throws SQLException {
+    if (dataRun == null) {
+      return;
+    }
+
+    String equipment = dataRun.getEquipement();
+    if (equipment == null) {
+      equipment = "";
+    }
+
+    String newEquipment = (String) view.getModelEquipements().getSelectedItem();
+    if (newEquipment == null) {
+      newEquipment = "";
+    }
+
+    if (!newEquipment.equals(equipment)) {
+      RunTableManager.getInstance().updateEquipment(dataRun.getId(),
+                                                    newEquipment);
+      dataRun.setEquipement(newEquipment);
+    }
+  }
+
+  /**
+   * Sauvegarde du type de sport.
+   */
+  public void saveSportType(JPanelRun view) throws SQLException {
+    if (dataRun == null) {
+      return;
+    }
 
     int sportType = dataRun.getSportType();
     int newSportType = view.getModelActivities().getSportType();
-    if (!newComments.equals(comments) || !newEquipment.equals(equipment)
-        || (sportType != newSportType)) {
-      RunTableManager.getInstance().update(dataRun.getId(),
-                                           newComments,
-                                           newEquipment,
-                                           newSportType);
+    if (sportType != newSportType) {
+      RunTableManager.getInstance().updateSport(dataRun.getId(), newSportType);
+      dataRun.setSportType(newSportType);
+      if (MainGui.getWindow().getListDateRun() != null) {
+        MainGui.getWindow().getListDateRun().fireSportChanged(dataRun.getTime(), newSportType);
+      }
     }
-
   }
 
   /**

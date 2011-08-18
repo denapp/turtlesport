@@ -10,6 +10,16 @@ import java.util.Date;
 public interface IListDateRunFire {
 
   /**
+   * Notifie changement d'activit&eacute;
+   * 
+   * @param date
+   *          date du run
+   * @param sportType
+   *          la nouvelle activit&eacute;.
+   */
+  public void fireSportChanged(Date date, int sportType);
+
+  /**
    * Notifie aucune date selectionn&eacute;e.
    * 
    */

@@ -142,8 +142,6 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private JMenuItemTurtle      jMenuItemRunDelete;
 
-  private JMenuItemTurtle      jMenuItemRunSave;
-
   private JMenu                jMenuRunExport;
 
   private JMenuItemTurtle      jMenuItemRunExportGpx;
@@ -266,7 +264,6 @@ public class MainGui extends JFrame implements LanguageListener {
 
     jMenuItemRunImport.setText(rb.getString("jMenuItemRunImport"));
     jMenuItemRunAdd.setText(rb.getString("jMenuItemRunAdd"));
-    jMenuItemRunSave.setText(rb.getString("jMenuItemRunSave"));
     jMenuItemRunDelete.setText(rb.getString("jMenuItemRunDelete"));
 
     jMenuItemNet.setText(rb.getString("jMenuItemNet"));
@@ -385,7 +382,6 @@ public class MainGui extends JFrame implements LanguageListener {
     getJMenuItemRunExportGoogleEarth().setEnabled(b);
     getJMenuItemRunExportTcx().setEnabled(b);
     getJMenuItemRunExportHst().setEnabled(b);
-    getJMenuItemRunSave().setEnabled(b);
     getJMenuItemRunDelete().setEnabled(b);
   }
 
@@ -711,7 +707,6 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuRun.add(getJMenuItemRunImport());
       jMenuRun.add(getJMenuItemRunAdd());
       jMenuRun.addSeparator();
-      jMenuRun.add(getJMenuItemRunSave());
       jMenuRun.add(getJMenuItemRunDelete());
     }
     return jMenuRun;
@@ -945,21 +940,6 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuItemRunDelete.setEnabled(false);
     }
     return jMenuItemRunDelete;
-  }
-
-  /**
-   * This method initializes jMenuItemRunSave.
-   * 
-   * @return javax.swing.JMenuItem
-   */
-  public JMenuItemTurtle getJMenuItemRunSave() {
-    if (jMenuItemRunSave == null) {
-      jMenuItemRunSave = new JMenuItemTurtle();
-      jMenuItemRunSave.setFont(GuiFont.FONT_PLAIN);
-      jMenuItemRunSave.setAccelerator(menuProperties, "jMenuItemRunSave");
-      jMenuItemRunSave.setEnabled(false);
-    }
-    return jMenuItemRunSave;
   }
 
   /**

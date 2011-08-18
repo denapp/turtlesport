@@ -27,7 +27,6 @@ import fr.turtlesport.unit.event.UnitManager;
  * 
  */
 public class JPanelListDateRun extends JPanel implements IListDateRunFire {
-
   private JToggleButton    jButtonCalendar;
 
   private JToggleButton    jButtonList;
@@ -140,6 +139,17 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
    * (non-Javadoc)
    * 
    * @see
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireSportChanged
+   * (int)
+   */
+  public void fireSportChanged(Date date, int sportType) {
+    panelDateRun.fireSportChanged(date, sportType);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
    * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireDatesUnselect
    * ()
    */
@@ -165,7 +175,7 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
    * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireHistoric
    * (int)
    */
-  public void fireHistoric(int idUser) throws SQLException {
+  public void fireHistoric(final int idUser) throws SQLException {
     panelDateRun.fireHistoric(idUser);
   }
 
@@ -270,19 +280,6 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
 
         // Recuperation des dates
         MainGui.getWindow().fireHistoric();
-        
-        // Bug packAll ca passe dans une autre thread.
-        // ((JPanelTreeRun) panelDateRun).packAll();
-        new Thread(new Runnable() {
-          public void run() {
-            try {
-              Thread.sleep(50);
-            }
-            catch (InterruptedException e) {
-            }
-            ((JPanelTreeRun) panelDateRun).packAll();
-          }
-        }).start();
       }
     }
   }

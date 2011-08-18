@@ -1,6 +1,7 @@
 package fr.turtlesport.ui.swing.component.calendar;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.sql.SQLException;
 import java.text.DateFormatSymbols;
@@ -24,6 +25,8 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import org.jdesktop.swingx.JXTreeTable;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableNode;
@@ -54,26 +57,28 @@ import fr.turtlesport.util.ResourceBundleUtility;
 public class JPanelTreeRun extends JPanel implements IListDateRunFire,
                                          LanguageListener, UnitListener {
 
-  private static TurtleLogger      log;
+  private static TurtleLogger             log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelTreeRun.class);
   }
 
-  private JXTreeTable              jTreeTable;
+  private JXTreeTable                     jTreeTable;
 
-  private DateShortDayCellRenderer dateShortDayCellRenderer = new DateShortDayCellRenderer();
+  private DateShortDayCellRenderer        dateShortDayCellRenderer = new DateShortDayCellRenderer();
 
-  private DateFormatSymbols        formatMonth              = DateFormatSymbols
-                                                                .getInstance(LanguageManager
-                                                                    .getManager()
-                                                                    .getLocale());
+  private DateFormatSymbols               formatMonth              = DateFormatSymbols
+                                                                       .getInstance(LanguageManager
+                                                                           .getManager()
+                                                                           .getLocale());
 
   // model
-  private ModelRunTreeTable        model                    = new ModelRunTreeTable();
+  private ModelRunTreeTable               model                    = new ModelRunTreeTable();
 
-  private TableModelRun            tableModel               = new TableModelRun();
+  private TableModelRun                   tableModel               = new TableModelRun();
 
-  private JLabel                   jlabelRun;
+  private JLabel                          jLabelRun;
+
+  private JTreeTableListSelectionListener selectionListener;
 
   /**
    * Create the panel.
@@ -151,19 +156,6 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     packAll();
   }
 
-  public void packAll() {
-    int row = jTreeTable.getSelectedRow();
-    jTreeTable.collapseAll();
-    jTreeTable.expandAll();
-    jTreeTable.packAll();
-
-    // reselection
-    if (row != -1) {
-      jTreeTable.getTreeSelectionModel()
-          .setSelectionPath(jTreeTable.getPathForRow(row));
-    }
-  }
-
   /**
    * @param lang
    */
@@ -188,23 +180,23 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
 
     setLayout(new BorderLayout(0, 0));
     add(scrollPane, BorderLayout.CENTER);
-    add(getJlabelRun(), BorderLayout.SOUTH);
+    add(getJLabelRun(), BorderLayout.SOUTH);
 
-    jTreeTable.getSelectionModel()
-        .addListSelectionListener(new JTreeTableListSelectionListener());
+    selectionListener = new JTreeTableListSelectionListener();
+    jTreeTable.getSelectionModel().addListSelectionListener(selectionListener);
 
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
   }
 
-  private JLabel getJlabelRun() {
-    if (jlabelRun == null) {
-      jlabelRun = new JLabel();
-      jlabelRun.setAlignmentX(Component.LEFT_ALIGNMENT);
-      jlabelRun.setFont(GuiFont.FONT_PLAIN_SMALL);
+  private JLabel getJLabelRun() {
+    if (jLabelRun == null) {
+      jLabelRun = new JLabel();
+      jLabelRun.setAlignmentX(Component.LEFT_ALIGNMENT);
+      jLabelRun.setFont(GuiFont.FONT_PLAIN_SMALL);
     }
-    return jlabelRun;
+    return jLabelRun;
   }
 
   private JXTreeTable getJTreeTable() {
@@ -215,13 +207,51 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
       jTreeTable.setShowGrid(false);
       jTreeTable.setSortable(false);
       jTreeTable.setRootVisible(false);
+      jTreeTable.getTableHeader().setFont(GuiFont.FONT_PLAIN);
 
       jTreeTable.setTreeCellRenderer(new MyTreeCellRenderer());
       jTreeTable.setTreeTableModel(tableModel);
       jTreeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       jTreeTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+      // jTreeTable.addHighlighter(HighlighterFactory.createSimpleStriping());
+      jTreeTable
+          .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                                               null,
+                                               Color.RED));
     }
     return jTreeTable;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireDatesUnselect
+   * ()
+   */
+  public void fireSportChanged(Date date, int sportType) {
+    if (tableModel.listRun != null) {      
+      // for (DataRun run : tableModel.listRun) {
+      // if (run.getTime().equals(date)) {
+      // run.setSportType(sportType);
+      // packAll();
+      // break;
+      // }
+      // }
+      /*
+       * DefaultMutableTreeTableNode deletedNode = null; for (int iyear = 0;
+       * iyear < tableModel.getRoot().getChildCount(); iyear++) { // annee
+       * DefaultMutableTreeTableNode year = (DefaultMutableTreeTableNode) root
+       * .getChildAt(iyear); // month for (int imonth = 0; imonth <
+       * year.getChildCount(); imonth++) { DefaultMutableTreeTableNode month =
+       * (DefaultMutableTreeTableNode) year .getChildAt(imonth); // runs for
+       * (int index = 0; index < month.getChildCount(); index++) {
+       * DefaultMutableTreeTableNode nodeRun = (DefaultMutableTreeTableNode)
+       * month .getChildAt(index); DataRun run = (DataRun)
+       * nodeRun.getUserObject(); run.setSportType(sportType) break; } }
+       */
+    }
   }
 
   /*
@@ -273,7 +303,6 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
   public void fireHistoric(int idUser) throws SQLException {
     model.setIdUser(idUser);
     model.updateView(this);
-
     // mis a jour des boutons date en cours
     if (MainGui.getWindow().getRightComponent() instanceof JPanelRun) {
       JPanelRun p = (JPanelRun) MainGui.getWindow().getRightComponent();
@@ -290,54 +319,65 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
    */
   public void fireDateDeleted(Date date) {
     if (date != null && tableModel != null && tableModel.getRoot() != null) {
-      // Recuperation du noeud
-      TreeTableNode root = tableModel.getRoot();
-      int index;
-      DefaultMutableTreeTableNode deletedNode = null;
-      for (int iyear = 0; iyear < root.getChildCount(); iyear++) {
-        // annee
-        DefaultMutableTreeTableNode year = (DefaultMutableTreeTableNode) root
-            .getChildAt(iyear);
+      return;
+    }
+
+    DataRun runDeleted = null;
+    // Recuperation du noeud
+    TreeTableNode root = tableModel.getRoot();
+    // int index;
+    DefaultMutableTreeTableNode deletedNode = null;
+    for (int iyear = 0; iyear < root.getChildCount(); iyear++) {
+      if (runDeleted != null) {
+        break;
+      }
+      // annee
+      DefaultMutableTreeTableNode year = (DefaultMutableTreeTableNode) root
+          .getChildAt(iyear);
+      // month
+      for (int imonth = 0; imonth < year.getChildCount(); imonth++) {
+        if (runDeleted != null) {
+          break;
+        }
+        DefaultMutableTreeTableNode month = (DefaultMutableTreeTableNode) year
+            .getChildAt(imonth);
+        // runs
+        for (int index = 0; index < month.getChildCount(); index++) {
+          DefaultMutableTreeTableNode nodeRun = (DefaultMutableTreeTableNode) month
+              .getChildAt(index);
+          DataRun run = (DataRun) nodeRun.getUserObject();
+          if (run.getTime().equals(date)) {
+            runDeleted = run;
+            deletedNode = nodeRun;
+            break;
+          }
+        }
+      }
+    }
+
+    if (deletedNode != null) {
+      // Suppression de la vue
+      int count = deletedNode.getParent().getChildCount();
+      if (count == 1) {
         // month
-        for (int imonth = 0; imonth < year.getChildCount(); imonth++) {
-          DefaultMutableTreeTableNode month = (DefaultMutableTreeTableNode) year
-              .getChildAt(imonth);
-          // runs
-          for (index = 0; index < month.getChildCount(); index++) {
-            DefaultMutableTreeTableNode nodeRun = (DefaultMutableTreeTableNode) month
-                .getChildAt(index);
-            DataRun run = (DataRun) nodeRun.getUserObject();
-            if (run.getTime().equals(date)) {
-              deletedNode = nodeRun;
-              break;
-            }
-          }
-        }
-      }
-
-      if (deletedNode != null) {
-        // Suppression
-        int count = deletedNode.getParent().getChildCount();
+        DefaultMutableTreeTableNode month = (DefaultMutableTreeTableNode) deletedNode
+            .getParent();
+        DefaultMutableTreeTableNode year = (DefaultMutableTreeTableNode) month
+            .getParent();
+        count = year.getChildCount();
+        tableModel.removeNodeFromParent(deletedNode);
+        tableModel.removeNodeFromParent(month);
+        // year
         if (count == 1) {
-          // month
-          DefaultMutableTreeTableNode month = (DefaultMutableTreeTableNode) deletedNode
-              .getParent();
-          DefaultMutableTreeTableNode year = (DefaultMutableTreeTableNode) month
-              .getParent();
-          count = year.getChildCount();
-          tableModel.removeNodeFromParent(deletedNode);
-          tableModel.removeNodeFromParent(month);
-          // year
-          if (count == 1) {
-            tableModel.removeNodeFromParent(year);
-          }
+          tableModel.removeNodeFromParent(year);
         }
-        else {
-          tableModel.removeNodeFromParent(deletedNode);
-        }
-        setNumCourse(--tableModel.nbRun);
       }
-
+      else {
+        tableModel.removeNodeFromParent(deletedNode);
+      }
+      // Suppression de la liste
+      tableModel.listRun.remove(runDeleted);
+      updateNumCourse(0);
     }
   }
 
@@ -371,7 +411,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
             if (run.getTime().equals(date)) {
               TreePath path = jTreeTable.getPathForRow(row);
               jTreeTable.getTreeSelectionModel().setSelectionPath(path);
-              break;
+              return;
             }
           }
         }
@@ -383,68 +423,12 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     return model;
   }
 
-  public void fireCurrentRun(List<DataRun> listRun) {
-    if (listRun == null) {
-      setNumCourse(0);
-    }
-    else {
-      setNumCourse(listRun.size());
-      tableModel.fireTableDataChanged(listRun);
-    }
-  }
+  public void fireCurrentRun(final List<DataRun> listRun) {
+    tableModel = new TableModelRun();
+    tableModel.listRun = listRun;
+    DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode();
 
-  public void removeDate(Date date) {
-  }
-
-  private void setNumCourse(int nb) {
-    switch (nb) {
-      case 0:
-        jlabelRun.setText("");
-        break;
-      case 1:
-        jlabelRun.setText(nb + " course");
-        break;
-      default:
-        jlabelRun.setText(nb + " courses");
-        break;
-    }
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  private class TableModelRun extends DefaultTreeTableModel {
-    private String[]      columnNames = { "Date", DistanceUnit.getDefaultUnit() };
-
-    private int           nbRun       = 0;
-
-    private List<DataRun> listRun;
-
-    public TableModelRun() {
-      super();
-    }
-
-    public void performedUnitChanged(String unit) {
-      if (listRun != null) {
-        for (DataRun run : listRun) {
-          run.setUnit(unit);
-        }
-      }
-    }
-
-    public void fireTableDataChanged(List<DataRun> listRun) {
-      this.listRun = listRun;
-
-      DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode();
-      setRoot(root);
-
-      if (listRun == null) {
-        return;
-      }
-
-      nbRun = listRun.size();
-
+    if (listRun != null) {
       Hashtable<String, DefaultMutableTreeTableNode> table = new Hashtable<String, DefaultMutableTreeTableNode>();
       for (DataRun run : listRun) {
         run.setUnit(DistanceUnit.getDefaultUnit());
@@ -468,9 +452,58 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
         }
         nodeMonth.add(new DefaultMutableTreeTableNode(run, false));
       }
-      jTreeTable.expandAll();
-      jTreeTable.packAll();
-      //packAll();
+    }
+    tableModel.setRoot(root);
+    jTreeTable.setTreeTableModel(tableModel);
+    packAll();
+
+    updateNumCourse(0);
+  }
+
+  public void removeDate(Date date) {
+  }
+
+  private void updateNumCourse(int selectedRow) {
+    int row = (tableModel.listRun == null) ? 0 : tableModel.listRun.size();
+    if (row != 0) {
+      jLabelRun.setText("  " + selectedRow + "/" + row);
+    }
+    else {
+      jLabelRun.setText(null);
+    }
+  }
+
+  private void packAll() {
+    int row = jTreeTable.getSelectedRow();
+    jTreeTable.collapseAll();
+    jTreeTable.expandAll();
+    jTreeTable.packAll();
+    // reselection
+    if (row != -1) {
+      jTreeTable.getTreeSelectionModel()
+          .setSelectionPath(jTreeTable.getPathForRow(row));
+    }
+  }
+
+  /**
+   * @author Denis Apparicio
+   * 
+   */
+  private class TableModelRun extends DefaultTreeTableModel {
+    private String[]      columnNames = { "Date", DistanceUnit.getDefaultUnit() };
+
+    private List<DataRun> listRun;
+
+    public TableModelRun() {
+      super();
+    }
+
+    public void performedUnitChanged(String unit) {
+      if (listRun != null) {
+        for (DataRun run : listRun) {
+          run.setUnit(unit);
+        }
+      }
     }
 
     @Override
@@ -562,6 +595,8 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
   private class JTreeTableListSelectionListener implements
                                                ListSelectionListener {
 
+    protected int runRow = -1;
+
     /*
      * (non-Javadoc)
      * 
@@ -583,7 +618,12 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
               .getLastPathComponent();
           if (node.getUserObject() != null
               && node.getUserObject() instanceof DataRun) {
+            runRow = viewRow;
             final DataRun dataRun = (DataRun) node.getUserObject();
+            final int index = tableModel.listRun.indexOf(dataRun);
+            if (index != -1) {
+              updateNumCourse(index + 1);
+            }
             MainGui.getWindow().beforeRunnableSwing();
             SwingUtilities.invokeLater(new Runnable() {
               public void run() {
