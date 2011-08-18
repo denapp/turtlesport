@@ -1114,9 +1114,9 @@ public final class RunTableManager extends AbstractTableManager {
     if (log.isInfoEnabled()) {
       log.info(">>retreive  idUser=" + id);
     }
-    
+
     DataRun dataRun = null;
-    
+
     Connection conn = DatabaseManager.getConnection();
     try {
       StringBuilder st = new StringBuilder();
@@ -1392,7 +1392,79 @@ public final class RunTableManager extends AbstractTableManager {
   }
 
   /**
-   * Mis &agrave; des commentaires et du nom de l'&eacute;quipement.
+   * Mis &agrave; jour du type de sportt.
+   * 
+   * @param id
+   * @param sportType
+   *          le sport.
+   * @throws SQLException
+   */
+  public void updateSport(int id, int sportType) throws SQLException {
+    log.debug(">>updateSport id=" + id);
+
+    Connection conn = DatabaseManager.getConnection();
+
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("UPDATE ");
+      st.append(getTableName());
+      st.append(" SET sport_type=?");
+      st.append(" WHERE id = ?");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, sportType);
+      pstmt.setInt(2, id);
+
+      pstmt.executeUpdate();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+    
+    log.debug("<<updateSport");
+  }
+
+  /**
+   * Mis &agrave; jour des commentaires.
+   * 
+   * @param id
+   * @param comments
+   *          les commentaires.
+   * @param sportType
+   *          le sport.
+   * @throws SQLException
+   */
+  public void updateComments(int id, String comments) throws SQLException {
+    log.debug(">>updateComments id=" + id);
+
+    Connection conn = DatabaseManager.getConnection();
+
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("UPDATE ");
+      st.append(getTableName());
+      st.append(" SET comments=?");
+      st.append(" WHERE id = ?");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (comments != null && comments.length() > 500) {
+        pstmt.setString(1, comments.substring(0, 499));
+      }
+      else {
+        pstmt.setString(1, comments);
+      }
+      pstmt.setInt(2, id);
+      pstmt.executeUpdate();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+    
+    log.debug("<<updateComments");
+  }
+
+  /**
+   * Mis &agrave; jour de l'&eacute;quipement.
    * 
    * @param id
    * @param comments
@@ -1403,8 +1475,8 @@ public final class RunTableManager extends AbstractTableManager {
    *          le sport.
    * @throws SQLException
    */
-  public void update(int id, String comments, String equipment, int sportType) throws SQLException {
-    log.debug(">>update id=" + id);
+  public void updateEquipment(int id, String equipment) throws SQLException {
+    log.debug(">>updateEquipment id=" + id);
 
     Connection conn = DatabaseManager.getConnection();
 
@@ -1412,26 +1484,19 @@ public final class RunTableManager extends AbstractTableManager {
       StringBuilder st = new StringBuilder();
       st.append("UPDATE ");
       st.append(getTableName());
-      st.append(" SET comments=?, equipement=?, sport_type=?");
+      st.append(" SET equipement=?");
       st.append(" WHERE id = ?");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
-      if (comments != null && comments.length() > 500) {
-        pstmt.setString(1, comments.substring(0, 499));
-      }
-      else {
-        pstmt.setString(1, comments);
-      }
-      pstmt.setString(2, equipment);
-      pstmt.setInt(3, sportType);
-      pstmt.setInt(4, id);
-
+      pstmt.setString(1, equipment);
+      pstmt.setInt(2, id);
       pstmt.executeUpdate();
     }
     finally {
       DatabaseManager.releaseConnection(conn);
     }
-    log.debug("<<update");
+    
+    log.debug("<<updateComments");
   }
 
   /**

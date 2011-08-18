@@ -3,17 +3,16 @@ package fr.turtlesport.ui.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
-import fr.turtlesport.ui.swing.component.JPanelBackgroundImage;
+import org.jdesktop.swingx.JXImagePanel;
+
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 
 /**
@@ -24,15 +23,9 @@ import fr.turtlesport.ui.swing.img.ImagesRepository;
  */
 public class JSplashScreen extends JWindow {
 
-  private JPanel       jContentPane;
+  private JXImagePanelStatus jContentPane;
 
-  private JLabel       jLabelSplash;
-
-  private JPanel       jPanelStatus;
-
-  private JProgressBar jProgressBar;
-
-  private Status       status;
+  private JProgressBar       jProgressBar;
 
   /**
    * 
@@ -48,7 +41,7 @@ public class JSplashScreen extends JWindow {
    * @return void
    */
   private void initialize() {
-    this.setSize(412, 310);
+    this.setSize(412, 302);
     this.setContentPane(getJContentPane());
   }
 
@@ -57,37 +50,14 @@ public class JSplashScreen extends JWindow {
    * 
    * @return javax.swing.JPanel
    */
-  private JPanel getJContentPane() {
+  private JXImagePanelStatus getJContentPane() {
     if (jContentPane == null) {
-      jLabelSplash = new JLabel();
-      ImageIcon icon = ImagesRepository.getImageIcon("splash.jpg");
-      jLabelSplash.setIcon(icon);
-      jLabelSplash.setSize(icon.getIconWidth(), icon.getIconHeight());
-
-      jContentPane = new JPanelBackgroundImage(ImagesRepository.getImage("splash.jpg"));
-      jContentPane.setLayout(new BorderLayout());
+      jContentPane = new JXImagePanelStatus(ImagesRepository.class.getResource("splash.jpg"));
+      jContentPane.setLayout(new BorderLayout(0,0));
       jContentPane.setBorder(BorderFactory.createLineBorder(Color.black, 1));
-      jContentPane.add(getJPanelStatus(), java.awt.BorderLayout.SOUTH);
+      jContentPane.add(getJProgressBar(), java.awt.BorderLayout.SOUTH);
     }
     return jContentPane;
-  }
-
-  /**
-   * This method initializes jPanelStatus
-   * 
-   * @return javax.swing.JPanel
-   */
-  private JPanel getJPanelStatus() {
-    if (jPanelStatus == null) {
-      status = new Status();
-      status.setBounds(0, 0, 412, 20);
-
-      jPanelStatus = new JPanel();
-      jPanelStatus.setOpaque(true);
-      jPanelStatus.setLayout(new BoxLayout(jPanelStatus, BoxLayout.Y_AXIS));
-      jPanelStatus.add(getJProgressBar(), null);
-    }
-    return jPanelStatus;
   }
 
   /**
@@ -111,7 +81,7 @@ public class JSplashScreen extends JWindow {
    *          le message
    */
   public void updateProgress(String msg) {
-    status.setMessageProgress("  " + msg);
+    jContentPane.setMessageProgress("  " + msg);
   }
 
   /**
@@ -121,7 +91,7 @@ public class JSplashScreen extends JWindow {
    *          le message
    */
   public void updateError(String msg) {
-    status.setMessageError("  " + msg);
+    jContentPane.setMessageError("  " + msg);
   }
 
   /**
@@ -160,11 +130,7 @@ public class JSplashScreen extends JWindow {
    *          le message
    */
   public void setValue(final int value) {
-   // SwingUtilities.invokeLater(new Runnable() {
-     // public void run() {
-        jProgressBar.setValue(value);
-      //}
-   // });
+    jProgressBar.setValue(value);
   }
 
   /**
@@ -186,6 +152,81 @@ public class JSplashScreen extends JWindow {
    */
   public void setMinimum(final int value) {
     jProgressBar.setMinimum(value);
+  }
+
+  /**
+   * @author Denis Apparicio
+   * 
+   */
+  private static class JXImagePanelStatus extends JXImagePanel {
+    /** Message. */
+    private String             message;
+
+    /** Niveau du message. */
+    private int                levelMessage         = LEVEL_PROGRESS;
+
+    /** Niveau erreur pour le message de statut. */
+    private static final int   LEVEL_ERROR          = 1;
+
+    /** Niveau message pour le message de statut. */
+    private static final int   LEVEL_PROGRESS       = 2;
+
+    /** Couleur du message de niveau avancement */
+    private static final Color COLOR_LEVEL_PROGRESS = Color.white;
+
+    /** Couleur du message de niveau erreur */
+    private static final Color COLOR_LEVEL_ERROR    = Color.red;
+
+    public JXImagePanelStatus(URL url) {
+      super(url);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jdesktop.swingx.JXImagePanel#paintComponent(java.awt.Graphics)
+     */
+    @Override
+    protected void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      if (message != null) {
+        g.setFont(GuiFont.FONT_PLAIN);
+        g.setColor((levelMessage == LEVEL_ERROR) ? COLOR_LEVEL_ERROR
+            : COLOR_LEVEL_PROGRESS);
+        g.drawString(message, 10, 240);
+      }
+    }
+
+    /**
+     * Mis &aecute; jour du message.
+     */
+    private void setMessage(String value, int niveau) {
+      this.message = value;
+      this.levelMessage = niveau;
+      repaint();
+    }
+
+    /**
+     * Mis &aecute; jour du message de niveau action en sp&eecute;cifiant le
+     * texte du message.
+     * 
+     * @param value
+     *          texte du message &aecute; mettre &aecute; jour.
+     */
+    public void setMessageProgress(String value) {
+      setMessage(value, LEVEL_PROGRESS);
+    }
+
+    /**
+     * Mis &aecute; jour du message de niveau action en sp&eecute;cifiant le
+     * texte du message.
+     * 
+     * @param value
+     *          texte du message &aecute; mettre &aecute; jour.
+     */
+    public void setMessageError(String value) {
+      setMessage(value, LEVEL_ERROR);
+    }
   }
 
 }

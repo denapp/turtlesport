@@ -1,6 +1,7 @@
 package fr.turtlesport.ui.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -9,6 +10,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -46,6 +49,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jfree.chart.ChartPanel;
 
 import fr.turtlesport.Configuration;
@@ -170,8 +175,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JMenuItemTurtle         jMenuItemRunDelete;
 
-  private JMenuItemTurtle         jMenuItemRunSave;
-
   private JMenuItemTurtle         jMenuItemRunExportGoogleEarth;
 
   private JMenu                   jMenuRunExport;
@@ -191,8 +194,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
   private JPanel                  jPanelEastCenter;
 
   private JScrollPane             jScrollPaneTextArea;
-
-  private JButtonCustom           jButtonSave;
 
   private JButtonCustom           jButtonDelete;
 
@@ -360,10 +361,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
     getJMenuItemRunExportGoogleEarth().setEnabled(b);
     getJMenuItemRunExportTcx().setEnabled(b);
     getJMenuItemRunExportHst().setEnabled(b);
-    getJMenuItemRunSave().setEnabled(b);
     getJMenuItemRunDelete().setEnabled(b);
     getJButtonDelete().setEnabled(b);
-    getJButtonSave().setEnabled(b);
     if (jButtonEmail != null) {
       jButtonEmail.setEnabled(b);
     }
@@ -371,16 +370,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
     getJButtonGoogleMap().setEnabled(b);
     getJButtonDetails().setEnabled(b);
     getJButtonDetailsGps().setEnabled(b);
-  }
-
-  /**
-   * Rend le menu save.
-   * 
-   * @param b
-   *          <code>true</code> pour activer le menu save.
-   */
-  public void setEnableSave(boolean b) {
-    getJButtonSave().setEnabled(b);
   }
 
   /*
@@ -438,7 +427,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private void performedLanguage(ILanguage lang) {
     rb = ResourceBundleUtility.getBundle(lang, getClass());
-    jButtonSave.setToolTipText(rb.getString("jButtonSaveToolTipText"));
     jButtonDelete.setToolTipText(rb.getString("jButtonDeleteToolTipText"));
     jButtonGoogleEarth.setToolTipText(rb
         .getString("jButtonGoogleEarthToolTipText"));
@@ -475,8 +463,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
         .getString("jMenuItemRunExportGoogleEarth"));
     jMenuItemRunExportTcx.setText(rb.getString("jMenuItemRunExportTcx"));
     jMenuItemRunExportHst.setText(rb.getString("jMenuItemRunExportHst"));
-    jMenuItemRunSave.setText(rb.getString("jMenuItemRunSave"));
     jMenuItemRunDelete.setText(rb.getString("jMenuItemRunDelete"));
+    jMenuItemRunDetailGps.setText(rb.getString("jMenuItemRunDetailGps"));
 
     // tabepane
     jTabbedPaneRace.setTitleAt(0, rb.getString("tabPane0"));
@@ -561,11 +549,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jButtonEmail.addActionListener(action);
       MainGui.getWindow().getJMenuItemRunEmail().addActionListener(action);
     }
-
-    action = new SaveActionListener();
-    getJMenuItemRunSave().addActionListener(action);
-    MainGui.getWindow().getJMenuItemRunSave().addActionListener(action);
-    getJButtonSave().addActionListener(action);
 
     action = new DeleteActionListener();
     getJMenuItemRunDelete().addActionListener(action);
@@ -659,6 +642,53 @@ public class JPanelRun extends JPanel implements LanguageListener,
       }
     });
 
+    // sauvegarde du texte
+    jTextFieldNotes.addFocusListener(new FocusListener() {
+      public void focusLost(FocusEvent event) {
+        try {
+          model.saveComments(JPanelRun.this);
+        }
+        catch (SQLException e) {
+          log.error("", e);
+        }
+      }
+
+      public void focusGained(FocusEvent event) {
+      }
+    });
+
+    // Equipement
+    jComboBoxEquipment.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        try {
+          model.saveEquipment(JPanelRun.this);
+        }
+        catch (SQLException e) {
+          log.error("", e);
+        }
+      }
+    });
+
+    // Activity
+    jComboBoxActivity.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        MainGui.getWindow().beforeRunnableSwing();
+
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            try {
+              model.saveSportType(JPanelRun.this);
+            }
+            catch (SQLException e) {
+              log.error("", e);
+            }
+            MainGui.getWindow().afterRunnableSwing();
+          }
+        });
+
+      }
+    });
+
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
@@ -689,7 +719,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
         jPopupMenu.add(jMenuItemRunEmail);
       }
       jPopupMenu.add(getJMenuRunExport());
-      jPopupMenu.add(getJMenuItemRunSave());
       jPopupMenu.add(getJMenuItemRunDelete());
     }
     return jPopupMenu;
@@ -882,22 +911,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jMenuItemRunDelete.setEnabled(false);
     }
     return jMenuItemRunDelete;
-  }
-
-  /**
-   * This method initializes jMenuItemRunSave.
-   * 
-   * @return javax.swing.JMenuItem
-   */
-  public JMenuItemTurtle getJMenuItemRunSave() {
-    if (jMenuItemRunSave == null) {
-      jMenuItemRunSave = new JMenuItemTurtle();
-      jMenuItemRunSave.setFont(GuiFont.FONT_PLAIN);
-      jMenuItemRunSave.setAccelerator(MainGui.getWindow().getMenuProperties(),
-                                      "jMenuItemRunSave");
-      jMenuItemRunSave.setEnabled(false);
-    }
-    return jMenuItemRunSave;
   }
 
   public JTabbedPane getJTabbedPaneRace() {
@@ -1324,7 +1337,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jPanelButtons = new JPanel();
       jPanelButtons.setLayout(new FlowLayout(FlowLayout.RIGHT));
       jPanelButtons.add(getJButtonDelete());
-      jPanelButtons.add(getJButtonSave());
       jPanelButtons.add(getJButtonDetails());
       jPanelButtons.add(getJButtonDetailsGps());
       if (Mail.isSupported()) {
@@ -1343,19 +1355,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
       panelAllButtons.add(getJPanelNav(), BorderLayout.WEST);
     }
     return panelAllButtons;
-  }
-
-  public JButton getJButtonSave() {
-    if (jButtonSave == null) {
-      jButtonSave = new JButtonCustom(ImagesRepository.getImageIcon("media-floppy.png"));
-      Dimension dim = new Dimension(20, 20);
-      jButtonSave.setPreferredSize(dim);
-      jButtonSave.setMaximumSize(dim);
-      jButtonSave.setEnabled(false);
-      jButtonSave.setOpaque(false);
-
-    }
-    return jButtonSave;
   }
 
   public JButton getJButtonGoogleEarth() {
@@ -1547,9 +1546,14 @@ public class JPanelRun extends JPanel implements LanguageListener,
    * 
    * @return javax.swing.JTable
    */
-  private JTable getJTableLap() {
+  private JXTable getJTableLap() {
     if (jTableLap == null) {
       jTableLap = new JXTable();
+      jTableLap
+          .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                                               null,
+                                               Color.RED));
+
       jTableLap.setOpaque(true);
       tableModelLap = new TableModelLap();
       jTableLap.setModel(tableModelLap);
@@ -1707,17 +1711,15 @@ public class JPanelRun extends JPanel implements LanguageListener,
       // mis a jour des valeurs
       DataRunLap[] runLaps = ModelPointsManager.getInstance().getRunLaps();
       if (!unit.equals(unitDistance) && runLaps != null) {
-        if (runLaps != null) {
-          double value;
-          for (int i = 0; i < runLaps.length; i++) {
-            value = DistanceUnit.convert(unitDistance,
-                                         unit,
-                                         runLaps[i].getTotalDist());
-            runLaps[i].setTotalDist((float) value);
-            fireTableCellUpdated(i, 2);
-            fireTableCellUpdated(i, 4);
-            fireTableCellUpdated(i, 5);
-          }
+        double value;
+        for (int i = 0; i < runLaps.length; i++) {
+          value = DistanceUnit.convert(unitDistance,
+                                       unit,
+                                       runLaps[i].getTotalDist());
+          runLaps[i].setTotalDist((float) value);
+          fireTableCellUpdated(i, 2);
+          fireTableCellUpdated(i, 4);
+          fireTableCellUpdated(i, 5);
         }
         unitDistance = unit;
       }
@@ -1924,8 +1926,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
           MainGui.getWindow().afterRunnableSwing();
         }
       });
-
     }
+
   }
 
   private class PrevActionListener implements ActionListener {
@@ -1974,7 +1976,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
           .getDateTimeFormatterWithoutSep()
           .format(ModelPointsManager.getInstance().getDataRun().getTime());
       final IGeoConvertRun cv = FactoryGeoConvertRun.getInstance(ext);
-      System.out.println(name + " " +cv.extension()[0] + " "+cv.description());
       final File out = JFileSaver.showSaveDialog(MainGui.getWindow(),
                                                  name,
                                                  cv.extension()[0],
@@ -2131,30 +2132,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
           .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     }
     return jScrollPaneTextArea;
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  private class SaveActionListener implements ActionListener {
-
-    public void actionPerformed(ActionEvent actionevent) {
-      MainGui.getWindow().beforeRunnableSwing();
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          try {
-            model.save(JPanelRun.this);
-          }
-          catch (SQLException e) {
-            log.error("", e);
-            JShowMessage.error(rb.getString("errorSaveRun"));
-          }
-          MainGui.getWindow().afterRunnableSwing();
-        }
-      });
-
-    }
   }
 
   /**

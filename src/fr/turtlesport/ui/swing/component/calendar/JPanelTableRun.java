@@ -1,6 +1,7 @@
 package fr.turtlesport.ui.swing.component.calendar;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,6 +21,10 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
+
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
@@ -30,7 +35,6 @@ import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.JPanelRun;
 import fr.turtlesport.ui.swing.MainGui;
 import fr.turtlesport.ui.swing.component.JShowMessage;
-import fr.turtlesport.ui.swing.component.JTableCustom;
 import fr.turtlesport.ui.swing.component.jtable.DateShortDayCellRenderer;
 import fr.turtlesport.ui.swing.component.jtable.DateTimeShortCellRenderer;
 import fr.turtlesport.ui.swing.model.ModelRun;
@@ -53,7 +57,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelTableRun.class);
   }
 
-  private JTableCustom             jTable;
+  private JXTable                  jTable;
 
   private DateShortDayCellRenderer dateShortDayCellRenderer = new DateShortDayCellRenderer();
 
@@ -62,7 +66,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
 
   private TableModelRun            tableModel;
 
-  private JLabel                   jlabelRun;
+  private JLabel                   jLabelRun;
 
   /**
    * Create the panel.
@@ -141,14 +145,16 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
    * @param lang
    */
   private void performedLanguage(ILanguage lang) {
-    dateShortDayCellRenderer.setLocale(lang.getLocale());
 
+    dateShortDayCellRenderer.setLocale(lang.getLocale());
     ResourceBundle rb = ResourceBundleUtility.getBundle(lang,
                                                         JPanelCalendar.class);
+
     tableModel.columnNames[1] = rb.getString("Date");
     jTable.getColumnModel().getColumn(1)
         .setHeaderValue(tableModel.columnNames[1]);
-    jTable.packAll();
+
+    tableModel.performedLanguage();
   }
 
   private void initialize() {
@@ -161,7 +167,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
 
     setLayout(new BorderLayout(0, 0));
     add(scrollPane, BorderLayout.CENTER);
-    add(getJlabelRun(), BorderLayout.SOUTH);
+    add(getJLabelRun(), BorderLayout.SOUTH);
 
     jTable.getSelectionModel()
         .addListSelectionListener(new JTableListSelectionListener());
@@ -171,18 +177,34 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     UnitManager.getManager().addUnitListener(this);
   }
 
-  private JLabel getJlabelRun() {
-    if (jlabelRun == null) {
-      jlabelRun = new JLabel();
-      jlabelRun.setAlignmentX(Component.LEFT_ALIGNMENT);
-      jlabelRun.setFont(GuiFont.FONT_PLAIN_SMALL);
+  private void updateNumCourse() {
+    int row = tableModel.getRowCount();
+    if (row != 0) {
+      int selectedRow = (jTable.getSelectedRow() == -1) ? 0 : (jTable
+          .getSelectedRow() + 1);
+      jLabelRun.setText("  " + selectedRow + "/" + row);
     }
-    return jlabelRun;
+    else {
+      jLabelRun.setText(null);
+    }
   }
 
-  private JTableCustom getJTable() {
+  private JLabel getJLabelRun() {
+    if (jLabelRun == null) {
+      jLabelRun = new JLabel();
+      jLabelRun.setAlignmentX(Component.LEFT_ALIGNMENT);
+      jLabelRun.setFont(GuiFont.FONT_PLAIN_SMALL);
+    }
+    return jLabelRun;
+  }
+
+  private JXTable getJTable() {
     if (jTable == null) {
-      jTable = new JTableCustom();
+      jTable = new JXTable();
+      jTable
+          .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                                               null,
+                                               Color.RED));
       jTable.setModel(tableModel);
       jTable.setFont(GuiFont.FONT_PLAIN);
       jTable.setShowGrid(false);
@@ -204,6 +226,16 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
       jTable.packAll();
     }
     return jTable;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireDatesUnselect
+   * ()
+   */
+  public void fireSportChanged(Date date, int sportType) {
   }
 
   /*
@@ -259,7 +291,6 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     if (MainGui.getWindow().getRightComponent() instanceof JPanelRun) {
       JPanelRun p = (JPanelRun) MainGui.getWindow().getRightComponent();
       p.fireHistoric();
-      jTable.packAll();
     }
   }
 
@@ -284,7 +315,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
             }
             try {
               jTable.setRowSelectionInterval(row, row);
-              setNumCourse(tableModel.listRows.size());
+              updateNumCourse();
             }
             catch (IllegalArgumentException e) {
             }
@@ -323,30 +354,15 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
   }
 
   public void fireCurrentRun(List<DataRun> listRun) {
-    setNumCourse(0);
     tableModel.listRows = listRun;
     if (listRun != null) {
-      setNumCourse(listRun.size());
       tableModel.fireTableDataChanged();
       jTable.packAll();
     }
+    updateNumCourse();
   }
 
   public void removeDate(Date date) {
-  }
-
-  private void setNumCourse(int nb) {
-    switch (nb) {
-      case 0:
-        jlabelRun.setText("");
-        break;
-      case 1:
-        jlabelRun.setText(nb + " course");
-        break;
-      default:
-        jlabelRun.setText(nb + " courses");
-        break;
-    }
   }
 
   /**
@@ -372,6 +388,17 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
       super();
     }
 
+    public void performedLanguage() {
+      if (listRows != null) {
+        int row = jTable.getSelectedRow();
+        tableModel.fireTableDataChanged();
+        if (row != -1) {
+          jTable.getSelectionModel().setSelectionInterval(row, row);
+        }
+      }
+      jTable.packAll();
+    }
+
     public void performedUnitChanged(String unit) {
       columnNames[2] = unit;
       jTable.getColumnModel().getColumn(2).setHeaderValue(unit);
@@ -380,9 +407,14 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
         for (DataRun run : listRows) {
           run.setUnit(unit);
         }
+
+        int row = jTable.getSelectedRow();
         tableModel.fireTableDataChanged();
+        if (row != -1) {
+          jTable.getSelectionModel().setSelectionInterval(row, row);
+        }
       }
-      
+
       jTable.packAll();
     }
 
@@ -524,6 +556,9 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
               MainGui.getWindow().afterRunnableSwing();
             }
           });
+
+          // mis a jour libelle course
+          updateNumCourse();
         }
       }
     }

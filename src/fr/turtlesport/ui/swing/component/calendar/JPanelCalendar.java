@@ -25,7 +25,8 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JPanelCalendar extends JPanel implements IListDateRunFire, LanguageListener {
+public class JPanelCalendar extends JPanel implements IListDateRunFire,
+                                          LanguageListener {
   private static TurtleLogger            log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelCalendar.class);
@@ -89,6 +90,16 @@ public class JPanelCalendar extends JPanel implements IListDateRunFire, Language
    * (non-Javadoc)
    * 
    * @see
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireDatesUnselect
+   * ()
+   */
+  public void fireSportChanged(Date date, int sportType) {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
    * fr.turtlesport.ui.swing.component.calendar.IListDateRun#fireDatesUnselect()
    */
   public void fireDatesUnselect() {
@@ -134,7 +145,7 @@ public class JPanelCalendar extends JPanel implements IListDateRunFire, Language
   public void fireHistoric(int idUser) throws SQLException {
     model.setIdUser(idUser);
     model.updateView(this);
-    
+
     // mis a jour des boutons date en cours
     if (MainGui.getWindow().getRightComponent() instanceof JPanelRun) {
       JPanelRun p = (JPanelRun) MainGui.getWindow().getRightComponent();
