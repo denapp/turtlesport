@@ -1,7 +1,6 @@
 package fr.turtlesport.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,23 +64,72 @@ public class FileUtil {
    *          l'inpustream &agrave; copier.
    * @param file
    *          la destination.
-   * @throws FileNotFoundException
    */
-  public static void copy(InputStream in, File file) throws FileNotFoundException {
-    byte[] buf = new byte[1024];
+  public static boolean copy(InputStream in, File file) {
+    byte[] buf = new byte[4096];
     int len = -1;
 
-    FileOutputStream out = new FileOutputStream(file);
-
+    boolean isOk = false;
+    boolean isCopyBegin = false;
+    FileOutputStream out = null;
     try {
+      out = new FileOutputStream(file);
+      isCopyBegin = true;
       while ((len = in.read(buf)) > 0) {
         out.write(buf, 0, len);
-      } 
+      }
+      in.close();
       out.close();
+      isOk = true;
     }
-    catch (IOException e) {
+    catch (Throwable th) {
+      isOk = false;
       file.delete();
+      try {
+        if (out != null) {
+          out.close();
+        }
+      }
+      catch (IOException ioe) {
+      }
+      try {
+        if (in != null) {
+          in.close();
+        }
+      }
+      catch (IOException ioe) {
+      }
+      // suppression du fichier
+      if (isCopyBegin && file.exists()) {
+        file.delete();
+      }
     }
+
+    return isOk;
+  }
+
+  /**
+   * chmod
+   * 
+   * @param permision
+   *          la permission ex : 755
+   * @param path
+   *          le path du fichier
+   */
+  public static boolean chmod(String permision, String path) {
+    if (OperatingSystem.isWindows()) {
+      return true;
+    }
+
+    try {
+      Runtime.getRuntime().exec(new String[] { "chmod", permision, path })
+          .waitFor();
+    }
+    catch (Throwable e) {
+      return false;
+    }
+
+    return true;
   }
 
 }

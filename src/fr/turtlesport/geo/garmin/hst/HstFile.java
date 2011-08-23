@@ -32,6 +32,7 @@ import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.geo.AbstractGeoRoute;
 import fr.turtlesport.geo.GeoConvertException;
 import fr.turtlesport.geo.GeoLoadException;
+import fr.turtlesport.geo.IGeoConvertProgress;
 import fr.turtlesport.geo.IGeoConvertRun;
 import fr.turtlesport.geo.IGeoFile;
 import fr.turtlesport.geo.IGeoPositionWithAlt;
@@ -79,6 +80,18 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
    */
   public String[] extension() {
     return EXT;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.IGeoConvertRun#convert(java.util.List,
+   * java.io.File)
+   */
+  public File convert(List<DataRun> runs,
+                      IGeoConvertProgress progress,
+                      File file) throws GeoConvertException, SQLException {
+    throw new UnsupportedOperationException();
   }
 
   /*

@@ -337,8 +337,8 @@ public final class RunTrkTableManager extends AbstractTableManager {
         trk.setLatitude(rs.getInt(2));
         trk.setLongitude(rs.getInt(3));
         trk.setTime(rs.getTimestamp(4));
-        trk.setAltitude(rs.getInt(5));
-        trk.setDistance(rs.getInt(6));
+        trk.setAltitude(rs.getFloat(5));
+        trk.setDistance(rs.getFloat(6));
         trk.setHeartRate(rs.getInt(7));
         list.add(trk);
 

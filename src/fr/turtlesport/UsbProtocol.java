@@ -2,7 +2,6 @@ package fr.turtlesport;
 
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.Library;
-import fr.turtlesport.util.OperatingSystem;
 
 /**
  * @author Denis Apparicio
@@ -16,32 +15,25 @@ public final class UsbProtocol {
   /** Nom de la JNI. */
   private static final String LIBRARY_NAME = "turtleUsbjni";
 
+  /** MD5 de la JNI Linux 32 bits */
+  private String              digestLibrary32bits;
+
+  /** MD5 de la JNI Linux 32 bits */
+  private String              digestLibrary64bits;
+
   /** Instance unique */
   private static UsbProtocol  singleton    = new UsbProtocol();
 
   /**
-   * 
+   * Pour linux on copie les librairies dans .turtlesport. Moins problematique
+   * pour la gestion des paquetages rpm et debian en 32bits et 64bits
    */
   private UsbProtocol() {
     log.debug(">>UsbProtocol");
 
     // chargement de la librairie
-    boolean isLoad = false;
+    Library.load(UsbPacket.class, LIBRARY_NAME);
 
-    if (OperatingSystem.isLinux() && OperatingSystem.is64bits()) {
-      String lib64 = LIBRARY_NAME + "64";
-      try {
-        Library.loadThrow(UsbPacket.class, lib64);
-        isLoad = true;
-      }
-      catch (Throwable e) {
-      }
-    }
-
-    if (!isLoad) {
-      Library.load(UsbPacket.class, LIBRARY_NAME);
-    }
-    
     log.debug("<<UsbProtocol");
   }
 

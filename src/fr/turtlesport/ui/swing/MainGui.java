@@ -44,6 +44,7 @@ import fr.turtlesport.MacOSXTurleApp;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.UserTableManager;
+import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
@@ -52,6 +53,7 @@ import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.mail.Mail;
 import fr.turtlesport.mail.MessageMail;
 import fr.turtlesport.protocol.A1000RunTransferProtocol;
+import fr.turtlesport.ui.swing.action.ExportAllActionListener;
 import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JXSplitButton;
@@ -141,6 +143,12 @@ public class MainGui extends JFrame implements LanguageListener {
   private JMenuItemTurtle      jMenuItemRunGoogleEarth;
 
   private JMenuItemTurtle      jMenuItemRunDelete;
+
+  private JMenu                jMenuExportAll;
+
+  private JMenuItemTurtle      jMenuItemExportAllGpx;
+
+  private JMenuItemTurtle      jMenuItemExportAllTcx;
 
   private JMenu                jMenuRunExport;
 
@@ -253,6 +261,11 @@ public class MainGui extends JFrame implements LanguageListener {
     if (jMenuItemRunEmail != null) {
       jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail"));
     }
+
+    jMenuExportAll.setText(rb.getString("jMenuExportAll"));
+    jMenuItemExportAllGpx.setText(rb.getString("jMenuItemRunExportGpx"));
+    jMenuItemExportAllTcx.setText(rb.getString("jMenuItemRunExportTcx"));
+
     jMenuItemRunGoogleMap.setText(rb.getString("jMenuItemRunGoogleMap"));
     jMenuItemRunGoogleEarth.setText(rb.getString("jMenuItemRunGoogleEarth"));
     jMenuRunExport.setText(rb.getString("jMenuRunExport"));
@@ -445,6 +458,11 @@ public class MainGui extends JFrame implements LanguageListener {
 
     jButtonPreference.addActionListener(prefAction);
     jButtonPreference.addMouseListener(prefMouseListener);
+
+    final ExportAllActionListener exportAllGpxAction = new ExportAllActionListener(FactoryGeoConvertRun.GPX);
+    jMenuItemExportAllGpx.addActionListener(exportAllGpxAction);
+    final ExportAllActionListener exportAllHstAction = new ExportAllActionListener(FactoryGeoConvertRun.TCX);
+    jMenuItemExportAllTcx.addActionListener(exportAllHstAction);
 
     RetreiveAction retreiveAction = new RetreiveAction();
     jButtonRetreive.addActionListener(retreiveAction);
@@ -703,6 +721,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuRun.add(getJMenuItemRunGoogleEarth());
       jMenuRun.add(getJMenuItemRunGoogleMap());
       jMenuRun.addSeparator();
+      jMenuRun.add(getJMenuExportAll());
       jMenuRun.add(getJMenuRunExport());
       jMenuRun.add(getJMenuItemRunImport());
       jMenuRun.add(getJMenuItemRunAdd());
@@ -877,6 +896,47 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuItemRunExportGpx.setEnabled(false);
     }
     return jMenuItemRunExportGpx;
+  }
+
+  /**
+   * This method initializes jMenuExportAll.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenu getJMenuExportAll() {
+    if (jMenuExportAll == null) {
+      jMenuExportAll = new JMenu();
+      jMenuExportAll.setFont(GuiFont.FONT_PLAIN);
+      jMenuExportAll.add(getJMenuItemExportAllGpx());
+      jMenuExportAll.add(getJMenuItemExportAllTcx());
+    }
+    return jMenuExportAll;
+  }
+
+  /**
+   * This method initializes jMenuItemExportAllGpx.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemExportAllGpx() {
+    if (jMenuItemExportAllGpx == null) {
+      jMenuItemExportAllGpx = new JMenuItemTurtle();
+      jMenuItemExportAllGpx.setFont(GuiFont.FONT_PLAIN);
+    }
+    return jMenuItemExportAllGpx;
+  }
+
+  /**
+   * This method initializes jMenuItemRunExportGpx.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemExportAllTcx() {
+    if (jMenuItemExportAllTcx == null) {
+      jMenuItemExportAllTcx = new JMenuItemTurtle();
+      jMenuItemExportAllTcx.setFont(GuiFont.FONT_PLAIN);
+    }
+    return jMenuItemExportAllTcx;
   }
 
   /**
@@ -1394,7 +1454,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
       beforeRunnableSwing();
 
-      new SwingWorker() {
+      new fr.turtlesport.ui.swing.SwingWorker() {
 
         @Override
         public Object construct() {
@@ -1734,7 +1794,6 @@ public class MainGui extends JFrame implements LanguageListener {
       });
 
     }
-
   }
 
 }

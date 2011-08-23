@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.swing.JComponent;
+import javax.swing.UIManager;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.db.DataLanguageRessource;
@@ -139,6 +140,7 @@ public final class LanguageManager {
       // composant
       JComponent.setDefaultLocale(lang.getLocale());
       Locale.setDefault(lang.getLocale());
+      UIManager.put("OptionPane.cancelButtonText", lang.cancel());
   }
 
   /**

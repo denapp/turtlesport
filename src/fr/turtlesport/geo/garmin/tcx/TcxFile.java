@@ -7,10 +7,14 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
@@ -31,7 +35,9 @@ import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.geo.AbstractGeoRoute;
 import fr.turtlesport.geo.GeoConvertException;
+import fr.turtlesport.geo.GeoConvertProgressAdaptor;
 import fr.turtlesport.geo.GeoLoadException;
+import fr.turtlesport.geo.IGeoConvertProgress;
 import fr.turtlesport.geo.IGeoConvertRun;
 import fr.turtlesport.geo.IGeoFile;
 import fr.turtlesport.geo.IGeoPositionWithAlt;
@@ -63,6 +69,10 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
   /** Extensions. */
   public static final String[] EXT = { "tcx" };
 
+  private DecimalFormat        formatDec;
+
+  private SimpleDateFormat     timeFormat;
+
   /**
    * 
    */
@@ -91,8 +101,103 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
   /*
    * (non-Javadoc)
    * 
+   * @see fr.turtlesport.geo.IGeoConvertRun#convert(java.util.List,
+   * java.io.File)
+   */
+  public File convert(List<DataRun> runs,
+                      IGeoConvertProgress progress,
+                      File file) throws GeoConvertException, SQLException {
+    if (runs == null || runs.size() == 0) {
+      throw new IllegalArgumentException("dataRun est null");
+    }
+    if (file == null) {
+      throw new IllegalArgumentException("file est null");
+    }
+    if (progress == null) {
+      progress = new GeoConvertProgressAdaptor();
+    }
+    
+    long startTime = -1;
+    if (log.isInfoEnabled()) {
+      startTime = System.currentTimeMillis();
+    }
+
+    BufferedWriter writer = null;
+    boolean isError = true;
+    try {
+      writer = new BufferedWriter(new FileWriter(file));
+
+      // begin
+      int size = runs.size();
+      progress.begin(size);
+      
+      writeBegin(writer);
+      writeln(writer);
+
+      // Folder
+      writeFolders(runs, writer);
+      writeln(writer);
+
+      // Tag Activities
+      writer.write("<Activities>");
+
+      for (int index = 0; index < size; index++) {
+        if (progress.cancel()) {
+          return null;
+        }
+        DataRun data = runs.get(index);
+        progress.convert(index, size);
+        
+        // Recuperation des points des tours intermediaires.
+        DataRunLap[] laps = RunLapTableManager.getInstance()
+            .findLaps(data.getId());
+        if (laps != null && laps.length > 0) {
+          // Ecriture de l activite
+          writeActivity(data, laps, writer);
+        }
+      }
+
+      // Tag Fin Activities
+      writer.write("</Activities>");
+      writeln(writer);
+
+      // End
+      writeEnd(writer);
+
+      isError = false;
+    }
+    catch (IOException e) {
+      log.error("", e);
+      throw new GpxGeoConvertException(e);
+    }
+    finally {
+      if (writer != null) {
+        try {
+          writer.close();
+        }
+        catch (IOException e) {
+          log.error("", e);
+        }
+        if (isError) {
+          file.delete();
+        }
+      }
+    }
+
+    if (log.isInfoEnabled()) {
+      long endTime = System.currentTimeMillis();
+      log.info("Temps pour ecrire : " + (endTime - startTime) + " ms");
+    }
+
+    log.debug("<<convert");
+    return file;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.turtlesport.geo.IGeoConvertRun#convert(fr.turtlesport.db.DataRun,
-   *      java.io.File)
+   * java.io.File)
    */
   public File convert(DataRun data, File file) throws GeoConvertException,
                                               SQLException {
@@ -107,7 +212,7 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
 
     // Recuperation des points des tours intermediaires.
     DataRunLap[] laps = RunLapTableManager.getInstance().findLaps(data.getId());
-    if (laps != null && laps.length < 1) {
+    if (laps == null || laps.length < 1) {
       return null;
     }
 
@@ -117,36 +222,22 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     boolean isError = false;
     try {
       writer = new BufferedWriter(new FileWriter(file));
-      SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
       // begin
       writeBegin(writer);
       writeln(writer);
 
-      // Activities
+      // Tag Activities
       writer.write("<Activities>");
-      writeln(writer);
 
-      // Activity
-      writer.write("<Activity ");
-      writeSportType(writer, data);
-      writer.write(">");
-      writeln(writer);
-      writer.write("<Id>");
-      writer.write(timeFormat.format(data.getTime()));
-      writer.write("</Id>");
-      writeln(writer);
+      // Ecriture de l activite
+      writeActivity(data, laps, writer);
 
-      // Ecriture des tours intermediaires.
-      for (DataRunLap l : laps) {
-        writeLap(writer, data, l, timeFormat);
-      }
-
-      // end
-      writer.write("</Activity>");
-      writeln(writer);
+      // Tag Fin Activities
       writer.write("</Activities>");
       writeln(writer);
+
+      // End
       writeEnd(writer);
     }
     catch (IOException e) {
@@ -174,10 +265,107 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     }
 
     long endTime = System.currentTimeMillis();
-    log.info("Temps pour ecrire gpx : " + (endTime - startTime) + " ms");
+    log.info("Temps pour ecrire : " + (endTime - startTime) + " ms");
 
     log.debug("<<convert");
     return file;
+  }
+
+  private DecimalFormat getDecimalFormat() {
+    if (formatDec == null) {
+      DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.ENGLISH);
+      dfs.setDecimalSeparator('.');
+      formatDec = new DecimalFormat("#.#######", dfs);
+    }
+    return formatDec;
+  }
+
+  private SimpleDateFormat getTimeFormat() {
+    if (timeFormat == null) {
+      timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      timeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+    return timeFormat;
+  }
+
+  private void writeFolders(List<DataRun> runs, BufferedWriter writer) throws IOException {
+
+    writer.write("<Folders>");
+    writeln(writer);
+    writer.write("<History>");
+    writeln(writer);
+    writer.write("<Running Name=\"Running\">");
+    for (DataRun data : runs) {
+      if (data.isSportRunning()) {
+        writeActivityRef(data, writer);
+      }
+    }
+    writeln(writer);
+    writer.write("</Running>");
+    writeln(writer);
+
+    writer.write("<Biking Name=\"Biking\">");
+    for (DataRun data : runs) {
+      if (data.isSportBike()) {
+        writeActivityRef(data, writer);
+      }
+    }
+    writeln(writer);
+    writer.write("</Biking>");
+    writeln(writer);
+
+    writer.write("<Other Name=\"Other\">");
+    for (DataRun data : runs) {
+      if (data.isSportOther()) {
+        writeActivityRef(data, writer);
+      }
+    }
+    writeln(writer);
+    writer.write("</Other>");
+    writeln(writer);
+
+    writer.write("<MultiSport Name=\"MultiSport\"/>");
+    writeln(writer);
+
+    writer.write("</History>");
+    writeln(writer);
+    writer.write("</Folders>");
+  }
+
+  private void writeActivityRef(DataRun data, BufferedWriter writer) throws IOException {
+    writeln(writer);
+    writer.write("<ActivityRef>");
+    writer.write("<Id>");
+    writer.write(getTimeFormat().format(data.getTime()));
+    writer.write("</Id>");
+    writer.write("</ActivityRef>");
+  }
+
+  private void writeActivity(DataRun data,
+                             DataRunLap[] laps,
+                             BufferedWriter writer) throws IOException,
+                                                   SQLException {
+    // Activity
+    writeln(writer);
+    writer.write("<Activity ");
+    writeSportType(writer, data);
+    writer.write(">");
+    writeln(writer);
+    writer.write("<Id>");
+    writer.write(getTimeFormat().format(data.getTime()));
+
+    // writer.write(getTimeFormat().format(data.getTime()));
+    writer.write("</Id>");
+    writeln(writer);
+
+    // Ecriture des tours intermediaires.
+    for (DataRunLap l : laps) {
+      writeLap(writer, data, l);
+    }
+
+    // end
+    writer.write("</Activity>");
+    writeln(writer);
   }
 
   /*
@@ -304,26 +492,29 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     writer.write("</TrainingCenterDatabase>");
   }
 
-  private void writeTrkPoint(BufferedWriter writer,
-                             DataRunTrk point,
-                             SimpleDateFormat timeFormat) throws IOException {
+  private void writeTrkPoint(BufferedWriter writer, DataRunTrk point) throws IOException {
     writer.write("<Trackpoint>");
 
     // Time
-    writer.write("<Time>" + timeFormat.format(point.getTime()) + "</Time>");
+    writer
+        .write("<Time>" + getTimeFormat().format(point.getTime()) + "</Time>");
     // position
     double latitude = GeoUtil.makeLatitudeFromGarmin(point.getLatitude());
     double longitude = GeoUtil.makeLatitudeFromGarmin(point.getLongitude());
     writer.write("<Position>");
-    writer.write("<LatitudeDegrees>" + latitude + "</LatitudeDegrees>");
-    writer.write("<LongitudeDegrees>" + longitude + "</LongitudeDegrees>");
+    writer.write("<LatitudeDegrees>" + getDecimalFormat().format(latitude)
+                 + "</LatitudeDegrees>");
+    writer.write("<LongitudeDegrees>" + getDecimalFormat().format(longitude)
+                 + "</LongitudeDegrees>");
     writer.write("</Position>");
     // Altitude
-    writer
-        .write("<AltitudeMeters>" + point.getAltitude() + "</AltitudeMeters>");
+    writer.write("<AltitudeMeters>"
+                 + getDecimalFormat().format(point.getAltitude())
+                 + "</AltitudeMeters>");
     // DistanceMeters
-    writer
-        .write("<DistanceMeters>" + point.getDistance() + "</DistanceMeters>");
+    writer.write("<DistanceMeters>"
+                 + getDecimalFormat().format(point.getDistance())
+                 + "</DistanceMeters>");
     // HeartRateBpm
     if (point.getHeartRate() > 0) {
       writer.write("<HeartRateBpm xsi:type=\"HeartRateInBeatsPerMinute_t\">");
@@ -341,11 +532,8 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     writer.write("</Trackpoint>");
   }
 
-  private void writeLap(BufferedWriter writer,
-                        DataRun data,
-                        DataRunLap l,
-                        SimpleDateFormat timeFormat) throws IOException,
-                                                    SQLException {
+  private void writeLap(BufferedWriter writer, DataRun data, DataRunLap l) throws IOException,
+                                                                          SQLException {
     log.debug(">>writeLap");
 
     // recuperation des points du tour
@@ -359,7 +547,7 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     }
 
     // Ecriture
-    String startTime = timeFormat.format(l.getStartTime());
+    String startTime = getTimeFormat().format(l.getStartTime());
     if (log.isDebugEnabled()) {
       log.debug("Lap StartTime=" + startTime);
     }
@@ -368,13 +556,17 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
 
     // TotalTimeSeconds
     double totalTime = l.getTotalTime() / 100.0;
-    writer.write("<TotalTimeSeconds>" + totalTime + "</TotalTimeSeconds>");
+    writer.write("<TotalTimeSeconds>" + getDecimalFormat().format(totalTime)
+                 + "</TotalTimeSeconds>");
     // DistanceMeters
     writeln(writer);
-    writer.write("<DistanceMeters>" + l.getTotalDist() + "</DistanceMeters>");
+    writer.write("<DistanceMeters>"
+                 + getDecimalFormat().format(l.getTotalDist())
+                 + "</DistanceMeters>");
     // MaximumSpeed
     writeln(writer);
-    writer.write("<MaximumSpeed>" + l.getMaxSpeed() + "</MaximumSpeed>");
+    writer.write("<MaximumSpeed>" + getDecimalFormat().format(l.getMaxSpeed())
+                 + "</MaximumSpeed>");
     // Calories
     writeln(writer);
     writer.write("<Calories>" + l.getCalories() + "</Calories>");
@@ -402,13 +594,14 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     writer.write("<Track>");
     for (DataRunTrk t : trks) {
       writeln(writer);
-      writeTrkPoint(writer, t, timeFormat);
+      writeTrkPoint(writer, t);
     }
 
     writeln(writer);
     writer.write("</Track>");
     writeln(writer);
     writer.write("</Lap>");
+    writeln(writer);
 
     log.debug("<<writeLap");
   }
@@ -459,7 +652,7 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
      * (non-Javadoc)
      * 
      * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String,
-     *      java.lang.String, java.lang.String, org.xml.sax.Attributes)
+     * java.lang.String, java.lang.String, org.xml.sax.Attributes)
      */
     public void startElement(String uri,
                              String localName,
@@ -530,7 +723,7 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
      * (non-Javadoc)
      * 
      * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
-     *      java.lang.String, java.lang.String)
+     * java.lang.String, java.lang.String)
      */
     public void endElement(String uri, String localName, String qName) {
       if (log.isDebugEnabled()) {

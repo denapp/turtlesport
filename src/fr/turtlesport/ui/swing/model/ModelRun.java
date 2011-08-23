@@ -134,7 +134,7 @@ public class ModelRun {
     // mis a jour du calendrier
     JPanelListDateRun jPanelView = MainGui.getWindow().getListDateRun();
     if (jPanelView != null) {
-      jPanelView.fireDateChanged(dataRun.getTime());
+      jPanelView.fireDateChanged((dataRun == null) ? null : dataRun.getTime());
     }
 
     log.debug(">>updateViewNext");
@@ -442,7 +442,8 @@ public class ModelRun {
       RunTableManager.getInstance().updateSport(dataRun.getId(), newSportType);
       dataRun.setSportType(newSportType);
       if (MainGui.getWindow().getListDateRun() != null) {
-        MainGui.getWindow().getListDateRun().fireSportChanged(dataRun.getTime(), newSportType);
+        MainGui.getWindow().getListDateRun()
+            .fireSportChanged(dataRun.getTime(), newSportType);
       }
     }
   }

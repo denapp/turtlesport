@@ -673,6 +673,42 @@ public final class RunTableManager extends AbstractTableManager {
   }
 
   /**
+   * Suppression des runs.
+   * 
+   * @return <code>true</code> si ligne trouv&eacute;e.
+   */
+  public boolean delete(int idUser, int year, int month) throws SQLException {
+
+    boolean bRes = false;
+
+    List<DataRun> runs = retreiveDesc(idUser, year, month);
+    if (runs == null || runs.size()==0) {
+      return false;
+    }
+    
+    // Debut de tansaction
+    boolean isInTransaction = DatabaseManager.isInTransaction();
+    if (!isInTransaction) {
+      DatabaseManager.beginTransaction();
+    }
+    
+    Connection conn = DatabaseManager.getConnection();
+    
+    for (DataRun dr :runs) {
+      bRes |= delete(dr.getId());
+    }
+    
+    // ok
+    if (!isInTransaction) {
+      DatabaseManager.commitTransaction();
+    }
+    DatabaseManager.releaseConnection(conn);
+
+    log.debug("<<delete bRes=" + bRes);
+    return bRes;
+  }
+
+  /**
    * Suppression du run.
    * 
    * @return <code>true</code> si ligne trouv&eacute;e.
@@ -990,6 +1026,70 @@ public final class RunTableManager extends AbstractTableManager {
       log.info("<<findNextOrPrev delay=" + delay + "ms");
     }
     return dataRun;
+  }
+
+  /**
+   * Recuperation des run d'un utilisateur avec ann&eacute; et le mois en
+   * criit&egrave;re.
+   * 
+   * @param idUser
+   * @param year
+   * @param month
+   * @return
+   * @throws SQLException
+   */
+  public List<DataRun> retreiveDesc(int idUser, int year, int month) throws SQLException {
+    if (log.isInfoEnabled()) {
+      log.info(">>retreiveDesc  idUser=" + idUser + " year=" + year + " month="
+               + month);
+    }
+    List<DataRun> listRun = new ArrayList<DataRun>();
+
+    long startTime = System.currentTimeMillis();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT id, sport_type, start_time FROM ");
+      st.append(getTableName());
+      st.append(" WHERE YEAR(start_time)=?");
+      if (month >= 0 && month <= 12) {
+        st.append(" AND MONTH(start_time)=?");
+      }
+      if (!DataUser.isAllUser(idUser)) {
+        st.append(" AND id_user=?");
+      }
+      st.append(" ORDER BY start_time DESC");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, year);
+      int index =1;
+      if (month >= 0 && month <= 12) {
+        pstmt.setInt(++index, month);
+      }
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(++index, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        DataRun dataRun = new DataRun();
+        dataRun.setId(rs.getInt("id"));
+        dataRun.setSportType(rs.getInt("sport_type"));
+        dataRun.setTime(rs.getTimestamp("start_time"));
+        listRun.add(dataRun);
+        log.debug("id" + dataRun.getId());
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      long delay = System.currentTimeMillis() - startTime;
+      log.info(">>retreiveDesc  idUser=" + idUser + " delay=" + delay + "ms");
+    }
+    return listRun;
   }
 
   /**
@@ -1420,7 +1520,7 @@ public final class RunTableManager extends AbstractTableManager {
     finally {
       DatabaseManager.releaseConnection(conn);
     }
-    
+
     log.debug("<<updateSport");
   }
 
@@ -1459,7 +1559,7 @@ public final class RunTableManager extends AbstractTableManager {
     finally {
       DatabaseManager.releaseConnection(conn);
     }
-    
+
     log.debug("<<updateComments");
   }
 
@@ -1495,7 +1595,7 @@ public final class RunTableManager extends AbstractTableManager {
     finally {
       DatabaseManager.releaseConnection(conn);
     }
-    
+
     log.debug("<<updateComments");
   }
 

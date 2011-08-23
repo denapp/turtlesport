@@ -20,6 +20,7 @@ import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.db.UserActivityTableManager;
 import fr.turtlesport.geo.GeoConvertException;
 import fr.turtlesport.geo.GeoPosition;
+import fr.turtlesport.geo.IGeoConvertProgress;
 import fr.turtlesport.geo.IGeoConvertRun;
 import fr.turtlesport.geo.IGeoPosition;
 import fr.turtlesport.lang.LanguageManager;
@@ -34,7 +35,7 @@ import fr.turtlesport.util.Location;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
- * @author Denis apparicio
+ * @author Denis Apparicio
  * 
  */
 public class GoogleMapGeo implements IGeoConvertRun {
@@ -83,6 +84,18 @@ public class GoogleMapGeo implements IGeoConvertRun {
   /*
    * (non-Javadoc)
    * 
+   * @see fr.turtlesport.geo.IGeoConvertRun#convert(java.util.List,
+   * java.io.File)
+   */
+  public File convert(List<DataRun> runs,
+                      IGeoConvertProgress progress,
+                      File file) throws GeoConvertException, SQLException {
+    throw new UnsupportedOperationException();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.turtlesport.geo.IGeoConvertRun#convert(fr.turtlesport.db.DataRun,
    * java.io.File)
    */
@@ -97,8 +110,8 @@ public class GoogleMapGeo implements IGeoConvertRun {
       throw new IllegalArgumentException("file est null");
     }
 
-    List<DataRunTrk> trks = RunTrkTableManager.getInstance().getTrks(dataRun
-        .getId());
+    List<DataRunTrk> trks = RunTrkTableManager.getInstance()
+        .getTrks(dataRun.getId());
     if (trks != null && trks.size() < 1) {
       return null;
     }
@@ -211,8 +224,8 @@ public class GoogleMapGeo implements IGeoConvertRun {
                       String line) throws IOException, SQLException {
     line = line.substring(AVG_ALL.length());
     writer.write(MessageFormat.format(line, rb.getString("AVG_ALL"), PaceUnit
-        .computeFormatAllureWithUnit(dataRun.getComputeDistanceTot(), dataRun
-            .computeTimeTot())));
+        .computeFormatAllureWithUnit(dataRun.getComputeDistanceTot(),
+                                     dataRun.computeTimeTot())));
     writer.write("\r\n");
   }
 
@@ -249,8 +262,8 @@ public class GoogleMapGeo implements IGeoConvertRun {
                         String line) throws IOException {
     line = line.substring(ACTIVITY.length());
     try {
-      String lib = UserActivityTableManager.getInstance().retreive(dataRun
-          .getSportType()).toString();
+      String lib = UserActivityTableManager.getInstance()
+          .retreive(dataRun.getSportType()).toString();
       if (lib != null && "".equals(lib)) {
         writer.write(MessageFormat.format(line, rb.getString("ACTIVITY"), lib));
       }
@@ -265,8 +278,8 @@ public class GoogleMapGeo implements IGeoConvertRun {
                    BufferedReader reader,
                    BufferedWriter writer) throws IOException {
     try {
-      DataRunLap[] runLaps = RunLapTableManager.getInstance().findLaps(dataRun
-          .getId());
+      DataRunLap[] runLaps = RunLapTableManager.getInstance()
+          .findLaps(dataRun.getId());
 
       String line = reader.readLine();
       if (runLaps.length <= 1) {
@@ -302,18 +315,16 @@ public class GoogleMapGeo implements IGeoConvertRun {
           line = line.substring(LAP_BODY.length());
           for (DataRunLap lap : runLaps) {
             if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
-              lap
-                  .setTotalDist((float) DistanceUnit.convert(DistanceUnit
-                      .unitKm(), DistanceUnit.getDefaultUnit(), lap
-                      .getTotalDist()));
+              lap.setTotalDist((float) DistanceUnit.convert(DistanceUnit
+                  .unitKm(), DistanceUnit.getDefaultUnit(), lap.getTotalDist()));
             }
 
             String dist = DistanceUnit.formatMetersInKm(lap.getTotalDist());
             String time = TimeUnit.formatHundredSecondeTime(lap.getTotalTime());
             String speed = SpeedPaceUnit.computeFormatSpeed(lap.getTotalDist(),
                                                             lap.getTotalTime());
-            String allure = PaceUnit.computeAllure(lap.getTotalDist(), lap
-                .getTotalTime());
+            String allure = PaceUnit.computeAllure(lap.getTotalDist(),
+                                                   lap.getTotalTime());
             String lineLap = new String(line);
             writer.write(MessageFormat.format(lineLap,
                                               time,
@@ -341,12 +352,13 @@ public class GoogleMapGeo implements IGeoConvertRun {
                         ResourceBundle rb,
                         BufferedWriter writer,
                         String line) throws IOException, SQLException {
-    int value = RunLapTableManager.getInstance().computeCalories(dataRun
-        .getId());
+    int value = RunLapTableManager.getInstance()
+        .computeCalories(dataRun.getId());
     if (value > 0) {
       line = line.substring(CALORIES.length());
-      writer.write(MessageFormat.format(line, rb.getString("CALORIES"), Integer
-          .toString(value)));
+      writer.write(MessageFormat.format(line,
+                                        rb.getString("CALORIES"),
+                                        Integer.toString(value)));
     }
     writer.write("\r\n");
   }
@@ -360,8 +372,11 @@ public class GoogleMapGeo implements IGeoConvertRun {
       int min = RunTrkTableManager.getInstance().heartMin(dataRun.getId());
       int max = RunLapTableManager.getInstance().heartMax(dataRun.getId());
       line = line.substring(CARDIO.length());
-      writer.write(MessageFormat.format(line, rb.getString("CARDIO"), Integer
-          .toString(avg), Integer.toString(min), Integer.toString(max)));
+      writer.write(MessageFormat.format(line,
+                                        rb.getString("CARDIO"),
+                                        Integer.toString(avg),
+                                        Integer.toString(min),
+                                        Integer.toString(max)));
     }
     writer.write("\r\n");
   }
@@ -382,8 +397,9 @@ public class GoogleMapGeo implements IGeoConvertRun {
   private void markerStop(BufferedWriter writer, String line, IGeoPosition mStop) throws IOException {
     if (mStop != null) {
       line = line.substring(MARKER_END.length());
-      writer.write(MessageFormat.format(line, Double.toString(mStop
-          .getLatitude()), Double.toString(mStop.getLongitude())));
+      writer.write(MessageFormat.format(line,
+                                        Double.toString(mStop.getLatitude()),
+                                        Double.toString(mStop.getLongitude())));
     }
     writer.write("\r\n");
   }
@@ -393,8 +409,10 @@ public class GoogleMapGeo implements IGeoConvertRun {
                            IGeoPosition mStart) throws IOException {
     if (mStart != null) {
       line = line.substring(MARKER_START.length());
-      writer.write(MessageFormat.format(line, Double.toString(mStart
-          .getLatitude()), Double.toString(mStart.getLongitude())));
+      writer
+          .write(MessageFormat.format(line,
+                                      Double.toString(mStart.getLatitude()),
+                                      Double.toString(mStart.getLongitude())));
     }
     writer.write("\r\n");
   }
@@ -418,8 +436,9 @@ public class GoogleMapGeo implements IGeoConvertRun {
       if (log.isDebugEnabled()) {
         log.debug("lat,long=" + latitude + "," + longitude);
       }
-      writer.write(MessageFormat.format(line, Double.toString(latitude), Double
-          .toString(longitude)));
+      writer.write(MessageFormat.format(line,
+                                        Double.toString(latitude),
+                                        Double.toString(longitude)));
     }
   }
 

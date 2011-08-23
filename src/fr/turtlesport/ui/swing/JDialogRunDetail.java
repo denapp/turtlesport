@@ -31,6 +31,7 @@ import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JShowMessage;
+import fr.turtlesport.ui.swing.component.JTableCustom;
 import fr.turtlesport.ui.swing.model.ModelRunDetail;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
@@ -59,7 +60,7 @@ public class JDialogRunDetail extends JDialog {
 
   private JLabel               jLabelLibUnit;
 
-  private JTable               jTable;
+  private JTableCustom               jTable;
 
   private JScrollPane          jPanelTable;
 
@@ -242,7 +243,7 @@ public class JDialogRunDetail extends JDialog {
    */
   private JTable getJTableLap() {
     if (jTable == null) {
-      jTable = new JTable();
+      jTable = new JTableCustom();
       tableModel = new TableModelDistance();
       jTable.setModel(tableModel);
       jTable.setFont(GuiFont.FONT_PLAIN);

@@ -28,6 +28,7 @@ import fr.turtlesport.geo.AbstractGeoRoute;
 import fr.turtlesport.geo.GeoConvertException;
 import fr.turtlesport.geo.GeoLoadException;
 import fr.turtlesport.geo.GeoPositionWithAlt;
+import fr.turtlesport.geo.IGeoConvertProgress;
 import fr.turtlesport.geo.IGeoConvertRun;
 import fr.turtlesport.geo.IGeoFile;
 import fr.turtlesport.geo.IGeoPositionWithAlt;
@@ -37,6 +38,10 @@ import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.Location;
 
+/**
+ * @author Denis Apparicio
+ * 
+ */
 public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
   private static TurtleLogger  log;
   static {
@@ -74,6 +79,18 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
    */
   public String description() {
     return "Garmin fit (*.fit)";
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.IGeoConvertRun#convert(java.util.List,
+   * java.io.File)
+   */
+  public File convert(List<DataRun> runs,
+                      IGeoConvertProgress progress,
+                      File file) throws GeoConvertException, SQLException {
+    throw new UnsupportedOperationException();
   }
 
   /*
