@@ -14,6 +14,13 @@ public final class XmlUtil {
   private XmlUtil() {
   }
 
+  private static SimpleDateFormat dateFormat;
+  static {
+    dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    dateFormat.setLenient(false);
+  }
+     
   /**
    * Restittue une date.
    * 
@@ -28,8 +35,6 @@ public final class XmlUtil {
     }
 
     Calendar calendar = Calendar.getInstance();
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    dateFormat.setLenient(false);
     Date date;
     try {
       synchronized (dateFormat) {

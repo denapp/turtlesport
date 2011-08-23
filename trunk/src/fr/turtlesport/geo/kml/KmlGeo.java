@@ -16,6 +16,7 @@ import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.geo.GeoConvertException;
 import fr.turtlesport.geo.IGeoConvertCourse;
+import fr.turtlesport.geo.IGeoConvertProgress;
 import fr.turtlesport.geo.IGeoConvertRun;
 import fr.turtlesport.geo.pcx5.Pcx5File;
 import fr.turtlesport.lang.LanguageManager;
@@ -64,6 +65,18 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
     return EXT;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.IGeoConvertRun#convert(java.util.List,
+   * java.io.File)
+   */
+  public File convert(List<DataRun> runs,
+                      IGeoConvertProgress progress,
+                      File file) throws GeoConvertException, SQLException {
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * Conversion vers le format kml.
    * 
@@ -85,8 +98,8 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
       throw new IllegalArgumentException("file est null");
     }
 
-    List<DataRunTrk> trks = RunTrkTableManager.getInstance().getTrks(dataRun
-        .getId());
+    List<DataRunTrk> trks = RunTrkTableManager.getInstance()
+        .getTrks(dataRun.getId());
     if (trks != null && trks.size() < 1) {
       return null;
     }
@@ -187,8 +200,9 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
 
       // <description> fils de <Placemark>
       writer.write("<description>");
-      writePointCData(writer, trks.get(trks.size() - 1).getTime(), trks
-          .get(trks.size() - 1).getAltitude());
+      writePointCData(writer,
+                      trks.get(trks.size() - 1).getTime(),
+                      trks.get(trks.size() - 1).getAltitude());
       writer.write("</description>");
       writeln(writer);
 
@@ -456,10 +470,11 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
 
       // <description> fils de <Placemark>
       writer.write("<description>");
-      writePointCData(writer, data.getListTrkPointType(data
-          .getListTrkPointTypeSize() - 1).getTime(), data
-          .getListTrkPointType(data.getListTrkPointTypeSize() - 1)
-          .getAltitude());
+      writePointCData(writer,
+                      data.getListTrkPointType(data.getListTrkPointTypeSize() - 1)
+                          .getTime(),
+                      data.getListTrkPointType(data.getListTrkPointTypeSize() - 1)
+                          .getAltitude());
       writer.write("</description>");
       writeln(writer);
 
@@ -471,8 +486,8 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
       writeln(writer);
 
       // <point> fils de <Placemark>
-      writePoint(writer, data.getListTrkPointType(data
-          .getListTrkPointTypeSize() - 1));
+      writePoint(writer,
+                 data.getListTrkPointType(data.getListTrkPointTypeSize() - 1));
 
       writer.write("</Placemark>");
       writeln(writer);
@@ -603,8 +618,8 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
   public File convert(D1006CourseType data) throws GeoConvertException {
     // Recuperation du fichier
     String name = LanguageManager.getManager().getCurrentLang()
-        .getDateTimeFormatterWithoutSep().format(data.getListTrkPointType(0)
-            .getTime())
+        .getDateTimeFormatterWithoutSep()
+        .format(data.getListTrkPointType(0).getTime())
                   + ".kml";
 
     File file = new File(Location.googleEarthLocation(), name);

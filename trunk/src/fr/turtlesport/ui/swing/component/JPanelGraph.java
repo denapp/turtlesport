@@ -35,6 +35,7 @@ import fr.turtlesport.unit.SpeedUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
+import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -352,7 +353,8 @@ public class JPanelGraph extends JPanel implements LanguageListener,
       jComboBoxY3.setForeground(JDiagramComponent.COLORY3);
       jComboBoxY3.setRenderer(new MyDefaultListCellRenderer());
       jComboBoxY3.setOpaque(true);
-      jComboBoxY3.setPreferredSize(new Dimension(110, jComboBoxY3
+      int width = (OperatingSystem.isMacOSX())?125:115;
+      jComboBoxY3.setPreferredSize(new Dimension(width, jComboBoxY3
           .getPreferredSize().height));
     }
     return jComboBoxY3;
@@ -362,7 +364,8 @@ public class JPanelGraph extends JPanel implements LanguageListener,
     if (jComboBoxX == null) {
       jComboBoxX = new JComboboxUIlistener();
       jComboBoxX.setFont(GuiFont.FONT_PLAIN_VERY_SMALL);
-      jComboBoxX.setPreferredSize(new Dimension(110, jComboBoxX
+      int width = (OperatingSystem.isMacOSX())?120:110;
+      jComboBoxX.setPreferredSize(new Dimension(width, jComboBoxX
           .getPreferredSize().height));
     }
     return jComboBoxX;

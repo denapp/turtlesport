@@ -3,6 +3,8 @@ package fr.turtlesport.ui.swing.component.calendar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,7 +12,9 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -24,25 +28,39 @@ import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 import fr.turtlesport.db.DataRun;
+import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.mail.Mail;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.JPanelRun;
 import fr.turtlesport.ui.swing.MainGui;
+import fr.turtlesport.ui.swing.action.DeleteActionListener;
+import fr.turtlesport.ui.swing.action.DetailActionListener;
+import fr.turtlesport.ui.swing.action.DetailPointsActionListener;
+import fr.turtlesport.ui.swing.action.EmailActionListener;
+import fr.turtlesport.ui.swing.action.ExportActionListener;
+import fr.turtlesport.ui.swing.action.GoogleEarthShowActionListener;
+import fr.turtlesport.ui.swing.action.GoogleMapsShowActionListener;
+import fr.turtlesport.ui.swing.action.MapMercatorActionListener;
+import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.jtable.DateShortDayCellRenderer;
 import fr.turtlesport.ui.swing.component.jtable.DateTimeShortCellRenderer;
+import fr.turtlesport.ui.swing.model.ModelPointsManager;
 import fr.turtlesport.ui.swing.model.ModelRun;
 import fr.turtlesport.ui.swing.model.ModelRunTable;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
+import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -67,6 +85,35 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
   private TableModelRun            tableModel;
 
   private JLabel                   jLabelRun;
+
+  private JPopupMenu               jPopupMenu;
+
+  private JMenuItemTurtle          jMenuItemRunDetail;
+
+  private JMenuItemTurtle          jMenuItemRunDetailGps;
+
+  private JMenuItemTurtle          jMenuItemRunMap;
+
+  private JMenuItemTurtle          jMenuItemRunGoogleEarth;
+
+  private JMenuItemTurtle          jMenuItemRunEmail;
+
+  private JMenuItemTurtle          jMenuItemRunDelete;
+
+  private JMenuItemTurtle          jMenuItemRunExportGoogleEarth;
+
+  private JMenu                    jMenuRunExport;
+
+  private JMenuItemTurtle          jMenuItemRunExportGpx;
+
+  private JMenuItemTurtle          jMenuItemRunExportTcx;
+
+  private JMenuItemTurtle          jMenuItemRunExportHst;
+
+  private JMenuItemTurtle          jMenuItemRunGoogleMap;
+
+  // Ressource
+  private ResourceBundle           rb;
 
   /**
    * Create the panel.
@@ -145,16 +192,35 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
    * @param lang
    */
   private void performedLanguage(ILanguage lang) {
-
+    // table
     dateShortDayCellRenderer.setLocale(lang.getLocale());
-    ResourceBundle rb = ResourceBundleUtility.getBundle(lang,
-                                                        JPanelCalendar.class);
+    rb = ResourceBundleUtility.getBundle(lang, JPanelCalendar.class);
 
     tableModel.columnNames[1] = rb.getString("Date");
     jTable.getColumnModel().getColumn(1)
         .setHeaderValue(tableModel.columnNames[1]);
 
     tableModel.performedLanguage();
+
+    // menu de la table
+    rb = ResourceBundleUtility.getBundle(lang, JPanelRun.class);
+
+    jMenuItemRunDetail.setText(rb.getString("jMenuItemRunDetail"));
+    jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
+    jMenuItemRunGoogleEarth.setText(rb.getString("jMenuItemRunGoogleEarth"));
+    jMenuItemRunGoogleMap.setText(rb.getString("jMenuItemRunGoogleMap"));
+    if (jMenuItemRunEmail != null) {
+      jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail"));
+    }
+    jMenuRunExport.setText(rb.getString("jMenuRunExport"));
+    jMenuItemRunExportGpx.setText(rb.getString("jMenuItemRunExportGpx"));
+    jMenuItemRunExportGoogleEarth.setText(rb
+        .getString("jMenuItemRunExportGoogleEarth"));
+    jMenuItemRunExportTcx.setText(rb.getString("jMenuItemRunExportTcx"));
+    jMenuItemRunExportHst.setText(rb.getString("jMenuItemRunExportHst"));
+    jMenuItemRunDelete.setText(rb.getString("jMenuItemRunDelete"));
+    jMenuItemRunDetailGps.setText(rb.getString("jMenuItemRunDetailGps"));
+
   }
 
   private void initialize() {
@@ -172,9 +238,285 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     jTable.getSelectionModel()
         .addListSelectionListener(new JTableListSelectionListener());
 
+    // Evenements
+    jTable.addMouseListener(new PopupListener());
+
+    final DetailActionListener actionDetails = new DetailActionListener();
+    getJMenuItemRunDetail().addActionListener(actionDetails);
+
+    final DetailPointsActionListener actionDetailsPoints = new DetailPointsActionListener();
+    getJMenuItemRunDetailGps().addActionListener(actionDetailsPoints);
+
+    final MapMercatorActionListener actionMap = new MapMercatorActionListener();
+    getJMenuItemRunMap().addActionListener(actionMap);
+
+    final GoogleEarthShowActionListener actionGoogleEarth = new GoogleEarthShowActionListener();
+    getJMenuItemRunGoogleEarth().addActionListener(actionGoogleEarth);
+
+    final GoogleMapsShowActionListener actionGoogleMaps = new GoogleMapsShowActionListener();
+    getJMenuItemRunGoogleMap().addActionListener(actionGoogleMaps);
+
+    final EmailActionListener actionMail = new EmailActionListener();
+    getJMenuItemRunEmail().addActionListener(actionMail);
+
+    final ExportActionListener actionKml = new ExportActionListener(FactoryGeoConvertRun.KML);
+    getJMenuItemRunExportGoogleEarth().addActionListener(actionKml);
+
+    final ExportActionListener actionHst = new ExportActionListener(FactoryGeoConvertRun.HST);
+    getJMenuItemRunExportHst().addActionListener(actionHst);
+
+    final ExportActionListener actionTcx = new ExportActionListener(FactoryGeoConvertRun.TCX);
+    getJMenuItemRunExportTcx().addActionListener(actionTcx);
+
+    final ExportActionListener actionGpx = new ExportActionListener(FactoryGeoConvertRun.GPX);
+    getJMenuItemRunExportGpx().addActionListener(actionGpx);
+
+    final DeleteActionListener actionDelete = new DeleteActionListener();
+    getJMenuItemRunDelete().addActionListener(actionDelete);
+
+    // Langue / unit
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
+  }
+
+  /**
+   * Rend les menus de courses activable ou non.
+   * 
+   * @param b
+   *          <code>true</code> pour activer les menus de course.
+   */
+  public void setEnableMenuRun(boolean b) {
+    getJMenuItemRunMap().setEnabled(b);
+    getJMenuItemRunDetail().setEnabled(b);
+    getJMenuItemRunDetailGps().setEnabled(b);
+    getJMenuItemRunGoogleEarth().setEnabled(b);
+    getJMenuItemRunGoogleMap().setEnabled(b);
+    if (jMenuItemRunEmail != null) {
+      jMenuItemRunEmail.setEnabled(b);
+    }
+    getJMenuRunExport().setEnabled(b);
+    getJMenuItemRunExportGpx().setEnabled(b);
+    getJMenuItemRunExportGoogleEarth().setEnabled(b);
+    getJMenuItemRunExportTcx().setEnabled(b);
+    getJMenuItemRunExportHst().setEnabled(b);
+    getJMenuItemRunDelete().setEnabled(b);
+  }
+
+  /**
+   * This method initializes jPanelRunSummary.
+   * 
+   * @return javax.swing.JPanel
+   */
+  private JPopupMenu getJPopupMenu() {
+    if (jPopupMenu == null) {
+      jPopupMenu = new JPopupMenu();
+      jPopupMenu.add(getJMenuItemRunDetail());
+      jPopupMenu.add(getJMenuItemRunDetailGps());
+      jPopupMenu.add(getJMenuItemRunMap());
+      jPopupMenu.add(getJMenuItemRunGoogleEarth());
+      jPopupMenu.add(getJMenuItemRunGoogleMap());
+      if (Mail.isSupported()) {
+        jMenuItemRunEmail = new JMenuItemTurtle();
+        jMenuItemRunEmail.setFont(GuiFont.FONT_PLAIN);
+        jMenuItemRunEmail.setAccelerator(MainGui.getWindow()
+            .getMenuProperties(), "jMenuItemRunEmail");
+        jMenuItemRunEmail.setEnabled(false);
+        jPopupMenu.add(jMenuItemRunEmail);
+      }
+      jPopupMenu.add(getJMenuRunExport());
+      jPopupMenu.add(getJMenuItemRunDelete());
+    }
+    return jPopupMenu;
+  }
+
+  /**
+   * This method initializes jMenuItemRunDetail.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunDetail() {
+    if (jMenuItemRunDetail == null) {
+      jMenuItemRunDetail = new JMenuItemTurtle();
+      jMenuItemRunDetail.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunDetail
+          .setAccelerator(MainGui.getWindow().getMenuProperties(),
+                          "jMenuItemRunDetail");
+      jMenuItemRunDetail.setEnabled(false);
+    }
+    return jMenuItemRunDetail;
+  }
+
+  /**
+   * This method initializes jMenuItemRunDetail.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunDetailGps() {
+    if (jMenuItemRunDetailGps == null) {
+      jMenuItemRunDetailGps = new JMenuItemTurtle();
+      jMenuItemRunDetailGps.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunDetailGps.setAccelerator(MainGui.getWindow()
+          .getMenuProperties(), "jMenuItemRunDetailGps");
+      jMenuItemRunDetailGps.setEnabled(false);
+    }
+    return jMenuItemRunDetailGps;
+  }
+
+  /**
+   * This method initializes jMenuItemRunDetail.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunMap() {
+    if (jMenuItemRunMap == null) {
+      jMenuItemRunMap = new JMenuItemTurtle();
+      jMenuItemRunMap.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunMap.setAccelerator(MainGui.getWindow().getMenuProperties(),
+                                     "jMenuItemRunMap");
+      jMenuItemRunMap.setEnabled(false);
+    }
+    return jMenuItemRunMap;
+  }
+
+  /**
+   * This method initializes jMenuItemRunGoogleEarth.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunGoogleEarth() {
+    if (jMenuItemRunGoogleEarth == null) {
+      jMenuItemRunGoogleEarth = new JMenuItemTurtle();
+      jMenuItemRunGoogleEarth.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunGoogleEarth.setAccelerator(MainGui.getWindow()
+          .getMenuProperties(), "jMenuItemRunGoogleEarth");
+      jMenuItemRunGoogleEarth.setEnabled(false);
+    }
+    return jMenuItemRunGoogleEarth;
+  }
+
+  /**
+   * This method initializes jMenuItemRunGoogleEarth.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunGoogleMap() {
+    if (jMenuItemRunGoogleMap == null) {
+      jMenuItemRunGoogleMap = new JMenuItemTurtle();
+      jMenuItemRunGoogleMap.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunGoogleMap.setAccelerator(MainGui.getWindow()
+          .getMenuProperties(), "jMenuItemRunGoogleMap");
+      jMenuItemRunGoogleMap.setEnabled(false);
+    }
+    return jMenuItemRunGoogleMap;
+  }
+
+  /**
+   * This method initializes jMenuItemRunEmail.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunEmail() {
+    return jMenuItemRunEmail;
+  }
+
+  /**
+   * This method initializes jMenuRunExport.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenu getJMenuRunExport() {
+    if (jMenuRunExport == null) {
+      jMenuRunExport = new JMenu();
+      jMenuRunExport.setFont(GuiFont.FONT_PLAIN);
+      jMenuRunExport.add(getJMenuItemRunExportGpx());
+      jMenuRunExport.add(getJMenuItemRunExportGoogleEarth());
+      jMenuRunExport.add(getJMenuItemRunExportTcx());
+      jMenuRunExport.add(getJMenuItemRunExportHst());
+      jMenuRunExport.setEnabled(false);
+    }
+    return jMenuRunExport;
+  }
+
+  /**
+   * This method initializes jMenuItemRunExportGpx.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunExportGpx() {
+    if (jMenuItemRunExportGpx == null) {
+      jMenuItemRunExportGpx = new JMenuItemTurtle();
+      jMenuItemRunExportGpx.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunExportGpx.setAccelerator(MainGui.getWindow()
+          .getMenuProperties(), "jMenuItemRunExportGpx");
+      jMenuItemRunExportGpx.setEnabled(false);
+    }
+    return jMenuItemRunExportGpx;
+  }
+
+  /**
+   * This method initializes jMenuItemRunExportGpx.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunExportGoogleEarth() {
+    if (jMenuItemRunExportGoogleEarth == null) {
+      jMenuItemRunExportGoogleEarth = new JMenuItemTurtle();
+      jMenuItemRunExportGoogleEarth.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunExportGoogleEarth.setAccelerator(MainGui.getWindow()
+          .getMenuProperties(), "jMenuItemRunExportGoogleEarth");
+      jMenuItemRunExportGoogleEarth.setEnabled(false);
+    }
+    return jMenuItemRunExportGoogleEarth;
+  }
+
+  /**
+   * This method initializes jMenuItemRunExportGpx.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunExportTcx() {
+    if (jMenuItemRunExportTcx == null) {
+      jMenuItemRunExportTcx = new JMenuItemTurtle();
+      jMenuItemRunExportTcx.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunExportTcx.setAccelerator(MainGui.getWindow()
+          .getMenuProperties(), "jMenuItemRunExportTcx");
+      jMenuItemRunExportTcx.setEnabled(false);
+    }
+    return jMenuItemRunExportTcx;
+  }
+
+  /**
+   * This method initializes jMenuItemRunExportGpx.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunExportHst() {
+    if (jMenuItemRunExportHst == null) {
+      jMenuItemRunExportHst = new JMenuItemTurtle();
+      jMenuItemRunExportHst.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunExportHst.setAccelerator(MainGui.getWindow()
+          .getMenuProperties(), "jMenuItemRunExportHst");
+      jMenuItemRunExportHst.setEnabled(false);
+    }
+    return jMenuItemRunExportHst;
+  }
+
+  /**
+   * This method initializes jMenuItemRunGoogleEarth.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  public JMenuItemTurtle getJMenuItemRunDelete() {
+    if (jMenuItemRunDelete == null) {
+      jMenuItemRunDelete = new JMenuItemTurtle();
+      jMenuItemRunDelete.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunDelete
+          .setAccelerator(MainGui.getWindow().getMenuProperties(),
+                          "jMenuItemRunDelete");
+      jMenuItemRunDelete.setEnabled(false);
+    }
+    return jMenuItemRunDelete;
   }
 
   private void updateNumCourse() {
@@ -200,7 +542,11 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
 
   private JXTable getJTable() {
     if (jTable == null) {
+      getJPopupMenu();
       jTable = new JXTable();
+      if (OperatingSystem.isMacOSX()) {
+        jTable.addHighlighter(HighlighterFactory.createAlternateStriping());
+      }
       jTable
           .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
                                                null,
@@ -561,6 +907,43 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
           updateNumCourse();
         }
       }
+    }
+  }
+
+  /**
+   * @author Denis apparicio
+   * 
+   */
+  private class PopupListener extends MouseAdapter {
+
+    public PopupListener() {
+    }
+
+    public void mousePressed(MouseEvent e) {
+      maybeShowPopup(e);
+    }
+
+    public void mouseReleased(MouseEvent e) {
+      maybeShowPopup(e);
+    }
+
+    private void maybeShowPopup(MouseEvent e) {
+      if (!e.isPopupTrigger()) {
+        return;
+      }
+
+      int viewRow = jTable.getSelectedRow();
+      int row = jTable.rowAtPoint(e.getPoint());
+      if (viewRow != row) {
+        jTable.getSelectionModel().setSelectionInterval(row, row);
+        return;
+      }
+
+      boolean hasPoint = ModelPointsManager.getInstance().hasPoints();
+      setEnableMenuRun(hasPoint);
+      getJMenuItemRunDelete().setEnabled(true);
+
+      getJPopupMenu().show(e.getComponent(), e.getX(), e.getY());
     }
   }
 

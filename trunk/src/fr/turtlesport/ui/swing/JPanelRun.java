@@ -14,7 +14,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -51,30 +50,32 @@ import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jfree.chart.ChartPanel;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.db.AbstractDataActivity;
 import fr.turtlesport.db.DataActivityOther;
-import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.EquipementTableManager;
 import fr.turtlesport.db.UserActivityTableManager;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
-import fr.turtlesport.geo.GeoConvertException;
-import fr.turtlesport.geo.IGeoConvertRun;
-import fr.turtlesport.googleearth.GoogleEarthException;
-import fr.turtlesport.googleearth.GoogleEarthFactory;
-import fr.turtlesport.googleearth.IGoogleEarth;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.mail.Mail;
+import fr.turtlesport.ui.swing.action.DeleteActionListener;
+import fr.turtlesport.ui.swing.action.DetailActionListener;
+import fr.turtlesport.ui.swing.action.DetailPointsActionListener;
+import fr.turtlesport.ui.swing.action.EmailActionListener;
+import fr.turtlesport.ui.swing.action.ExportActionListener;
+import fr.turtlesport.ui.swing.action.GoogleEarthShowActionListener;
+import fr.turtlesport.ui.swing.action.GoogleMapsShowActionListener;
+import fr.turtlesport.ui.swing.action.MapMercatorActionListener;
 import fr.turtlesport.ui.swing.component.JButtonCustom;
-import fr.turtlesport.ui.swing.component.JFileSaver;
 import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
 import fr.turtlesport.ui.swing.component.JPanelGraph;
 import fr.turtlesport.ui.swing.component.JPanelMap;
@@ -93,7 +94,7 @@ import fr.turtlesport.unit.TimeUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
-import fr.turtlesport.util.BrowserUtil;
+import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -351,6 +352,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
   public void setEnableMenuRun(boolean b) {
     getJMenuItemRunMap().setEnabled(b);
     getJMenuItemRunDetail().setEnabled(b);
+    getJMenuItemRunDetailGps().setEnabled(b);
     getJMenuItemRunGoogleEarth().setEnabled(b);
     getJMenuItemRunGoogleMap().setEnabled(b);
     if (jMenuItemRunEmail != null) {
@@ -1548,42 +1550,50 @@ public class JPanelRun extends JPanel implements LanguageListener,
    */
   private JXTable getJTableLap() {
     if (jTableLap == null) {
-      jTableLap = new JXTable();
-      jTableLap
-          .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
-                                               null,
-                                               Color.RED));
+      synchronized (JPanelRun.class) {
+        if (jTableLap == null) {
+          jTableLap = new JXTable();
+          if (OperatingSystem.isMacOSX()) {
+            jTableLap.addHighlighter(HighlighterFactory
+                .createAlternateStriping());
+          }
+          jTableLap
+              .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                                                   null,
+                                                   Color.RED));
 
-      jTableLap.setOpaque(true);
-      tableModelLap = new TableModelLap();
-      jTableLap.setModel(tableModelLap);
+          jTableLap.setOpaque(true);
+          tableModelLap = new TableModelLap();
+          jTableLap.setModel(tableModelLap);
 
-      jTableLap.setFont(GuiFont.FONT_PLAIN);
-      jTableLap.setShowGrid(false);
-      jTableLap.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-      // jTableLap.setSelectionForeground(Color.white);
-      jTableLap.setFont(GuiFont.FONT_PLAIN);
+          jTableLap.setFont(GuiFont.FONT_PLAIN);
+          jTableLap.setShowGrid(false);
+          jTableLap.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+          // jTableLap.setSelectionForeground(Color.white);
+          jTableLap.setFont(GuiFont.FONT_PLAIN);
 
-      jTableLap.setRowSelectionAllowed(true);
-      jTableLap.setColumnSelectionAllowed(false);
-      jTableLap.setShowGrid(false);
+          jTableLap.setRowSelectionAllowed(true);
+          jTableLap.setColumnSelectionAllowed(false);
+          jTableLap.setShowGrid(false);
 
-      // colum size
-      TableColumn column;
-      for (int i = 0; i < tableModelLap.getColumnCount(); i++) {
-        column = jTableLap.getColumnModel().getColumn(i);
-        column.setPreferredWidth(tableModelLap.getPreferredWidth(i));
-        column.setWidth(tableModelLap.getPreferredWidth(i));
-        column.setMinWidth(tableModelLap.getPreferredWidth(i));
+          // colum size
+          TableColumn column;
+          for (int i = 0; i < tableModelLap.getColumnCount(); i++) {
+            column = jTableLap.getColumnModel().getColumn(i);
+            column.setPreferredWidth(tableModelLap.getPreferredWidth(i));
+            column.setWidth(tableModelLap.getPreferredWidth(i));
+            column.setMinWidth(tableModelLap.getPreferredWidth(i));
+          }
+
+          jTableLap.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+          jTableLap.getTableHeader().setFont(GuiFont.FONT_PLAIN);
+          jTableLap.getSelectionModel()
+              .addListSelectionListener(new TableListSelectionListener());
+          // jTableLap.packAll();
+          jTableLap.setHorizontalScrollEnabled(true);
+          jTableLap.setSortable(false);
+        }
       }
-
-      jTableLap.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-      jTableLap.getTableHeader().setFont(GuiFont.FONT_PLAIN);
-      jTableLap.getSelectionModel()
-          .addListSelectionListener(new TableListSelectionListener());
-      // jTableLap.packAll();
-      jTableLap.setHorizontalScrollEnabled(true);
-      jTableLap.setSortable(false);
     }
     return jTableLap;
   }
@@ -1957,162 +1967,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
     }
   }
 
-  private class ExportActionListener implements ActionListener {
-
-    private String ext;
-
-    public ExportActionListener(String ext) {
-      this.ext = ext;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent ae) {
-      String name = LanguageManager.getManager().getCurrentLang()
-          .getDateTimeFormatterWithoutSep()
-          .format(ModelPointsManager.getInstance().getDataRun().getTime());
-      final IGeoConvertRun cv = FactoryGeoConvertRun.getInstance(ext);
-      final File out = JFileSaver.showSaveDialog(MainGui.getWindow(),
-                                                 name,
-                                                 cv.extension()[0],
-                                                 cv.description());
-      if (out != null) {
-        MainGui.getWindow().beforeRunnableSwing();
-
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            try {
-              cv.convert(ModelPointsManager.getInstance().getDataRun(), out);
-              JShowMessage.ok(rb.getString("exportOK"),
-                              rb.getString("exportTitle"));
-            }
-            catch (GeoConvertException e) {
-              log.error("", e);
-              JShowMessage.error(e.getMessage());
-            }
-            catch (SQLException e) {
-              log.error("", e);
-              JShowMessage.error(e.getMessage());
-            }
-            MainGui.getWindow().afterRunnableSwing();
-          }
-        });
-
-      }
-    }
-  }
-
-  private class GoogleEarthShowActionListener implements ActionListener {
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent e) {
-      MainGui.getWindow().beforeRunnableSwing();
-
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          try {
-            IGoogleEarth ge = GoogleEarthFactory.getDefault();
-
-            // Determine si google earth est installe
-            if (!ge.isInstalled()) {
-              JShowMessage.error(rb.getString("errorInstallGoogleEarth"));
-            }
-            else {
-              // recuperation des pistes
-              DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
-              if (dataRun != null) {
-                File kmlFile = FactoryGeoConvertRun
-                    .getInstance(FactoryGeoConvertRun.KML).convert(dataRun);
-                if (kmlFile != null) {
-                  ge.open(kmlFile);
-                }
-              }
-            }
-          }
-          catch (SQLException e) {
-            log.error("", e);
-            JShowMessage.error(rb.getString("errorDatabase"));
-          }
-          catch (GeoConvertException e) {
-            log.error("", e);
-            JShowMessage.error(e.getMessage());
-          }
-          catch (GoogleEarthException e) {
-            log.error("", e);
-            JShowMessage.error(e.getMessage());
-          }
-          MainGui.getWindow().afterRunnableSwing();
-        }
-      });
-
-    }
-
-  }
-
-  private class GoogleMapsShowActionListener implements ActionListener {
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent e) {
-      MainGui.getWindow().beforeRunnableSwing();
-
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          try {
-
-            // recuperation des pistes
-            DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
-            if (dataRun != null) {
-              File mapFile = FactoryGeoConvertRun
-                  .getInstance(FactoryGeoConvertRun.MAP).convert(dataRun);
-              if (mapFile != null) {
-                BrowserUtil.browse(mapFile.toURI());
-              }
-            }
-          }
-          catch (SQLException e) {
-            log.error("", e);
-            JShowMessage.error(rb.getString("errorDatabase"));
-          }
-          catch (GeoConvertException e) {
-            log.error("", e);
-            JShowMessage.error(e.getMessage());
-          }
-
-          MainGui.getWindow().afterRunnableSwing();
-        }
-      });
-
-    }
-
-  }
-
-  private class EmailActionListener implements ActionListener {
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent e) {
-      JDialogRunSendEmail.prompt(ModelPointsManager.getInstance().getDataRun());
-    }
-  }
-
   /**
    * This method initializes jScrollPaneTextArea.
    * 
@@ -2134,69 +1988,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
     return jScrollPaneTextArea;
   }
 
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  private class DeleteActionListener implements ActionListener {
-
-    public void actionPerformed(ActionEvent actionevent) {
-      if (!JShowMessage.question(rb.getString("questionDeleteRace"),
-                                 rb.getString("delete"))) {
-        return;
-      }
-      MainGui.getWindow().beforeRunnableSwing();
-
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          try {
-            model.delete(JPanelRun.this);
-          }
-          catch (SQLException e) {
-            log.error("", e);
-            JShowMessage.error(rb.getString("errorDeleteRace"));
-          }
-          MainGui.getWindow().afterRunnableSwing();
-        }
-      });
-
-    }
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  private class DetailActionListener implements ActionListener {
-
-    public void actionPerformed(ActionEvent actionevent) {
-      JDialogRunDetail.prompt(ModelPointsManager.getInstance().getDataRun(),
-                              ModelPointsManager.getInstance().getListTrks());
-    }
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  private class DetailPointsActionListener implements ActionListener {
-
-    public void actionPerformed(ActionEvent actionevent) {
-      JDialogRunPointsDetail.prompt(ModelPointsManager.getInstance()
-          .getDataRun(), ModelPointsManager.getInstance().getListTrks());
-    }
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  private class MapMercatorActionListener implements ActionListener {
-
-    public void actionPerformed(ActionEvent actionevent) {
-      jPanelMap.fireActionGrow();
-    }
-  }
 
   /**
    * @author Denis apparicio

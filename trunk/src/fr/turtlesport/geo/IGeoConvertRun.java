@@ -2,6 +2,7 @@ package fr.turtlesport.geo;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.List;
 
 import fr.turtlesport.db.DataRun;
 
@@ -10,6 +11,20 @@ import fr.turtlesport.db.DataRun;
  * 
  */
 public interface IGeoConvertRun extends IGeoFileDesc {
+
+  /**
+   * Conversion de plusieurs run.
+   * 
+   * @param runs
+   *          liste des runs
+   * @param progress
+   * @param file
+   *          fichier de sauvegarde des runs.
+   * @throws KmlConvertException
+   * @throws SQLException
+   */
+  File convert(List<DataRun> runs, IGeoConvertProgress progress, File file) throws GeoConvertException,
+                                                                           SQLException;
 
   /**
    * Conversion vers le format.
