@@ -1238,6 +1238,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
 
     private void maybeShowPopup(MouseEvent e) {
       if (!e.isPopupTrigger()) {
+        return;
       }
 
       int viewRow = jTreeTable.getSelectedRow();
