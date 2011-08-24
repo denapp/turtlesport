@@ -208,8 +208,11 @@ public class GeoPositionWithAlt extends GeoPosition implements
    */
   @Override
   public String toString() {
-    return "[" + getLatitude() + ", " + getLongitude() + ", " + elevation
-           + ", " + DF.format(date) + "]";
+    if (date != null) {
+      return "[" + getLatitude() + ", " + getLongitude() + ", " + elevation
+             + ", " + DF.format(date) + "]";
+    }
+    return "[" + getLatitude() + ", " + getLongitude() + ", " + elevation;
   }
 
 }
