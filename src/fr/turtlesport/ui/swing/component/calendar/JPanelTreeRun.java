@@ -1433,7 +1433,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
       StringBuilder name = new StringBuilder(Integer.toString(year));
       if (getMonth() != -1) {
         name.append('-');
-        name.append(formatMonth.getMonths()[getMonth()]);
+        name.append(formatMonth.getMonths()[getMonth()-1]);
       }
       return name.toString();
     }
