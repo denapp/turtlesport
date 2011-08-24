@@ -384,6 +384,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     GpxHandler handler = null;
     try {
       SAXParserFactory factory = SAXParserFactory.newInstance();
+      factory.setNamespaceAware(true);
       SAXParser parser = factory.newSAXParser();
 
       handler = new GpxHandler();
@@ -611,11 +612,11 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
                              String qName,
                              Attributes attrs) throws SAXParseException {
       log.debug(">>startElement uri=" + uri + " localName=" + localName
-                + " qName=" + qName);
+                + " qName=" + localName);
 
       // verification que la racine est gpx
       if (checkGpx) {
-        if (!qName.equals("gpx")) {
+        if (!localName.equals("gpx")) {
           throw new SAXParseException("qName != gpx", (Locator) null);
         }
         checkGpx = false;
@@ -623,13 +624,13 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
       // rte
       // --------------------------
-      if (qName.equals("rte")) {
+      if (localName.equals("rte")) {
         currentRte = new Rte();
         isRte = true;
       }
 
       // rtept
-      if (qName.equals("rtept") && isRte) {
+      if (localName.equals("rtept") && isRte) {
         isRtept = true;
 
         // Latitude
@@ -646,21 +647,21 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
       // trk
       // ------------------------------
-      if (qName.equals("trk")) {
+      if (localName.equals("trk")) {
         currentTrk = new Trk();
         nbTrk++;
         isTrk = true;
       }
 
       // trkseg
-      if (qName.equals("trkseg") && isTrk) {
+      if (localName.equals("trkseg") && isTrk) {
         currentTrkseg = new Trkseg(currentTrk.getSegmentSize());
         nbTrkseg++;
         isTrkseg = true;
       }
 
       // trkpt
-      if (qName.equals("trkpt") && isTrkseg) {
+      if (localName.equals("trkpt") && isTrkseg) {
         nbTrkpt++;
         isTrkpt = true;
 
@@ -689,8 +690,16 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       log.debug(">>endElement uri=" + uri + " localName=" + localName
                 + " qName=" + qName);
 
+      // hr
+      if (localName.equals("hr") && isTrk) {
+        currentTrkpt.setHeartRate(Integer.valueOf(stBuffer.toString()));
+      }
+      // hr
+      else if (localName.equals("cad") && isTrk) {
+        currentTrkpt.setCadence(Integer.valueOf(stBuffer.toString()));
+      }
       // elevation
-      if (qName.equals("ele")) {
+      else if (localName.equals("ele")) {
         if (isTrkpt) { // de trkpt
           currentTrkpt.setElevation(Double.valueOf(stBuffer.toString()));
         }
@@ -699,9 +708,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
           log.debug("Rtept ele: " + currentRtept.getElevation());
         }
       }
-
       // time
-      if (qName.equals("time")) {
+      else if (localName.equals("time")) {
         if (isTrkpt) { // de trkpt
           currentTrkpt.setDate(XmlUtil.getTime(stBuffer.toString()));
           if (log.isDebugEnabled()) {
@@ -715,9 +723,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
           }
         }
       }
-
       // name
-      if (qName.equals("name") && stBuffer != null) {
+      else if (localName.equals("name") && stBuffer != null) {
         String st = stBuffer.toString();
 
         if (st.startsWith("![CDATA[") && st.endsWith("]]")) {
@@ -740,9 +747,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
           log.debug("Trkpt name: " + st);
         }
       }
-
       // desc
-      if (qName.equals("desc") && stBuffer != null) {
+      else if (localName.equals("desc") && stBuffer != null) {
         String st = stBuffer.toString();
 
         if (st.startsWith("![CDATA[") && st.endsWith("]]")) {
@@ -770,40 +776,36 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
       // rte
       // -------------------------
-      if (qName.equals("rte")) {
+      if (localName.equals("rte")) {
         isRte = false;
         log.debug("currentRte.getRteptSize()=" + currentRte.getRteptSize());
         if (currentRte.getRteptSize() > 0) {
           addRte(currentRte);
         }
       }
-
       // rtept
       // -------------------------
-      if (qName.equals("rtept")) {
+      else if (localName.equals("rtept")) {
         isRtept = false;
         currentRte.addRtept(currentRtept);
       }
-
       // trk
       // -------------------------
-      if (qName.equals("trk")) {
+      else if (localName.equals("trk")) {
         isTrk = false;
         if (currentTrk.getTrkSize() > 0) {
           addTrk(currentTrk);
         }
       }
-
       // trkpt
       // ------------
-      if (qName.equals("trkpt")) {
+      else if (localName.equals("trkpt")) {
         isTrkpt = false;
         currentTrkseg.addTrk(currentTrkpt);
       }
-
       // trkseg
       // -----------------
-      if (qName.equals("trkseg")) {
+      else if (localName.equals("trkseg")) {
         isTrkseg = false;
         log.debug("currentTrkseg.getTrkSize()=" + currentTrkseg.getTrkSize());
         if (currentTrkseg.getTrkSize() > 0) {
@@ -854,122 +856,6 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       listTrk.add(trk);
     }
 
-    // /**
-    // * Ajoute un wpt.
-    // */
-    // private void addWpt(Wpt wpt) {
-    // if (listWpt == null) {
-    // listWpt = new ArrayList<Wpt>();
-    // }
-    // listWpt.add(wpt);
-    // }
   }
-
-  // /**
-  // * @author Denis Apparicio
-  // *
-  // */
-  // private class WptGeoRoute extends AbstractGeoRoute {
-  // private GpxGeoSegment segment;
-  //
-  // private List<IGeoSegment> list;
-  //
-  // public WptGeoRoute(List<Wpt> listWpt) {
-  // super();
-  // segment = new GpxGeoSegment(listWpt);
-  // }
-  //
-  // /*
-  // * (non-Javadoc)
-  // *
-  // * @see fr.turtlesport.geo.IGeoRoute#getAllPoints()
-  // */
-  // public List<IGeoPositionWithAlt> getAllPoints() {
-  // return segment.getPoints();
-  // }
-  //
-  // /*
-  // * (non-Javadoc)
-  // *
-  // * @see fr.turtlesport.geo.IGeoRoute#getName()
-  // */
-  // public String getName() {
-  // return null;
-  // }
-  //
-  // /*
-  // * (non-Javadoc)
-  // *
-  // * @see fr.turtlesport.geo.IGeoRoute#getSegment(int)
-  // */
-  // public IGeoSegment getSegment(int index) {
-  // if (index != 0) {
-  // throw new IndexOutOfBoundsException("size 0, index " + index);
-  // }
-  // return segment;
-  // }
-  //
-  // /*
-  // * (non-Javadoc)
-  // *
-  // * @see fr.turtlesport.geo.IGeoRoute#getSegmentSize()
-  // */
-  // public int getSegmentSize() {
-  // return 1;
-  // }
-  //
-  // /*
-  // * (non-Javadoc)
-  // *
-  // * @see fr.turtlesport.geo.IGeoRoute#getSegments()
-  // */
-  // public List<IGeoSegment> getSegments() {
-  // if (list == null) {
-  // synchronized (WptGeoRoute.class) {
-  // list = new ArrayList<IGeoSegment>();
-  // list.add(segment);
-  // }
-  // }
-  // return list;
-  // }
-  //
-  // }
-
-  // /**
-  // * @author Denis Apparicio
-  // *
-  // */
-  // private class GpxGeoSegment extends AbstractGeoSegment {
-  // private List<IGeoPositionWithAlt> list;
-  //
-  // /**
-  // * @param listWpt
-  // */
-  // public GpxGeoSegment(List<Wpt> listWpt) {
-  // list = new ArrayList<IGeoPositionWithAlt>();
-  // for (Wpt w : listWpt) {
-  // list.add(w);
-  // }
-  // }
-  //
-  // /*
-  // * (non-Javadoc)
-  // *
-  // * @see fr.turtlesport.geo.IGeoSegment#getPoints()
-  // */
-  // public List<IGeoPositionWithAlt> getPoints() {
-  // return list;
-  // }
-  //
-  // /*
-  // * (non-Javadoc)
-  // *
-  // * @see fr.turtlesport.geo.IGeoSegment#index()
-  // */
-  // public int index() {
-  // return 0;
-  // }
-  //
-  // }
 
 }

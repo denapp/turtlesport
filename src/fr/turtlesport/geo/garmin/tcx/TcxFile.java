@@ -664,54 +664,46 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
       }
 
       // Activities
-      if (qName.equals("Activities")) {
+      if (localName.equals("Activities")) {
         listActivity = new ArrayList<Activity>();
       }
-
       // Activity
-      if (qName.equals("Activity")) {
+      else if (localName.equals("Activity")) {
         // sport
         currentActivity = new Activity(attrs.getValue("Sport"));
         isActivity = true;
       }
-
       // Lap
-      if (qName.equals("Lap") && isActivity) {
+      else if (localName.equals("Lap") && isActivity) {
         // sport
         currentLap = new Lap(XmlUtil.getTime(attrs.getValue("StartTime")),
                              currentActivity.getLapSize());
         isLap = true;
       }
-
       // AverageHeartRateBpm
-      if (qName.equals("AverageHeartRateBpm") && isLap) {
+      else if (localName.equals("AverageHeartRateBpm") && isLap) {
         isAverageHeartRateBpm = true;
       }
-
       // AverageHeartRateBpm
-      if (qName.equals("MaximumHeartRateBpm") && isLap) {
+      else if (localName.equals("MaximumHeartRateBpm") && isLap) {
         isMaximumHeartRateBpm = true;
       }
-
       // HeartRateBpm
-      if (qName.equals("HeartRateBpm") && isTrackpoint) {
+      else if (localName.equals("HeartRateBpm") && isTrackpoint) {
         isHeartRateBpm = true;
       }
-
       // Track
-      if (qName.equals("Track") && isLap) {
+      else if (localName.equals("Track") && isLap) {
         isTrack = true;
         currentTrack = new Track();
       }
-
       // Trackpoint
-      if (qName.equals("Trackpoint") && isTrack) {
+      else if (localName.equals("Trackpoint") && isTrack) {
         isTrackpoint = true;
         currentTrackPoint = new TrackPoint();
       }
-
       // Position
-      if (qName.equals("Position") && isTrackpoint) {
+      else if (localName.equals("Position") && isTrackpoint) {
         isPosition = true;
         currentPosition = new Position();
       }
@@ -731,25 +723,25 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
                   + " qName=" + qName);
       }
 
-      if (qName.equals("id")) {
+      if (localName.equals("id")) {
         // id
         if (isActivity) {
           currentActivity.setId(XmlUtil.getTime(stBuffer.toString()));
         }
       }
-      else if (qName.equals("TotalTimeSeconds") && isLap) { // TotalTimeSeconds
+      else if (localName.equals("TotalTimeSeconds") && isLap) { // TotalTimeSeconds
         // isLap
         currentLap.setTotalTimeSeconds(new Double(stBuffer.toString()));
       }
-      else if (qName.equals("Time") && isTrackpoint) { // Time
+      else if (localName.equals("Time") && isTrackpoint) { // Time
         // Trackpoint
         currentTrackPoint.setDate(XmlUtil.getTime(stBuffer.toString()));
       }
-      else if (qName.equals("AltitudeMeters") && isTrackpoint) { // AltitudeMeters
+      else if (localName.equals("AltitudeMeters") && isTrackpoint) { // AltitudeMeters
         // Trackpoint
         currentTrackPoint.setElevation(new Double(stBuffer.toString()));
       }
-      else if (qName.equals("DistanceMeters")) { // DistanceMeters
+      else if (localName.equals("DistanceMeters")) { // DistanceMeters
         if (isTrackpoint) {
           // TrackPoint
           currentTrackPoint.setDistanceMeters(new Double(stBuffer.toString()));
@@ -759,19 +751,19 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
           currentLap.setDistanceMeters(new Double(stBuffer.toString()));
         }
       }
-      else if (qName.equals("SensorState") && isTrackpoint) { // SensorState
+      else if (localName.equals("SensorState") && isTrackpoint) { // SensorState
         // TrackPoint
         currentTrackPoint.setSensorState(stBuffer.toString());
       }
-      else if (qName.equals("MaximumSpeed") && isLap) { // MaximumSpeed
+      else if (localName.equals("MaximumSpeed") && isLap) { // MaximumSpeed
         // Lap
         currentLap.setMaxSpeed(new Double(stBuffer.toString()));
       }
-      else if (qName.equals("Calories") && isLap) { // Calories
+      else if (localName.equals("Calories") && isLap) { // Calories
         // Lap
         currentLap.setCalories(new Integer(stBuffer.toString()));
       }
-      else if (qName.equals("Value")) { // Value
+      else if (localName.equals("Value")) { // Value
         if (isAverageHeartRateBpm) {
           // AverageHeartRateBpm -> Value
           currentLap.setAverageHeartRateBpm(new Integer(stBuffer.toString()));
@@ -785,11 +777,11 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
           currentTrackPoint.setHeartRate(new Integer(stBuffer.toString()));
         }
       }
-      else if (qName.equals("Intensity") && isLap) {// Intensity
+      else if (localName.equals("Intensity") && isLap) {// Intensity
         // Lap
         currentLap.setIntensity(stBuffer.toString());
       }
-      else if (qName.equals("Cadence")) {// Cadence
+      else if (localName.equals("Cadence")) {// Cadence
         if (isTrackpoint) {
           // TrackPoint
           currentTrackPoint.setCadence(new Integer(stBuffer.toString()));
@@ -799,15 +791,15 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
           currentLap.setCadence(new Integer(stBuffer.toString()));
         }
       }
-      else if (qName.equals("TriggerMethod") && isLap) {// TriggerMethod
+      else if (localName.equals("TriggerMethod") && isLap) {// TriggerMethod
         // Lap
         currentLap.setTriggerMethod(stBuffer.toString());
       }
-      else if (qName.equals("LatitudeDegrees") && isPosition) { // LatitudeDegrees
+      else if (localName.equals("LatitudeDegrees") && isPosition) { // LatitudeDegrees
         // Position
         currentPosition.setLatitude(new Double(stBuffer.toString()));
       }
-      else if (qName.equals("LongitudeDegrees") && isPosition) {// LongitudeDegrees
+      else if (localName.equals("LongitudeDegrees") && isPosition) {// LongitudeDegrees
         // Position
         currentPosition.setLongitude(new Double(stBuffer.toString()));
       }
@@ -815,28 +807,25 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
 
       // Activity
       // -------------
-      if (qName.equals("Activity")) {
+      if (localName.equals("Activity")) {
         listActivity.add(currentActivity);
         isActivity = false;
       }
-
       // Lap
       // ---------
-      if (qName.equals("Lap") && isLap) {
+      else if (localName.equals("Lap") && isLap) {
         isLap = false;
         currentActivity.addLap(currentLap);
       }
-
       // Track
       // ---------
-      if (qName.equals("Track") && isTrack) {
+      else if (localName.equals("Track") && isTrack) {
         isTrack = false;
         currentLap.addTrack(currentTrack);
       }
-
       // Trackpoint
       // ---------------
-      if (qName.equals("Trackpoint") && isTrackpoint) {
+      else if (localName.equals("Trackpoint") && isTrackpoint) {
         isTrackpoint = false;
         currentTrack.addPoint(currentTrackPoint);
         log.info(currentTrackPoint);
@@ -844,26 +833,23 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
 
       // Position
       // -------------------
-      if (qName.equals("Position") && isPosition) {
+      else if (localName.equals("Position") && isPosition) {
         isPosition = false;
         currentTrackPoint.setPosition(currentPosition);
       }
-
       // AverageHeartRateBpm
       // ----------------------
-      if (qName.equals("AverageHeartRateBpm")) {
+      else if (localName.equals("AverageHeartRateBpm")) {
         isAverageHeartRateBpm = false;
       }
-
       // MaximumHeartRateBpm
       // ----------------------
-      if (qName.equals("MaximumHeartRateBpm")) {
+      else if (localName.equals("MaximumHeartRateBpm")) {
         isMaximumHeartRateBpm = false;
       }
-
       // HeartRateBpm
       // ----------------------
-      if (qName.equals("HeartRateBpm")) {
+      else if (localName.equals("HeartRateBpm")) {
         isHeartRateBpm = false;
       }
 
