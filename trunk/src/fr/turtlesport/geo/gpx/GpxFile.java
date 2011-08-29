@@ -43,7 +43,7 @@ import fr.turtlesport.util.Location;
 import fr.turtlesport.util.XmlUtil;
 
 /**
- * @author Denis apparicio
+ * @author Denis Apparicio
  * 
  */
 public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
@@ -54,6 +54,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
   /** Extensions. */
   public static final String[] EXT = { "gpx" };
+
+  private SimpleDateFormat     timeFormat;
 
   /**
    * 
@@ -90,7 +92,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
                       IGeoConvertProgress progress,
                       File file) throws GeoConvertException, SQLException {
     if (runs == null || runs.size() == 0) {
-      throw new IllegalArgumentException("dataRun est null");
+      return null;
     }
     if (file == null) {
       throw new IllegalArgumentException("file est null");
@@ -99,14 +101,16 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       progress = new GeoConvertProgressAdaptor();
     }
 
+    timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    timeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
     long startTime = System.currentTimeMillis();
 
     BufferedWriter writer = null;
     boolean isError = true;
+    boolean hasData = false;
     try {
       writer = new BufferedWriter(new FileWriter(file));
-      SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-      timeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
       // begin
       int size = runs.size();
@@ -123,15 +127,17 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         // Recuperation des points des tours intermediaires.
         DataRunLap[] laps = RunLapTableManager.getInstance()
             .findLaps(data.getId());
-        if (laps != null && laps.length < 1) {
+        if (laps == null || laps.length == 0) {
           continue;
         }
 
         List<DataRunTrk> trks = RunTrkTableManager.getInstance()
             .getTrks(data.getId());
-        if (trks == null || trks.size() < 1) {
+        if (trks == null || trks.size() == 0) {
           continue;
         }
+
+        hasData = true;
 
         // <trk> fils de <gpx>
         writer.write("<trk>");
@@ -141,7 +147,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
         // Ecriture des tours intermediaires.
         for (DataRunLap l : laps) {
-          writeLap(writer, data, l, timeFormat);
+          writeLap(writer, data, l);
         }
 
         // end <trk> fils de <gpx>
@@ -168,9 +174,9 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         catch (IOException e) {
           log.error("", e);
         }
-        if (isError) {
-          file.delete();
-        }
+      }
+      if (isError || !hasData) {
+        file.delete();
       }
     }
 
@@ -179,7 +185,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       log.info("Temps pour ecrire : " + (endTime - startTime) + " ms");
     }
 
-    return file;
+    return (isError || !hasData) ? null : file;
   }
 
   /*
@@ -198,6 +204,9 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     if (file == null) {
       throw new IllegalArgumentException("file est null");
     }
+
+    timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    timeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
     // Recuperation des points des tours intermediaires.
     DataRunLap[] laps = RunLapTableManager.getInstance().findLaps(data.getId());
@@ -231,7 +240,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
       // Ecriture des tours intermediaires.
       for (DataRunLap l : laps) {
-        writeLap(writer, data, l, timeFormat);
+        writeLap(writer, data, l);
       }
 
       // end <trk> fils de <gpx>
@@ -307,6 +316,9 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       throw new IllegalArgumentException("file est null");
     }
 
+    timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    timeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
     long startTime = System.currentTimeMillis();
 
     BufferedWriter writer = null;
@@ -317,9 +329,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       writeBegin(file, startTime, writer);
 
       // Ecriture des points
-      SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
       for (D304TrkPointType trk : data.getListTrkPointType()) {
-        writeTrkPoint(writer, trk, timeFormat);
+        writeTrkPoint(writer, trk);
       }
 
       // end
@@ -454,11 +465,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     writeln(writer);
   }
 
-  private void writeLap(BufferedWriter writer,
-                        DataRun data,
-                        DataRunLap l,
-                        SimpleDateFormat timeFormat) throws IOException,
-                                                    SQLException {
+  private void writeLap(BufferedWriter writer, DataRun data, DataRunLap l) throws IOException,
+                                                                          SQLException {
     log.debug(">>writeLap");
 
     // recuperation des points du tour
@@ -476,7 +484,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     writer.write("<trkseg>");
     writeln(writer);
     for (DataRunTrk t : trks) {
-      writeTrkPoint(writer, t, timeFormat);
+      writeTrkPoint(writer, t);
     }
     writer.write("</trkseg>");
     writeln(writer);
@@ -484,9 +492,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     log.debug("<<writeLap");
   }
 
-  private void writeTrkPoint(BufferedWriter writer,
-                             DataRunTrk point,
-                             SimpleDateFormat timeFormat) throws IOException {
+  private void writeTrkPoint(BufferedWriter writer, DataRunTrk point) throws IOException {
     if (!point.isValidGps()) {
       return;
     }
@@ -497,7 +503,9 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     writer.write("<trkpt ");
     writer.write("lat=\"" + Double.toString(latitude) + "\" ");
     writer.write("lon=\"" + Double.toString(longitude) + "\">");
-    writer.write("<ele>" + Float.toString(point.getAltitude()) + "</ele>");
+    if (point.isValidAltitude()) {
+      writer.write("<ele>" + Float.toString(point.getAltitude()) + "</ele>");
+    }
     writer.write("<time>" + timeFormat.format(point.getTime()) + "</time>");
 
     if (point.getHeartRate() > 0 || point.isValidCadence()) {
@@ -522,9 +530,14 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     writeln(writer);
   }
 
-  private void writeTrkPoint(BufferedWriter writer,
-                             D304TrkPointType point,
-                             SimpleDateFormat timeFormat) throws IOException {
+  private void writeTrkPoint(BufferedWriter writer, D304TrkPointType point) throws IOException {
+    // verification de la validite du point
+    if (point == null || point.getPosn() == null
+        || point.getPosn().iPositionInvalid()) {
+      return;
+    }
+
+    // Ecriture
     double latitude = GeoUtil.makeLatitudeFromGarmin(point.getPosn()
         .getLatitude());
     double longitude = GeoUtil.makeLatitudeFromGarmin(point.getPosn()
@@ -533,7 +546,9 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     writer.write("<trkpt ");
     writer.write("lat=\"" + Double.toString(latitude) + "\" ");
     writer.write("lon=\"" + Double.toString(longitude) + "\">");
-    writer.write("<el>" + Float.toString(point.getAltitude()) + "</el>");
+    if (point.isValidAltitude()) {
+      writer.write("<el>" + Float.toString(point.getAltitude()) + "</el>");
+    }
     writer.write("<time>" + timeFormat.format(point.getTime()) + "</time>");
 
     writer.write("</trkpt>");
@@ -599,6 +614,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
      */
     public GpxHandler() {
       super();
+
     }
 
     /*

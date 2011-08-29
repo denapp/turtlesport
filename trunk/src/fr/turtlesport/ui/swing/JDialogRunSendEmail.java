@@ -19,6 +19,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import fr.turtlesport.Configuration;
@@ -70,6 +71,8 @@ public class JDialogRunSendEmail extends JDialog {
 
   private JCheckBox           jCheckBoxGpx;
 
+  private JCheckBox           jCheckBoxHst;
+
   private JCheckBox           jCheckBoxDiagram;
 
   private DataRun             dataRun;
@@ -102,6 +105,8 @@ public class JDialogRunSendEmail extends JDialog {
     jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());
 
     // Recuperation de la config precedente
+    jCheckBoxHst.setSelected(Configuration.getConfig()
+        .getPropertyAsBoolean("mail", "racehst", false));
     jCheckBoxGpx.setSelected(Configuration.getConfig()
         .getPropertyAsBoolean("mail", "racegpx", false));
     jCheckBoxGoogleMap.setSelected(Configuration.getConfig()
@@ -141,13 +146,13 @@ public class JDialogRunSendEmail extends JDialog {
     if (jPanelCenter == null) {
       jPanelCenter = new JPanel();
       jPanelCenter.setLayout(new BoxLayout(jPanelCenter, BoxLayout.PAGE_AXIS));
-      jPanelCenter.setBorder(BorderFactory
-          .createTitledBorder(null,
-                              rb.getString("borderTitleCenter"),
-                              TitledBorder.DEFAULT_JUSTIFICATION,
-                              TitledBorder.DEFAULT_POSITION,
-                              GuiFont.FONT_PLAIN,
-                              null));
+      jPanelCenter
+          .setBorder(BorderFactory.createTitledBorder(null,
+                                                      rb.getString("borderTitleCenter"),
+                                                      TitledBorder.DEFAULT_JUSTIFICATION,
+                                                      TitledBorder.DEFAULT_POSITION,
+                                                      GuiFont.FONT_PLAIN,
+                                                      null));
 
       jCheckBoxKml = new JCheckBox(rb.getString("jCheckBoxKml"));
       jCheckBoxKml.setFont(GuiFont.FONT_PLAIN);
@@ -155,12 +160,15 @@ public class JDialogRunSendEmail extends JDialog {
       jCheckBoxGoogleMap.setFont(GuiFont.FONT_PLAIN);
       jCheckBoxGpx = new JCheckBox(rb.getString("jCheckBoxGpx"));
       jCheckBoxGpx.setFont(GuiFont.FONT_PLAIN);
+      jCheckBoxHst = new JCheckBox(rb.getString("jCheckBoxHst"));
+      jCheckBoxHst.setFont(GuiFont.FONT_PLAIN);
       jCheckBoxDiagram = new JCheckBox(rb.getString("jCheckBoxDiagram"));
       jCheckBoxDiagram.setFont(GuiFont.FONT_PLAIN);
 
       jPanelCenter.add(jCheckBoxKml, null);
       jPanelCenter.add(jCheckBoxGoogleMap, null);
       jPanelCenter.add(jCheckBoxGpx, null);
+      jPanelCenter.add(jCheckBoxHst, null);
       jPanelCenter.add(jCheckBoxDiagram, null);
     }
     return jPanelCenter;
@@ -195,9 +203,9 @@ public class JDialogRunSendEmail extends JDialog {
   }
 
   private class SendMailActionListener implements ActionListener {
+    IMailClient mail = null;
 
     public void actionPerformed(ActionEvent e) {
-      IMailClient mail = null;
 
       if (Mail.isConfigurable() && !Mail.isChoose()) {
         mail = JDialogChooseEmail.prompt(JDialogRunSendEmail.this);
@@ -211,6 +219,22 @@ public class JDialogRunSendEmail extends JDialog {
         return;
       }
 
+      MainGui.getWindow().beforeRunnableSwing();
+
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          try {
+            doWork();
+          }
+          finally {
+            MainGui.getWindow().afterRunnableSwing();
+            dispose();
+          }
+        }
+      });
+    }
+    
+    public void doWork() {
       MessageMail msg = new MessageMail();
       try {
         // sujet
@@ -268,54 +292,54 @@ public class JDialogRunSendEmail extends JDialog {
             int value = RunLapTableManager.getInstance()
                 .computeCalories(dataRun.getId());
             if (value > 0) {
-              writer.write(line.replaceFirst("%CALORIES%", Integer
-                  .toString(value)));
+              writer.write(line.replaceFirst("%CALORIES%",
+                                             Integer.toString(value)));
               writer.write('\n');
             }
           }
           else if (line.contains("%HEART_AVG%")) {
             // frequence moyenne
-            int value = RunLapTableManager.getInstance().heartAvg(dataRun
-                .getId());
+            int value = RunLapTableManager.getInstance()
+                .heartAvg(dataRun.getId());
             if (value > 0) {
-              writer.write(line.replaceFirst("%HEART_AVG%", Integer
-                  .toString(value)));
+              writer.write(line.replaceFirst("%HEART_AVG%",
+                                             Integer.toString(value)));
               writer.write('\n');
             }
           }
           else if (line.contains("%HEART_MAX%")) {
             // frequence max.
-            int value = RunLapTableManager.getInstance().heartMax(dataRun
-                .getId());
+            int value = RunLapTableManager.getInstance()
+                .heartMax(dataRun.getId());
             if (value > 0) {
-              writer.write(line.replaceFirst("%HEART_MAX%", Integer
-                  .toString(value)));
+              writer.write(line.replaceFirst("%HEART_MAX%",
+                                             Integer.toString(value)));
               writer.write('\n');
             }
           }
           else if (line.contains("%HEART_MIN%")) {
             // frequence min.
-            int value = RunTrkTableManager.getInstance().heartMin(dataRun
-                .getId());
+            int value = RunTrkTableManager.getInstance()
+                .heartMin(dataRun.getId());
             if (value > 0) {
-              writer.write(line.replaceFirst("%HEART_MIN%", Integer
-                  .toString(value)));
+              writer.write(line.replaceFirst("%HEART_MIN%",
+                                             Integer.toString(value)));
               writer.write('\n');
             }
           }
           else if (line.contains("%ALT_PLUS%")) {
             // Altitude +.
             if (alt[0] > 0) {
-              writer.write(line.replaceFirst("%ALT_PLUS%", Integer
-                  .toString(alt[0])));
+              writer.write(line.replaceFirst("%ALT_PLUS%",
+                                             Integer.toString(alt[0])));
               writer.write('\n');
             }
           }
           else if (line.contains("%ALT_MOINS%")) {
             // Altitude -.
             if (alt[1] > 0) {
-              writer.write(line.replaceFirst("%ALT_MOINS%", Integer
-                  .toString(alt[1])));
+              writer.write(line.replaceFirst("%ALT_MOINS%",
+                                             Integer.toString(alt[1])));
               writer.write('\n');
             }
           }
@@ -326,6 +350,7 @@ public class JDialogRunSendEmail extends JDialog {
 
         // piece jointe
         // ----------------------
+        boolean hasJoin = false;
         try {
           // image
           if (jCheckBoxDiagram.isSelected()) {
@@ -337,6 +362,7 @@ public class JDialogRunSendEmail extends JDialog {
             File f = new File(Location.googleEarthLocation(), name);
             panel.getJDiagram().getJDiagram().saveComponentAsJPEG(f);
             msg.addAttachment(f);
+            hasJoin = true;
           }
           // kml
           if (jCheckBoxKml.isSelected()) {
@@ -348,6 +374,7 @@ public class JDialogRunSendEmail extends JDialog {
               File kmz = new File(name + ".kmz");
               ZipUtil.create(kmz, f);
               msg.addAttachment(kmz);
+              hasJoin = true;
             }
           }
           // google map
@@ -356,6 +383,7 @@ public class JDialogRunSendEmail extends JDialog {
                 .convert(dataRun);
             if (f != null) {
               msg.addAttachment(f);
+              hasJoin = true;
             }
           }
           // gpx
@@ -364,6 +392,16 @@ public class JDialogRunSendEmail extends JDialog {
                 .convert(dataRun);
             if (f != null) {
               msg.addAttachment(f);
+              hasJoin = true;
+            }
+          }
+          // hst
+          if (jCheckBoxHst.isSelected()) {
+            File f = FactoryGeoConvertRun.getInstance(FactoryGeoConvertRun.HST)
+                .convert(dataRun);
+            if (f != null) {
+              msg.addAttachment(f);
+              hasJoin = true;
             }
           }
         }
@@ -372,6 +410,13 @@ public class JDialogRunSendEmail extends JDialog {
           JShowMessage.error(ge.getMessage());
         }
 
+        if (hasJoin) {
+          try {
+            Thread.sleep(1000);
+          }
+          catch (Exception ex) {
+          }
+        }
         mail.mail(msg);
       }
       catch (Throwable th) {
@@ -382,6 +427,10 @@ public class JDialogRunSendEmail extends JDialog {
       Configuration.getConfig().addProperty("mail",
                                             "racegpx",
                                             Boolean.toString(jCheckBoxGpx
+                                                .isSelected()));
+      Configuration.getConfig().addProperty("mail",
+                                            "racehst",
+                                            Boolean.toString(jCheckBoxHst
                                                 .isSelected()));
       Configuration.getConfig().addProperty("mail",
                                             "racekml",
@@ -395,9 +444,6 @@ public class JDialogRunSendEmail extends JDialog {
                                             "racediagram",
                                             Boolean.toString(jCheckBoxDiagram
                                                 .isSelected()));
-
-      dispose();
     }
   }
-
 }

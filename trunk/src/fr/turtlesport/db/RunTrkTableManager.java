@@ -217,6 +217,40 @@ public final class RunTrkTableManager extends AbstractTableManager {
   }
 
   /**
+   * D&eacute;termine si ce run &agrave; des points..
+   * 
+   * @param idRun
+   * @return <code>true</code si ce run &agrave; des points, <code>false</code>
+   *         sinon.
+   * @throws SQLException
+   */
+  public boolean hasTrks(int idRun) throws SQLException {
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT * FROM ");
+      st.append(getTableName());
+      st.append(" WHERE id=?");
+      st.append(" AND distance <> ?");
+      st.append(" AND ((latitude <> ? AND longitude <> ?) AND  (latitude <> 0 AND longitude <> 0))");
+      st.append(" ORDER BY distance");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, idRun);
+      pstmt.setFloat(2, 1.0e25f);
+      pstmt.setInt(3, 0x7FFFFFFF);
+      pstmt.setInt(4, 0x7FFFFFFF);
+
+      ResultSet rs = pstmt.executeQuery();
+      return rs.next();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+  }
+
+  /**
    * Restitue les points valides.
    * 
    * @param idRun
@@ -237,7 +271,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
       st.append(getTableName());
       st.append(" WHERE id=?");
       st.append(" AND distance <> ?");
-      st.append(" AND ((latitude <> ? AND longitude <> ?) AND  (latitude <> 0 AND longitude <> 0))");
+      st.append(" AND ((latitude <> ? OR longitude <> ?) AND  (latitude <> 0 OR longitude <> 0))");
       st.append(" ORDER BY distance");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
@@ -315,7 +349,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
       st.append(getTableName());
       st.append(" WHERE id=?");
       st.append(" AND distance <> ?");
-      st.append(" AND ((latitude <> ? AND longitude <> ?) AND  (latitude <> 0 AND longitude <> 0))");
+      st.append(" AND ((latitude <> ? OR longitude <> ?) AND  (latitude <> 0 OR longitude <> 0))");
       st.append(" AND (time BETWEEN ? AND ?)");
       st.append(" ORDER BY distance");
 

@@ -2055,7 +2055,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     public int getSportType() {
       Object obj = getSelectedItem();
-      if (obj instanceof String) {
+      if (obj instanceof String || obj == null) {
         return DataActivityOther.SPORT_TYPE;
       }
       return ((AbstractDataActivity) obj).getSportType();

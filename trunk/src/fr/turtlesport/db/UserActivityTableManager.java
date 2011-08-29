@@ -26,6 +26,22 @@ public final class UserActivityTableManager extends AbstractTableManager {
    */
   private UserActivityTableManager() {
     super();
+
+    // creation des sports run velo, other si non present
+    try {
+      if (retreive(DataActivityRun.SPORT_TYPE) == null) {
+        store(FactoryDataActivity.getInstance(DataActivityRun.SPORT_TYPE));
+      }
+      if (retreive(DataActivityBike.SPORT_TYPE) == null) {
+        store(FactoryDataActivity.getInstance(DataActivityBike.SPORT_TYPE));
+      }
+      if (retreive(DataActivityOther.SPORT_TYPE) == null) {
+        store(FactoryDataActivity.getInstance(DataActivityOther.SPORT_TYPE));
+      }
+    }
+    catch (SQLException e) {
+      log.error("", e);
+    }
   }
 
   /**
@@ -106,7 +122,7 @@ public final class UserActivityTableManager extends AbstractTableManager {
       }
       // si non trouve on supprime
       if (!bFound) {
-        //suppression  
+        // suppression
         delete(a1.getSportType());
         // mis a jour du sport type
         RunTableManager.getInstance()
@@ -481,7 +497,8 @@ public final class UserActivityTableManager extends AbstractTableManager {
         int index = 0;
         while (rs.next() && index < AbstractDataActivity.MAX_HEART_ZONE) {
           dataActivity.setHeartZone(new DataHeartZone(rs.getInt(1), rs
-              .getInt(2)), index);
+                                        .getInt(2)),
+                                    index);
           index++;
         }
         pstmt.close();
@@ -501,8 +518,10 @@ public final class UserActivityTableManager extends AbstractTableManager {
         index = 0;
         DataSpeedZone dsz;
         while (rs.next() && index < AbstractDataActivity.MAX_SPEED_ZONE) {
-          dsz = new DataSpeedZone(rs.getString(1), rs.getFloat(2), rs
-              .getFloat(3), rs.getString(4));
+          dsz = new DataSpeedZone(rs.getString(1),
+                                  rs.getFloat(2),
+                                  rs.getFloat(3),
+                                  rs.getString(4));
           dataActivity.setSpeedZone(dsz, index);
           index++;
         }
