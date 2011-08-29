@@ -228,8 +228,8 @@ public final class JDialogImport extends JDialog implements
       log.error("", e);
       ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
           .getManager().getCurrentLang(), JDialogImport.class);
-      JShowMessage.error(MessageFormat.format(rb.getString("errorSql"), e
-          .getErrorCode()));
+      JShowMessage.error(MessageFormat.format(rb.getString("errorSql"),
+                                              e.getErrorCode()));
     }
   }
 
@@ -298,8 +298,9 @@ public final class JDialogImport extends JDialog implements
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.db.progress.IGeoRouteStoreProgress#beginStore(fr.turtlesport
-   *      .geo.IGeoRoute)
+   * @see
+   * fr.turtlesport.db.progress.IGeoRouteStoreProgress#beginStore(fr.turtlesport
+   * .geo.IGeoRoute)
    */
   public void beginStore(IGeoRoute route) {
   }
@@ -307,8 +308,9 @@ public final class JDialogImport extends JDialog implements
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.db.progress.IGeoRouteStoreProgress#endStore(fr.turtlesport
-   *      .geo.IGeoRoute)
+   * @see
+   * fr.turtlesport.db.progress.IGeoRouteStoreProgress#endStore(fr.turtlesport
+   * .geo.IGeoRoute)
    */
   public void endStore(IGeoRoute route) {
     TableRowObject row = tableModel.getTableRowObject(route);
@@ -330,8 +332,9 @@ public final class JDialogImport extends JDialog implements
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.db.progress.IGeoRouteStoreProgress#storePoint(fr.turtlesport
-   *      .geo.IGeoRoute, int, int)
+   * @see
+   * fr.turtlesport.db.progress.IGeoRouteStoreProgress#storePoint(fr.turtlesport
+   * .geo.IGeoRoute, int, int)
    */
   public void storePoint(IGeoRoute route, int currentPoint, int maxPoint) {
     TableRowObject row = tableModel.getTableRowObject(route);
@@ -888,7 +891,7 @@ public final class JDialogImport extends JDialog implements
      * (non-Javadoc)
      * 
      * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object,
-     *      int, int)
+     * int, int)
      */
     @Override
     public void setValueAt(Object value, int row, int col) {
@@ -1307,7 +1310,9 @@ public final class JDialogImport extends JDialog implements
 
     public void setUser(User user) {
       this.user = user;
-      ((DataRunExtra) route.getExtra()).setIdUser(user.getData().getId());
+      if (user != null) {
+        ((DataRunExtra) route.getExtra()).setIdUser(user.getData().getId());
+      }
     }
 
     public String getComments() {
@@ -1548,7 +1553,8 @@ public final class JDialogImport extends JDialog implements
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent actionevent) {
       dispose();
@@ -1569,7 +1575,8 @@ public final class JDialogImport extends JDialog implements
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent actionevent) {
       for (TableRowObject row : tableModel.listRows) {
@@ -1593,7 +1600,8 @@ public final class JDialogImport extends JDialog implements
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent actionevent) {
       JDialogImport.this.setCursor(Cursor
@@ -1692,7 +1700,8 @@ public final class JDialogImport extends JDialog implements
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent actionevent) {
 
@@ -1771,9 +1780,10 @@ public final class JDialogImport extends JDialog implements
           jProgressBar.setIndeterminate(false);
           jProgressBar.setValue(0);
           if (error.length() > 0) {
-            error
-                .insert(0, "<html><body><b>"
-                           + rb.getString("errorDialogImportMsg") + "</b><br>");
+            error.insert(0,
+                         "<html><body><b>"
+                             + rb.getString("errorDialogImportMsg")
+                             + "</b><br>");
             if (nbError > 3) {
               error.append("...");
             }
@@ -1798,7 +1808,8 @@ public final class JDialogImport extends JDialog implements
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
       tableModel.removeRows(jTable.getSelectedRows());
@@ -1814,8 +1825,9 @@ public final class JDialogImport extends JDialog implements
     /*
      * (non-Javadoc)
      * 
-     * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event
-     *      .ListSelectionEvent)
+     * @see
+     * javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event
+     * .ListSelectionEvent)
      */
     public void valueChanged(ListSelectionEvent e) {
       if (e != null && e.getValueIsAdjusting()) {

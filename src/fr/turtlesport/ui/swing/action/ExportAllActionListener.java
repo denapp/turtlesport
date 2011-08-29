@@ -62,7 +62,7 @@ public class ExportAllActionListener implements ActionListener {
    * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */
   public void actionPerformed(ActionEvent ae) {
-    MainGui.getWindow().afterRunnableSwing();
+    MainGui.getWindow().beforeRunnableSwing();
 
     final List<DataRun> runs;
     StringBuilder name = new StringBuilder();
@@ -93,6 +93,10 @@ public class ExportAllActionListener implements ActionListener {
           name.append(date.getLibelle());
         }
       }
+      else {
+        // pas de run a sauvegarder
+        return;
+      }
     }
     catch (SQLException e) {
       log.error("", e);
@@ -111,6 +115,8 @@ public class ExportAllActionListener implements ActionListener {
                                                cv.extension()[0],
                                                cv.description());
     if (out != null) {
+      MainGui.getWindow().beforeRunnableSwing();
+
       final ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
           .getManager().getCurrentLang(), JPanelRun.class);
 
@@ -153,8 +159,8 @@ public class ExportAllActionListener implements ActionListener {
       new Thread() {
         public void run() {
           try {
-            cv.convert(runs, progress, out);
-            if (!progress.cancel()) {
+            File file = cv.convert(runs, progress, out);
+            if (!progress.cancel() && file != null) {
               ResourceBundle rb = ResourceBundleUtility
                   .getBundle(LanguageManager.getManager().getCurrentLang(),
                              JPanelRun.class);

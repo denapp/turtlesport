@@ -51,6 +51,35 @@ public final class RunLapTableManager extends AbstractTableManager {
   }
 
   /**
+   * D&eacute;termine si ce run &agrave; des tours intermediaires.
+   * 
+   * @param idRun
+   * @return <code>true</code> si ce run &agrave; des tours intermediaires,
+   *         <code>false</code> sinon.
+   * @throws SQLException
+   */
+  public boolean hasLap(int idRun) throws SQLException {
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT * FROM ");
+      st.append(getTableName());
+      st.append(" WHERE id=?");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, idRun);
+
+      ResultSet rs = pstmt.executeQuery();
+
+      return rs.next();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+  }
+
+  /**
    * Restitue les tours intermediaires du run.
    * 
    * @param idRun
@@ -124,9 +153,15 @@ public final class RunLapTableManager extends AbstractTableManager {
       throw new IllegalArgumentException("lapType est null");
     }
 
-    store(id, lap.getIndex(), lap.getStartTime(), lap.getTotalTime(), lap
-        .getTotalDist(), lap.getMaxSpeed(), lap.getCalories(), lap
-        .getAvgHeartRate(), lap.getMaxHeartRate());
+    store(id,
+          lap.getIndex(),
+          lap.getStartTime(),
+          lap.getTotalTime(),
+          lap.getTotalDist(),
+          lap.getMaxSpeed(),
+          lap.getCalories(),
+          lap.getAvgHeartRate(),
+          lap.getMaxHeartRate());
 
     log.debug("<<store");
   }
@@ -660,9 +695,7 @@ public final class RunLapTableManager extends AbstractTableManager {
       ResultSet rs = pstmt.executeQuery();
 
       while (rs.next()) {
-        res
-            .add(new DataStatYear(rs.getInt(1), rs.getDouble(2), 0, rs
-                .getInt(3)));
+        res.add(new DataStatYear(rs.getInt(1), rs.getDouble(2), 0, rs.getInt(3)));
 
       }
       rs.close();
@@ -719,9 +752,7 @@ public final class RunLapTableManager extends AbstractTableManager {
 
       ResultSet rs = pstmt.executeQuery();
       while (rs.next()) {
-        res
-            .add(new DataStatYear(rs.getInt(1), 0, rs.getDouble(2), rs
-                .getInt(3)));
+        res.add(new DataStatYear(rs.getInt(1), 0, rs.getDouble(2), rs.getInt(3)));
       }
       rs.close();
     }
@@ -830,7 +861,8 @@ public final class RunLapTableManager extends AbstractTableManager {
         // st.append(" COUNT(DISTINCT LAP.id) ");
         // st.append("FROM ");
         // st.append(getTableName() + " LAP, ");
-        // st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+        // st.append(RunTableManager.getInstance().getTableName() +
+        // " RUN ");
         // st.append("WHERE LAP.ID = RUN.ID ");
         // st.append(" AND RUN.id_user=?");
         // st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
@@ -940,8 +972,11 @@ public final class RunLapTableManager extends AbstractTableManager {
 
       DataStatYearWeek dLast = new DataStatYearWeek(1, -1, 0, 0, 0);
       while (rs.next()) {
-        dLast = new DataStatYearWeek(rs.getInt(1), rs.getInt(2), rs
-            .getDouble(3), rs.getDouble(4), rs.getInt(5));
+        dLast = new DataStatYearWeek(rs.getInt(1),
+                                     rs.getInt(2),
+                                     rs.getDouble(3),
+                                     rs.getDouble(4),
+                                     rs.getInt(5));
         res.add(dLast);
       }
       rs.close();
@@ -1317,8 +1352,11 @@ public final class RunLapTableManager extends AbstractTableManager {
 
       DataStatYearWeek dLast = new DataStatYearWeek(1, -1, 0, 0, 0);
       while (rs.next()) {
-        dLast = new DataStatYearWeek(rs.getInt(1), rs.getInt(2), rs
-            .getDouble(3), 0, rs.getInt(4));
+        dLast = new DataStatYearWeek(rs.getInt(1),
+                                     rs.getInt(2),
+                                     rs.getDouble(3),
+                                     0,
+                                     rs.getInt(4));
         res.add(dLast);
       }
 
@@ -1395,8 +1433,11 @@ public final class RunLapTableManager extends AbstractTableManager {
       ResultSet rs = pstmt.executeQuery();
       DataStatYearWeek dLast = new DataStatYearWeek(1, -1, 0, 0, 0);
       while (rs.next()) {
-        dLast = new DataStatYearWeek(rs.getInt(1), rs.getInt(2), 0, rs
-            .getDouble(3), rs.getInt(4));
+        dLast = new DataStatYearWeek(rs.getInt(1),
+                                     rs.getInt(2),
+                                     0,
+                                     rs.getDouble(3),
+                                     rs.getInt(4));
         res.add(dLast);
       }
       rs.close();

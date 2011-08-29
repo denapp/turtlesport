@@ -48,7 +48,7 @@ public class PositionType extends AbstractData {
    * @return <code>true</code> si cette postion est invalide.
    */
   public boolean iPositionInvalid() {
-    return (latitude == INVALID && longitude == INVALID);
+    return (latitude == INVALID || longitude == INVALID);
   }
 
   /*
