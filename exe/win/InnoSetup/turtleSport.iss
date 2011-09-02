@@ -6,16 +6,16 @@
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{14B614CA-42E0-4545-A272-B1248809E95D}
-AppName=Turtle Sport v0.3
-AppVerName=Turtle Sport v0.3
-AppVersion=0.3
+AppName=Turtle Sport v1.0
+AppVerName=Turtle Sport v1.0
+AppVersion=1.0
 AppPublisher=TurtleSport
 AppPublisherURL=http://turtlesport.sourceforge.net
 AppSupportURL=http://turtlesport.sourceforge.net
 AppUpdatesURL=http://turtlesport.sourceforge.net
 DefaultDirName={pf}\turtlesport
 DefaultGroupName=Turtle Sport
-OutputBaseFilename=turtlesport-win-0.3
+OutputBaseFilename=turtlesport-win-1.0
 Compression=lzma
 SolidCompression=yes
 WizardSmallImageFile=Turtle-55.bmp
@@ -38,6 +38,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 Source: "..\derby.jar"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\fit.jar"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\jcommon.jar"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\jfreechart.jar"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\log4j.jar"; DestDir: "{app}"; Flags: ignoreversion
