@@ -141,7 +141,7 @@ public class ImportFileFilter extends FileFilter {
     }
     String path = f.getPath();
     for (String s : ext) {
-      if (path.endsWith(s)) {
+      if (path.toLowerCase().endsWith(s)) {
         return true;
       }
     }
