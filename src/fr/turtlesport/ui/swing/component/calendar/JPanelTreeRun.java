@@ -871,6 +871,8 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
             TreePath path = new TreePath(nodes);
             jTreeTable.scrollPathToVisible(path);
             jTreeTable.getTreeSelectionModel().setSelectionPath(path);
+            // recuperation du focus
+            jTreeTable.grabFocus();
             return;
           }
         }
