@@ -685,6 +685,8 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
         if (run.getTime().equals(date)) {
           int row = jTable.convertRowIndexToView(i);
           jTable.setRowSelectionInterval(row, row);
+          // recuperation du focus
+          jTable.grabFocus();
           break;
         }
       }
