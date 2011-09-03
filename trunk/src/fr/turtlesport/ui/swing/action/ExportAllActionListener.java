@@ -95,6 +95,10 @@ public class ExportAllActionListener implements ActionListener {
       }
       else {
         // pas de run a sauvegarder
+        MainGui.getWindow().afterRunnableSwing();
+        ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+            .getManager().getCurrentLang(), ExportAllActionListener.class);
+        JShowMessage.ok(rb.getString("noexport"));
         return;
       }
     }
