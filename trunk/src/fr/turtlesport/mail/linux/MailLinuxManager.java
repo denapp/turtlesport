@@ -99,7 +99,7 @@ public final class MailLinuxManager implements IMailManager {
     }
     else {
       if ("Thunderbird".equals(defaultClient)
-          && MailClientLinuxEvolution.isAvailable()) {
+          && MailClientLinuxThunderbird.isAvailable()) {
         return new MailClientLinuxThunderbird();
       }
       if ("Evolution".equals(defaultClient)
@@ -111,7 +111,7 @@ public final class MailLinuxManager implements IMailManager {
       }
     }
 
-    if (MailClientLinuxEvolution.isAvailable()) {
+    if (MailClientLinuxThunderbird.isAvailable()) {
       return new MailClientLinuxThunderbird();
     }
     if (MailClientLinuxEvolution.isAvailable()) {
