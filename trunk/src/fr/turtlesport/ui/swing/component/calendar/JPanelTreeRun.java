@@ -296,9 +296,11 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     final GoogleMapsShowActionListener actionGoogleMaps = new GoogleMapsShowActionListener();
     getJMenuItemRunGoogleMap().addActionListener(actionGoogleMaps);
 
-    final EmailActionListener actionMail = new EmailActionListener();
-    getJMenuItemRunEmail().addActionListener(actionMail);
-
+    if (getJMenuItemRunEmail() != null) {
+      final EmailActionListener actionMail = new EmailActionListener();
+      getJMenuItemRunEmail().addActionListener(actionMail);
+    }
+    
     final ExportActionListener actionKml = new ExportActionListener(FactoryGeoConvertRun.KML);
     getJMenuItemRunExportGoogleEarth().addActionListener(actionKml);
 
@@ -1435,7 +1437,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
       StringBuilder name = new StringBuilder(Integer.toString(year));
       if (getMonth() != -1) {
         name.append('-');
-        name.append(formatMonth.getMonths()[getMonth()-1]);
+        name.append(formatMonth.getMonths()[getMonth() - 1]);
       }
       return name.toString();
     }

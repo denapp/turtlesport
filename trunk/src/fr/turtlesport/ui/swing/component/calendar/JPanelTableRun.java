@@ -256,9 +256,11 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     final GoogleMapsShowActionListener actionGoogleMaps = new GoogleMapsShowActionListener();
     getJMenuItemRunGoogleMap().addActionListener(actionGoogleMaps);
 
-    final EmailActionListener actionMail = new EmailActionListener();
-    getJMenuItemRunEmail().addActionListener(actionMail);
-
+    if (getJMenuItemRunEmail() != null) {
+      final EmailActionListener actionMail = new EmailActionListener();
+      getJMenuItemRunEmail().addActionListener(actionMail);
+    }
+    
     final ExportActionListener actionKml = new ExportActionListener(FactoryGeoConvertRun.KML);
     getJMenuItemRunExportGoogleEarth().addActionListener(actionKml);
 
