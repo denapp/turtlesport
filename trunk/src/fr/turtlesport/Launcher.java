@@ -84,6 +84,7 @@ public final class Launcher {
       log.debug(">>main");
 
       // log
+      log.warn("Turtle Sport v"+Version.VERSION);
       logProperty("prop application.home");
       logProperty("java.vendor");
       logProperty("java.runtime.name");
