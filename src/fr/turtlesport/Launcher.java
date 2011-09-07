@@ -53,6 +53,10 @@ public final class Launcher {
     gui.stopIt();
   }
 
+  private static void logProperty(String name) {
+    log.warn(name + "=" + System.getProperty(name));
+  }
+
   /**
    * @param args
    */
@@ -79,8 +83,15 @@ public final class Launcher {
       log = (TurtleLogger) TurtleLogger.getLogger(Launcher.class);
       log.debug(">>main");
 
-      String apphome = System.getProperty("application.home");
-      log.warn("prop application.home=" + apphome);
+      // log
+      logProperty("prop application.home");
+      logProperty("java.vendor");
+      logProperty("java.runtime.name");
+      logProperty("java.version");
+      logProperty("java.vm.version");
+      logProperty("prop application.home");
+      logProperty("os.name");
+      logProperty("os.arch");
 
       // demarre l'application
       Launcher.getInstance().startIt();
