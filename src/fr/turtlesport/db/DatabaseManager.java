@@ -79,6 +79,8 @@ public class DatabaseManager {
     // ds.setPassword(password);
     ds.setCreateDatabase("create");
 
+    loadDerbyVersion();
+    
     if (isDropTables) {
       dropTables();
     }
@@ -117,6 +119,8 @@ public class DatabaseManager {
     ds.setCreateDatabase("create");
 
     isInit = true;
+
+    loadDerbyVersion();
     createTables(splash);
 
     // create function
@@ -301,6 +305,29 @@ public class DatabaseManager {
   public static ResultSet executeQueryNoParams(Connection conn, String statement) throws SQLException {
     PreparedStatement ps = conn.prepareStatement(statement);
     return ps.executeQuery();
+  }
+
+  private static void loadDerbyVersion() {
+    Connection conn = null;
+    try {
+      conn = getConnection();
+      DatabaseMetaData dbmd = conn.getMetaData();
+      String productName = dbmd.getDatabaseProductName();
+      String productVersion = dbmd.getDatabaseProductVersion();
+      log.warn("Using " + productName + " v" + productVersion);
+    }
+    catch (SQLException e) {
+      log.error("", e);
+    }
+    finally {
+      if (conn != null) {
+        try {
+          releaseConnection(conn);
+        }
+        catch (SQLException e) {
+        }
+      }
+    }
   }
 
   /**
