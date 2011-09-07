@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.apache.derby.jdbc.EmbeddedDriver;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.log.TurtleLogger;
@@ -72,6 +73,9 @@ public class DatabaseManager {
     log.info("derby.system.home=" + derbyHome);
     System.setProperty("derby.system.home", derbyHome);
 
+    logJDBCSupportInVM();
+    logDerbyVersion();
+
     // Creation de la database.
     ds = new EmbeddedDataSource();
     ds.setDatabaseName(DB_NAME);
@@ -79,8 +83,8 @@ public class DatabaseManager {
     // ds.setPassword(password);
     ds.setCreateDatabase("create");
 
-    loadDerbyVersion();
-    
+    loadDbVersion();
+
     if (isDropTables) {
       dropTables();
     }
@@ -111,6 +115,9 @@ public class DatabaseManager {
     log.info("derby.system.home=" + derbyHome);
     System.setProperty("derby.system.home", derbyHome);
 
+    logJDBCSupportInVM();
+    logDerbyVersion();
+
     // Creation de la database.
     ds = new EmbeddedDataSource();
     ds.setDatabaseName(DB_NAME);
@@ -119,8 +126,8 @@ public class DatabaseManager {
     ds.setCreateDatabase("create");
 
     isInit = true;
+    loadDbVersion();
 
-    loadDerbyVersion();
     createTables(splash);
 
     // create function
@@ -307,14 +314,23 @@ public class DatabaseManager {
     return ps.executeQuery();
   }
 
-  private static void loadDerbyVersion() {
+  private static void logDerbyVersion() {
+    // Connection conn = null;
+    // try {
+    EmbeddedDriver driver = new EmbeddedDriver();
+    int majorVersion = driver.getMajorVersion();
+    int minorVersion = driver.getMinorVersion();
+    log.warn("Using " + majorVersion + "." + minorVersion);
+  }
+
+  private static void loadDbVersion() {
     Connection conn = null;
     try {
       conn = getConnection();
       DatabaseMetaData dbmd = conn.getMetaData();
       String productName = dbmd.getDatabaseProductName();
       String productVersion = dbmd.getDatabaseProductVersion();
-      log.warn("Using " + productName + " v" + productVersion);
+      log.warn("Using " + productName + " " + productVersion);
     }
     catch (SQLException e) {
       log.error("", e);
@@ -327,6 +343,59 @@ public class DatabaseManager {
         catch (SQLException e) {
         }
       }
+    }
+  }
+
+  private static void logJDBCSupportInVM() {
+    /*
+     * Check the availability of classes or interfaces introduced in or removed
+     * from specific versions of JDBC-related specifications. This will give us
+     * an indication of which JDBC version this Java VM is supporting.
+     */
+    if (haveClass("java.sql.SQLXML")) {
+      log.warn("JDBC 4");
+    }
+    else if (haveClass("java.sql.Savepoint")) {
+      // indication of JDBC 3 or JSR-169.
+      // JSR-169 is a subset of JDBC 3 which does not include the
+      // java.sql.Driver interface
+      if (haveClass("java.sql.Driver")) {
+        log.warn("JDBC 3");
+      }
+      else {
+        log.warn("JSR-169");
+      }
+    }
+    else if (haveClass("java.sql.Blob")) {
+      // new in JDBC 2.0.
+      // We already checked for JDBC 3.0, 4.0 and JSR-169, all of which also
+      // include this class. Chances are good this is JDBC 2.x
+      log.warn("JDBC 2");
+    }
+    else if (haveClass("java.sql.Connection")) {
+      // included in most (all?) JDBC specs
+      log.warn("Older than JDBC 2.0");
+    }
+    else {
+      // JDBC support is missing (or is older than JDBC 1.0?)
+      log.warn("No valid JDBC support found");
+    }
+  }
+
+  /**
+   * Checks whether or not we can load a specific class.
+   * 
+   * @param className
+   *          Name of class to attempt to load.
+   * @return true if class can be loaded, false otherwise.
+   */
+  private static boolean haveClass(String className) {
+    try {
+      Class.forName(className);
+      return true;
+    }
+    catch (Exception e) {
+      return false;
     }
   }
 
