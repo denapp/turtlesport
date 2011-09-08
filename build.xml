@@ -22,8 +22,7 @@
 	<property name="dirBundle" location="${exe}/macosx/turlesport" />
 	<property name="rootdir" value='/tmp/turtlesport_dist' />
 	<property name="rpmbuilddir" value="${rootdir}/RPMBUILD" />
-	<property name="rpmdistdir-i386" value="${rpmbuilddir}/BUILDROOT/turtlesport-${version}-1.i386" />
-	<property name="rpmdistdir-64" value="${rpmbuilddir}/BUILDROOT/turtlesport-${version}-1.x86_64" />
+	<property name="rpmdistdir" value="${rpmbuilddir}/BUILDROOT/turtlesport-${version}-1.noarch" />
 	<property name="packaging" value="${basedir}/packaging" />
 
 	<target name="init">
@@ -250,7 +249,7 @@
 	</target>
 
 	<!-- Linux -->
-	<target name="releaseLinux" depends="packagingLinuxTar, desktopLinuxTurtle, packagingLinuxDeb" />
+	<target name="releaseLinux" depends="packagingLinuxTar, desktopLinuxTurtle, packagingLinuxDeb, packagingLinuxRmp" />
 
 	<!-- Desktop Linux Turtle -->
 	<target name="desktopLinuxTurtle">
@@ -269,7 +268,7 @@
 
 	<!-- Creates a Ubuntu/Debian package -->
 	<target name="packagingLinuxDeb">
-		<deb todir="${release}" package="turtlesport" section="utils" depends="sun-java6-jre">
+		<deb todir="${release}" package="turtlesport" section="utils" depends=" sun-java6-jre | openjdk-6-jre | sun-java7-jre | openjdk-7-jre">
 			<version upstream="${version}" />
 			<maintainer name="Denis Apparicio" email="turtlesport@sourceforge.net" />
 			<description synopsis="Turtle Sport">Turtle Sport garmin logbook.</description>
@@ -296,9 +295,6 @@
 		<echo message='Prepare files to build RPM package' />
 
 		<delete dir="${rootdir}" />
-		<!--                 -->
-		<!--RPM x86-->
-		<!--                 -->
 		<!-- Create structure-->
 		<mkdir dir='${rootdir}' />
 		<mkdir dir='${rpmbuilddir}' />
@@ -307,107 +303,42 @@
 		<mkdir dir='${rpmbuilddir}/RPMS' />
 		<mkdir dir='${rpmbuilddir}/SPECS' />
 		<mkdir dir='${rpmbuilddir}/BUILD' />
-		<mkdir dir='${rpmdistdir-64}' />
-		<mkdir dir='${rpmdistdir-64}/usr/bin' />
-		<mkdir dir='${rpmdistdir-64}/usr/share/turtlesport/' />
-		<mkdir dir='${rpmdistdir-64}/usr/share/pixmaps' />
-
-		<!-- Copy files -->
-		<copy todir='${rpmbuilddir}/SPECS'>
-			<fileset file='${packaging}/linux/rpm/turtlesport32.spec' />
-		</copy>
-		<copy todir='${rpmdistdir-i386}/usr/bin'>
-			<fileset file='${exe}/linux/turtlesport' />
-		</copy>
-		<copy todir='${rpmdistdir-i386}/usr/share/turtlesport'>
-			<fileset dir="${exe}/linux/">
-				<exclude name="**/turtlesport" />
-				<exclude name="**/turtleSport.png" />
-				<exclude name="**/turtlesport125.png" />
-			</fileset>
-		</copy>
-		<copy todir='${rpmdistdir-i386}/usr/share/applications'>
-			<fileset file='${packaging}/linux/turtlesport.desktop' />
-		</copy>
-		<copy todir='${rpmdistdir-i386}/usr/share/pixmaps'>
-			<fileset file='${exe}/linux/turtlesport125.png' />
-		</copy>
-		<!-- rights-->
-		<chmod file="${rpmdistdir-i386}/usr/bin/turtlesport" perm="ugo+rx" />
-
-		<!--  x86 -->
-		<copy file='${packaging}/linux/rpm/.rpmmacros32' toFile='${user.home}/.rpmmacros' overwrite='yes' />
-		<replace dir='${rpmbuilddir}/SPECS' value='${version}'>
-			<include name='turtlesport32.spec' />
-			<replacetoken>VERSION_REPLACED_BY_ANT</replacetoken>
-		</replace>
-		<rpm failOnError='true' specFile='turtlesport32.spec' topDir='${rpmbuilddir}' cleanBuildDir='yes' removeSpec='no' command='-bb -vv --target i386' />
-
-		<!--                 -->
-		<!--RPM 64-->
-		<!--                 -->
-		<!-- Create structure-->
-		<mkdir dir='${rootdir}' />
-		<mkdir dir='${rpmbuilddir}' />
-		<mkdir dir='${rpmbuilddir}/tmp' />
-		<mkdir dir='${rpmbuilddir}/SRMPS' />
-		<mkdir dir='${rpmbuilddir}/RPMS' />
-		<mkdir dir='${rpmbuilddir}/SPECS' />
-		<mkdir dir='${rpmbuilddir}/BUILD' />
-		<mkdir dir='${rpmdistdir-64}' />
-		<mkdir dir='${rpmdistdir-64}/usr/bin' />
-		<mkdir dir='${rpmdistdir-64}/usr/share/turtlesport/' />
-		<mkdir dir='${rpmdistdir-64}/usr/share/pixmaps' />
+		<mkdir dir='${rpmdistdir}' />
+		<mkdir dir='${rpmdistdir}/usr/bin' />
+		<mkdir dir='${rpmdistdir}/usr/share/turtlesport/' />
+		<mkdir dir='${rpmdistdir}/usr/share/pixmaps' />
 
 		<!-- Copy files -->
 		<copy todir='${rpmbuilddir}/SPECS'>
 			<fileset file='${packaging}/linux/rpm/turtlesport.spec' />
 		</copy>
-		<copy todir='${rpmdistdir-64}/usr/bin'>
+		<copy todir='${rpmdistdir}/usr/bin'>
 			<fileset file='${exe}/linux/turtlesport' />
 		</copy>
-		<copy todir='${rpmdistdir-64}/usr/share/turtlesport'>
+		<copy todir='${rpmdistdir}/usr/share/turtlesport'>
 			<fileset dir="${exe}/linux/">
 				<exclude name="**/turtlesport" />
 				<exclude name="**/turtleSport.png" />
 				<exclude name="**/turtlesport125.png" />
 			</fileset>
 		</copy>
-		<copy todir='${rpmdistdir-64}/usr/share/applications'>
+		<copy todir='${rpmdistdir}/usr/share/applications'>
 			<fileset file='${packaging}/linux/turtlesport.desktop' />
 		</copy>
-		<copy todir='${rpmdistdir-64}/usr/share/pixmaps'>
+		<copy todir='${rpmdistdir}/usr/share/pixmaps'>
 			<fileset file='${exe}/linux/turtlesport125.png' />
 		</copy>
 		<!-- rights-->
-		<chmod file="${rpmdistdir-64}/usr/bin/turtlesport" perm="ugo+rx" />
+		<chmod file="${rpmdistdir}/usr/bin/turtlesport" perm="ugo+rx" />
 
-		<copy todir='${rpmbuilddir}/SPECS'>
-			<fileset file='${packaging}/linux/rpm/turtlesport64.spec' />
-		</copy>
-		<copy todir='${rpmdistdir-64}/usr/share/turtlesport'>
-			<fileset dir="${exe}/linux/">
-				<exclude name="**/turtlesport" />
-				<exclude name="**/turtleSport.png" />
-				<exclude name="**/turtlesport125.png" />
-			</fileset>
-		</copy>
-		<copy todir='${rpmdistdir-64}/usr/share/applications'>
-			<fileset file='${packaging}/linux/turtlesport.desktop' />
-		</copy>
-		<copy todir='${rpmdistdir-64}/usr/share/pixmaps'>
-			<fileset file='${exe}/linux/turtlesport125.png' />
-		</copy>
-		<!-- rights-->
-		<chmod file="${rpmdistdir-64}/usr/bin/turtlesport" perm="ugo+rx" />
-
-		<copy file='${packaging}/linux/rpm/.rpmmacros64' toFile='${user.home}/.rpmmacros' overwrite='yes' />
+		<!-- all -->
+		<copy file='${packaging}/linux/rpm/.rpmmacros' toFile='${user.home}/.rpmmacros' overwrite='yes' />
 		<replace dir='${rpmbuilddir}/SPECS' value='${version}'>
-			<include name='turtlesport64.spec' />
+			<include name='turtlesport.spec' />
 			<replacetoken>VERSION_REPLACED_BY_ANT</replacetoken>
 		</replace>
-		<rpm failOnError='true' specFile='turtlesport64.spec' topDir='${rpmbuilddir}' cleanBuildDir='yes' removeSpec='no' command='-bb -vv --target x86_64' />
-
+		<rpm failOnError='true' specFile='turtlesport.spec' topDir='${rpmbuilddir}' cleanBuildDir='yes' removeSpec='no' command='-bb -vv --target noarch' />
+	   <copy file="${rpmbuilddir}/RPMS/turtlesport-${version}-1.all.rpm" todir="${release}" overwrite="true" />
 	</target>
 
 	<target name="releaseWin" depends="launch4j,SetupWin">
