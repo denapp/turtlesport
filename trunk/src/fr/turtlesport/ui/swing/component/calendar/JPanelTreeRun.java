@@ -1104,6 +1104,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
       }
 
       runNode = null;
+      jTreeTable.grabFocus();
 
       // recuperation de la selection
       int[] tabIndex = jTreeTable.getSelectedRows();
