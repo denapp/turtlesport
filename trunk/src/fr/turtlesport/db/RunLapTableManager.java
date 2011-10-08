@@ -228,7 +228,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return
    * @throws SQLException
    */
-  public boolean findLap(int idRun, int lapIndex) throws SQLException {
+  public boolean findLap(int idRun, int lapIndex, Date startTime) throws SQLException {
     log.debug(">>findLap idRun=" + idRun);
 
     boolean bRes;
@@ -243,11 +243,12 @@ public final class RunLapTableManager extends AbstractTableManager {
       StringBuilder st = new StringBuilder();
       st.append("SELECT * FROM ");
       st.append(getTableName());
-      st.append(" WHERE id=? AND lap_index=?");
+      st.append(" WHERE id=? AND (lap_index=? OR start_time=?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       pstmt.setInt(1, idRun);
       pstmt.setInt(2, lapIndex);
+      pstmt.setTimestamp(3, new Timestamp(startTime.getTime()));
 
       ResultSet rs = pstmt.executeQuery();
       bRes = rs.next();

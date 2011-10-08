@@ -629,6 +629,29 @@ public class DatabaseManager {
         st.append("(id)");
         executeUpdate(st.toString());
       }
+
+      // suppression des doublons
+      Connection conn = DatabaseManager.getConnection();
+      try {
+        // suppression des doublons --> BUG database
+        st = new StringBuilder();
+        st.append("DELETE FROM ");
+        st.append(TABLE_RUN_LAP);
+        st.append(" T1");
+        st.append(" WHERE  T1.LAP_INDEX < ANY");
+        st.append(" (");
+        st.append(" SELECT LAP_INDEX FROM ");
+        st.append(TABLE_RUN_LAP);
+        st.append(" T2");
+       st.append(" WHERE  T1.LAP_INDEX <> T2.LAP_INDEX");
+        st.append(" AND  T1.ID = T2.ID");
+        st.append(" AND  T1.START_TIME = T2.START_TIME)");
+        executeUpdate(st.toString());
+      }
+      finally {
+        DatabaseManager.releaseConnection(conn);
+      }
+
       return;
     }
 
