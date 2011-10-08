@@ -263,7 +263,7 @@ public final class RunTableManager extends AbstractTableManager {
         for (AbstractLapType lap : runType.getListLapType()) {
           log.info("LapIndex=" + lap.getIndex());
           // insertion du lap si non present
-          if (!RunLapTableManager.getInstance().findLap(id, lap.getIndex())) {
+          if (!RunLapTableManager.getInstance().findLap(id, lap.getIndex(), lap.getStartTime())) {
             RunLapTableManager.getInstance().store(id, lap);
             hasNewLap = true;
           }
