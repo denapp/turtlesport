@@ -126,10 +126,13 @@ public class SwingApplication {
     if (!Update.isCheckFirstEnd()) {
       splash.updateProgress(rb.getString("splashUpdate"));
       int nbRetry = 0;
-      while (!Update.isCheckFirstEnd() || (nbRetry < 8)) {
+      while (nbRetry < 8) {
         ThreadUtil.sleep(300);
         log.error("nbRetry=" + nbRetry);
         nbRetry++;
+        if (Update.isCheckFirstEnd()) {
+          break;
+        }
       }
     }
 

@@ -16,7 +16,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -39,6 +38,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -214,8 +214,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JTabbedPane             jTabbedPaneRace;
 
-  private JPanel                  panelAllButtons;
-
   private ChartPanel              chartPanelHeartZone;
 
   private JPanel                  jPanelSpeed;
@@ -254,6 +252,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
   private JPanel                  jPanelTextSpeed;
 
   private JPanelMeteo             jPanelMeteo;
+
+  private JLabel                  jLabelValDateTime;
 
   /**
    * This is the default constructor.
@@ -301,6 +301,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   public TableModelLap getTableModelLap() {
     return tableModelLap;
+  }
+
+  public JLabel getjLabelValDateTime() {
+    return jLabelValDateTime;
   }
 
   public JLabel getJLabelValAllure() {
@@ -423,7 +427,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
    */
   public void completedRemoveLanguageListener() {
     LanguageManager.getManager().removeLanguageListener(jDiagram);
-    LanguageManager.getManager().removeLanguageListener(jPanelMap);
     LanguageManager.getManager().removeLanguageListener(getJPanelMeteo());
   }
 
@@ -498,7 +501,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
    */
   private void initialize() {
     this.setSize(650, 650);
-    this.setLayout(new BorderLayout(10, 10));
+    this.setLayout(new BorderLayout(5, 0));
     this.setOpaque(true);
     this.add(getJPopupMenu());
     this.add(getJPanelCenter(), BorderLayout.CENTER);
@@ -920,6 +923,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jTabbedPaneRace = new JTabbedPane();
 
       jTabbedPaneRace.setBorder(BorderFactory.createTitledBorder(""));
+      // jTabbedPaneRace.setBorder(BorderFactory
+      // .createEtchedBorder(EtchedBorder.LOWERED));
 
       jTabbedPaneRace.setFont(GuiFont.FONT_PLAIN);
       jTabbedPaneRace.addTab("Course", getJPanelRunSummary());
@@ -933,6 +938,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
                              null);
       jTabbedPaneRace.addTab("Speed", getJPanelChartSpeed());
       jTabbedPaneRace.addTab("Meteo", getJPanelMeteo());
+      jTabbedPaneRace.setPreferredSize(new Dimension(200, 320));
     }
     return jTabbedPaneRace;
   }
@@ -958,6 +964,19 @@ public class JPanelRun extends JPanel implements LanguageListener,
       Insets insets = new Insets(0, 0, 5, 10);
       Insets insets2 = new Insets(10, 0, 5, 10);
       GridBagConstraints g = new GridBagConstraints();
+
+      // Ligne 0
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.VERTICAL;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      jLabelValDateTime = new JLabel();
+      jLabelValDateTime.setFont(GuiFont.FONT_ITALIC);
+      jLabelValDateTime.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelValDateTime, g);
 
       // Ligne 1
       g = new GridBagConstraints();
@@ -1333,11 +1352,13 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JPanel getJPanelButtons() {
     if (jPanelButtons == null) {
-      panelAllButtons = new JPanel();
-      panelAllButtons.setLayout(new BorderLayout());
-
       jPanelButtons = new JPanel();
       jPanelButtons.setLayout(new FlowLayout(FlowLayout.RIGHT));
+      jPanelButtons.add(getJPanelNav());
+
+      jPanelButtons.add(new Box.Filler(new Dimension(200, 10),
+                                       new Dimension(120, 10),
+                                       new Dimension(200, 10)));
       jPanelButtons.add(getJButtonDelete());
       jPanelButtons.add(getJButtonDetails());
       jPanelButtons.add(getJButtonDetailsGps());
@@ -1352,11 +1373,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
       }
       jPanelButtons.add(getJButtonGoogleEarth());
       jPanelButtons.add(getJButtonGoogleMap());
-
-      panelAllButtons.add(jPanelButtons, BorderLayout.EAST);
-      panelAllButtons.add(getJPanelNav(), BorderLayout.WEST);
     }
-    return panelAllButtons;
+    return jPanelButtons;
   }
 
   public JButton getJButtonGoogleEarth() {
@@ -1468,9 +1486,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jPanelCenter = new JPanel();
       jPanelCenter.setOpaque(true);
       jPanelCenter.setLayout(new BoxLayout(jPanelCenter, BoxLayout.Y_AXIS));
-      jPanelCenter.add(getJPanelRunLap());
+      // jPanelCenter.add(getJPanelRunLap());
+      jPanelCenter.add(getJPanelMap());
       jPanelCenter.add(Box.createRigidArea(new Dimension(0, 10)));
-      jPanelCenter.add(getJPanelGraph());
+      jPanelCenter.add(getJDiagram());
     }
     return jPanelCenter;
   }
@@ -1487,8 +1506,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
                                                BoxLayout.Y_AXIS));
       jPanelEastCenter.add(getJPanelButtons());
       jPanelEastCenter.add(getJTabbedPaneRace());
-      // jPanelEastCenter.add(Box.createRigidArea(new Dimension(0, 5)));
-      jPanelEastCenter.add(getJPanelMap());
+      jPanelEastCenter.add(getJPanelRunLap());
       jPanelEast = new JPanel();
       jPanelEast.setLayout(new BorderLayout());
       jPanelEast.add(jPanelEastCenter, BorderLayout.CENTER);
@@ -1504,15 +1522,13 @@ public class JPanelRun extends JPanel implements LanguageListener,
   public JPanelMap getJPanelMap() {
     if (jPanelMap == null) {
       jPanelMap = new JPanelMap();
-      jPanelMap.setBorder(BorderFactory
-          .createTitledBorder(null,
-                              "",
-                              TitledBorder.DEFAULT_JUSTIFICATION,
-                              TitledBorder.DEFAULT_POSITION,
-                              GuiFont.FONT_PLAIN,
-                              null));
-
-      Dimension dim = new Dimension(270, 270);
+      /*
+       * jPanelMap.setBorder(BorderFactory .createTitledBorder(null, "",
+       * TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+       * GuiFont.FONT_PLAIN, null));
+       */
+      // Dimension dim = new Dimension(270, 270);
+      Dimension dim = new Dimension(600, 400);
       jPanelMap.setPreferredSize(dim);
       jPanelMap.setMinimumSize(dim);
     }
@@ -1538,7 +1554,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
                               null);
       jPanelRunLap.setBorder(borderPanelRunLap);
       jPanelRunLap.setViewportView(getJTableLap());
-      jPanelRunLap.setPreferredSize(new Dimension(600, 300));
+      jPanelRunLap.setPreferredSize(new Dimension(200, 300));
     }
     return jPanelRunLap;
   }
@@ -1607,13 +1623,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
     if (jPanelGraph == null) {
       jPanelGraph = new JScrollPane();
       jPanelGraph.setViewportView(getJDiagram());
-      jPanelGraph.setBorder(BorderFactory
-          .createTitledBorder(null,
-                              "",
-                              TitledBorder.DEFAULT_JUSTIFICATION,
-                              TitledBorder.DEFAULT_POSITION,
-                              GuiFont.FONT_PLAIN,
-                              null));
       jPanelGraph.setFont(GuiFont.FONT_PLAIN);
       jPanelGraph.setPreferredSize(new Dimension(600, 360));
     }
@@ -1626,6 +1635,9 @@ public class JPanelRun extends JPanel implements LanguageListener,
   public JPanelGraph getJDiagram() {
     if (jDiagram == null) {
       jDiagram = new JPanelGraph();
+      jDiagram.setPreferredSize(new Dimension(600, 360));
+      jDiagram
+          .setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
     }
     return jDiagram;
   }
@@ -1639,9 +1651,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     private String                 unitDistance = DistanceUnit.unitKm();
 
-    private String[]               columnNames  = { "Jour",
-                                                    "Heure",
-                                                    "Distance (km)",
+    private String[]               columnNames  = { DistanceUnit
+                                                        .getDefaultUnit(),
                                                     "Temps",
                                                     "Allure Moy. (mn/km)",
                                                     "Vitesse Moy. (km/h)",
@@ -1651,19 +1662,15 @@ public class JPanelRun extends JPanel implements LanguageListener,
                                                     "Denivele +",
                                                     "Denivele -" };
 
-    private final int[]            columWidth   = { 40,
-                                                    40,
-                                                    50,
+    private final int[]            columWidth   = { 30,
                                                     30,
-                                                    70,
-                                                    70,
-                                                    35,
+                                                    60,
+                                                    60,
+                                                    28,
                                                     28,
                                                     30,
                                                     45,
                                                     45 };
-
-    private final SimpleDateFormat dfTime       = new SimpleDateFormat("kk:mm:ss");
 
     public TableModelLap() {
       super();
@@ -1678,19 +1685,17 @@ public class JPanelRun extends JPanel implements LanguageListener,
     public void performedLanguage() {
       for (int i = 0; i < columnNames.length; i++) {
         switch (i) {
+          case 0:
+            break;
+            
           case 2:
-            // Distance
-            performedHeader(DistanceUnit.getDefaultUnit(), 2);
-            break;
-
-          case 4:
             // Allure
-            performedHeader(PaceUnit.getDefaultUnit(), 4);
+            performedHeader(PaceUnit.getDefaultUnit(), 2);
             break;
 
-          case 5:
+          case 3:
             // Vitesse moyenne
-            performedHeader(SpeedUnit.getDefaultUnit(), 5);
+            performedHeader(SpeedUnit.getDefaultUnit(), 3);
             break;
 
           default:
@@ -1714,9 +1719,9 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     private void performedUnit(String unit) {
       // unite
-      performedHeader(unit, 2);
-      performedHeader("mn/" + unit, 4);
-      performedHeader(unit + "/h", 5);
+      columnNames[0] = unit;
+      performedHeader("mn/" + unit, 2);
+      performedHeader(unit + "/h", 3);
 
       // mis a jour des valeurs
       DataRunLap[] runLaps = ModelPointsManager.getInstance().getRunLaps();
@@ -1727,9 +1732,9 @@ public class JPanelRun extends JPanel implements LanguageListener,
                                        unit,
                                        runLaps[i].getTotalDist());
           runLaps[i].setTotalDist((float) value);
+          fireTableCellUpdated(i, 0);
           fireTableCellUpdated(i, 2);
-          fireTableCellUpdated(i, 4);
-          fireTableCellUpdated(i, 5);
+          fireTableCellUpdated(i, 3);
         }
         unitDistance = unit;
       }
@@ -1783,7 +1788,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
     public Object getValueAt(int rowIndex, int columnIndex) {
-      // "Date"
       // "Heure",
       // "Distance",
       // "Temps",
@@ -1797,39 +1801,32 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
       DataRunLap[] runLaps = ModelPointsManager.getInstance().getRunLaps();
       switch (columnIndex) {
-        case 0: // Date
-          return LanguageManager.getManager().getCurrentLang()
-              .getDateFormatter().format(runLaps[rowIndex].getStartTime());
-
-        case 1: // Heure
-          return dfTime.format(runLaps[rowIndex].getStartTime());
-
-        case 2: // Distance
+        case 0: // Distance
           return DistanceUnit
               .formatMetersInKm(runLaps[rowIndex].getTotalDist());
 
-        case 3: // Temps
+        case 1: // Temps
           return TimeUnit.formatHundredSecondeTime(runLaps[rowIndex]
               .getTotalTime());
 
-        case 4: // Allure Moy.
+        case 2: // Allure Moy.
           return PaceUnit.computeAllure(runLaps[rowIndex].getTotalDist(),
                                         runLaps[rowIndex].getTotalTime());
 
-        case 5: // Vitesse Moy.
+        case 3: // Vitesse Moy.
           return SpeedPaceUnit.computeFormatSpeed(runLaps[rowIndex]
               .getTotalDist(), runLaps[rowIndex].getTotalTime());
 
-        case 6: // Frequence cardiaque moy.
+        case 4: // Frequence cardiaque moy.
           return runLaps[rowIndex].getAvgHeartRate();
 
-        case 7: // Frequence cardiaque max.
+        case 5: // Frequence cardiaque max.
           return runLaps[rowIndex].getMaxHeartRate();
 
-        case 8: // Calories
+        case 6: // Calories
           return runLaps[rowIndex].getCalories();
 
-        case 9: // Denivele +
+        case 7: // Denivele +
           try {
             return Integer.toString(runLaps[rowIndex].computeDenivelePos());
           }
@@ -1838,7 +1835,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
           }
           return "";
 
-        case 10: // Denivele -
+        case 8: // Denivele -
           try {
             return Integer.toString(runLaps[rowIndex].computeDeniveleNeg());
           }
@@ -1987,7 +1984,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
     }
     return jScrollPaneTextArea;
   }
-
 
   /**
    * @author Denis apparicio
