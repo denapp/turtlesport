@@ -104,6 +104,9 @@ public class Wundergound {
     sUrl.append("/DailyHistory.html?req_city=NA&req_state=NA&req_statename=NA&format=1");
 
     URL url = new URL(sUrl.toString());
+    if (log.isInfoEnabled()) {
+      log.info(sUrl);
+    }
 
     HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
      cnx.setConnectTimeout(5000);
