@@ -1,9 +1,11 @@
 package fr.turtlesport.ui.swing.component;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -12,7 +14,9 @@ import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.Timer;
@@ -21,6 +25,7 @@ import javax.swing.plaf.ProgressBarUI;
 import org.jdesktop.swingx.JXPanel;
 
 import fr.turtlesport.ui.swing.GuiFont;
+import fr.turtlesport.ui.swing.JDialogMap;
 import fr.turtlesport.ui.swing.img.diagram.ImagesDiagramRepository;
 import fr.turtlesport.ui.swing.model.ModelMapkitManager;
 import fr.turtlesport.unit.DistanceUnit;
@@ -54,6 +59,8 @@ public class JMediaMapKit extends JXPanel {
 
   private JLabel              jLabelSpeed2;
 
+  private JButton             jButtonDialog;
+
   public static ImageIcon     ICON_PLAY           = ImagesDiagramRepository
                                                       .getImageIcon("player_play.png");
 
@@ -69,11 +76,14 @@ public class JMediaMapKit extends JXPanel {
   // Model
   private MediaMapKitModel    model;
 
+  private boolean             isSmallFlag;
+
   /**
    * @param mapkit
    */
-  public JMediaMapKit(JTurtleMapKit mapkit) {
+  public JMediaMapKit(JTurtleMapKit mapkit, boolean isSmallFlag) {
     super();
+    this.isSmallFlag = isSmallFlag;
     this.mapkit = mapkit;
     initialize();
   }
@@ -88,6 +98,9 @@ public class JMediaMapKit extends JXPanel {
   }
 
   private void initialize() {
+    JPanel panelWest = (isSmallFlag) ? new JPanel(): this;
+    panelWest.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
     jButtonPlay = new JButtonCustom();
     jButtonPlay.setIcon(ICON_PLAY);
     jButtonPlay.setRolloverIcon(ICON_PLAY_ROLLOVER);
@@ -114,20 +127,29 @@ public class JMediaMapKit extends JXPanel {
     jLabelExtra.setVisible(true);
     jLabelExtra.setFont(GuiFont.FONT_PLAIN_VERY_SMALL);
 
-    setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
     setOpaque(false);
-    add(jButtonPlay);
+
+    panelWest.add(jButtonPlay);
     JSeparator separator = new JSeparator(JSeparator.VERTICAL);
     separator.setPreferredSize(new Dimension(2, 22));
-    add(separator);
-    add(getJProgressBarPlay());
-    add(jLabelTime);
-    add(jLabelSpeed1);
-    add(getJProgressBarSpeed());
-    add(jLabelSpeed2);
-    add(jLabelExtra);
-    add(Box.createRigidArea(new Dimension(50, 10)));
-    add(getJLabelGeoPosition());
+    panelWest.add(separator);
+    panelWest.add(getJProgressBarPlay());
+    panelWest.add(jLabelTime);
+    panelWest.add(jLabelSpeed1);
+    panelWest.add(getJProgressBarSpeed());
+    panelWest.add(jLabelSpeed2);
+    panelWest.add(jLabelExtra);
+    panelWest.add(Box.createRigidArea(new Dimension(50, 10)));
+    panelWest.add(getJLabelGeoPosition());
+
+    if (isSmallFlag) {
+      JPanel panelEast = new JPanel();
+      panelEast.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+      panelEast.add(getJButtonDialog());
+      setLayout(new BorderLayout());
+      add(panelEast, BorderLayout.EAST);
+      add(panelWest, BorderLayout.WEST);
+    }
 
     // Evenements
     model = new MediaMapKitModel();
@@ -157,8 +179,7 @@ public class JMediaMapKit extends JXPanel {
         int width = jProgressBarPlay.getSize().width;
 
         int value = (int) (((1.0 * x) / width) * jProgressBarPlay.getMaximum());
-        ModelMapkitManager.getInstance()
-            .setMapCurrentPoint(this, value);
+        ModelMapkitManager.getInstance().setMapCurrentPoint(this, value);
       }
 
     });
@@ -198,6 +219,13 @@ public class JMediaMapKit extends JXPanel {
       }
     });
 
+    if (isSmallFlag) {
+      jButtonDialog.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          JDialogMap.prompt(mapkit);
+        }
+      });
+    }
     // ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     // executor.scheduleAtFixedRate(timerActionListener,
     // 0,
@@ -267,6 +295,20 @@ public class JMediaMapKit extends JXPanel {
       jLabelGeoPosition.setVisible(false);
     }
     return jLabelGeoPosition;
+  }
+
+  private JButton getJButtonDialog() {
+    if (jButtonDialog == null) {
+      jButtonDialog = new JButton();
+      jButtonDialog.setIcon(ImagesDiagramRepository.getImageIcon("open.png"));
+      jButtonDialog.setText("");
+      jButtonDialog.setMargin(new Insets(2, 2, 2, 2));
+      jButtonDialog.setMaximumSize(new Dimension(20, 20));
+      jButtonDialog.setMinimumSize(new Dimension(20, 20));
+      jButtonDialog.setPreferredSize(new Dimension(20, 20));
+      jButtonDialog.setOpaque(false);
+    }
+    return jButtonDialog;
   }
 
   /**

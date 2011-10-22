@@ -68,7 +68,7 @@ public class JTurtleMapKit extends JXPanel {
 
   private Dimension               dimButton      = new Dimension(20, 20);
 
-  private JTurtleMapViewer             mainMap;
+  private JTurtleMapViewer        mainMap;
 
   private JPanel                  jPanelButton;
 
@@ -97,12 +97,14 @@ public class JTurtleMapKit extends JXPanel {
 
   private GeoMouseMotionListener  geoMouseMotionListener;
 
+  private boolean                 isSmallFlag    = false;
+
   /**
    * 
    */
   public JTurtleMapKit(boolean isSmallFlag) {
+    this.isSmallFlag = isSmallFlag;
     initialize();
-
     if (isSmallFlag) {
       imgStop = ImagesRepository.getImage("flag_red12.png");
       imgStart = ImagesRepository.getImage("flag_green12.png");
@@ -231,7 +233,7 @@ public class JTurtleMapKit extends JXPanel {
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     mainMap.add(getJPanelButton(), gridBagConstraints);
 
-    jMediaMapKit = new JMediaMapKit(this);
+    jMediaMapKit = new JMediaMapKit(this, isSmallFlag);
     setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
     setLayout(new BorderLayout(0, 0));
     add(mainMap, BorderLayout.CENTER);

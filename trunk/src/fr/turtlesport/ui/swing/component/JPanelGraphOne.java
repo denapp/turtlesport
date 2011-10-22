@@ -19,23 +19,18 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.plaf.ComboBoxUI;
 
 import fr.turtlesport.lang.ILanguage;
-import fr.turtlesport.lang.LanguageEvent;
-import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.ui.swing.GuiFont;
-import fr.turtlesport.ui.swing.JDialogDiagramComponents;
 import fr.turtlesport.ui.swing.img.diagram.ImagesDiagramRepository;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
 import fr.turtlesport.unit.SpeedUnit;
 import fr.turtlesport.unit.event.UnitEvent;
-import fr.turtlesport.unit.event.UnitListener;
-import fr.turtlesport.unit.event.UnitManager;
 import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
 
@@ -43,78 +38,43 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JPanelGraph extends JPanel implements LanguageListener,
-                                       UnitListener {
+public class JPanelGraphOne extends JPanel {
 
-  private JDiagramComponent   jDiagram;
+  private JDiagramOneComponent jDiagram;
 
-  private JPanel              jPanelTitle;
+  private JPanel               jPanelTitle;
 
-  private JCheckBox           jCheckBox1;
+  private JCheckBox            jCheckBoxFilter;
 
-  private JCheckBox           jCheckBox2;
+  private JComboboxUIlistener  jComboBoxY3;
 
-  private JCheckBox           jCheckBox3;
+  private JComboboxUIlistener  jComboBoxX;
 
-  private JCheckBox           jCheckBoxFilter;
+  private JButton              jButtonZoomMoins;
 
-  private JCheckBox           jCheckBoxTime;
+  private JButton              jButtonZoomPlus;
 
-  private JComboboxUIlistener jComboBoxY3;
+  private Border               raisedBorder  = BorderFactory
+                                                 .createLoweredBevelBorder();
 
-  private JComboboxUIlistener jComboBoxX;
+  private Border               loweredBorder = BorderFactory
+                                                 .createRaisedBevelBorder();
 
-  private JButton             jButtonZoomMoins;
+  private JButton              jButtonReload;
 
-  private JButton             jButtonZoomPlus;
+  private JPanel               jPanelX;
 
-  private JButton             jButtonDialog;
+  private JLabel               jLabelTitle;
 
-  private Border              raisedBorder  = BorderFactory
-                                                .createLoweredBevelBorder();
-
-  private Border              loweredBorder = BorderFactory
-                                                .createRaisedBevelBorder();
-
-  private JButton             jButtonReload;
-
-  private JPanel              jPanelX;
+  private int                  type;
 
   /**
    * 
    */
-  public JPanelGraph() {
+  public JPanelGraphOne(int type) {
     super();
+    this.type = type;
     initialize();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * fr.turtlesport.lang.LanguageListener#languageChanged(fr.turtlesport.lang
-   * .LanguageEvent)
-   */
-  public void languageChanged(final LanguageEvent event) {
-    if (SwingUtilities.isEventDispatchThread()) {
-      performedLanguage(event.getLang());
-    }
-    else {
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          performedLanguage(event.getLang());
-        }
-      });
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.lang.LanguageListener#completedRemoveLanguageListener()
-   */
-  public void completedRemoveLanguageListener() {
-    LanguageManager.getManager().removeLanguageListener(jDiagram);
   }
 
   private void performedLanguage(ILanguage lang) {
@@ -124,19 +84,32 @@ public class JPanelGraph extends JPanel implements LanguageListener,
     jDiagram.getModel().setUnitX(MessageFormat.format(rb.getString("unitX"),
                                                       DistanceUnit
                                                           .getDefaultUnit()));
-    jCheckBox1.setText("<html><font color=red>" + rb.getString("unitY1")
-                       + "</font></html>");
-    jCheckBox2.setText("<html><font color=blue>" + rb.getString("unitY2")
-                       + "</font></html>");
-    jCheckBoxTime.setText(rb.getString("time"));
-    jCheckBoxFilter.setText(rb.getString("filter"));
 
-    jComboBoxY3.removeAllItems();
-    jComboBoxY3.addItem(rb.getString("speed") + "("
-                        + SpeedUnit.getDefaultUnit() + ")");
-    jComboBoxY3.addItem(rb.getString("allure") + "("
-                        + PaceUnit.getDefaultUnit() + ")");
+    switch (type) {
+      case JDiagramOneComponent.HEART:
+        getJLabelTitle().setText("<html><font color=red>"
+                                 + rb.getString("unitY1") + "</font></html>");
+        break;
 
+      case JDiagramOneComponent.ALTITUDE:
+        getJLabelTitle().setText("<html><font color=blue>"
+                                 + rb.getString("unitY2") + "</font></html>");
+        break;
+
+      default:
+        getJComboBoxY3().removeAllItems();
+        getJComboBoxY3().addItem(rb.getString("speed") + "("
+                                 + SpeedUnit.getDefaultUnit() + ")");
+        getJComboBoxY3().addItem(rb.getString("allure") + "("
+                                 + PaceUnit.getDefaultUnit() + ")");
+        jComboBoxY3.setSelectedIndex(jDiagram.getModel().isVisibleSpeed() ? 0
+            : 1);
+
+    }
+
+    if (type != JDiagramOneComponent.SPEED) {
+      jCheckBoxFilter.setText(rb.getString("filter"));
+    }
     jComboBoxX.removeAllItems();
     jComboBoxX.addItem(MessageFormat.format(rb.getString("unitX"),
                                             DistanceUnit.getDefaultUnit()));
@@ -177,22 +150,13 @@ public class JPanelGraph extends JPanel implements LanguageListener,
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.unit.event.UnitListener#completedRemoveUnitListener()
-   */
-  public void completedRemoveUnitListener() {
-    UnitManager.getManager().removeUnitListener(jDiagram);
-  }
-
   /**
    * This method initializes this
    * 
    * @return void
    */
   private void initialize() {
-    jDiagram = new JDiagramComponent();
+    jDiagram = new JDiagramOneComponent(type);
     setSize(300, 230);
     setLayout(new BorderLayout(0, 0));
     add(jDiagram, BorderLayout.CENTER);
@@ -200,44 +164,19 @@ public class JPanelGraph extends JPanel implements LanguageListener,
     add(getJPanelX(), BorderLayout.SOUTH);
     setOpaque(true);
 
-    LanguageManager.getManager().addLanguageListener(this);
+    // setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+    setBorder(BorderFactory
+        .createTitledBorder(null,
+                            "",
+                            TitledBorder.DEFAULT_JUSTIFICATION,
+                            TitledBorder.DEFAULT_POSITION,
+                            GuiFont.FONT_PLAIN,
+                            null));
     performedLanguage(LanguageManager.getManager().getCurrentLang());
-    UnitManager.getManager().addUnitListener(this);
 
-    if (jDiagram.getModel().isVisibleY3()) {
-      jComboBoxY3
-          .setSelectedIndex(jDiagram.getModel().isVisibleSpeed() ? 0 : 1);
-    }
     jComboBoxX.setSelectedIndex(jDiagram.getModel().isAxisXDistance() ? 0 : 1);
 
     // Evenement
-    jCheckBox1.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        jDiagram.getModel().setVisibleY1(jCheckBox1.isSelected());
-      }
-    });
-    jCheckBox2.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        jDiagram.getModel().setVisibleY2(jCheckBox2.isSelected());
-      }
-    });
-    jCheckBox3.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int value = (jCheckBox3.isSelected()) ? jComboBoxY3.getSelectedIndex()
-            : -1;
-        jDiagram.getModel().setVisibleY3(value);
-      }
-    });
-    jCheckBoxTime.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        jDiagram.getModel().setVisibleTime(jCheckBoxTime.isSelected());
-      }
-    });
-    jCheckBoxFilter.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        jDiagram.getModel().setFilter(jCheckBoxFilter.isSelected());
-      }
-    });
     jButtonZoomMoins.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         jButtonZoomMoins.setBorder(raisedBorder);
@@ -257,28 +196,33 @@ public class JPanelGraph extends JPanel implements LanguageListener,
         jDiagram.getModel().reload();
       }
     });
-    jButtonDialog.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        JDialogDiagramComponents.prompt();
-      }
-    });
-    jComboBoxY3.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        jDiagram.getModel().setVisibleY3(jComboBoxY3.getSelectedIndex());
-      }
-    });
     jComboBoxX.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         jDiagram.getModel().setAxisX(jComboBoxX.getSelectedIndex() == 0);
       }
     });
 
+    if (type == JDiagramOneComponent.SPEED) {
+      jComboBoxY3.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          jDiagram.getModel().setVisibleY3(jComboBoxY3.getSelectedIndex());
+        }
+      });
+    }
+    else {
+      jCheckBoxFilter.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          jDiagram.getModel().setFilter(jCheckBoxFilter.isSelected());
+        }
+      });
+    }
+
   }
 
   /**
    * @return the jDiagram
    */
-  public JDiagramComponent getJDiagram() {
+  public JDiagramOneComponent getJDiagram() {
     return jDiagram;
   }
 
@@ -289,29 +233,25 @@ public class JPanelGraph extends JPanel implements LanguageListener,
    */
   private JPanel getJPanelTitle() {
     if (jPanelTitle == null) {
-
-      JPanel panelWest = new JPanel();
-      panelWest.setLayout(new FlowLayout(FlowLayout.LEFT));
-      panelWest.add(getJCheckBox1());
-      panelWest.add(getJCheckBox2());
-      panelWest.add(getJCheckBox3());
-      panelWest.add(getJComboBoxY3());
-      panelWest.add(getJCheckBoxTime());
-      panelWest.add(getJCheckBoxFilter());
-      panelWest.add(new JLabel("   "));
-      panelWest.add(getJButtonZoomPlus());
-      panelWest.add(getJButtonZoomMoins());
-      panelWest.add(getJButtonReload());
-      
-      JPanel panelEast = new JPanel();
-      panelEast.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 0));
-      panelEast.add(getJButtonDialog());
-      panelEast.add(new JLabel("   "));
-      panelEast.add(getJButtonDialog());
-
-      jPanelTitle = new JPanel(new BorderLayout());
-      jPanelTitle.add(panelEast, BorderLayout.EAST);
-      jPanelTitle. add(panelWest, BorderLayout.WEST);
+      jPanelTitle = new JPanel();
+      jPanelTitle.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+      if (type == JDiagramOneComponent.SPEED) {
+        jPanelTitle.add(getJComboBoxY3());
+        Dimension dim = new Dimension(50, 10);
+        jPanelTitle.add(new Box.Filler(dim, dim, dim));
+      }
+      else {
+        jPanelTitle.add(getJLabelTitle());
+        Dimension dim = new Dimension(300, 10);
+        jPanelTitle.add(new Box.Filler(dim, dim, dim));
+        jPanelTitle.add(getJCheckBoxFilter());
+        jPanelTitle.add(new JLabel("   "));
+        }
+      jPanelTitle.add(getJButtonZoomPlus());
+      jPanelTitle.add(getJButtonZoomMoins());
+      jPanelTitle.add(getJButtonReload());
+      Dimension dim = new Dimension(JDiagramOneComponent.WIDTH_TITLE_2, 10);
+      jPanelTitle.add(new Box.Filler(dim, dim, dim));
     }
     return jPanelTitle;
   }
@@ -328,43 +268,6 @@ public class JPanelGraph extends JPanel implements LanguageListener,
     return jPanelX;
   }
 
-  /**
-   * This method initializes jCheckBox
-   * 
-   * @return javax.swing.JCheckBox
-   */
-  private JCheckBox getJCheckBox1() {
-    if (jCheckBox1 == null) {
-      jCheckBox1 = new JCheckBox();
-      jCheckBox1.setFont(GuiFont.FONT_PLAIN_SMALL);
-      jCheckBox1.setSelected(jDiagram.getModel().isVisibleY1());
-    }
-    return jCheckBox1;
-  }
-
-  /**
-   * This method initializes jCheckBox
-   * 
-   * @return javax.swing.JCheckBox
-   */
-  private JCheckBox getJCheckBox2() {
-    if (jCheckBox2 == null) {
-      jCheckBox2 = new JCheckBox();
-      jCheckBox2.setSelected(jDiagram.getModel().isVisibleY2());
-      jCheckBox2.setFont(GuiFont.FONT_PLAIN_SMALL);
-    }
-    return jCheckBox2;
-  }
-
-  private JCheckBox getJCheckBox3() {
-    if (jCheckBox3 == null) {
-      jCheckBox3 = new JCheckBox();
-      jCheckBox3.setSelected(jDiagram.getModel().isVisibleY3());
-      jCheckBox3.setFont(GuiFont.FONT_PLAIN_SMALL);
-    }
-    return jCheckBox3;
-  }
-
   private JComboBox getJComboBoxY3() {
     if (jComboBoxY3 == null) {
       jComboBoxY3 = new JComboboxUIlistener();
@@ -377,6 +280,14 @@ public class JPanelGraph extends JPanel implements LanguageListener,
           .getPreferredSize().height));
     }
     return jComboBoxY3;
+  }
+
+  private JLabel getJLabelTitle() {
+    if (jLabelTitle == null) {
+      jLabelTitle = new JLabel();
+      jLabelTitle.setFont(GuiFont.FONT_PLAIN);
+    }
+    return jLabelTitle;
   }
 
   private JComboBox getJComboBoxX() {
@@ -417,21 +328,6 @@ public class JPanelGraph extends JPanel implements LanguageListener,
       return renderer;
     }
 
-  }
-
-  /**
-   * This method initializes jCheckBox
-   * 
-   * @return javax.swing.JCheckBox
-   */
-  private JCheckBox getJCheckBoxTime() {
-    if (jCheckBoxTime == null) {
-      jCheckBoxTime = new JCheckBox();
-      jCheckBoxTime.setSelected(jDiagram.getModel().isVisibleTime());
-      jCheckBoxTime.setFont(GuiFont.FONT_PLAIN_SMALL);
-      jCheckBoxTime.setForeground(JDiagramComponent.COLOR_TIME);
-    }
-    return jCheckBoxTime;
   }
 
   /**
@@ -509,22 +405,6 @@ public class JPanelGraph extends JPanel implements LanguageListener,
     }
     return jButtonReload;
   }
-  
-  private JButton getJButtonDialog() {
-    if (jButtonDialog == null) {
-      jButtonDialog = new JButton();
-      jButtonDialog.setIcon(ImagesDiagramRepository
-          .getImageIcon("open.png"));
-      jButtonDialog.setText("");
-      jButtonDialog.setMargin(new Insets(2, 2, 2, 2));
-      jButtonDialog.setMaximumSize(new Dimension(20, 20));
-      jButtonDialog.setMinimumSize(new Dimension(20, 20));
-      jButtonDialog.setPreferredSize(new Dimension(20, 20));
-      jButtonDialog.setOpaque(false);
-    }
-    return jButtonDialog;
-  }
-  
 
   private class JComboboxUIlistener extends JComboBox {
     public JComboboxUIlistener() {

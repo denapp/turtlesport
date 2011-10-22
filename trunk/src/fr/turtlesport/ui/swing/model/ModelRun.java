@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -259,6 +260,7 @@ public class ModelRun {
    * Effacement de la vue.
    */
   private void eraseGui(JPanelRun view) {
+    view.getjLabelValDateTime().setText(null);
     view.getJLabelValDistTot().setText(null);
     view.getJLabelValTimeTot().setText(null);
     view.getJLabelValAllure().setText(null);
@@ -296,6 +298,12 @@ public class ModelRun {
     if (dataRun == null) {
       return;
     }
+
+    // Date et heure
+    SimpleDateFormat df = new SimpleDateFormat("EEE d MMM yyyy HH:mm:ss",
+                                               LanguageManager.getManager()
+                                                   .getLocale());
+    view.getjLabelValDateTime().setText(df.format(dataRun.getTime()));
 
     int value;
     if (!dataRun.getUnit().equals(DistanceUnit.getDefaultUnit())) {

@@ -407,7 +407,7 @@ public class MainGui extends JFrame implements LanguageListener {
     log.debug(">>initialize");
 
     // on ajuste la taille car pas de menu sous mac os x
-    this.setSize(1200, 727 - (OperatingSystem.isMacOSX() ? 27 : 0));
+    this.setSize(1200, 767 - (OperatingSystem.isMacOSX() ? 27 : 0));
     this.setContentPane(getJContentPane());
     initJMenuBar();
 

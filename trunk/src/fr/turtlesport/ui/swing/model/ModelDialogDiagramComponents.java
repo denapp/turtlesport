@@ -9,7 +9,7 @@ import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.ui.swing.JDialogMap;
+import fr.turtlesport.ui.swing.JDialogDiagramComponents;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
 import fr.turtlesport.unit.SpeedPaceUnit;
@@ -19,16 +19,17 @@ import fr.turtlesport.unit.TimeUnit;
  * @author Denis Apparicio
  * 
  */
-public class ModelDialogMap {
+public class ModelDialogDiagramComponents {
   private static TurtleLogger log;
   static {
-    log = (TurtleLogger) TurtleLogger.getLogger(ModelDialogMap.class);
+    log = (TurtleLogger) TurtleLogger
+        .getLogger(ModelDialogDiagramComponents.class);
   }
 
   /**
    * 
    */
-  public ModelDialogMap() {
+  public ModelDialogDiagramComponents() {
     super();
   }
 
@@ -38,12 +39,10 @@ public class ModelDialogMap {
    * @param view
    * @throws SQLException
    */
-  public void updateView(JDialogMap view) throws SQLException {
+  public void updateView(JDialogDiagramComponents view) throws SQLException {
     log.debug(">>updateView");
 
     DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
-
-    view.getJLabelTitle().setText(title(dataRun));
 
     // resume
     // ----------------------------------------
@@ -73,7 +72,7 @@ public class ModelDialogMap {
    * @param dialogMap
    * @param selectedItem
    */
-  public void updateViewLap(JDialogMap view, int selectedItem) {
+  public void updateViewLap(JDialogDiagramComponents view, int selectedItem) {
     clearLap(view);
 
     try {
@@ -137,7 +136,7 @@ public class ModelDialogMap {
     }
   }
 
-  private void clearLap(JDialogMap view) {
+  private void clearLap(JDialogDiagramComponents view) {
     view.getJPanelRight().getjLabelValDateTime().setText("");
     view.getJPanelRight().getJLabelValDayLap().setText("");
     view.getJPanelRight().getJLabelValHourLap().setText("");
@@ -154,7 +153,7 @@ public class ModelDialogMap {
   /**
    * 
    */
-  private void updateSummary(JDialogMap view, DataRun dataRun) throws SQLException {
+  private void updateSummary(JDialogDiagramComponents view, DataRun dataRun) throws SQLException {
     log.info(">>updateSummary");
 
     if (dataRun == null) {
@@ -225,27 +224,6 @@ public class ModelDialogMap {
         .setText(dataRun.getEquipement());
 
     log.info("<<updateSummary");
-  }
-
-  private String title(DataRun dataRun) {
-    if (dataRun == null) {
-      log.error("dataRun est null");
-      return null;
-    }
-
-    try {
-      return LanguageManager.getManager().getCurrentLang().getDateFormatter()
-          .format(dataRun.getTime())
-             + "   "
-             + new SimpleDateFormat("kk:mm:ss").format(dataRun.getTime())
-             + "   "
-             + DistanceUnit.formatWithUnit(dataRun.getComputeDistanceTot());
-    }
-    catch (SQLException e) {
-      log.error("", e);
-    }
-
-    return null;
   }
 
 }
