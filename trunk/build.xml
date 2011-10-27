@@ -3,7 +3,7 @@
 
 	<!-- set global properties for this build -->
 	<property name="Name" value="turtlesport" />
-	<property name="version" value="1.0" />
+	<property name="version" value="1.1" />
 	<property name="src" location="${basedir}/src" />
 	<property name="test" location="${basedir}/test" />
 	<property name="srcccommonUsbCom" location="${basedir}/c/usbcom/srccommon" />
@@ -268,7 +268,7 @@
 
 	<!-- Creates a Ubuntu/Debian package -->
 	<target name="packagingLinuxDeb">
-		<deb todir="${release}" package="turtlesport" section="utils" depends=" sun-java6-jre | openjdk-6-jre | sun-java7-jre | openjdk-7-jre">
+		<deb todir="${release}" package="turtlesport" section="utils" depends=" sun-java6-jre | openjdk-6-jre | sun-java7-jre | openjdk-7-jre" postinst="${packaging}/linux/debian/postinst">
 			<version upstream="${version}" />
 			<maintainer name="Denis Apparicio" email="turtlesport@sourceforge.net" />
 			<description synopsis="Turtle Sport">Turtle Sport garmin logbook.</description>
@@ -277,6 +277,7 @@
 				<exclude name="**/turtleSport.png" />
 				<exclude name="**/turtlesport125.png" />
 				<exclude name="**/turtlesport.desktop" />
+				<exclude name="**/51-garmin.rules" />
 			</tarfileset>
 			<tarfileset dir="${exe}/linux" prefix="usr/share/pixmaps" username="root" group="root">
 				<include name="**/turtlesport125.png" />
@@ -287,6 +288,11 @@
 			<tarfileset dir="${exe}/linux" prefix="usr/share/applications" username="root" group="root">
 				<include name="turtlesport.desktop" />
 			</tarfileset>
+			<!--
+			<tarfileset dir="${exe}/linux" prefix="etc/udev/rules.d" username="root" group="root" filemode="644">
+					<include name="51-garmin.rules" />
+			</tarfileset>
+			-->
 		</deb>
 	</target>
 
