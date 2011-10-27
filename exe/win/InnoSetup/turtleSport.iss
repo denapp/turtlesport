@@ -6,16 +6,16 @@
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{14B614CA-42E0-4545-A272-B1248809E95D}
-AppName=Turtle Sport v1.0
-AppVerName=Turtle Sport v1.0
-AppVersion=1.0
+AppName=Turtle Sport v1.1
+AppVerName=Turtle Sport v1.1
+AppVersion=1.1
 AppPublisher=TurtleSport
 AppPublisherURL=http://turtlesport.sourceforge.net
 AppSupportURL=http://turtlesport.sourceforge.net
 AppUpdatesURL=http://turtlesport.sourceforge.net
 DefaultDirName={pf}\turtlesport
 DefaultGroupName=Turtle Sport
-OutputBaseFilename=turtlesport-win-1.0
+OutputBaseFilename=turtlesport-win-1.1
 Compression=lzma
 SolidCompression=yes
 WizardSmallImageFile=Turtle-55.bmp
