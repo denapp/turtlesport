@@ -81,6 +81,9 @@ public class CVSReader {
   }
 
   private String[] readLine(String line) {
+    if (line ==null) {
+      return new String[0]; 
+    }
     line = line.replaceAll(",,", ", ,");
     if (line.endsWith("<br />")) {
       line = line.substring(0, line.length() - 6);
