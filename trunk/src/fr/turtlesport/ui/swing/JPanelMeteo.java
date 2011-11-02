@@ -49,6 +49,7 @@ import fr.turtlesport.unit.TemperatureUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
+import fr.turtlesport.util.DateUtil;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -127,16 +128,16 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     HashMap<String, ImageIcon> map = new HashMap<String, ImageIcon>();
     String[] values = new String[listIcon.size()];
     JPopupMenu popupMenu = new JPopupMenu();
-    
+
     for (int i = 0; i < listIcon.size(); i++) {
       values[i] = Integer.toString(i);
       map.put(values[i], listIcon.get(i));
-      
-      JMenuItem item =  new JMenuItem(listIcon.get(i));
+
+      JMenuItem item = new JMenuItem(listIcon.get(i));
       popupMenu.add(item);
       final int index = i;
       final ActionListener itemListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {       
+        public void actionPerformed(ActionEvent e) {
           jxSplitButtonImgMeteo.setSelectedIndex(index);
         }
       };
@@ -144,7 +145,7 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     }
 
     jxSplitButtonImgMeteo = new JXSplitButton(null, null, popupMenu);
-    //jxSplitButtonImgMeteo.setSelectedIndex(values.length - 1);
+    // jxSplitButtonImgMeteo.setSelectedIndex(values.length - 1);
     jxSplitButtonImgMeteo.setFont(new Font("SansSerif", Font.PLAIN, 0));
     GridBagConstraints gbc_jLabelImgMeteo = new GridBagConstraints();
     gbc_jLabelImgMeteo.gridheight = 1;
@@ -490,15 +491,16 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
           return null;
         }
 
+        DataMeteo currentMeteo = null;
+
         // Recuperation dans la base de donnees (sauf cas de reload)
         if (changeEvent != null) {
-          DataMeteo meteo = null;
           try {
-            meteo = MeteoTableManager.getInstance().retreive(dataRun);
-            if (meteo != null) {
+            currentMeteo = MeteoTableManager.getInstance().retreive(dataRun);
+            if (currentMeteo != null) {
               // data trouve
               isInDataBase = true;
-              return meteo;
+              return currentMeteo;
             }
           }
           catch (SQLException sqle) {
@@ -514,19 +516,30 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
             // Recuperation de la location
             StationMeteo station = Wundergound.lookup(geo.getLatitude(),
                                                       geo.getLongitude());
+
             if (station != null) {
-              // recuperation des donnees meteo
+              // recuperation des donnees meteo historiques
               List<DataMeteo> list = Wundergound.history(station,
                                                          dataRun.getTime());
+              long l = Long.MAX_VALUE;
 
               // recuperation des donnees les plus proche de l'heure de depart
-              long l = Long.MAX_VALUE;
               for (int i = 0; i < list.size(); i++) {
                 long diff = Math.abs(list.get(i).getDate().getTime()
                                      - dataRun.getTime().getTime());
                 if (diff < l) {
-                  meteo = list.get(i);
+                  currentMeteo = list.get(i);
                   l = diff;
+                }
+              }
+
+              // on compare avec la date du jour
+              if (DateUtil.isDayDate(dataRun.getTime())) {
+                DataMeteo dayMeteo = Wundergound.current(station);
+                long diff = Math.abs(currentMeteo.getDate().getTime()
+                                     - dataRun.getTime().getTime());
+                if (diff < l) {
+                  currentMeteo = dayMeteo;
                 }
               }
 
@@ -539,13 +552,17 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
           }
           catch (Throwable e) {
             log.error("", e);
+            if (meteo != null) {
+              return meteo;
+            }
+            return null;
           }
         }
 
-        if (meteo == null) {
-          meteo = new DataMeteo(dataRun.getTime());
+        if (currentMeteo == null) {
+          currentMeteo = new DataMeteo(dataRun.getTime());
         }
-        return meteo;
+        return currentMeteo;
       }
 
       @Override

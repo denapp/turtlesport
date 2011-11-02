@@ -294,6 +294,14 @@ public class DataMeteo {
     this.visibility = visibility;
   }
 
+  public String getCondition() {
+    return condition;
+  }
+
+  public void setCondition(String condition) {
+    this.condition = condition;
+  }
+
   /**
    * @return Restitue l'index de l'image correspond aux conditions m&eacute;teo.
    */
