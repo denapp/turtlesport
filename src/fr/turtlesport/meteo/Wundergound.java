@@ -83,6 +83,50 @@ public class Wundergound {
   }
 
   /**
+   * Restitue la m&eacute;t&eacute;o courante.
+   * 
+   * @param station
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   */
+  public static DataMeteo current(StationMeteo station) throws IOException,
+                                                       ParserConfigurationException,
+                                                       SAXException {
+
+    URL url = new URL("http://api.wunderground.com/auto/wui/geo/WXCurrentObXML/index.xml?query=" + station.getAirportCode());
+    HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
+
+    cnx.setConnectTimeout(3000);
+    cnx.setReadTimeout(3000);
+    cnx.setRequestMethod("GET");
+    cnx.setDoInput(true);
+    cnx.addRequestProperty("Accept-Language", "en;q=0.6,en-us;q=0.4,sv;q=0.2");
+
+    if (cnx.getResponseCode() == HttpURLConnection.HTTP_OK) {
+      try {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setNamespaceAware(true);
+        SAXParser parser = factory.newSAXParser();
+
+        WuCurrentHandler handler = new WuCurrentHandler();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream()));
+        InputSource source = new InputSource(reader);
+        parser.parse(source, handler);
+        
+        return handler.getData();
+      }
+      finally {
+        if (cnx != null) {
+          cnx.disconnect();
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Recu&eacute;re l'historique.
    * 
    * @param station
@@ -109,8 +153,8 @@ public class Wundergound {
     }
 
     HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
-     cnx.setConnectTimeout(5000);
-     cnx.setReadTimeout(5000);
+    cnx.setConnectTimeout(5000);
+    cnx.setReadTimeout(5000);
     cnx.setRequestMethod("GET");
     cnx.setDoInput(true);
     cnx.addRequestProperty("Accept",
@@ -155,7 +199,7 @@ public class Wundergound {
     if (log.isDebugEnabled()) {
       log.debug(">>history date=" + date);
     }
-    
+
     Calendar cal = Calendar.getInstance();
     cal.setTime(date);
 
