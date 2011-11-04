@@ -1662,10 +1662,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
                                                     "Denivele +",
                                                     "Denivele -" };
 
-    private final int[]            columWidth   = { 30,
+    private final int[]            columWidth   = { 35,
                                                     30,
-                                                    60,
-                                                    60,
+                                                    30,
+                                                    35,
                                                     35,
                                                     28,
                                                     30,
@@ -1686,6 +1686,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
       for (int i = 0; i < columnNames.length; i++) {
         switch (i) {
           case 0:
+            // Distance
+            performedHeader(DistanceUnit.getDefaultUnit(), 0);
             break;
             
           case 2:
@@ -1719,7 +1721,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     private void performedUnit(String unit) {
       // unite
-      columnNames[0] = unit;
+      performedHeader( unit, 0);
       performedHeader("mn/" + unit, 2);
       performedHeader(unit + "/h", 3);
 
