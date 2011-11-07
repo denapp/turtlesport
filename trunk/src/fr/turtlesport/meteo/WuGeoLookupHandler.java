@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.ext.DefaultHandler2;
 
 import fr.turtlesport.log.TurtleLogger;
 
@@ -13,7 +13,7 @@ import fr.turtlesport.log.TurtleLogger;
  * @author Denis Apparicio
  * 
  */
-public class WuGeoLookupHandler extends DefaultHandler {
+public class WuGeoLookupHandler extends DefaultHandler2 {
   private static TurtleLogger log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(WuGeoLookupHandler.class);
@@ -23,9 +23,9 @@ public class WuGeoLookupHandler extends DefaultHandler {
 
   private boolean             isStation               = false;
 
-  private List<StationMeteo>       listStation             = new ArrayList<StationMeteo>();
+  private List<StationMeteo>  listStation             = new ArrayList<StationMeteo>();
 
-  private StationMeteo             currentStation;
+  private StationMeteo        currentStation;
 
   private boolean             isCity;
 

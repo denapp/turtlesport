@@ -14,6 +14,7 @@ import java.util.ResourceBundle;
 
 import javax.swing.AbstractSpinnerModel;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -127,21 +128,16 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     List<ImageIcon> listIcon = DataMeteo.getIcons();
     HashMap<String, ImageIcon> map = new HashMap<String, ImageIcon>();
     String[] values = new String[listIcon.size()];
-    JPopupMenu popupMenu = new JPopupMenu();
 
+    JPopupMenu popupMenu = new JPopupMenu();
+    ButtonGroup buttonGroupDropDown = new ButtonGroup();
     for (int i = 0; i < listIcon.size(); i++) {
       values[i] = Integer.toString(i);
       map.put(values[i], listIcon.get(i));
 
-      JMenuItem item = new JMenuItem(listIcon.get(i));
-      popupMenu.add(item);
-      final int index = i;
-      final ActionListener itemListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          jxSplitButtonImgMeteo.setSelectedIndex(index);
-        }
-      };
-      item.addActionListener(itemListener);
+      JMenuItemMeteo mi = new JMenuItemMeteo(listIcon.get(i), i);
+      buttonGroupDropDown.add(mi);
+      popupMenu.add(mi);
     }
 
     jxSplitButtonImgMeteo = new JXSplitButton(null, null, popupMenu);
@@ -315,32 +311,6 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
 
-    jxSplitButtonImgMeteo.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        try {
-          DataRun run = ModelPointsManager.getInstance().getDataRun();
-          if (run != null
-              && meteo != null
-              && meteo.getImageIconIndex() != jxSplitButtonImgMeteo
-                  .getSelectedIndex()) {
-            meteo.setImageIconIndex(jxSplitButtonImgMeteo.getSelectedIndex());
-            if (isInDataBase) {
-              MeteoTableManager.getInstance()
-                  .updateCondition(run,
-                                   jxSplitButtonImgMeteo.getSelectedIndex());
-            }
-            else {
-              isInDataBase = true;
-              MeteoTableManager.getInstance().store(meteo, run);
-            }
-          }
-        }
-        catch (SQLException sqle) {
-          log.error("", sqle);
-        }
-      }
-    });
-
     jButtonReload.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         changedAllPoints(null);
@@ -463,9 +433,11 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
   }
 
   public void changedAllPoints(final ChangePointsEvent changeEvent) {
+    final int temp = (meteo == null) ? Integer.MAX_VALUE : meteo
+        .getTemperature();
     if (changeEvent != null) {
-      meteo = null;
       isInDataBase = false;
+      meteo = null;
     }
 
     jxSplitButtonImgMeteo
@@ -502,6 +474,7 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
               isInDataBase = true;
               return currentMeteo;
             }
+            return new DataMeteo(dataRun.getTime());
           }
           catch (SQLException sqle) {
             log.error("", sqle);
@@ -543,22 +516,27 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
                 }
               }
 
-              if (meteo != null) {
+              if (currentMeteo != null) {
                 // sauvegarde en base
                 isInDataBase = true;
-                MeteoTableManager.getInstance().store(meteo, dataRun);
+                MeteoTableManager.getInstance().store(currentMeteo, dataRun);
               }
             }
           }
           catch (Throwable e) {
             log.error("", e);
             if (meteo != null) {
+              meteo.setTemperature(temp);
               return meteo;
             }
             return null;
           }
         }
 
+        if (currentMeteo == null && meteo != null) {
+          currentMeteo = meteo;
+          meteo.setTemperature(temp);
+        }
         if (currentMeteo == null) {
           currentMeteo = new DataMeteo(dataRun.getTime());
         }
@@ -692,6 +670,9 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
           }
           else {
             isInDataBase = true;
+            if (!meteo.isTemperatureValid()) {
+              meteo.setTemperature(0);
+            }
             MeteoTableManager.getInstance().store(meteo, run);
           }
         }
@@ -702,5 +683,38 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
     }
 
   }
+
+  private class JMenuItemMeteo extends JMenuItem implements ActionListener {
+    int index;
+
+    public JMenuItemMeteo(ImageIcon imageIcon, int index) {
+      super(imageIcon);
+      this.index = index;
+      addActionListener(JMenuItemMeteo.this);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      jxSplitButtonImgMeteo.setSelectedIndex(index);
+      try {
+        DataRun run = ModelPointsManager.getInstance().getDataRun();
+        if (run != null && meteo != null) {
+          meteo.setImageIconIndex(index);
+          if (isInDataBase) {
+            MeteoTableManager.getInstance().updateCondition(run, index);
+          }
+          else {
+            isInDataBase = true;
+            if (!meteo.isTemperatureValid()) {
+              meteo.setTemperature(0);
+            }
+            MeteoTableManager.getInstance().store(meteo, run);
+          }
+        }
+      }
+      catch (SQLException sqle) {
+        log.error("", sqle);
+      }
+    }
+  };
 
 }
