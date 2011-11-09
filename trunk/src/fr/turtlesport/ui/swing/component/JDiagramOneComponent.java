@@ -53,7 +53,7 @@ public class JDiagramOneComponent extends JPanel {
   private boolean                     clearOnce;
 
   // Mouse position
-  private int                         mouseX         = 0;
+  public int                          mouseX         = 0;
 
   private long                        currentTime;
 
@@ -85,7 +85,7 @@ public class JDiagramOneComponent extends JPanel {
                                                                       0.2f);
 
   /** Model. */
-  private TablePointsModel            model;
+  protected TablePointsModel          model;
 
   private MyMouseMotionListener       mouseMotionListener;
 
@@ -101,11 +101,14 @@ public class JDiagramOneComponent extends JPanel {
 
   private Color                       colorY;
 
+  private int currentIndex;
+  
   /**
    * 
    */
   public JDiagramOneComponent(int type) {
     super();
+
     switch (type) {
       case HEART:
         colorY = JDiagramComponent.COLORY1;
@@ -533,6 +536,7 @@ public class JDiagramOneComponent extends JPanel {
       xg = WIDTH_TITLE_1 - lenText - 2;
       g2.drawString(st, xg, tabMouseY + highText);
     }
+  
   }
 
   /**
@@ -573,32 +577,29 @@ public class JDiagramOneComponent extends JPanel {
     double near = Double.MAX_VALUE;
     double nearCur;
 
-    int index = model.indexX2 - 1;
-    currentY1 = model.getY(index);
+    currentIndex = model.indexX2 - 1;
+    currentY1 = model.getY(currentIndex);
     double xInv = invComputeRelativeX(x0);
 
     for (int i = model.indexX1; i < model.indexX2 - 1; i++) {
       nearCur = Math.abs(xInv - model.getX(i));
       if (nearCur == 0) {
-        index = i;
+        currentIndex = i;
         break;
       }
       else if (near > nearCur) {
         near = nearCur;
-        index = i;
+        currentIndex = i;
       }
     }
 
-    // on met a jour le point pour la map
-    ModelPointsManager.getInstance().setMapCurrentPoint(model, index);
-
-    currentTime = model.getTime(index);
-    currentDistance = model.getDistanceX(index);
-    currentY1 = model.getY(index);
+    currentTime = model.getTime(currentIndex);
+    currentDistance = model.getDistanceX(currentIndex);
+    currentY1 = model.getY(currentIndex);
 
     tabMouseY = computeRelativeY(currentY1);
   }
-
+  
   /**
    * @author Denis Apparicio
    * 
@@ -746,7 +747,8 @@ public class JDiagramOneComponent extends JPanel {
       points = e.getListTrks();
       JDiagramOneComponent.this.removeMouseMotionListener(mouseMotionListener);
       JDiagramOneComponent.this.addMouseMotionListener(mouseMotionListener);
-      mouseX = 0;
+      
+      setMouseX(0);
       fireChangedAllPoints();
     }
 
@@ -784,25 +786,17 @@ public class JDiagramOneComponent extends JPanel {
      * turtlesport.ui.swing.component.ChangePointsEvent)
      */
     public void changedPoint(ChangePointsEvent e) {
-      if (e.hasPoints() && model != null) {
-        int index = e.getTrkIndexCurrentPoint();
-        if (e.isCurrentLastPoint()) {
-          mouseX = computeRelativeX(model.getGridXMax());
-          revalidate();
-          repaint();
-        }
-        else {
-          mouseX = computeRelativeX(model.getX(index));
-
-          currentTime = getTime(index);
-          currentDistance = getX(index);
-          currentY1 = getY(index);
-
-          tabMouseY = computeRelativeY(currentY1);
-          revalidate();
-          repaint();
-        }
-      }
+      /*
+       * if (e.hasPoints() && model != null) { int index =
+       * e.getTrkIndexCurrentPoint(); if (e.isCurrentLastPoint()) { mouseX =
+       * computeRelativeX(model.getGridXMax()); revalidate(); repaint(); } else
+       * { mouseX = computeRelativeX(model.getX(index));
+       * 
+       * currentTime = getTime(index); currentDistance = getX(index); currentY1
+       * = getY(index);
+       * 
+       * tabMouseY = computeRelativeY(currentY1); revalidate(); repaint(); } }
+       */
     }
 
     /*
@@ -1207,11 +1201,14 @@ public class JDiagramOneComponent extends JPanel {
       applyZoom();
     }
 
-    private void zoom(boolean isLeft) {
+    protected void zoom(boolean isLeft) {
       if (points == null) {
         return;
       }
+      doZoom(isLeft);
+    }
 
+    private void doZoom(boolean isLeft) {
       if (bZoom) {
         if (currentZoom < maxZoom) {
           currentZoom++;
@@ -1302,10 +1299,18 @@ public class JDiagramOneComponent extends JPanel {
      * java.awt.event.MouseMotionAdapter#mouseMoved(java.awt.event.MouseEvent)
      */
     public void mouseMoved(MouseEvent e) {
-      mouseX = e.getX();
+      setMouseX(e.getX());
+      
+     // jLabelText
+      
       revalidate();
       repaint();
     }
+  }
+  
+  private void setMouseX(int mouseX) {
+    this.mouseX = mouseX;
+    
   }
 
   /**
