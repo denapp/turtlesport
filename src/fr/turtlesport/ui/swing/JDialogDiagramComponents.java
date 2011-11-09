@@ -107,6 +107,7 @@ public class JDialogDiagramComponents extends JDialog {
         }
       }
     });
+    
   }
 
   public JPanelRunLap getJPanelRight() {
@@ -115,7 +116,7 @@ public class JDialogDiagramComponents extends JDialog {
     }
     return jPanelRight;
   }
-
+  
   private JPanel getjPanelGraphs() {
     if (jPanelGraphs == null) {
       jPanelGraphs = new JPanel();
