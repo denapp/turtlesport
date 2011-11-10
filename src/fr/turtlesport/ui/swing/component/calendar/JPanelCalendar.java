@@ -161,6 +161,9 @@ public class JPanelCalendar extends JPanel implements IListDateRunFire,
    * (java.util.Date)
    */
   public void fireDateDeleted(Date date) {
+    log.debug(">>fireDateChanged");
+    model.retreiveDate(this, date);
+    log.debug("<<fireDateChanged");
   }
 
   /**
