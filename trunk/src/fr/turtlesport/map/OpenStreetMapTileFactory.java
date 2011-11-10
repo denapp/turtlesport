@@ -139,7 +139,7 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
    */
   public static TileFactory getDefaultTileFactory() {
     String key = Configuration.getConfig()
-        .getProperty("map", "tile", TurtleEmptyTileFactory.NAME);
+        .getProperty("map", "tile",  "mapnik");
 
     TileFactory tileFactory;
     if (TurtleEmptyTileFactory.NAME.equals(key) /* || !URLPing.ping() */) {
