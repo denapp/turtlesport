@@ -474,7 +474,6 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
               isInDataBase = true;
               return currentMeteo;
             }
-            return new DataMeteo(dataRun.getTime());
           }
           catch (SQLException sqle) {
             log.error("", sqle);
