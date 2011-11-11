@@ -16,6 +16,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -101,14 +102,17 @@ public class JDiagramOneComponent extends JPanel {
 
   private Color                       colorY;
 
-  private int currentIndex;
-  
+  private int                         currentIndex;
+
+  private List<JDiagramOneComponent>  listDiagrams;
+
   /**
    * 
    */
   public JDiagramOneComponent(int type) {
     super();
 
+    listDiagrams = new ArrayList<JDiagramOneComponent>();
     switch (type) {
       case HEART:
         colorY = JDiagramComponent.COLORY1;
@@ -133,6 +137,10 @@ public class JDiagramOneComponent extends JPanel {
     this.type = type;
     model = new TablePointsModel();
     initialize();
+  }
+
+  public void addDIagram(JDiagramOneComponent d) {
+    listDiagrams.add(d);
   }
 
   private void performedLanguage(ILanguage lang) {
@@ -536,7 +544,7 @@ public class JDiagramOneComponent extends JPanel {
       xg = WIDTH_TITLE_1 - lenText - 2;
       g2.drawString(st, xg, tabMouseY + highText);
     }
-  
+
   }
 
   /**
@@ -599,7 +607,7 @@ public class JDiagramOneComponent extends JPanel {
 
     tabMouseY = computeRelativeY(currentY1);
   }
-  
+
   /**
    * @author Denis Apparicio
    * 
@@ -747,7 +755,7 @@ public class JDiagramOneComponent extends JPanel {
       points = e.getListTrks();
       JDiagramOneComponent.this.removeMouseMotionListener(mouseMotionListener);
       JDiagramOneComponent.this.addMouseMotionListener(mouseMotionListener);
-      
+
       setMouseX(0);
       fireChangedAllPoints();
     }
@@ -1186,19 +1194,35 @@ public class JDiagramOneComponent extends JPanel {
 
     public void zoomPlus() {
       bZoom = true;
+      for (JDiagramOneComponent d : listDiagrams) {
+        d.model.bZoom = true;
+      }
     }
 
     public void zoomMoins() {
       bZoom = false;
+      for (JDiagramOneComponent d : listDiagrams) {
+        d.model.bZoom = false;
+      }
     }
 
     public void reload() {
-      if (points == null || currentZoom == 0) {
+      if (points == null) {
         return;
       }
-      indexX1 = 0;
-      indexX2 = points.size();
-      applyZoom();
+      reloadInner();
+      
+      for (JDiagramOneComponent d : listDiagrams) {
+        d.model.reloadInner();
+      }
+    }
+    
+    private void reloadInner() {
+      if (currentZoom != 0) {
+        indexX1 = 0;
+        indexX2 = points.size();
+        applyZoom();
+      }
     }
 
     protected void zoom(boolean isLeft) {
@@ -1206,9 +1230,12 @@ public class JDiagramOneComponent extends JPanel {
         return;
       }
       doZoom(isLeft);
+      for (JDiagramOneComponent d : listDiagrams) {
+        d.model.doZoom(isLeft);
+      }
     }
 
-    private void doZoom(boolean isLeft) {
+    protected void doZoom(boolean isLeft) {
       if (bZoom) {
         if (currentZoom < maxZoom) {
           currentZoom++;
@@ -1299,18 +1326,21 @@ public class JDiagramOneComponent extends JPanel {
      * java.awt.event.MouseMotionAdapter#mouseMoved(java.awt.event.MouseEvent)
      */
     public void mouseMoved(MouseEvent e) {
-      setMouseX(e.getX());
-      
-     // jLabelText
-      
+      final int x = e.getX();
+      setMouseX(x);
       revalidate();
       repaint();
+
+      for (JDiagramOneComponent d : listDiagrams) {
+        d.setMouseX(x);
+        d.revalidate();
+        d.repaint();
+      }
     }
   }
-  
+
   private void setMouseX(int mouseX) {
     this.mouseX = mouseX;
-    
   }
 
   /**
@@ -1356,6 +1386,11 @@ public class JDiagramOneComponent extends JPanel {
           && y < (getHeight() - HEIGHT_TITLE_2)) {
         model.bZoom = (e.getWheelRotation() < 0);
         model.zoom((x < w / 2));
+        
+        for (JDiagramOneComponent d: listDiagrams) {
+          d.model.bZoom = (e.getWheelRotation() < 0);
+          d.model.zoom((x < w / 2));         
+        }
       }
     }
 
