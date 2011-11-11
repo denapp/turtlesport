@@ -77,10 +77,6 @@ public class JPanelGraphOne extends JPanel {
     initialize();
   }
 
-  public JDiagramOneComponent getjDiagram() {
-    return jDiagram;
-  }
-
   private void performedLanguage(ILanguage lang) {
     ResourceBundle rb = ResourceBundleUtility
         .getBundle(lang, JDiagramComponent.class);

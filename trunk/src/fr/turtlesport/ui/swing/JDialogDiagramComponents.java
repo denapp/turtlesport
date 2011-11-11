@@ -107,7 +107,7 @@ public class JDialogDiagramComponents extends JDialog {
         }
       }
     });
-    
+
   }
 
   public JPanelRunLap getJPanelRight() {
@@ -116,7 +116,7 @@ public class JDialogDiagramComponents extends JDialog {
     }
     return jPanelRight;
   }
-  
+
   private JPanel getjPanelGraphs() {
     if (jPanelGraphs == null) {
       jPanelGraphs = new JPanel();
@@ -126,6 +126,13 @@ public class JDialogDiagramComponents extends JDialog {
       jPanelY2 = new JPanelGraphOne(JDiagramOneComponent.ALTITUDE);
       jPanelY3 = new JPanelGraphOne(JDiagramOneComponent.SPEED);
 
+      jPanelY1.getJDiagram().addDIagram(jPanelY2.getJDiagram());
+      jPanelY1.getJDiagram().addDIagram(jPanelY3.getJDiagram());
+      jPanelY2.getJDiagram().addDIagram(jPanelY1.getJDiagram());
+      jPanelY2.getJDiagram().addDIagram(jPanelY3.getJDiagram());
+      jPanelY3.getJDiagram().addDIagram(jPanelY1.getJDiagram());
+      jPanelY3.getJDiagram().addDIagram(jPanelY2.getJDiagram());
+      
       Dimension dim = new Dimension(0, 5);
 
       jPanelGraphs.add(jPanelY1);
