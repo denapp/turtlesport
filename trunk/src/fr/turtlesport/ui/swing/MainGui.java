@@ -59,10 +59,12 @@ import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JXSplitButton;
 import fr.turtlesport.ui.swing.component.calendar.JPanelCalendar;
 import fr.turtlesport.ui.swing.component.calendar.JPanelListDateRun;
+import fr.turtlesport.ui.swing.component.workout.JPanelWorkout;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.img.menu.ImagesMenuRepository;
 import fr.turtlesport.ui.swing.model.ModelMapkitManager;
 import fr.turtlesport.ui.swing.model.ModelPointsManager;
+import fr.turtlesport.ui.swing.model.ModelWorkout;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
 import fr.turtlesport.update.Update;
@@ -125,6 +127,8 @@ public class MainGui extends JFrame implements LanguageListener {
   private JButton              jButtonPrefUser;
 
   private JButton              jButtonStat;
+
+  private JButton              jButtonWorkout;
 
   private MainGuiMouseListener quitMouseListener;
 
@@ -496,10 +500,12 @@ public class MainGui extends JFrame implements LanguageListener {
     usersMouseListener = new MainGuiMouseListener("");
     jXSplitButtonUser.addMouseListener(usersMouseListener);
 
-    if (jMenuItemMail != null) {
-      MailAction mailAction = new MailAction();
-      jMenuItemMail.addActionListener(mailAction);
-    }
+//    WorkoutAction workoutAction = new WorkoutAction();
+//    jButtonWorkout.addActionListener(workoutAction);
+//    if (jMenuItemMail != null) {
+//      MailAction mailAction = new MailAction();
+//      jMenuItemMail.addActionListener(mailAction);
+//    }
 
     jMenuItemCheckUpdate.addActionListener(new CheckUpdateAction());
     jMenuItemDonate.addActionListener(new DonationAction());
@@ -587,6 +593,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jToolBar.add(getJButtonStat());
       jToolBar.addSeparator();
       jToolBar.add(getJButtonPreference());
+//      jToolBar.add(getJButtonWorkout());
     }
     return jToolBar;
   }
@@ -618,7 +625,17 @@ public class MainGui extends JFrame implements LanguageListener {
     }
     return jButtonStat;
   }
-
+  
+  private JButton getJButtonWorkout() {
+    if (jButtonWorkout == null) {
+      jButtonWorkout = new JButton();
+      jButtonWorkout.setIcon(ImagesMenuRepository.getImageIcon("stat.png"));
+      jButtonWorkout.setEnabled(true);
+    }
+    return jButtonWorkout;
+  }
+  
+  
   /**
    * This method initializes jButtonPreference
    * 
@@ -1620,6 +1637,49 @@ public class MainGui extends JFrame implements LanguageListener {
             ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
                 .getManager().getCurrentLang(), MainGui.class);
             JShowMessage.error(rb.getString("errorSQL"));
+          }
+          catch (Throwable e) {
+            log.error("", e);
+          }
+          afterRunnableSwing();
+        }
+      });
+
+    }
+
+  }
+
+  /**
+   * @author Denis Apparicio
+   * 
+   */
+  private class WorkoutAction extends AbstractAction {
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+     */
+    public void actionPerformed(ActionEvent e) {
+      if (jSplitPaneCenter.getRightComponent() instanceof JPanelWorkout) {
+        return;
+      }
+
+      beforeRunnableSwing();
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+
+          try {
+            JPanelWorkout panel = new JPanelWorkout();
+            setRightComponent(panel);
+            
+            ModelWorkout w = new ModelWorkout();
+            panel.setModel(w);
+            MainGui.getWindow().setEnableMenuRun(false);
+            // Pour les boutons de navigation avec CDE/Motif
+            if (SwingLookAndFeel.isLookAndFeelMotif()) {
+              MainGui.getWindow().updateComponentTreeUI();
+            }
           }
           catch (Throwable e) {
             log.error("", e);
