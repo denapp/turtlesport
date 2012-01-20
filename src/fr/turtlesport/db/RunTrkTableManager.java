@@ -545,11 +545,11 @@ public final class RunTrkTableManager extends AbstractTableManager {
     while (rs.next()) {
       alt = rs.getFloat(1);
       tmp = alt - cur;
-      if (tmp > 0 && tmp < 8) {
+      if (tmp > 0 && tmp > 10) {
         altPlus += tmp;
         cur = alt;
       }
-      else if (tmp < 0 && tmp > -8) {
+      else if (tmp < 0 && tmp < -10) {
         altMoins -= tmp;
         cur = alt;
       }

@@ -776,22 +776,21 @@ public final class RunLapTableManager extends AbstractTableManager {
     log.info(">>distanceByMonth");
 
     List<DataStatYearMonth> res = new ArrayList<DataStatYearMonth>();
-
     Connection conn = DatabaseManager.getConnection();
     try {
       StringBuilder st = new StringBuilder();
       if (DataUser.isAllUser(idUser)) {
-        st.append("SELECT ");
-        st.append(" Year(LAP.start_time) AS THE_YEAR,");
-        st.append(" Month(LAP.start_time) AS THE_MONTH,");
-        st.append(" SUM(LAP.total_dist) AS TOT_DIST, ");
-        st.append(" COUNT(DISTINCT LAP.id) ");
-        st.append("FROM ");
-        st.append(getTableName() + " LAP, ");
-        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
-        st.append("WHERE LAP.ID = RUN.ID");
-        st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
-        st.append(" ORDER  BY THE_YEAR, THE_MONTH");
+          st.append("SELECT ");
+          st.append(" Year(LAP.start_time) AS THE_YEAR,");
+          st.append(" Month(LAP.start_time) AS THE_MONTH,");
+          st.append(" SUM(LAP.total_dist) AS TOT_DIST,");
+          st.append(" COUNT(DISTINCT LAP.ID) ");
+          st.append("FROM ");
+          st.append(getTableName() + " LAP, ");
+          st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+          st.append("WHERE LAP.ID = RUN.ID ");
+          st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
+          st.append(" ORDER BY THE_YEAR, THE_MONTH");
       }
       else {
         st.append("SELECT ");
@@ -805,7 +804,7 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append("WHERE LAP.ID = RUN.ID ");
         st.append(" AND RUN.id_user=?");
         st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
-        st.append(" ORDER  BY THE_YEAR, THE_MONTH");
+        st.append(" ORDER BY THE_YEAR, THE_MONTH");
       }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
@@ -1086,18 +1085,18 @@ public final class RunLapTableManager extends AbstractTableManager {
     try {
       StringBuilder st = new StringBuilder();
       if (DataUser.isAllUser(idUser)) {
-        st.append("SELECT");
-        st.append(" Year(LAP.start_time) AS THE_YEAR,");
-        st.append(" Month(LAP.start_time) AS THE_MONTH,");
-        st.append(" SUM(LAP.total_time) AS TOT_TIME, ");
-        st.append(" SUM(LAP.total_dist) AS TOT_DIST, ");
-        st.append("COUNT(DISTINCT LAP.id) ");
-        st.append("FROM ");
-        st.append(getTableName() + " LAP, ");
-        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
-        st.append("WHERE LAP.ID = RUN.ID ");
-        st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
-        st.append(" ORDER  BY THE_YEAR, THE_MONTH");
+          st.append("SELECT");
+          st.append(" Year(LAP.start_time) AS THE_YEAR,");
+          st.append(" Month(LAP.start_time) AS THE_MONTH,");
+          st.append(" SUM(LAP.total_dist) AS TOT_DIST, ");
+          st.append(" SUM(LAP.total_time) AS TOT_TIME, ");
+          st.append("COUNT(DISTINCT LAP.id) ");
+          st.append("FROM ");
+          st.append(getTableName() + " LAP, ");
+          st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+          st.append("WHERE LAP.ID = RUN.ID ");
+          st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
+          st.append(" ORDER  BY THE_YEAR, THE_MONTH");
       }
       else {
         st.append("SELECT");

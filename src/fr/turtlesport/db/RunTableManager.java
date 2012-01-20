@@ -168,6 +168,7 @@ public final class RunTableManager extends AbstractTableManager {
         dataRun.setTime(rs.getTimestamp("start_time"));
         dataRun.setComments(rs.getString("comments"));
         dataRun.setEquipement(rs.getString("equipement"));
+        dataRun.setLocation(rs.getString("location"));
         log.debug("id" + dataRun.getId());
       }
     }
@@ -248,7 +249,8 @@ public final class RunTableManager extends AbstractTableManager {
                      runType.getMultisport(),
                      runType.getComputeStartTime(),
                      comments,
-                     equipement);
+                     equipement,
+                     null);
 
           hashLap.put(runType.getTrackIndex(), id);
         }
@@ -263,7 +265,9 @@ public final class RunTableManager extends AbstractTableManager {
         for (AbstractLapType lap : runType.getListLapType()) {
           log.info("LapIndex=" + lap.getIndex());
           // insertion du lap si non present
-          if (!RunLapTableManager.getInstance().findLap(id, lap.getIndex(), lap.getStartTime())) {
+          if (!RunLapTableManager.getInstance().findLap(id,
+                                                        lap.getIndex(),
+                                                        lap.getStartTime())) {
             RunLapTableManager.getInstance().store(id, lap);
             hasNewLap = true;
           }
@@ -422,7 +426,8 @@ public final class RunTableManager extends AbstractTableManager {
                    0,
                    startTime,
                    comments,
-                   equipement);
+                   equipement,
+                   null);
         // notification
         if (++nbSave % IRunTransfertProgress.POINT_NOTIFY == 0) {
           progress.store(nbSave, maxLine);
@@ -543,7 +548,8 @@ public final class RunTableManager extends AbstractTableManager {
                  0,
                  startTime,
                  data.getComments(),
-                 data.getEquipement());
+                 data.getEquipement(),
+                 null);
 
       // Lap
       // ------------
@@ -682,22 +688,22 @@ public final class RunTableManager extends AbstractTableManager {
     boolean bRes = false;
 
     List<DataRun> runs = retreiveDesc(idUser, year, month);
-    if (runs == null || runs.size()==0) {
+    if (runs == null || runs.size() == 0) {
       return false;
     }
-    
+
     // Debut de tansaction
     boolean isInTransaction = DatabaseManager.isInTransaction();
     if (!isInTransaction) {
       DatabaseManager.beginTransaction();
     }
-    
+
     Connection conn = DatabaseManager.getConnection();
-    
-    for (DataRun dr :runs) {
+
+    for (DataRun dr : runs) {
       bRes |= delete(dr.getId());
     }
-    
+
     // ok
     if (!isInTransaction) {
       DatabaseManager.commitTransaction();
@@ -832,6 +838,7 @@ public final class RunTableManager extends AbstractTableManager {
    * @param time
    * @param distance
    * @param comments
+   * @param location
    * @return
    * @throws SQLException
    */
@@ -841,7 +848,8 @@ public final class RunTableManager extends AbstractTableManager {
                       int multisport,
                       Date startTime,
                       String comments,
-                      String equipement) throws SQLException {
+                      String equipement,
+                      String location) throws SQLException {
     log.debug(">>store");
     int id;
 
@@ -863,8 +871,9 @@ public final class RunTableManager extends AbstractTableManager {
       st.append(" multisport,");
       st.append(" start_time,");
       st.append(" comments,");
-      st.append(" equipement)");
-      st.append("VALUES(?, ?, ?, ?, ?, ?, ?)");
+      st.append(" equipement,");
+      st.append(" location)");
+      st.append("VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       pstmt.setInt(1, idUser);
@@ -874,6 +883,7 @@ public final class RunTableManager extends AbstractTableManager {
       pstmt.setTimestamp(5, new Timestamp(startTime.getTime()));
       pstmt.setString(6, comments);
       pstmt.setString(7, equipement);
+      pstmt.setString(8, location);
       pstmt.executeUpdate();
 
       // Recuperation de l'id
@@ -1013,6 +1023,7 @@ public final class RunTableManager extends AbstractTableManager {
         dataRun.setTime(rs.getTimestamp("start_time"));
         dataRun.setComments(rs.getString("comments"));
         dataRun.setEquipement(rs.getString("equipement"));
+        dataRun.setLocation(rs.getString("location"));
         log.debug("id" + dataRun.getId());
       }
     }
@@ -1063,7 +1074,7 @@ public final class RunTableManager extends AbstractTableManager {
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       pstmt.setInt(1, year);
-      int index =1;
+      int index = 1;
       if (month >= 0 && month <= 12) {
         pstmt.setInt(++index, month);
       }
@@ -1140,7 +1151,7 @@ public final class RunTableManager extends AbstractTableManager {
 
     if (log.isInfoEnabled()) {
       long delay = System.currentTimeMillis() - startTime;
-      log.info(">>retreiveDesc  idUser=" + idUser + " delay=" + delay + "ms");
+      log.info("<<retreiveDesc  idUser=" + idUser + " delay=" + delay + "ms");
     }
     return listRun;
   }
@@ -1187,8 +1198,9 @@ public final class RunTableManager extends AbstractTableManager {
         dataRun.setTime(rs.getTimestamp("start_time"));
         dataRun.setComments(rs.getString("comments"));
         dataRun.setEquipement(rs.getString("equipement"));
+        dataRun.setLocation(rs.getString("location"));
         listRun.add(dataRun);
-        log.debug("id" + dataRun.getId());
+        log.debug("id" + dataRun.getId() + " " + rs.getString("location"));
       }
     }
     finally {
@@ -1197,7 +1209,7 @@ public final class RunTableManager extends AbstractTableManager {
 
     if (log.isInfoEnabled()) {
       long delay = System.currentTimeMillis() - startTime;
-      log.info(">>retreive  idUser=" + idUser + " delay=" + delay + "ms");
+      log.info("<<retreive  idUser=" + idUser + " delay=" + delay + "ms");
     }
     return listRun;
   }
@@ -1212,7 +1224,7 @@ public final class RunTableManager extends AbstractTableManager {
    */
   public DataRun retreiveWithID(int id) throws SQLException {
     if (log.isInfoEnabled()) {
-      log.info(">>retreive  idUser=" + id);
+      log.info(">>retreiveWithID  id=" + id);
     }
 
     DataRun dataRun = null;
@@ -1237,6 +1249,7 @@ public final class RunTableManager extends AbstractTableManager {
         dataRun.setTime(rs.getTimestamp("start_time"));
         dataRun.setComments(rs.getString("comments"));
         dataRun.setEquipement(rs.getString("equipement"));
+        dataRun.setLocation(rs.getString("location"));
         log.debug("id" + dataRun.getId());
       }
     }
@@ -1597,6 +1610,84 @@ public final class RunTableManager extends AbstractTableManager {
     }
 
     log.debug("<<updateComments");
+  }
+
+  /**
+   * Mis &agrave; jour de la localisation.
+   * 
+   * @param id
+   * @param localisation
+   *          la localisation.
+   * @throws SQLException
+   */
+  public void updateLocation(int id, String localisation) throws SQLException {
+    log.debug(">>updateLocation id=" + id);
+
+    Connection conn = DatabaseManager.getConnection();
+
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("UPDATE ");
+      st.append(getTableName());
+      st.append(" SET location=?");
+      st.append(" WHERE id = ?");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setString(1, localisation);
+      pstmt.setInt(2, id);
+      pstmt.executeUpdate();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.debug("<<updateLocation");
+  }
+
+  /**
+   * R&eacute;p&egrave;re les localisations d'un utilisateur.
+   * 
+   * @param idUser
+   *          id de dl'utilisateur.
+   * @return la liste des localisations.
+   * @throws SQLException
+   */
+  public List<String> retreiveLocations(int idUser) throws SQLException {
+    log.debug(">>retreiveLocations");
+
+    ArrayList<String> list;
+    Connection conn = DatabaseManager.getConnection();
+
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT DISTINCT(location) FROM ");
+      st.append(getTableName());
+      if (!DataUser.isAllUser(idUser)) {
+        st.append(" WHERE id_user=?");
+      }
+      st.append(" ORDER BY location ASC");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+      ResultSet rs = pstmt.executeQuery();
+
+      list = new ArrayList<String>();
+      while (rs.next()) {
+        String s = rs.getString(1);
+        if (s != null) {
+          list.add(rs.getString(1));
+        }
+      }
+
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.debug("<<retreiveLocations");
+    return list;
   }
 
   /**

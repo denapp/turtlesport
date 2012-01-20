@@ -468,7 +468,7 @@ public class DatabaseManager {
                                                         + TABLE_RUN);
         rs = pstmt.executeQuery();
 
-        if (rs.getMetaData().getColumnCount() != 8) {
+        if (rs.getMetaData().getColumnCount() < 8) {
           // table existe dans une ancienne version ( < 0.1.13)
           while (rs.next()) {
             if (listData == null) {
@@ -489,9 +489,9 @@ public class DatabaseManager {
 
           executeUpdate("DROP TABLE " + TABLE_RUN);
         }
-        else {
+        else if (rs.getMetaData().getColumnCount() != 9) {
           // la table existe
-          if (rs.getMetaData().getColumnDisplaySize(8) != 500) {
+          if (rs.getMetaData().getColumnDisplaySize(7) != 500) {
             // on augmente la taille des commentaires
             releaseConnection(conn);
             conn = null;
@@ -501,6 +501,21 @@ public class DatabaseManager {
             st.append(" ALTER COLUMN comments SET DATA TYPE VARCHAR(500)");
             executeUpdate(st.toString());
           }
+          // table existe dans une ancienne version ( = 1.1)
+          // nouvelle version avec ajoiut colonne location
+          if (conn != null) {
+            releaseConnection(conn);
+            conn = null;
+          }
+          StringBuilder st = new StringBuilder();
+          st.append("ALTER TABLE ");
+          st.append(TABLE_RUN);
+          st.append(" ADD COLUMN location VARCHAR(100)");
+          executeUpdate(st.toString());
+          return;
+        }
+        else {
+          // la table existe
           return;
         }
       }
@@ -524,8 +539,8 @@ public class DatabaseManager {
     st.append("multisport INTEGER, ");
     st.append("start_time TIMESTAMP, ");
     st.append("comments VARCHAR(100), ");
-    st.append("equipement VARCHAR(50)");
-    st.append(')');
+    st.append("equipement VARCHAR(50), ");
+    st.append("location VARCHAR(100))");
 
     executeUpdate(st.toString());
 
@@ -643,7 +658,7 @@ public class DatabaseManager {
         st.append(" SELECT LAP_INDEX FROM ");
         st.append(TABLE_RUN_LAP);
         st.append(" T2");
-       st.append(" WHERE  T1.LAP_INDEX <> T2.LAP_INDEX");
+        st.append(" WHERE  T1.LAP_INDEX <> T2.LAP_INDEX");
         st.append(" AND  T1.ID = T2.ID");
         st.append(" AND  T1.START_TIME = T2.START_TIME)");
         executeUpdate(st.toString());

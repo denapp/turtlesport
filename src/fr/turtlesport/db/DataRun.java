@@ -32,6 +32,8 @@ public class DataRun {
 
   private String              equipement;
 
+  private String              location;
+
   private double              distanceTot = -1;
 
   private int                 timeTot     = -1;
@@ -126,6 +128,20 @@ public class DataRun {
    */
   public int getSportType() {
     return sportType;
+  }
+
+  /**
+   * @return
+   */
+  public String getLocation() {
+    return location;
+  }
+
+  /**
+   * @param location
+   */
+  public void setLocation(String location) {
+    this.location = location;
   }
 
   /**
