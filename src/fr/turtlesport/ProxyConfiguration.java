@@ -70,7 +70,7 @@ public final class ProxyConfiguration {
            && !hasProxyConfig()
            && Configuration.getConfig().getPropertyAsBoolean("proxy",
                                                              "detect",
-                                                             true);
+                                                             false);
   }
 
   /**

@@ -5,20 +5,15 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 /**
- * Language sweden.
- * 
  * @author Denis Apparicio
  * 
  */
-public final class LanguageSv extends AbstractLanguage {
+public final class LanguageIt extends AbstractLanguage {
 
   /** Instance unique. */
-  private static LanguageSv singleton = new LanguageSv();
+  private static LanguageIt singleton = new LanguageIt();
 
-  private Locale            locale;
-
-  private LanguageSv() {
-    locale = new Locale("sv");
+  private LanguageIt() {
   }
 
   /**
@@ -26,7 +21,7 @@ public final class LanguageSv extends AbstractLanguage {
    * 
    * @return une instance de ce langage.
    */
-  public static LanguageSv getInstance() {
+  public static LanguageIt getInstance() {
     return singleton;
   }
 
@@ -36,7 +31,7 @@ public final class LanguageSv extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#getEncoding()
    */
   public String getEncoding() {
-    return "ISO-8859-1";
+    return "UTF-8";
   }
 
   /*
@@ -45,7 +40,7 @@ public final class LanguageSv extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#getLocale()
    */
   public Locale getLocale() {
-    return locale;
+    return Locale.ITALIAN;
   }
 
   /*
@@ -57,9 +52,7 @@ public final class LanguageSv extends AbstractLanguage {
     return new SimpleDateFormat("dd/MM/yyyy", getLocale());
   }
 
-  /*
-   * (non-Javadoc)
-   * 
+  /* (non-Javadoc)
    * @see fr.turtlesport.lang.ILanguage#getDateTimeShortFormatter()
    */
   public DateFormat getDateTimeShortFormatter() {
@@ -90,7 +83,7 @@ public final class LanguageSv extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#no()
    */
   public String no() {
-    return "Nej";
+    return "No";
   }
 
   /*
@@ -99,7 +92,7 @@ public final class LanguageSv extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#yes()
    */
   public String yes() {
-    return "Ja";
+    return "Si";
   }
 
   /*
@@ -108,7 +101,7 @@ public final class LanguageSv extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#cancel()
    */
   public String cancel() {
-    return "Avbryt";
+    return "Cancellare";
   }
 
   /*
@@ -128,5 +121,4 @@ public final class LanguageSv extends AbstractLanguage {
   public boolean hasWebSiteTranslate() {
     return false;
   }
-
 }
