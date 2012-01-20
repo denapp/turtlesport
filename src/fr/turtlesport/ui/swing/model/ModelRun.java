@@ -270,6 +270,7 @@ public class ModelRun {
     view.getJLabelValAlt().setText(null);
     view.getModelActivities().setSelectedItem("");
     view.getModelEquipements().setSelectedItem("");
+    view.getModelLocation().setSelectedItem("");
     view.getJTextFieldNotes().setText("");
     view.getJButtonNext().setEnabled(false);
     view.getJButtonPrev().setEnabled(false);
@@ -363,6 +364,9 @@ public class ModelRun {
     view.getJTextFieldNotes().setText((dataRun.getComments() == null) ? ""
         : dataRun.getComments());
 
+    // Location
+    view.getModelLocation().setSelectedLocation(dataRun.getLocation());
+
     updateViewButtons(view);
 
     log.info("<<updateSummary");
@@ -433,6 +437,33 @@ public class ModelRun {
       RunTableManager.getInstance().updateEquipment(dataRun.getId(),
                                                     newEquipment);
       dataRun.setEquipement(newEquipment);
+    }
+  }
+
+  /**
+   * Sauvegarde dela localisation.
+   */
+  public void saveLocation(JPanelRun view) throws SQLException {
+    if (dataRun == null) {
+      return;
+    }
+
+    String location = dataRun.getLocation();
+    if (location == null) {
+      location = "";
+    }
+
+    String newLocation = (String) view.getModelLocation().getSelectedItem();
+    newLocation = (newLocation==null)?"":newLocation.trim();
+
+    if (!newLocation.equals(location)) {
+      RunTableManager.getInstance()
+          .updateLocation(dataRun.getId(), newLocation);
+      dataRun.setLocation(newLocation);
+      if (!view.getModelLocation().contains(newLocation)) {
+        view.getModelLocation().fill();
+        view.getModelLocation().setSelectedItem(newLocation);
+      }
     }
   }
 

@@ -59,6 +59,7 @@ import fr.turtlesport.db.DataActivityOther;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.EquipementTableManager;
+import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.db.UserActivityTableManager;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.lang.ILanguage;
@@ -155,6 +156,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
   private JLabel                  jLabelLibEquipment;
 
   private JComboBox               jComboBoxEquipment;
+
+  private JLabel                  jLabelLibLocation;
+
+  private JComboBox               jComboBoxLocation;
 
   private JTextAreaLength         jTextFieldNotes;
 
@@ -255,6 +260,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JLabel                  jLabelValDateTime;
 
+  private LocationComboBoxModel   modelLocations;
+
   /**
    * This is the default constructor.
    */
@@ -341,6 +348,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   public EquipementComboBoxModel getModelEquipements() {
     return modelEquipements;
+  }
+
+  public LocationComboBoxModel getModelLocation() {
+    return modelLocations;
   }
 
   public JTextArea getJTextFieldNotes() {
@@ -454,6 +465,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
     borderPanelRunLap.setTitle(rb.getString("borderPanelRunLap"));
     jLabelLibAlt.setText(rb.getString("jLabelLibAlt"));
     jLabelLibEquipment.setText(rb.getString("jLabelLibEquipment"));
+    jLabelLibLocation.setText(rb.getString("jLabelLibLocation"));
     jLabelLibActivity.setText(rb.getString("jLabelLibActivity"));
     jMenuItemRunDetail.setText(rb.getString("jMenuItemRunDetail"));
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
@@ -691,6 +703,18 @@ public class JPanelRun extends JPanel implements LanguageListener,
           }
         });
 
+      }
+    });
+
+    // Localisation
+    jComboBoxLocation.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        try {
+          model.saveLocation(JPanelRun.this);
+        }
+        catch (SQLException e) {
+          log.error("", e);
+        }
       }
     });
 
@@ -1184,6 +1208,28 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibEquipment.setLabelFor(jComboBoxEquipment);
       jPanelRunSummary.add(jComboBoxEquipment, g);
 
+      // Ligne 10
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibLocation = new JLabel();
+      jLabelLibLocation.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibLocation.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelLibLocation, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      modelLocations = new LocationComboBoxModel();
+      jComboBoxLocation = new JComboBox(modelLocations);
+      jComboBoxLocation.setEditable(true);
+      jComboBoxLocation.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibLocation.setLabelFor(jComboBoxLocation);
+      jPanelRunSummary.add(jComboBoxLocation, g);
     }
     return jPanelRunSummary;
   }
@@ -1649,28 +1695,19 @@ public class JPanelRun extends JPanel implements LanguageListener,
   public class TableModelLap extends AbstractTableModel implements
                                                        ChangePointsListener {
 
-    private String                 unitDistance = DistanceUnit.unitKm();
+    private String      unitDistance = DistanceUnit.unitKm();
 
-    private String[]               columnNames  = { DistanceUnit
-                                                        .getDefaultUnit(),
-                                                    "Temps",
-                                                    "Allure Moy. (mn/km)",
-                                                    "Vitesse Moy. (km/h)",
-                                                    "moy.",
-                                                    "max.",
-                                                    "Calories",
-                                                    "Denivele +",
-                                                    "Denivele -" };
+    private String[]    columnNames  = { DistanceUnit.getDefaultUnit(),
+                                         "Temps",
+                                         "Allure Moy. (mn/km)",
+                                         "Vitesse Moy. (km/h)",
+                                         "moy.",
+                                         "max.",
+                                         "Calories",
+                                         "Denivele +",
+                                         "Denivele -" };
 
-    private final int[]            columWidth   = { 35,
-                                                    30,
-                                                    30,
-                                                    35,
-                                                    35,
-                                                    28,
-                                                    30,
-                                                    45,
-                                                    45 };
+    private final int[] columWidth   = { 35, 30, 30, 35, 35, 28, 30, 45, 45 };
 
     public TableModelLap() {
       super();
@@ -1689,7 +1726,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
             // Distance
             performedHeader(DistanceUnit.getDefaultUnit(), 0);
             break;
-            
+
           case 2:
             // Allure
             performedHeader(PaceUnit.getDefaultUnit(), 2);
@@ -1721,7 +1758,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
     private void performedUnit(String unit) {
       // unite
-      performedHeader( unit, 0);
+      performedHeader(unit, 0);
       performedHeader("mn/" + unit, 2);
       performedHeader(unit + "/h", 3);
 
@@ -2081,4 +2118,44 @@ public class JPanelRun extends JPanel implements LanguageListener,
     }
   }
 
+  /**
+   * @author Denis Apparicio
+   * 
+   */
+  public class LocationComboBoxModel extends DefaultComboBoxModel {
+    public LocationComboBoxModel() {
+      super();
+      fill();
+    }
+
+    public void fill() {
+      removeAllElements();
+      addElement("");
+      try {
+        List<String> list = RunTableManager.getInstance()
+            .retreiveLocations(MainGui.getWindow().getCurrentIdUser());
+        for (String d : list) {
+          if (d != null && d.trim().length() > 0) {
+            addElement(d.trim());
+          }
+        }
+      }
+      catch (SQLException e) {
+        log.error("", e);
+      }
+    }
+
+    public void setSelectedLocation(String location) {
+      setSelectedItem((location == null) ? "" : location);
+    }
+
+    public boolean contains(Object value) {
+      for (int i = 0; i < getSize(); i++) {
+        if (getElementAt(i).equals(value)) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
 }

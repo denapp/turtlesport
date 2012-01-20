@@ -111,8 +111,8 @@ public class ModelDialogMap {
       // Vitesse Moy.
       view.getJPanelRight()
           .getJLabelValSpeedLap()
-          .setText(PaceUnit.computeAllure(lap.getTotalDist(),
-                                          lap.getTotalTime()));
+          .setText(SpeedPaceUnit.computeFormatSpeedWithUnit(lap.getTotalDist(),
+                                                            lap.getTotalTime()));
 
       // Frequence cardiaque
       view.getJPanelRight()
@@ -223,6 +223,10 @@ public class ModelDialogMap {
     // Equipement
     view.getJPanelRight().getJLabelValEquipment()
         .setText(dataRun.getEquipement());
+
+    // Location
+    view.getJPanelRight().getjLabelValLocation()
+        .setText(dataRun.getLocation());
 
     log.info("<<updateSummary");
   }

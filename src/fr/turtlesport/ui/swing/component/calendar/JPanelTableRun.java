@@ -688,7 +688,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
           int row = jTable.convertRowIndexToView(i);
           jTable.setRowSelectionInterval(row, row);
           // recuperation du focus
-          jTable.grabFocus();
+          jTable.requestFocusInWindow();
           break;
         }
       }
@@ -923,10 +923,17 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     public PopupListener() {
     }
 
+    @Override
+    public void mouseEntered(MouseEvent e) {
+      jTable.requestFocusInWindow();
+    }
+    
+    @Override
     public void mousePressed(MouseEvent e) {
       maybeShowPopup(e);
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
       maybeShowPopup(e);
     }

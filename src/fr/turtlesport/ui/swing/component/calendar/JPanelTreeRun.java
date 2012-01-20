@@ -874,7 +874,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
             jTreeTable.scrollPathToVisible(path);
             jTreeTable.getTreeSelectionModel().setSelectionPath(path);
             // recuperation du focus
-            jTreeTable.grabFocus();
+            jTreeTable.requestFocusInWindow();
             return;
           }
         }
@@ -1104,7 +1104,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
       }
 
       runNode = null;
-      jTreeTable.grabFocus();
+      jTreeTable.requestFocusInWindow();
 
       // recuperation de la selection
       int[] tabIndex = jTreeTable.getSelectedRows();
@@ -1233,10 +1233,17 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     public PopupListener() {
     }
 
+    @Override
+    public void mouseEntered(MouseEvent e) {
+      jTreeTable.requestFocusInWindow();
+    }
+
+    @Override
     public void mousePressed(MouseEvent e) {
       maybeShowPopup(e);
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
       maybeShowPopup(e);
     }

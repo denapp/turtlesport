@@ -108,6 +108,10 @@ public class JPanelRunLap extends JPanel {
 
   private JLabel         jLabelLibLap;
 
+  private JLabel         jLabelLibLocation;
+
+  private JLabel         jLabelValLocation;
+
   private JComboBox      jComboBoxLap;
 
   public JPanelRunLap() {
@@ -205,6 +209,10 @@ public class JPanelRunLap extends JPanel {
 
   public JLabel getJLabelValAltitudeTot() {
     return jLabelValAltitudeTot;
+  }
+
+  public JLabel getjLabelValLocation() {
+    return jLabelValLocation;
   }
 
   /**
@@ -450,6 +458,29 @@ public class JPanelRunLap extends JPanel {
       jLabelValEquipment.setFont(GuiFont.FONT_PLAIN);
       jLabelLibEquipment.setLabelFor(jLabelValEquipment);
       jPanelRunSummary.add(jLabelValEquipment, g);
+
+      // Ligne 10
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibLocation = new JLabel(rb.getString("jLabelLibLocation"));
+      jLabelLibLocation.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibLocation.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelLibLocation, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      g.anchor = GridBagConstraints.WEST;
+      jLabelValLocation = new JLabel();
+      jLabelValLocation.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibLocation.setLabelFor(jLabelValLocation);
+      jPanelRunSummary.add(jLabelValLocation, g);
     }
     return jPanelRunSummary;
   }
