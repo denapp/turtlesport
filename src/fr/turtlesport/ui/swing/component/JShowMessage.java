@@ -9,8 +9,10 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.plaf.FontUIResource;
 
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.ui.swing.GuiFont;
@@ -24,7 +26,18 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public final class JShowMessage  {
+public final class JShowMessage {
+
+  static {
+    try {
+      UIManager.put("OptionPane.messageFont",
+                    new FontUIResource(GuiFont.FONT_PLAIN));
+      UIManager.put("OptionPane.buttonFont",
+                    new FontUIResource(GuiFont.FONT_PLAIN));
+    }
+    catch (Throwable e) {
+    }
+  }
 
   /**
    * 
@@ -32,7 +45,7 @@ public final class JShowMessage  {
   private JShowMessage() {
     super();
   }
-  
+
   /**
    * 
    * @param msg
