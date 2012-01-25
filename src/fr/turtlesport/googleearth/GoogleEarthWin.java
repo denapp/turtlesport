@@ -16,14 +16,13 @@ public final class GoogleEarthWin extends AbstractGoogleEarth {
   }
 
   /** Google earth subkey */
-  private static final String SUBKEY = "Software\\Classes\\Applications\\googleearth.exe\\shell\\Open\\command";
+  private static final String SUBKEY = "SOFTWARE\\Classes\\Applications\\googleearth.exe\\shell\\Open\\command";
 
   /** Commande pour executer. */
   private String              command;
 
-  private static final String PATH_C = "C:\\Program Files\\Google\\Google Earth\\googleearth.exe";
-
-  private static final String PATH_D = "C:\\Program Files\\Google\\Google Earth\\googleearth.exe";
+  private String[]            PATH   = { "C:\\Program Files\\Google\\Google Earth\\googleearth.exe",
+                                         "C:\\Program Files\\Google\\Google Earth\\client\\googleearth.exe" };
 
   /**
    * 
@@ -43,17 +42,14 @@ public final class GoogleEarthWin extends AbstractGoogleEarth {
       return true;
     }
 
-    File f = new File(PATH_C);
-    if (f.isFile()) {
-      command = f.getPath() + " %1";
-      return true;
+    for (String s: PATH) {
+      File f = new File(s);
+      if (f.isFile()) {
+        command = f.getPath() + " %1";
+        return true;
+      }
     }
-
-    f = new File(PATH_D);
-    if (f.isFile()) {
-      command = f.getPath() + " %1";
-      return true;
-    }
+    
 
     // Valeur de la cle
     command = RegistryWin.localMachine().get(SUBKEY, null);
