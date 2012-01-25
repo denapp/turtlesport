@@ -44,9 +44,11 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     hashDiskCache.put(tileProviderInfo.getName(),
                       new DiskTitleCache(dir, tileProviderInfo));
 
-    // cyclemap
-    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://andy.sandbox.cloudmade.com/tiles/cycle",
-                                                         "cyclemap");
+    // cyclemap                                          tile.opencyclemap.org
+//    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://andy.sandbox.cloudmade.com/tiles/cycle",
+//                                                         "cyclemap");
+    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile.opencyclemap.org/cycle",
+        "cyclemap");
     dir = new File(dirCache, tileProviderInfo.getName());
     hashDiskCache.put(tileProviderInfo.getName(),
                       new DiskTitleCache(dir, tileProviderInfo));
