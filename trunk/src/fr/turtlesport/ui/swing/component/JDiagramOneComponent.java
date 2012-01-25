@@ -65,7 +65,7 @@ public class JDiagramOneComponent extends JPanel {
   private int                         tabMouseY;
 
   // gui
-  private static final int            WIDTH_TITLE_1  = 40;
+  private static final int            WIDTH_TITLE_1  = 50;
 
   protected static final int          WIDTH_TITLE_2  = 25;
 
