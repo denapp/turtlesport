@@ -65,7 +65,7 @@ public class JDiagramOneComponent extends JPanel {
   private int                         tabMouseY;
 
   // gui
-  private static final int            WIDTH_TITLE_1  = 50;
+  private static final int            WIDTH_TITLE_1  = 60;
 
   protected static final int          WIDTH_TITLE_2  = 25;
 
@@ -334,7 +334,8 @@ public class JDiagramOneComponent extends JPanel {
           text = SpeedUnit.format(model.getGridY()[i]);
         }
         lenText = metrics.stringWidth(text);
-        x = WIDTH_TITLE_1 - PAD - lenText - 15;
+        x = WIDTH_TITLE_1 - PAD - lenText - 20;
+        x =5;
         g2.setColor(colorY);
         g2.drawString(text, x, y + (highText / 2));
       }
