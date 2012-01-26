@@ -27,7 +27,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -1193,9 +1192,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jPanelSouth.setBorder(BorderFactory.createLoweredBevelBorder());
 
       status = new Status();
-      status.setFont(new JLabel().getFont());
       jPanelSouth.add(status, java.awt.BorderLayout.CENTER);
-
       jPanelSouth.add(getJPanelStatusCode(), java.awt.BorderLayout.WEST);
     }
     return jPanelSouth;
@@ -1215,8 +1212,7 @@ public class MainGui extends JFrame implements LanguageListener {
           .createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
 
       statusCode = new Status();
-      statusCode.setFont(new JLabel().getFont());
-      statusCode.setSize(new Dimension(30, 15));
+      statusCode.setPreferredSize(new Dimension(30, 15));
       jPanelStatusCode.add(statusCode, BorderLayout.CENTER);
     }
     return jPanelStatusCode;

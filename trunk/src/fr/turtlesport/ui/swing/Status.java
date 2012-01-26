@@ -1,10 +1,9 @@
 package fr.turtlesport.ui.swing;
 
-import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
+
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 /**
  * Barre de statut.
@@ -12,7 +11,7 @@ import java.awt.Image;
  * @author Denis Apparicio
  * 
  */
-public class Status extends Canvas {
+public class Status extends JLabel {
 
   /** Niveau erreur pour le message de statut. */
   private static final int   LEVEL_ERROR           = 1;
@@ -38,14 +37,13 @@ public class Status extends Canvas {
   /** Niveau du message. */
   private int                levelMessage          = LEVEL_ACTION;
 
-  private Image              imageBuffer;
-
   /**
    * 
    * 
    */
   public Status() {
-    super();
+    super("    ");
+    setFont(GuiFont.FONT_PLAIN);
     message = " ";
   }
 
@@ -56,9 +54,9 @@ public class Status extends Canvas {
    * @param value
    *          texte du message &aecute; mettre &aecute; jour.
    */
-  public void setText(String value) {
-    setMessage(value, levelMessage);
-  }
+  // public void setText(String value) {
+  // setMessage(value, levelMessage);
+  // }
 
   /**
    * Mis &aecute; jour du message de niveau action en sp&eecute;cifiant le texte
@@ -119,85 +117,29 @@ public class Status extends Canvas {
     setMessage(value + formatCodeErreur(erreur), LEVEL_ERROR);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.awt.Canvas#addNotify()
-   */
-  public void addNotify() {
-    super.addNotify();
-    repaint();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.awt.Canvas#paint(java.awt.Graphics)
-   */
-  public final void paint(Graphics g) {
-    g.setFont(GuiFont.FONT_PLAIN);
-    int nHeight = g.getFontMetrics().getMaxAscent();
-
-    // on efface le message precedent
-    if (getParent() != null) {
-      g.setColor(getParent().getBackground());
-    }
-    else {
-      g.setColor(getBackground());
-    }    
-    g.fillRect(0, 0, getWidth(), getHeight());
-    
-
-    g.setColor(getColorMessage());
-    g.drawString(message, 0, nHeight);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.awt.Canvas#update(java.awt.Graphics)
-   */
-  public void update(Graphics graphics) {
-    int nWidth = 0;
-    int nHeight = 0;
-    Dimension dim;
-    Graphics graphicsNew;
-
-    dim = this.getSize();
-    if (imageBuffer != null) {
-      nWidth = imageBuffer.getWidth(this);
-      nHeight = imageBuffer.getHeight(this);
-    }
-    if (imageBuffer == null || nWidth < dim.width || nHeight < dim.height) {
-      nWidth = Math.max(nWidth, dim.width);
-      nHeight = Math.max(nHeight, dim.height);
-      imageBuffer = this.createImage(nWidth, nHeight);
-    }
-
-    graphicsNew = imageBuffer.getGraphics();
-    if (graphicsNew == null) {
-      graphicsNew = graphics;
-    }
-
-    super.update(graphicsNew);
-
-    if (graphicsNew != graphics) {
-      graphics.drawImage(imageBuffer, 0, 0, dim.width, dim.height, this);
-    }
-  }
-
   /**
    * Mis &aecute; jour du message.
    */
   private void setMessage(String value, int niveau) {
     this.message = value;
     this.levelMessage = niveau;
-    Graphics g = getGraphics();
-    if (g != null) {
-      // super.paint(getGraphics());
-      // this.setForeground(getColorMessage());
-      this.paint(getGraphics());
+    if (SwingUtilities.isEventDispatchThread()) {
+      doMessage();
     }
+    else {
+      SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+          System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+          doMessage();
+        }
+      });
+    }
+  }
+
+  private void doMessage() {
+    setBackground(getColorMessage());
+    setText(message);
   }
 
   /**

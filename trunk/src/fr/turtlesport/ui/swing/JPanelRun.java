@@ -512,7 +512,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
    * @return void
    */
   private void initialize() {
-    this.setSize(650, 650);
+    this.setSize(660, 597);
     this.setLayout(new BorderLayout(5, 0));
     this.setOpaque(true);
     this.add(getJPopupMenu());
