@@ -63,7 +63,7 @@ public class JPanelGraph extends JPanel implements LanguageListener,
   private JComboboxUIlistener jComboBoxY3;
 
   private JComboboxUIlistener jComboBoxX;
-
+  
   private JButton             jButtonZoomMoins;
 
   private JButton             jButtonZoomPlus;
@@ -322,7 +322,6 @@ public class JPanelGraph extends JPanel implements LanguageListener,
       jPanelX.setLayout(new FlowLayout(FlowLayout.RIGHT));
       jPanelX.add(getJComboBoxX());
       Dimension dim = new Dimension(JDiagramComponent.WIDTH_TITLE_2 / 2, 20);
-      jPanelX.add(getJComboBoxX());
       jPanelX.add(new Box.Filler(dim, dim, dim));
     }
     return jPanelX;
