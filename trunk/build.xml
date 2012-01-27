@@ -59,6 +59,12 @@
 			<path refid="ant.classpath" />
 		</classpath>
 	</taskdef>
+	<!-- task xjc -->
+	<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
+		<classpath>
+			<path refid="ant.classpath" />
+		</classpath>
+	</taskdef>
 
 	<!-- task  Linux desktop entry-->
 	<taskdef name="desktopLinuxEntry" classname="com.googlecode.ant_deb_task.DesktopEntry">
@@ -97,7 +103,7 @@
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac compiler="javac1.5" srcdir="${src}" destdir="${dest}" debug="yes" deprecation="on" encoding="ISO-8859-1">
+		<javac compiler="javac1.6" srcdir="${src}" destdir="${dest}" debug="yes" deprecation="on" encoding="ISO-8859-1">
 			<compilerarg value="-Xlint:unchecked" />
 			<classpath>
 				<path refid="app.classpath" />
@@ -174,6 +180,13 @@
 		<copy file="${exe}/${jarApp}" todir="${exe}/linux" overwrite="yes" />
 		<copy file="${exe}/${jarApp}" todir="${exe}/macosx" overwrite="yes" />
 		<delete file="${exe}/${jarApp}" />
+	</target>
+
+	<!--  ================================================================== -->
+	<!--   Bundle jarApp macosx                                              -->
+	<!--  ================================================================== -->
+	<target name="xjcTcx">
+		<xjc schema="${src}/fr/turtlesport/geo/garmin/tcx/TrainingCenterDatabasev2.xsd" destdir="${src}"  />
 	</target>
 
 	<!--  ================================================================== -->
@@ -344,7 +357,7 @@
 			<replacetoken>VERSION_REPLACED_BY_ANT</replacetoken>
 		</replace>
 		<rpm failOnError='true' specFile='turtlesport.spec' topDir='${rpmbuilddir}' cleanBuildDir='yes' removeSpec='no' command='-bb -vv --target noarch' />
-	   <copy file="${rpmbuilddir}/RPMS/turtlesport-${version}-1.all.rpm" todir="${release}" overwrite="true" />
+		<copy file="${rpmbuilddir}/RPMS/turtlesport-${version}-1.all.rpm" todir="${release}" overwrite="true" />
 	</target>
 
 	<target name="releaseWin" depends="launch4j,SetupWin">
