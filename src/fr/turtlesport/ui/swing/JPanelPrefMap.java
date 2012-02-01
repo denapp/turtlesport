@@ -196,7 +196,7 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
       jLabelOpenStreeetMap = new JLabel();
       jLabelOpenStreeetMap.setFont(GuiFont.FONT_PLAIN);
       jLabelOpenStreeetMap
-          .setText("<html><body>Data/Maps Copyright &#169; 2011</body></html>");
+          .setText("<html><body>Data/Maps Copyright &#169; 2012</body></html>");
 
       jxHyperlinkOpenStreetMap = new JXHyperlink();
       jxHyperlinkOpenStreetMap.setText("OpenStreetMap Contributors");
