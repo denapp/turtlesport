@@ -78,6 +78,8 @@ public class GoogleMapGeo implements IGeoConvertRun {
 
   private static final String  END_TABLE_LAP   = "#END_TABLE_LAP#";
 
+  private static final String  LOCALISATION    = "#LOCALISATION#";
+
   /** Extensions. */
   public static final String[] EXT             = { "gpx" };
 
@@ -170,6 +172,9 @@ public class GoogleMapGeo implements IGeoConvertRun {
         else if (line.startsWith(CARDIO)) {
           cardio(dataRun, rb, writer, line);
         }
+        else if (line.startsWith(LOCALISATION)) {
+          localisation(dataRun, rb, writer, line);
+        }
         else if (line.startsWith(ACTIVITY)) {
           activity(dataRun, rb, writer, line);
         }
@@ -206,6 +211,19 @@ public class GoogleMapGeo implements IGeoConvertRun {
 
     log.debug("<<convert");
     return file;
+  }
+
+  private void localisation(DataRun dataRun,
+                            ResourceBundle rb,
+                            BufferedWriter writer,
+                            String line) throws IOException {
+    if (dataRun.getLocation() != null
+        && !"".equals(dataRun.getLocation().trim())) {
+      line = line.substring(LOCALISATION.length());
+      writer.write(MessageFormat.format(line, dataRun.getLocation().trim()));
+      writer.write("\r\n");
+    }
+
   }
 
   private void timeTot(DataRun dataRun,
