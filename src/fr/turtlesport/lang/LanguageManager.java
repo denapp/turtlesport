@@ -31,7 +31,8 @@ public final class LanguageManager {
       LanguageCa.getInstance(),
       LanguageDe.getInstance(),
       LanguageHu.getInstance(),
-      LanguageIt.getInstance()};
+      LanguageIt.getInstance(),
+      LanguageNl.getInstance()};
 
   private static HashMap<String, ILanguage> mapLang;
 

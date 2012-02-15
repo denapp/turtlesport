@@ -1707,7 +1707,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
                                          "Denivele +",
                                          "Denivele -" };
 
-    private final int[] columWidth   = { 35, 30, 30, 35, 35, 28, 30, 45, 45 };
+    private final int[] columWidth   = { 35, 30, 30, 35, 35, 28, 37, 45, 45 };
 
     public TableModelLap() {
       super();
