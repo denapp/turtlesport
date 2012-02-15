@@ -346,7 +346,7 @@ public final class RunLapTableManager extends AbstractTableManager {
     Connection conn = DatabaseManager.getConnection();
     try {
       StringBuilder st = new StringBuilder();
-      st.append(" SELECT SUM(calories) FROM ");
+      st.append(" SELECT SUM(int(calories)) FROM ");
       st.append(getTableName());
       st.append(" WHERE id=?");
 
