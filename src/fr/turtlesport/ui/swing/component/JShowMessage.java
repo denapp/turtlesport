@@ -28,17 +28,6 @@ import fr.turtlesport.util.ResourceBundleUtility;
  */
 public final class JShowMessage {
 
-  static {
-    try {
-      UIManager.put("OptionPane.messageFont",
-                    new FontUIResource(GuiFont.FONT_PLAIN));
-      UIManager.put("OptionPane.buttonFont",
-                    new FontUIResource(GuiFont.FONT_PLAIN));
-    }
-    catch (Throwable e) {
-    }
-  }
-
   /**
    * 
    */
