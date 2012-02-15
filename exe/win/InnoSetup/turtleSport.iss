@@ -19,7 +19,7 @@ OutputBaseFilename=turtlesport-win-1.2
 Compression=lzma
 SolidCompression=yes
 WizardSmallImageFile=Turtle-55.bmp
-WizardImageFile=wizardImage.bmp
+WizardImageFile=wizardImage2.bmp
 LicenseFile=lgpl-2.1.txt
 SetupIconFile=turtleSport.ico
 
@@ -32,6 +32,7 @@ Name: "catalan"; MessagesFile: "compiler:Languages\Catalan.isl"
 Name: "Hungarian"; MessagesFile: "compiler:Languages\Hungarian.isl"
 Name: "swedish"; MessagesFile: "compiler:Languages\Swedish.isl"
 Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
+Name: "nederlands"; MessagesFile: "compiler:Languages\Dutch.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
