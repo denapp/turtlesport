@@ -128,9 +128,7 @@ public class Status extends JLabel {
     }
     else {
       SwingUtilities.invokeLater(new Runnable() {
-        @Override
         public void run() {
-          System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
           doMessage();
         }
       });

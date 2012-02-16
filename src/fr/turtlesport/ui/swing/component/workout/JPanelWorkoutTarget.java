@@ -33,7 +33,6 @@ public class JPanelWorkoutTarget extends JPanel {
     
     //Evenements
     jComboBox.addItemListener(new ItemListener() {
-      @Override
       public void itemStateChanged(ItemEvent e) {        
         int index = jComboBox.getSelectedIndex();
       }

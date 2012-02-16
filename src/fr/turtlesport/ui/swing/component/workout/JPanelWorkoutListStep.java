@@ -169,7 +169,6 @@ public class JPanelWorkoutListStep extends JPanel {
       super();
     }
 
-    @Override
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
                                                    boolean isSelected,
@@ -197,7 +196,6 @@ public class JPanelWorkoutListStep extends JPanel {
       setFont(GuiFont.FONT_PLAIN);
     }
 
-    @Override
     public Component getTableCellRendererComponent(JTable table,
                                                    Object obj,
                                                    boolean isSelected,

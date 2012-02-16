@@ -48,7 +48,6 @@ public class JPanelWorkoutDuration extends JPanel {
 
     // Evenements
     jComboBox.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         int index = jComboBox.getSelectedIndex();
         JPanelWorkoutDuration.this.remove(1);
