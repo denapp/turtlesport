@@ -1,0 +1,168 @@
+package fr.turtlesport.ui.swing;
+
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.ResourceBundle;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.ui.swing.component.JShowMessage;
+import fr.turtlesport.ui.swing.component.JTurtleMapKit;
+import fr.turtlesport.ui.swing.model.ModelDialogMap;
+import fr.turtlesport.ui.swing.model.ModelMapkitManager;
+import fr.turtlesport.ui.swing.model.ModelPointsManager;
+import fr.turtlesport.util.ResourceBundleUtility;
+
+/**
+ * @author Denis Apparicio
+ * 
+ */
+public class JDialogMap extends JDialog {
+
+  private JTurtleMapKit  mapKit;
+
+  private JLabel         jLabelTitle;
+
+  private JPanelRunLap   jPanelRight;
+
+  private ResourceBundle rb;
+
+  // Model
+  private ModelDialogMap model;
+
+  /**
+   * @param frame
+   */
+  private JDialogMap(Frame frame) {
+    super(frame, true);
+    rb = ResourceBundleUtility.getBundle(LanguageManager.getManager()
+        .getCurrentLang(), getClass());
+
+    initialize();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.awt.Window#dispose()
+   */
+  @Override
+  public void dispose() {
+    super.dispose();
+    ModelMapkitManager.getInstance()
+        .removeChangeListener(mapKit.getMapListener());
+  }
+
+  /**
+   * Affiche la boite de dialogue.
+   * 
+   * @param mapKit
+   */
+  public static void prompt(JTurtleMapKit mapKit) {
+    // mis a jour du model et affichage de l'IHM
+    JDialogMap view = new JDialogMap(MainGui.getWindow());
+
+    // MapKit
+    view.mapKit.getMainMap().setCenterPosition(mapKit.getMainMap()
+        .getCenterPosition());
+    int zoom = mapKit.getMainMap().getZoom();
+    if (zoom != 1) {
+      zoom--;
+    }
+    view.mapKit.getMainMap().setZoom(zoom);
+
+    // original zoom et position
+    zoom = mapKit.getOriginalZoom();
+    if (zoom != 1) {
+      zoom--;
+    }
+    view.mapKit.setOriginalZoom(zoom);
+    view.mapKit.setOriginalPosition(mapKit.getOriginalPosition());
+
+    // model
+    ModelDialogMap model = new ModelDialogMap();
+    try {
+      model.updateView(view);
+      view.model = model;
+      int indexLap = ModelPointsManager.getInstance().getLapIndex();
+      if (indexLap != -1) {
+        view.getJPanelRight().getJComboBoxLap().setSelectedIndex(indexLap + 1);
+      }
+    }
+    catch (SQLException e) {
+      JShowMessage.error(view.rb.getString("errorDatabase"));
+      return;
+    }
+
+    view.pack();
+    view.setLocationRelativeTo(MainGui.getWindow());
+    view.setVisible(true);
+  }
+
+  public JLabel getJLabelTitle() {
+    return jLabelTitle;
+  }
+
+  private void initialize() {
+    jLabelTitle = new JLabel();
+    jLabelTitle.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabelTitle.setFont(GuiFont.FONT_PLAIN);
+
+    JPanel contentPane = new JPanel();
+    contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
+    contentPane.add(getJPanelMap());
+    contentPane.add(Box.createRigidArea(new Dimension(5, 0)));
+    contentPane.add(getJPanelRight());
+
+    this.setContentPane(contentPane);
+    this.setTitle(rb.getString("title"));
+
+    // Evenement
+    getJPanelRight().getJComboBoxLap().addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (model != null && getJPanelRight().getJComboBoxLap().getSelectedIndex() > 0) {
+          model.updateViewLap(JDialogMap.this,
+                              getJPanelRight().getJComboBoxLap().getSelectedIndex() - 1);
+        }
+      }
+    });
+
+  }
+
+  public JPanelRunLap getJPanelRight() {
+    if (jPanelRight == null) {
+      jPanelRight = new JPanelRunLap();
+    }
+    return jPanelRight;
+  }
+
+  public JTurtleMapKit getJPanelMap() {
+    if (mapKit == null) {
+      mapKit = new JTurtleMapKit(false);
+      mapKit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      // mapKit.setBorder(BorderFactory
+      // .createTitledBorder(null,
+      // "",
+      // TitledBorder.DEFAULT_JUSTIFICATION,
+      // TitledBorder.DEFAULT_POSITION,
+      // GuiFont.FONT_PLAIN,
+      // null));
+      Dimension dim = new Dimension(600, 600);
+      mapKit.setPreferredSize(dim);
+      mapKit.setGeoPositionVisible(true);
+      mapKit.setTimeVisible(true);
+    }
+    return mapKit;
+  }
+
+}
