@@ -260,6 +260,7 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
                     + dateFormat.format(lapMsg.getStartTime().getDate()));
           log.debug("   StartPositionLat=" + lapMsg.getStartPositionLat());
           log.debug("   StartPositionLong=" + lapMsg.getStartPositionLong());
+          log.debug("   Cadence=" + lapMsg.getAvgCadence());
           log.debug("   Type=" + lapMsg.getEventType());
           log.debug("   Event=" + lapMsg.getEvent());
           log.debug("-----------");
@@ -276,7 +277,7 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
                     + record.getHeartRate() + " Speed=" + record.getSpeed()
                     + " Altitude=" + record.getAltitude() + " Lat="
                     + record.getPositionLat() + " lon="
-                    + record.getPositionLat());
+                    + record.getPositionLat() + " cadence="+ record.getCadence());
         }
         break;
 
