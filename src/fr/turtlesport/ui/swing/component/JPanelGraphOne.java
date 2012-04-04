@@ -48,8 +48,6 @@ public class JPanelGraphOne extends JPanel {
 
   private JComboboxUIlistener  jComboBoxY3;
 
-  private JComboboxUIlistener  jComboBoxX;
-
   private JButton              jButtonZoomMoins;
 
   private JButton              jButtonZoomPlus;
@@ -61,8 +59,6 @@ public class JPanelGraphOne extends JPanel {
                                                  .createRaisedBevelBorder();
 
   private JButton              jButtonReload;
-
-  private JPanel               jPanelX;
 
   private JLabel               jLabelTitle;
 
@@ -96,6 +92,11 @@ public class JPanelGraphOne extends JPanel {
                                  + rb.getString("unitY2") + "</font></html>");
         break;
 
+      case JDiagramOneComponent.CADENCE:
+        getJLabelTitle().setText("<html><font color=#FF00FF>"
+                                 + rb.getString("unitY4") + "</font></html>");
+        break;
+
       default:
         getJComboBoxY3().removeAllItems();
         getJComboBoxY3().addItem(rb.getString("speed") + "("
@@ -110,10 +111,6 @@ public class JPanelGraphOne extends JPanel {
     if (type != JDiagramOneComponent.SPEED) {
       jCheckBoxFilter.setText(rb.getString("filter"));
     }
-    jComboBoxX.removeAllItems();
-    jComboBoxX.addItem(MessageFormat.format(rb.getString("unitX"),
-                                            DistanceUnit.getDefaultUnit()));
-    jComboBoxX.addItem(rb.getString("time"));
   }
 
   /*
@@ -138,15 +135,6 @@ public class JPanelGraphOne extends JPanel {
       if (index != -1) {
         jComboBoxY3.setSelectedIndex(index);
       }
-
-      index = jComboBoxX.getSelectedIndex();
-      jComboBoxX.removeAllItems();
-      jComboBoxX.addItem(MessageFormat.format(rb.getString("unitX"),
-                                              DistanceUnit.getDefaultUnit()));
-      jComboBoxX.addItem(rb.getString("time"));
-      if (index != -1) {
-        jComboBoxX.setSelectedIndex(index);
-      }
     }
   }
 
@@ -161,7 +149,6 @@ public class JPanelGraphOne extends JPanel {
     setLayout(new BorderLayout(0, 0));
     add(jDiagram, BorderLayout.CENTER);
     add(getJPanelTitle(), BorderLayout.NORTH);
-    add(getJPanelX(), BorderLayout.SOUTH);
     setOpaque(true);
 
     // setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
@@ -173,8 +160,6 @@ public class JPanelGraphOne extends JPanel {
                             GuiFont.FONT_PLAIN,
                             null));
     performedLanguage(LanguageManager.getManager().getCurrentLang());
-
-    jComboBoxX.setSelectedIndex(jDiagram.getModel().isAxisXDistance() ? 0 : 1);
 
     // Evenement
     jButtonZoomMoins.addActionListener(new ActionListener() {
@@ -194,11 +179,6 @@ public class JPanelGraphOne extends JPanel {
     jButtonReload.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         jDiagram.getModel().reload();
-      }
-    });
-    jComboBoxX.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        jDiagram.getModel().setAxisX(jComboBoxX.getSelectedIndex() == 0);
       }
     });
 
@@ -246,7 +226,7 @@ public class JPanelGraphOne extends JPanel {
         jPanelTitle.add(new Box.Filler(dim, dim, dim));
         jPanelTitle.add(getJCheckBoxFilter());
         jPanelTitle.add(new JLabel("   "));
-        }
+      }
       jPanelTitle.add(getJButtonZoomPlus());
       jPanelTitle.add(getJButtonZoomMoins());
       jPanelTitle.add(getJButtonReload());
@@ -254,18 +234,6 @@ public class JPanelGraphOne extends JPanel {
       jPanelTitle.add(new Box.Filler(dim, dim, dim));
     }
     return jPanelTitle;
-  }
-
-  private JPanel getJPanelX() {
-    if (jPanelX == null) {
-      jPanelX = new JPanel();
-      jPanelX.setLayout(new FlowLayout(FlowLayout.RIGHT));
-      jPanelX.add(getJComboBoxX());
-      Dimension dim = new Dimension(JDiagramComponent.WIDTH_TITLE_2 / 2, 20);
-      jPanelX.add(getJComboBoxX());
-      jPanelX.add(new Box.Filler(dim, dim, dim));
-    }
-    return jPanelX;
   }
 
   private JComboBox getJComboBoxY3() {
@@ -288,17 +256,6 @@ public class JPanelGraphOne extends JPanel {
       jLabelTitle.setFont(GuiFont.FONT_PLAIN);
     }
     return jLabelTitle;
-  }
-
-  private JComboBox getJComboBoxX() {
-    if (jComboBoxX == null) {
-      jComboBoxX = new JComboboxUIlistener();
-      jComboBoxX.setFont(GuiFont.FONT_PLAIN_VERY_SMALL);
-      int width = (OperatingSystem.isMacOSX()) ? 120 : 110;
-      jComboBoxX.setPreferredSize(new Dimension(width, jComboBoxX
-          .getPreferredSize().height));
-    }
-    return jComboBoxX;
   }
 
   private class MyDefaultListCellRenderer extends DefaultListCellRenderer {
