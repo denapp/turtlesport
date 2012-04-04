@@ -67,7 +67,7 @@ public class JDiagramOneComponent extends JPanel {
   // gui
   private static final int            WIDTH_TITLE_1  = 60;
 
-  protected static final int          WIDTH_TITLE_2  = 25;
+  public static final int          WIDTH_TITLE_2  = 25;
 
   private static final int            HEIGHT_TITLE_1 = 10;
 
@@ -97,6 +97,8 @@ public class JDiagramOneComponent extends JPanel {
   public static final int             PACE           = 3;
 
   public static final int             ALTITUDE       = 4;
+
+  public static final int             CADENCE        = 5;
 
   private int                         type;
 
@@ -130,6 +132,10 @@ public class JDiagramOneComponent extends JPanel {
         colorY = JDiagramComponent.COLORY3;
         break;
 
+      case CADENCE:
+        colorY = JDiagramComponent.COLORY4;
+        break;
+
       default:
         throw new IllegalArgumentException();
     }
@@ -139,7 +145,7 @@ public class JDiagramOneComponent extends JPanel {
     initialize();
   }
 
-  public void addDIagram(JDiagramOneComponent d) {
+  public void addDiagram(JDiagramOneComponent d) {
     listDiagrams.add(d);
   }
 
@@ -335,7 +341,7 @@ public class JDiagramOneComponent extends JPanel {
         }
         lenText = metrics.stringWidth(text);
         x = WIDTH_TITLE_1 - PAD - lenText - 20;
-        x =5;
+        x = 5;
         g2.setColor(colorY);
         g2.drawString(text, x, y + (highText / 2));
       }
@@ -474,7 +480,7 @@ public class JDiagramOneComponent extends JPanel {
    */
   private void paintExtra(Graphics2D g2) {
     if (mouseX < WIDTH_TITLE_1
-        || mouseX > getWidth() - WIDTH_TITLE_1 - WIDTH_TITLE_2) {
+        || mouseX > getWidth() - WIDTH_TITLE_2) {
       // on remet le point a zero pour la map
       ModelPointsManager.getInstance().setMapCurrentPoint(model, 0);
       return;
@@ -884,6 +890,9 @@ public class JDiagramOneComponent extends JPanel {
         case ALTITUDE:
           return (model.isFilter()) ? pointsFilter[i].getAltitude() : points
               .get(i).getAltitude();
+        case CADENCE:
+          return (model.isFilter()) ? pointsFilter[i].getCadence() : points
+              .get(i).getCadence();
         default:
           return 0;
       }
@@ -998,7 +1007,6 @@ public class JDiagramOneComponent extends JPanel {
         maxYSpeed = 0;
         minYPace = Double.MAX_VALUE;
         maxYPace = 0;
-
         if (type == SPEED) {
           computeSpeedPace();
         }
@@ -1055,8 +1063,28 @@ public class JDiagramOneComponent extends JPanel {
                 minY = p.getAltitude();
               }
               break;
+            case CADENCE:
+              if (!p.isValidCadence()) {
+                p.setCadence(0);
+              }
+              if (p.getCadence() > maxY) {
+                maxY = p.getCadence();
+              }
+              if (p.getCadence() < minY) {
+                minY = p.getCadence();
+              }
+              break;
           }
 
+        }
+        if (type == CADENCE) {
+          double tmp = maxY;
+          maxY = Math.round(maxY/10)*10;
+          maxY += (tmp > maxY)?10:0;
+
+          tmp = minY;
+          minY = Math.round(minY/10)*10;
+          minY += (tmp < minY)?-10:0;
         }
 
         // Axe des x (distance en metre)
@@ -1073,7 +1101,7 @@ public class JDiagramOneComponent extends JPanel {
           gridXTime[i] = (maxTime * 1.0) * i / (gridXDistance.length - 1);
         }
 
-        if (type == ALTITUDE) {
+        if (type == ALTITUDE || type == CADENCE) {
           for (int i = 0; i < gridY.length; i++) {
             gridY[i] = (int) (minY + (maxY - minY) * i / (gridY.length - 1));
           }
@@ -1191,6 +1219,11 @@ public class JDiagramOneComponent extends JPanel {
         pointsFilter[i].setSpeed(points.get(i).getSpeed());
       }
 
+      // courbe 4
+      for (int i = 0; i < points.size(); i++) {
+        pointsFilter[i].setCadence(points.get(i).getCadence());
+      }
+
     }
 
     public void zoomPlus() {
@@ -1212,12 +1245,12 @@ public class JDiagramOneComponent extends JPanel {
         return;
       }
       reloadInner();
-      
+
       for (JDiagramOneComponent d : listDiagrams) {
         d.model.reloadInner();
       }
     }
-    
+
     private void reloadInner() {
       if (currentZoom != 0) {
         indexX1 = 0;
@@ -1387,10 +1420,10 @@ public class JDiagramOneComponent extends JPanel {
           && y < (getHeight() - HEIGHT_TITLE_2)) {
         model.bZoom = (e.getWheelRotation() < 0);
         model.zoom((x < w / 2));
-        
-        for (JDiagramOneComponent d: listDiagrams) {
+
+        for (JDiagramOneComponent d : listDiagrams) {
           d.model.bZoom = (e.getWheelRotation() < 0);
-          d.model.zoom((x < w / 2));         
+          d.model.zoom((x < w / 2));
         }
       }
     }
