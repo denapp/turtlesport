@@ -719,7 +719,6 @@ public final class JDialogImport extends JDialog implements
       if (routes != null) {
         for (IGeoRoute r : routes) {
           int size = listRows.size();
-          if (r.getAllPoints().size() > 0) {
             TableRowObject rowObj = new TableRowObject(size, r, file);
             listRows.add(rowObj);
             switch (r.getSportType()) {
@@ -733,7 +732,6 @@ public final class JDialogImport extends JDialog implements
             }
             fireTableRowsInserted(size, size);
             isAdd = true;
-          }
         }
       }
 
