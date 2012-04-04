@@ -55,7 +55,7 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JDiagramComponent extends JPanel implements LanguageListener,
+public class CopyOfJDiagramComponent extends JPanel implements LanguageListener,
                                              UnitListener {
   private BufferedImage               bimg;
 
@@ -122,7 +122,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
   /**
    * 
    */
-  protected JDiagramComponent() {
+  protected CopyOfJDiagramComponent() {
     super();
     initialize();
   }
@@ -157,7 +157,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
   private void performedLanguage(ILanguage lang) {
     ResourceBundle rb = ResourceBundleUtility
-        .getBundle(lang, JDiagramComponent.class);
+        .getBundle(lang, CopyOfJDiagramComponent.class);
     model.setUnitX(MessageFormat.format(rb.getString("unitX"),
                                         DistanceUnit.getDefaultUnit()));
   }
@@ -227,7 +227,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     Graphics2D g2 = myImage.createGraphics();
 
     ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-        .getManager().getCurrentLang(), JDiagramComponent.class);
+        .getManager().getCurrentLang(), CopyOfJDiagramComponent.class);
 
     paintGrid(g2);
     if (model != null && model.indexX2 != 0) {
@@ -1195,7 +1195,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     public void unitChanged(String newUnit) {
       if (!unit.equals(newUnit)) {
         ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-            .getManager().getCurrentLang(), JDiagramComponent.class);
+            .getManager().getCurrentLang(), CopyOfJDiagramComponent.class);
         model.setUnitX(MessageFormat.format(rb.getString("unitX"),
                                             DistanceUnit.getDefaultUnit()));
 
@@ -1227,8 +1227,8 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
         return;
       }
       points = e.getListTrks();
-      JDiagramComponent.this.removeMouseMotionListener(mouseMotionListener);
-      JDiagramComponent.this.addMouseMotionListener(mouseMotionListener);
+      CopyOfJDiagramComponent.this.removeMouseMotionListener(mouseMotionListener);
+      CopyOfJDiagramComponent.this.addMouseMotionListener(mouseMotionListener);
       mouseX = 0;
       fireChangedAllPoints();
     }
@@ -1311,10 +1311,10 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
      * turtlesport.ui.swing.component.ChangeMapEvent)
      */
     public void changedPlay(ChangeMapEvent e) {
-      JDiagramComponent.this.removeMouseMotionListener(mouseMotionListener);
+      CopyOfJDiagramComponent.this.removeMouseMotionListener(mouseMotionListener);
       hasMouseMotionListener = !e.isRunning();
       if (hasMouseMotionListener) {
-        JDiagramComponent.this.addMouseMotionListener(mouseMotionListener);
+        CopyOfJDiagramComponent.this.addMouseMotionListener(mouseMotionListener);
       }
     }
 
