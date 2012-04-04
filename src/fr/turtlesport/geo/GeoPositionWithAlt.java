@@ -206,7 +206,6 @@ public class GeoPositionWithAlt extends GeoPosition implements
    * 
    * @see fr.turtlesport.geo.IGeoPositionWithAlt#isValidCadence()
    */
-  @Override
   public boolean isValidCadence() {
     return cadence >=0 && cadence < 0xFF;
   }
