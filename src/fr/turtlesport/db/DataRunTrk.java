@@ -12,9 +12,9 @@ public class DataRunTrk {
 
   private int              id;
 
-  private int              latitude;
+  private int              latitude       = INVALID;
 
-  private int              longitude;
+  private int              longitude      = INVALID;
 
   private Timestamp        time;
 
@@ -178,7 +178,7 @@ public class DataRunTrk {
    *         sinon
    */
   public boolean isValidCadence() {
-    return (cadence >= 0 && cadence < 0xff);
+    return (cadence > 0 && cadence < 0xff);
   }
 
   /**

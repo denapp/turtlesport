@@ -257,9 +257,64 @@ public final class RunTrkTableManager extends AbstractTableManager {
    * @return
    * @throws SQLException
    */
-  public List<DataRunTrk> getTrks(int idRun) throws SQLException {
+  public List<DataRunTrk> getAllTrks(int idRun) throws SQLException {
     if (log.isInfoEnabled()) {
-      log.info(">>getTrks idRun=" + idRun);
+      log.info(">>getAllTrks idRun=" + idRun);
+    }
+    List<DataRunTrk> list = new ArrayList<DataRunTrk>();
+
+    long startTime = System.currentTimeMillis();
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT * FROM ");
+      st.append(getTableName());
+      st.append(" WHERE id=?");
+      st.append(" AND distance <> ?");
+      st.append(" ORDER BY distance");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, idRun);
+      pstmt.setFloat(2, 1.0e25f);
+
+      DataRunTrk trk;
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        trk = new DataRunTrk();
+        trk.setId(rs.getInt(1));
+        if (rs.getInt(2) != 0 || rs.getInt(3) != 0) {
+          trk.setLatitude(rs.getInt(2));
+          trk.setLongitude(rs.getInt(3));
+        }
+        trk.setTime(rs.getTimestamp(4));
+        trk.setAltitude(rs.getFloat(5));
+        trk.setDistance(rs.getFloat(6));
+        trk.setHeartRate(rs.getInt(7));
+        trk.setCadence(rs.getInt(8));
+        list.add(trk);
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      long delay = System.currentTimeMillis() - startTime;
+      log.info("<<getAllTrks delay=" + delay + "ms");
+    }
+    return list;
+  }
+
+  /**
+   * Restitue les points valides.
+   * 
+   * @param idRun
+   * @return
+   * @throws SQLException
+   */
+  public List<DataRunTrk> getValidTrks(int idRun) throws SQLException {
+    if (log.isInfoEnabled()) {
+      log.info(">>getValidTrks idRun=" + idRun);
     }
     List<DataRunTrk> list = new ArrayList<DataRunTrk>();
 
@@ -301,7 +356,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
 
     if (log.isInfoEnabled()) {
       long delay = System.currentTimeMillis() - startTime;
-      log.info("<<getTrks delay=" + delay + "ms");
+      log.info("<<getValidTrks delay=" + delay + "ms");
     }
     return list;
   }
@@ -348,18 +403,13 @@ public final class RunTrkTableManager extends AbstractTableManager {
       st.append("SELECT * FROM ");
       st.append(getTableName());
       st.append(" WHERE id=?");
-      st.append(" AND distance <> ?");
-      st.append(" AND ((latitude <> ? OR longitude <> ?) AND  (latitude <> 0 OR longitude <> 0))");
       st.append(" AND (time BETWEEN ? AND ?)");
-      st.append(" ORDER BY distance");
+      st.append(" ORDER BY time");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       pstmt.setInt(1, idRun);
-      pstmt.setFloat(2, (float) 1.0e25);
-      pstmt.setInt(3, 0x7FFFFFFF);
-      pstmt.setInt(4, 0x7FFFFFFF);
-      pstmt.setTimestamp(5, new Timestamp(dateFirst.getTime()));
-      pstmt.setTimestamp(6, new Timestamp(dateEnd.getTime()));
+      pstmt.setTimestamp(2, new Timestamp(dateFirst.getTime()));
+      pstmt.setTimestamp(3, new Timestamp(dateEnd.getTime()));
 
       ArrayList<DataRunTrk> list = new ArrayList<DataRunTrk>();
       DataRunTrk trk;
