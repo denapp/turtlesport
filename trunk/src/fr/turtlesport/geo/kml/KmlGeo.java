@@ -99,7 +99,7 @@ public final class KmlGeo implements IGeoConvertRun, IGeoConvertCourse {
     }
 
     List<DataRunTrk> trks = RunTrkTableManager.getInstance()
-        .getTrks(dataRun.getId());
+        .getValidTrks(dataRun.getId());
     if (trks != null && trks.size() < 1) {
       return null;
     }

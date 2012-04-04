@@ -132,7 +132,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         }
 
         List<DataRunTrk> trks = RunTrkTableManager.getInstance()
-            .getTrks(data.getId());
+            .getValidTrks(data.getId());
         if (trks == null || trks.size() == 0) {
           continue;
         }
@@ -215,7 +215,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     }
 
     List<DataRunTrk> trks = RunTrkTableManager.getInstance()
-        .getTrks(data.getId());
+        .getValidTrks(data.getId());
     if (trks != null && trks.size() < 1) {
       return null;
     }
@@ -474,7 +474,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     DataRunTrk[] trks = RunTrkTableManager.getInstance()
         .getTrks(data.getId(), l.getStartTime(), dateEnd);
 
-    if (trks.length == 0) {
+    if (!hasValidpoints(trks)) {
       log.warn("pas de points pour ce tour");
       return;
     }
@@ -484,12 +484,25 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     writer.write("<trkseg>");
     writeln(writer);
     for (DataRunTrk t : trks) {
-      writeTrkPoint(writer, t);
+      if (t.isValidGps()) {
+        writeTrkPoint(writer, t);
+      }
     }
     writer.write("</trkseg>");
     writeln(writer);
 
     log.debug("<<writeLap");
+  }
+
+  private boolean hasValidpoints(DataRunTrk[] trks) {
+    if (trks != null) {
+      for (DataRunTrk t : trks) {
+        if (t.isValidGps()) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   private void writeTrkPoint(BufferedWriter writer, DataRunTrk point) throws IOException {

@@ -310,7 +310,7 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
     DataRunTrk[] trks = RunTrkTableManager.getInstance()
         .getTrks(data.getId(), l.getStartTime(), dateEnd);
 
-    if (trks.length == 0) {
+    if (!hasValidpoints(trks)) {
       log.warn("pas de points pour ce tour");
       return;
     }
@@ -362,6 +362,17 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
     writer.write("</Lap>");
   }
 
+  private boolean hasValidpoints(DataRunTrk[] trks) {
+    if (trks != null) {
+      for (DataRunTrk t : trks) {
+        if (t.isValidGps()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   private void writeTrkPoint(BufferedWriter writer,
                              DataRunTrk point,
                              SimpleDateFormat timeFormat) throws IOException {
@@ -369,31 +380,36 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
 
     // Time
     writer.write("<Time>" + timeFormat.format(point.getTime()) + "</Time>");
+
     // position
-    double latitude = GeoUtil.makeLatitudeFromGarmin(point.getLatitude());
-    double longitude = GeoUtil.makeLatitudeFromGarmin(point.getLongitude());
-    writer.write("<Position>");
-    writer.write("<LatitudeDegrees>" + latitude + "</LatitudeDegrees>");
-    writer.write("<LongitudeDegrees>" + longitude + "</LongitudeDegrees>");
-    writer.write("</Position>");
-    // Altitude
-    writer
-        .write("<AltitudeMeters>" + point.getAltitude() + "</AltitudeMeters>");
-    // DistanceMeters
-    writer
-        .write("<DistanceMeters>" + point.getDistance() + "</DistanceMeters>");
-    // HeartRateBpm
-    if (point.getHeartRate() > 0) {
-      writer.write("<HeartRateBpm>" + point.getHeartRate() + "</HeartRateBpm>");
-      writer.write("<SensorState>Present</SensorState>");
+    if (point.isValidGps()) {
+      double latitude = GeoUtil.makeLatitudeFromGarmin(point.getLatitude());
+      double longitude = GeoUtil.makeLatitudeFromGarmin(point.getLongitude());
+      writer.write("<Position>");
+      writer.write("<LatitudeDegrees>" + latitude + "</LatitudeDegrees>");
+      writer.write("<LongitudeDegrees>" + longitude + "</LongitudeDegrees>");
+      writer.write("</Position>");
+      // Altitude
+      writer.write("<AltitudeMeters>" + point.getAltitude()
+                   + "</AltitudeMeters>");
+      // DistanceMeters
+      writer.write("<DistanceMeters>" + point.getDistance()
+                   + "</DistanceMeters>");
+      // HeartRateBpm
+      if (point.getHeartRate() > 0) {
+        writer.write("<HeartRateBpm>" + point.getHeartRate()
+                     + "</HeartRateBpm>");
+        writer.write("<SensorState>Present</SensorState>");
+      }
+      else {
+        writer.write("<SensorState>Absent</SensorState>");
+      }
+      // Cadence
+      if (point.isValidCadence()) {
+        writer.write("<Cadence>" + point.getCadence() + "</Cadence>");
+      }
     }
-    else {
-      writer.write("<SensorState>Absent</SensorState>");
-    }
-    // Cadence
-    if (point.isValidCadence()) {
-      writer.write("<Cadence>" + point.getCadence() + "</Cadence>");
-    }
+    
     writer.write("</Trackpoint>");
   }
 
@@ -512,7 +528,7 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
       }
       // FisrtSport ou NextSport
       else if (localName.equals("FisrtSport") || qName.equals("NextSport")
-          && isMultiSport) {
+               && isMultiSport) {
         isMultiSportSession = true;
         currentMultiSportSession = new MultiSportSession();
       }

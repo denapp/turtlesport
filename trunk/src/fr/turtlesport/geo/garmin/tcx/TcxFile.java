@@ -511,39 +511,43 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
 
     // Time
     writer.write("<Time>" + timeFormat.format(point.getTime()) + "</Time>");
-    // position
-    double latitude = GeoUtil.makeLatitudeFromGarmin(point.getLatitude());
-    double longitude = GeoUtil.makeLatitudeFromGarmin(point.getLongitude());
-    writer.write("<Position>");
-    writer.write("<LatitudeDegrees>" + getDecimalFormat().format(latitude)
-                 + "</LatitudeDegrees>");
-    writer.write("<LongitudeDegrees>" + getDecimalFormat().format(longitude)
-                 + "</LongitudeDegrees>");
-    writer.write("</Position>");
-    // Altitude
-    if (point.isValidAltitude()) {
-      writer.write("<AltitudeMeters>"
-                   + getDecimalFormat().format(point.getAltitude())
-                   + "</AltitudeMeters>");
+
+    if (point.isValidGps()) {
+      // position
+      double latitude = GeoUtil.makeLatitudeFromGarmin(point.getLatitude());
+      double longitude = GeoUtil.makeLatitudeFromGarmin(point.getLongitude());
+      writer.write("<Position>");
+      writer.write("<LatitudeDegrees>" + getDecimalFormat().format(latitude)
+                   + "</LatitudeDegrees>");
+      writer.write("<LongitudeDegrees>" + getDecimalFormat().format(longitude)
+                   + "</LongitudeDegrees>");
+      writer.write("</Position>");
+      // Altitude
+      if (point.isValidAltitude()) {
+        writer.write("<AltitudeMeters>"
+                     + getDecimalFormat().format(point.getAltitude())
+                     + "</AltitudeMeters>");
+      }
+      // DistanceMeters
+      writer.write("<DistanceMeters>"
+                   + getDecimalFormat().format(point.getDistance())
+                   + "</DistanceMeters>");
+      // HeartRateBpm
+      if (point.getHeartRate() > 0) {
+        writer.write("<HeartRateBpm xsi:type=\"HeartRateInBeatsPerMinute_t\">");
+        writer.write("<Value>" + point.getHeartRate() + "</Value>");
+        writer.write("</HeartRateBpm>");
+        writer.write("<SensorState>Present</SensorState>");
+      }
+      else {
+        writer.write("<SensorState>Absent</SensorState>");
+      }
+      // Cadence
+      if (point.isValidCadence()) {
+        writer.write("<Cadence>" + point.getCadence() + "</Cadence>");
+      }
     }
-    // DistanceMeters
-    writer.write("<DistanceMeters>"
-                 + getDecimalFormat().format(point.getDistance())
-                 + "</DistanceMeters>");
-    // HeartRateBpm
-    if (point.getHeartRate() > 0) {
-      writer.write("<HeartRateBpm xsi:type=\"HeartRateInBeatsPerMinute_t\">");
-      writer.write("<Value>" + point.getHeartRate() + "</Value>");
-      writer.write("</HeartRateBpm>");
-      writer.write("<SensorState>Present</SensorState>");
-    }
-    else {
-      writer.write("<SensorState>Absent</SensorState>");
-    }
-    // Cadence
-    if (point.isValidCadence()) {
-      writer.write("<Cadence>" + point.getCadence() + "</Cadence>");
-    }
+    
     writer.write("</Trackpoint>");
   }
 
@@ -551,17 +555,15 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
                                                                           SQLException {
     log.debug(">>writeLap");
 
-    if (data.getId() == 88) {
-      System.out.println();
-    }
     // recuperation des points du tour
     Date dateEnd = new Date(l.getStartTime().getTime() + l.getTotalTime() * 10);
     DataRunTrk[] trks = RunTrkTableManager.getInstance()
         .getTrks(data.getId(), l.getStartTime(), dateEnd);
 
-    if (trks == null || trks.length == 0) {
+    if (!hasValidpoints(trks)) {
       log.warn("pas de points pour ce tour run : id " + data.getId() + " "
                + timeFormat.format(data.getTime()));
+      return;
     }
 
     // Ecriture
@@ -608,23 +610,32 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     writer.write("<TriggerMethod>Manual</TriggerMethod>");
 
     // Track
-    if (trks != null && trks.length > 0) {
+    writeln(writer);
+    writer.write("<Track>");
+    for (DataRunTrk t : trks) {
       writeln(writer);
-      writer.write("<Track>");
-      for (DataRunTrk t : trks) {
-        writeln(writer);
-        writeTrkPoint(writer, t);
-      }
-
-      writeln(writer);
-      writer.write("</Track>");
+      writeTrkPoint(writer, t);
     }
+
+    writeln(writer);
+    writer.write("</Track>");
 
     writeln(writer);
     writer.write("</Lap>");
     writeln(writer);
 
     log.debug("<<writeLap");
+  }
+
+  private boolean hasValidpoints(DataRunTrk[] trks) {
+    if (trks != null) {
+      for (DataRunTrk t : trks) {
+        if (t.isValidGps()) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   private boolean checkRun(DataRun run) throws SQLException {

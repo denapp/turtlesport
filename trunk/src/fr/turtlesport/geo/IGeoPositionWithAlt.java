@@ -50,19 +50,26 @@ public interface IGeoPositionWithAlt extends IGeoPosition {
    * @return l'altitude.
    */
   double getElevation();
-  
+
   /**
    * D&eacute;termine si l'altitude est valide.
    * 
    * @return <code>true</code> si l'altitude est valide.
    */
   boolean isValidElevation();
-  
+
   /**
    * D&eacute;termine si cette distance est valide.
    * 
    * @return <code>true</code> si cette distance est valide.
    */
   boolean isValidDistance();
+
+  /**
+   * D&eacute;termine si la cadence est valide.
+   * 
+   * @return <code>true</code> si la cadence est valide.
+   */
+  boolean isValidCadence();
 
 }

@@ -204,6 +204,16 @@ public class GeoPositionWithAlt extends GeoPosition implements
   /*
    * (non-Javadoc)
    * 
+   * @see fr.turtlesport.geo.IGeoPositionWithAlt#isValidCadence()
+   */
+  @Override
+  public boolean isValidCadence() {
+    return cadence >=0 && cadence < 0xFF;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
