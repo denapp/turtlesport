@@ -61,6 +61,23 @@ public final class ModelPointsManager {
   }
 
   /**
+   * D&eacute;termine si les points ont des donn&eacute;es de cadence.
+   * 
+   * @return <code>true</code> si les points ont des donn&eacute;es de cadence,
+   *         <code>false</code> sinon.
+   */
+  public final boolean hasCadencePoints() {
+      if (getListTrks() != null) {
+        for (DataRunTrk p : getListTrks()) {
+          if (p.isValidCadence()) {
+            return true;
+          }
+        }
+      }
+      return false;
+  }
+
+  /**
    * Restitue la liste des geo position.
    * 
    * @return la liste des points.
@@ -128,7 +145,7 @@ public final class ModelPointsManager {
 
     if (dataRun != null) {
       // Les points
-      listTrks = RunTrkTableManager.getInstance().getTrks(dataRun.getId());
+      listTrks = RunTrkTableManager.getInstance().getAllTrks(dataRun.getId());
       if (listTrks != null && listTrks.size() > 0) {
         if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
           for (DataRunTrk t : listTrks) {
