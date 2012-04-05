@@ -49,9 +49,19 @@ public class DataRunTrk {
   }
 
   /**
+   * D&eacute;termine si ce point GPS est une pause.
+   * 
+   * @return <code>true</code> si si ce point GPS est une pause,
+   *         <code>false</code> sinon.
+   */
+  public boolean isPause() {
+    return !isValidGps() && !isValidCadence() && heartRate == 0;
+  }
+  
+  /**
    * D&eacute;termine si coordonn&eacute;es GPS sont valides.
    * 
-   * @return <code>true</code> si si coordonn&eacute;es GPS sont valides,
+   * @return <code>true</code> si coordonn&eacute;es GPS sont valides,
    *         <code>false</code> sinon.
    */
   public boolean isValidGps() {

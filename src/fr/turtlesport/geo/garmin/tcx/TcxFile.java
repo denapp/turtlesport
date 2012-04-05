@@ -511,43 +511,46 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
 
     // Time
     writer.write("<Time>" + timeFormat.format(point.getTime()) + "</Time>");
-
-    if (point.isValidGps()) {
-      // position
-      double latitude = GeoUtil.makeLatitudeFromGarmin(point.getLatitude());
-      double longitude = GeoUtil.makeLatitudeFromGarmin(point.getLongitude());
-      writer.write("<Position>");
-      writer.write("<LatitudeDegrees>" + getDecimalFormat().format(latitude)
-                   + "</LatitudeDegrees>");
-      writer.write("<LongitudeDegrees>" + getDecimalFormat().format(longitude)
-                   + "</LongitudeDegrees>");
-      writer.write("</Position>");
-      // Altitude
-      if (point.isValidAltitude()) {
-        writer.write("<AltitudeMeters>"
-                     + getDecimalFormat().format(point.getAltitude())
-                     + "</AltitudeMeters>");
-      }
-      // DistanceMeters
-      writer.write("<DistanceMeters>"
-                   + getDecimalFormat().format(point.getDistance())
-                   + "</DistanceMeters>");
-      // HeartRateBpm
-      if (point.getHeartRate() > 0) {
-        writer.write("<HeartRateBpm xsi:type=\"HeartRateInBeatsPerMinute_t\">");
-        writer.write("<Value>" + point.getHeartRate() + "</Value>");
-        writer.write("</HeartRateBpm>");
-        writer.write("<SensorState>Present</SensorState>");
-      }
-      else {
-        writer.write("<SensorState>Absent</SensorState>");
-      }
-      // Cadence
-      if (point.isValidCadence()) {
-        writer.write("<Cadence>" + point.getCadence() + "</Cadence>");
+    if (!point.isPause()) {
+      if (point.isValidGps()) {
+        // position
+        double latitude = GeoUtil.makeLatitudeFromGarmin(point.getLatitude());
+        double longitude = GeoUtil.makeLatitudeFromGarmin(point.getLongitude());
+        writer.write("<Position>");
+        writer.write("<LatitudeDegrees>" + getDecimalFormat().format(latitude)
+                     + "</LatitudeDegrees>");
+        writer.write("<LongitudeDegrees>"
+                     + getDecimalFormat().format(longitude)
+                     + "</LongitudeDegrees>");
+        writer.write("</Position>");
+        // Altitude
+        if (point.isValidAltitude()) {
+          writer.write("<AltitudeMeters>"
+                       + getDecimalFormat().format(point.getAltitude())
+                       + "</AltitudeMeters>");
+        }
+        // DistanceMeters
+        writer.write("<DistanceMeters>"
+                     + getDecimalFormat().format(point.getDistance())
+                     + "</DistanceMeters>");
+        // HeartRateBpm
+        if (point.getHeartRate() > 0) {
+          writer
+              .write("<HeartRateBpm xsi:type=\"HeartRateInBeatsPerMinute_t\">");
+          writer.write("<Value>" + point.getHeartRate() + "</Value>");
+          writer.write("</HeartRateBpm>");
+          writer.write("<SensorState>Present</SensorState>");
+        }
+        else {
+          writer.write("<SensorState>Absent</SensorState>");
+        }
+        // Cadence
+        if (point.isValidCadence()) {
+          writer.write("<Cadence>" + point.getCadence() + "</Cadence>");
+        }
       }
     }
-    
+
     writer.write("</Trackpoint>");
   }
 
@@ -612,9 +615,28 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     // Track
     writeln(writer);
     writer.write("<Track>");
+    DataRunTrk trkPause = null;
     for (DataRunTrk t : trks) {
+      if (t.isPause()) {
+        if (trkPause == null) {
+          writeln(writer);
+          writeTrkPoint(writer, t);
+          trkPause = t;
+        }
+      }
+      else {
+        if (trkPause != null) {
+          writeln(writer);
+          writeTrkPoint(writer, trkPause);
+          trkPause = null;
+        }
+        writeln(writer);
+        writeTrkPoint(writer, t);
+      }
+    }
+    if (trkPause != null) {
       writeln(writer);
-      writeTrkPoint(writer, t);
+      writeTrkPoint(writer, trkPause);
     }
 
     writeln(writer);
