@@ -66,7 +66,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
   private boolean                     clearOnce;
 
   // Mouse position
-  private int                         mouseX         = 0;
+  private int                         mouseX          = 0;
 
   private long                        currentTime;
 
@@ -80,39 +80,43 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
   private double                      currentY4;
 
-  private int[]                       tabMouseY      = new int[4];
+  private int[]                       tabMouseY       = new int[4];
 
   // gui
-  public static final int             WIDTH_TITLE_1  = 90;
+  public static final int             WIDTH_LEFT      = 90;
 
-  public static final int             WIDTH_AXE_4    = WIDTH_TITLE_1 / 2 - 7;
+  public static final int             WIDTH_RIGHT     = 100;
 
-  private static final int            HEIGHT_TITLE_1 = 10;
+  public static final int             WIDTH_AXE_RIGHT = 50;
 
-  private static final int            HEIGHT_TITLE_2 = 20;
+  public static final int             WIDTH_AXE_LEFT  = 40;
 
-  private static final int            PAD            = 5;
+  private static final int            HEIGHT_TITLE_1  = 10;
 
-  private static final Color          COLOR_LINE     = new Color(0xe1,
-                                                                 0xe1,
-                                                                 0xe1);
+  private static final int            HEIGHT_TITLE_2  = 20;
+
+  private static final int            PAD             = 5;
+
+  private static final Color          COLOR_LINE      = new Color(0xe1,
+                                                                  0xe1,
+                                                                  0xe1);
 
   // protected static final Color COLOR_TIME = new Color(120, 160, 76);
-  protected static final Color        COLOR_TIME     = new Color(99, 86, 136);
+  protected static final Color        COLOR_TIME      = new Color(99, 86, 136);
 
-  public static final Color           COLORY1        = Color.RED;
+  public static final Color           COLORY1         = Color.RED;
 
-  public static final Color           COLORY2        = Color.BLUE;
+  public static final Color           COLORY2         = Color.BLUE;
 
-  public static final Color           COLORY3        = new Color(0x00,
-                                                                 0x8b,
-                                                                 0x00);
+  public static final Color           COLORY3         = new Color(0x00,
+                                                                  0x8b,
+                                                                  0x00);
 
-  public static final Color           COLORY4        = Color.MAGENTA;
+  public static final Color           COLORY4         = Color.MAGENTA;
 
-  private static final AlphaComposite AC_TRANSPARENT = AlphaComposite
-                                                         .getInstance(AlphaComposite.SRC_OVER,
-                                                                      0.2f);
+  private static final AlphaComposite AC_TRANSPARENT  = AlphaComposite
+                                                          .getInstance(AlphaComposite.SRC_OVER,
+                                                                       0.2f);
 
   /** Model. */
   private TablePointsModel            model;
@@ -237,11 +241,11 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     paintYAxis(g2);
 
     g2.setFont(GuiFont.FONT_PLAIN_SMALL);
-    int x = WIDTH_TITLE_1;
+    int x = WIDTH_LEFT;
     if (model.isVisibleY1()) {
       g2.setColor(COLORY1);
       String s = "\u2665 (bmp)";
-      g2.drawString(s, WIDTH_TITLE_1, 10);
+      g2.drawString(s, WIDTH_LEFT, 10);
       x += g2.getFontMetrics().stringWidth(s) + 10;
     }
     if (model.isVisibleY2()) {
@@ -377,11 +381,10 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     g2.fillRect(0, 0, getWidth(), getHeight());
 
     g2.setColor(Color.white);
-    g2.fillRect(WIDTH_TITLE_1,
-                HEIGHT_TITLE_1,
-                getWidth() - 2 * WIDTH_TITLE_1,
-                getHeight() - HEIGHT_TITLE_1 - HEIGHT_TITLE_2);
-
+    g2.fillRect(WIDTH_LEFT, HEIGHT_TITLE_1, getWidth() - WIDTH_LEFT
+                                            - WIDTH_RIGHT, getHeight()
+                                                           - HEIGHT_TITLE_1
+                                                           - HEIGHT_TITLE_2);
     g2.setColor(getParent().getBackground());
 
     // Font
@@ -416,7 +419,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
     // Axe // a X
     // -----------------
-    tot = getWidth() - WIDTH_TITLE_1;
+    tot = getWidth() - WIDTH_RIGHT;
     int gridy1, gridy2 = -1, gridy4 = -1;
     double gridy3 = -1;
     for (int i = 0; i < model.getGridY1().length; i++) {
@@ -436,14 +439,14 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       if (i != 0) {
         g2.setColor((i % 2 == 0) ? Color.LIGHT_GRAY : COLOR_LINE);
       }
-      g2.drawLine(WIDTH_TITLE_1, y, tot, y);
+      g2.drawLine(WIDTH_LEFT, y, tot, y);
       g2.setColor(Color.BLACK);
 
       if (i % 2 == 0 || (i == model.getGridY1().length - 1)) {
         // texte Freq cardiaque
         text = Integer.toString(gridy1);
         lenText = metrics.stringWidth(text);
-        x = WIDTH_TITLE_1 - PAD - lenText - 15;
+        x = WIDTH_LEFT - PAD - lenText - 15;
         g2.setColor(COLORY1);
         g2.drawString(text, x, y + (highText / 2));
 
@@ -452,7 +455,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
           g2.setColor(COLORY4);
           text = Integer.toString(gridy4);
           lenText = metrics.stringWidth(text);
-          x = WIDTH_AXE_4 - PAD - lenText - 15;
+          x = WIDTH_AXE_LEFT - PAD - lenText - 15;
           g2.drawString(text, x, y + (highText / 2));
         }
 
@@ -464,12 +467,12 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
           g2.drawString(text, x, y + (highText / 2));
         }
 
-        // texte Y3
+        // texte Vitesse
         if (gridy3 != -1) {
           g2.setColor(COLORY3);
           text = model.isVisibleSpeed() ? SpeedUnit.format(gridy3) : PaceUnit
               .format(gridy3);
-          x = getWidth() - WIDTH_AXE_4 + PAD + 15;
+          x = getWidth() - WIDTH_AXE_RIGHT + PAD + 15;
           g2.drawString(text, x, y + (highText / 2));
         }
 
@@ -486,7 +489,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     // axe cadence
     if (model.isVisibleY4()) {
       g2.setColor(COLORY4);
-      g2.drawLine(WIDTH_AXE_4, HEIGHT_TITLE_1, WIDTH_AXE_4, tot);
+      g2.drawLine(WIDTH_AXE_LEFT, HEIGHT_TITLE_1, WIDTH_AXE_LEFT, tot);
     }
 
     // axe freq. cardiaque
@@ -501,25 +504,22 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     // axe altitude
     if (model.isVisibleY2()) {
       g2.setColor(COLORY2);
-      // g2.drawLine(x, HEIGHT_TITLE_1, x, tot);
-      g2.drawLine(getWidth() - WIDTH_TITLE_1,
-                  HEIGHT_TITLE_1,
-                  getWidth() - WIDTH_TITLE_1,
-                  tot);
+      g2.drawLine(getWidth() - WIDTH_RIGHT, HEIGHT_TITLE_1, getWidth()
+                                                            - WIDTH_RIGHT, tot);
     }
 
-    // axe y3
+    // axe vitesse
     if (model.isVisibleY3()) {
       g2.setColor(COLORY3);
-      // g2.drawLine(x + WIDTH_TITLE_1, HEIGHT_TITLE_1, x + WIDTH_TITLE_1, tot);
-      g2.drawLine(getWidth() - WIDTH_AXE_4, HEIGHT_TITLE_1, getWidth()
-                                                            - WIDTH_AXE_4, tot);
-
+      g2.drawLine(getWidth() - WIDTH_AXE_RIGHT,
+                  HEIGHT_TITLE_1,
+                  getWidth() - WIDTH_AXE_RIGHT,
+                  tot);
     }
 
     // Axe // a X
     // -----------------
-    tot = getWidth() - WIDTH_TITLE_1;
+    tot = getWidth() - WIDTH_RIGHT;
     int gridy1 = -1;
     for (int i = 0; i < model.getGridY1().length; i++) {
       gridy1 = model.getGridY1()[i];
@@ -527,11 +527,11 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
       // Freq. Cardiaque
       g2.setColor(COLORY1);
-      g2.drawLine(WIDTH_TITLE_1 - PAD, y, WIDTH_TITLE_1, y);
+      g2.drawLine(WIDTH_LEFT - PAD, y, WIDTH_LEFT, y);
       // axe cadence
       if (model.isVisibleY4()) {
         g2.setColor(COLORY4);
-        g2.drawLine(WIDTH_AXE_4 - PAD, y, WIDTH_AXE_4, y);
+        g2.drawLine(WIDTH_AXE_LEFT - PAD, y, WIDTH_AXE_LEFT, y);
       }
       // altitude
       if (model.isVisibleY2()) {
@@ -541,10 +541,8 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       // speed
       if (model.isVisibleY3()) {
         g2.setColor(COLORY3);
-        g2.drawLine(getWidth() - WIDTH_AXE_4,
-                    y,
-                    getWidth() - WIDTH_AXE_4 + PAD,
-                    y);
+        g2.drawLine(getWidth() - WIDTH_AXE_RIGHT, y, getWidth()
+                                                     - WIDTH_AXE_RIGHT + PAD, y);
       }
     }
 
@@ -602,18 +600,19 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
       if (model.isVisibleY4()) {
         g2.setColor(COLORY4);
-        y1 = computeRelativeY4(model.getY1(i));
-        y2 = computeRelativeY4(model.getY1(i + 1));
+        y1 = computeRelativeY4(model.getY4(i));
+        y2 = computeRelativeY4(model.getY4(i + 1));
         g2.drawLine(x1, y1, x2, y2);
       }
 
     }
-
-    g2.setColor(COLORY2);
-    pol.addPoint(x2, tot);
-    g2.setComposite(AC_TRANSPARENT);
-    g2.fillPolygon(pol);
-    g2.setComposite(AlphaComposite.SrcOver);
+    if (model.isVisibleY2()) {
+      g2.setColor(COLORY2);
+      pol.addPoint(x2, tot);
+      g2.setComposite(AC_TRANSPARENT);
+      g2.fillPolygon(pol);
+      g2.setComposite(AlphaComposite.SrcOver);
+    }
   }
 
   /**
@@ -693,27 +692,28 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
    * Calcule la coordonnee relative x.
    */
   private int computeRelativeX(double x) {
-    return (int) (WIDTH_TITLE_1 + (getWidth() - 2 * WIDTH_TITLE_1)
-                                  * (x - model.getGridXMin())
-                                  / (model.getGridXMax() - model.getGridXMin()));
+    return (int) (WIDTH_LEFT + (getWidth() - WIDTH_LEFT - WIDTH_RIGHT)
+                               * (x - model.getGridXMin())
+                               / (model.getGridXMax() - model.getGridXMin()));
   }
 
   /**
    * Calcule la coordonnee relative x.
    */
   private int computeRelativeXDistance(double x) {
-    return (int) (WIDTH_TITLE_1 + (getWidth() - 2 * WIDTH_TITLE_1)
-                                  * (x - model.getGridXMinDist())
-                                  / (model.getGridXMaxDist() - model
-                                      .getGridXMinDist()));
+    return (int) (WIDTH_LEFT + (getWidth() - WIDTH_LEFT - WIDTH_RIGHT)
+                               * (x - model.getGridXMinDist())
+                               / (model.getGridXMaxDist() - model
+                                   .getGridXMinDist()));
   }
 
   /**
    * Calcule la coordonnee relative x.
    */
   private double invComputeRelativeX(int x) {
-    return (1.0 * (x - WIDTH_TITLE_1)
-            * (model.getGridXMax() - model.getGridXMin()) / (getWidth() - 2 * WIDTH_TITLE_1))
+    return (1.0 * (x - WIDTH_LEFT)
+            * (model.getGridXMax() - model.getGridXMin()) / (getWidth()
+                                                             - WIDTH_LEFT - WIDTH_RIGHT))
            + model.getGridXMin();
   }
 
@@ -724,7 +724,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     if (!model.isVisibleY1() && !model.isVisibleY2() && !model.isVisibleY3()) {
       return;
     }
-    if (mouseX < WIDTH_TITLE_1 || mouseX > (getWidth() - WIDTH_TITLE_1)) {
+    if (mouseX < WIDTH_LEFT || mouseX > (getWidth() - WIDTH_RIGHT)) {
       // on remet le point a zero pour la map
       ModelPointsManager.getInstance().setMapCurrentPoint(model, 0);
       return;
@@ -794,7 +794,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       // Dessine la valeur sur l'axe des y
       st = Integer.toString((int) currentY1);
       lenText = metrics.stringWidth(st);
-      xg = WIDTH_TITLE_1 - lenText - 2;
+      xg = WIDTH_LEFT - lenText - 2;
       g2.drawString(st, xg, tabMouseY[0] + highText);
     }
 
@@ -807,12 +807,12 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       g2.drawRect(mouseX - 2, tabMouseY[3] - 2, 4, 4);
 
       // Dessine triangle sur axe y
-      drawTriangleY1(g2, tabMouseY[3]);
+      drawTriangleY4(g2, tabMouseY[3]);
 
       // Dessine la valeur sur l'axe des y
       st = Integer.toString((int) currentY4);
       lenText = metrics.stringWidth(st);
-      xg = WIDTH_AXE_4 - lenText - 2;
+      xg = WIDTH_AXE_LEFT - lenText - 2;
       g2.drawString(st, xg, tabMouseY[3] + highText);
     }
 
@@ -830,7 +830,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       // Dessine la valeur sur l'axe des y
       // st = Double.toString(currentY2);
       st = Integer.toString((int) currentY2);
-      xg = getWidth() - WIDTH_TITLE_1 + 2;
+      xg = getWidth() - WIDTH_LEFT + 2;
       g2.drawString(st, xg, tabMouseY[1] + highText);
     }
 
@@ -849,7 +849,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       st = model.isVisibleSpeed() ? SpeedUnit.format(currentY3) : PaceUnit
           .format(currentY3);
 
-      xg = getWidth() - WIDTH_AXE_4 + 2;
+      xg = getWidth() - WIDTH_AXE_RIGHT + 2;
       g2.drawString(st, xg, tabMouseY[2] + highText);
     }
 
@@ -859,11 +859,11 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
    * Affiche les positions.
    */
   private void paintPoint(Graphics2D g2) {
-    if (!model.isVisibleY1() && !model.isVisibleY2() && !model.isVisibleY3()) {
+    if (!model.isVisibleY1() && !model.isVisibleY2() && !model.isVisibleY3()
+        && !model.isVisibleY4()) {
       return;
     }
-    if (mouseX < WIDTH_TITLE_1
-        || mouseX > getWidth() - WIDTH_TITLE_1 - WIDTH_TITLE_1) {
+    if (mouseX < WIDTH_LEFT || mouseX > (getWidth() - WIDTH_LEFT - WIDTH_RIGHT)) {
       return;
     }
 
@@ -884,7 +884,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
    * Dessine le triangle sur l'axe des Y courbe 1.
    */
   private void drawTriangleY1(Graphics2D g2, int y) {
-    int[] tabx = { WIDTH_TITLE_1 + 5, WIDTH_TITLE_1, WIDTH_TITLE_1 + 5 };
+    int[] tabx = { WIDTH_LEFT + 5, WIDTH_LEFT, WIDTH_LEFT + 5 };
     int[] taby = { y - 5, y, y + 5 };
     g2.fillPolygon(tabx, taby, 3);
   }
@@ -893,7 +893,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
    * Dessine le triangle sur l'axe des Y courbe2.
    */
   private void drawTriangleY2(Graphics2D g2, int y) {
-    int tot = getWidth() - WIDTH_TITLE_1;
+    int tot = getWidth() - WIDTH_RIGHT;
     int[] tabx = { tot - 5, tot, tot - 5 };
     int[] taby = { y - 5, y, y + 5 };
     g2.fillPolygon(tabx, taby, 3);
@@ -903,8 +903,17 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
    * Dessine le triangle sur l'axe des Y courbe3.
    */
   private void drawTriangleY3(Graphics2D g2, int y) {
-    int tot = getWidth() - WIDTH_AXE_4;
+    int tot = getWidth() - WIDTH_AXE_RIGHT;
     int[] tabx = { tot - 5, tot, tot - 5 };
+    int[] taby = { y - 5, y, y + 5 };
+    g2.fillPolygon(tabx, taby, 3);
+  }
+
+  /**
+   * Dessine le triangle sur l'axe des Y courbe 1.
+   */
+  private void drawTriangleY4(Graphics2D g2, int y) {
+    int[] tabx = { WIDTH_AXE_LEFT + 5, WIDTH_AXE_LEFT, WIDTH_AXE_LEFT + 5 };
     int[] taby = { y - 5, y, y + 5 };
     g2.fillPolygon(tabx, taby, 3);
   }
@@ -917,11 +926,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     double nearCur;
 
     int index = model.indexX2 - 1;
-    currentY1 = model.getY1(index);
-    currentY2 = model.getY2(index);
-    currentY3 = model.getY3(index);
     double xInv = invComputeRelativeX(x0);
-
     for (int i = model.indexX1; i < model.indexX2 - 1; i++) {
       nearCur = Math.abs(xInv - model.getX(i));
       if (nearCur == 0) {
@@ -939,15 +944,23 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
     currentTime = model.getTime(index);
     currentDistance = model.getDistanceX(index);
-    currentY1 = model.getY1(index);
-    currentY2 = model.getY2(index);
-    currentY3 = model.getY3(index);
-    currentY4 = model.getY4(index);
 
-    tabMouseY[0] = computeRelativeY1(currentY1);
-    tabMouseY[1] = computeRelativeY2(currentY2);
-    tabMouseY[2] = computeRelativeY3(currentY3);
-    tabMouseY[3] = computeRelativeY4(currentY4);
+    if (model.isVisibleY1()) {
+      currentY1 = model.getY1(index);
+      tabMouseY[0] = computeRelativeY1(currentY1);
+    }
+    if (model.isVisibleY2()) {
+      currentY2 = model.getY2(index);
+      tabMouseY[1] = computeRelativeY2(currentY2);
+    }
+    if (model.isVisibleY3()) {
+      currentY3 = model.getY3(index);
+      tabMouseY[2] = computeRelativeY3(currentY3);
+    }
+    if (model.isVisibleY4()) {
+      currentY4 = model.getY4(index);
+      tabMouseY[3] = computeRelativeY4(currentY4);
+    }
   }
 
   /**
@@ -1030,8 +1043,6 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     private boolean          isVisibleY4;
 
     // Y4 si il y a des points avec cadence
-    private boolean          hasY4                  = false;
-
     private int              visibleY3;
 
     private boolean          isAxisXDistance;
@@ -1166,7 +1177,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     }
 
     public boolean isVisibleY4() {
-      return isVisibleY4 && hasY4;
+      return isVisibleY4;
     }
 
     public boolean isVisibleSpeed() {
@@ -1279,15 +1290,26 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
           currentTime = getTime(index);
           currentDistance = getX(index);
-          currentY1 = getY1(index);
-          currentY2 = getY2(index);
-          currentY3 = getY3(index);
-          currentY4 = getY4(index);
 
-          tabMouseY[0] = computeRelativeY1(currentY1);
-          tabMouseY[1] = computeRelativeY2(currentY2);
-          tabMouseY[2] = computeRelativeY3(currentY3);
-          tabMouseY[3] = computeRelativeY3(currentY4);
+          if (model.isVisibleY1()) {
+            currentY1 = getY1(index);
+            tabMouseY[0] = computeRelativeY1(currentY1);
+
+          }
+          if (model.isVisibleY2()) {
+            currentY2 = getY2(index);
+            tabMouseY[1] = computeRelativeY2(currentY2);
+
+          }
+          if (model.isVisibleY3()) {
+            currentY3 = getY3(index);
+            tabMouseY[2] = computeRelativeY3(currentY3);
+
+          }
+          if (model.isVisibleY4()) {
+            currentY4 = getY4(index);
+            tabMouseY[3] = computeRelativeY4(currentY4);
+          }
           revalidate();
           repaint();
         }
@@ -1509,7 +1531,6 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
         maxY3Pace = 0;
         minY4 = Double.MAX_VALUE;
         maxY4 = 0;
-        hasY4 = false;
 
         computeSpeedPace();
 
@@ -1545,17 +1566,14 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
           if (p.getAltitude() < minY2) {
             minY2 = p.getAltitude();
           }
-          if (p.isValidCadence()) {
-            hasY4 = true;
-            if (!p.isValidCadence()) {
-              p.setCadence(0);
-            }
-            if (p.getCadence() > maxY4) {
-              maxY4 = p.getCadence();
-            }
-            if (p.getCadence() < minY4) {
-              minY4 = p.getCadence();
-            }
+          if (!p.isValidCadence()) {
+            p.setCadence(0);
+          }
+          if (p.getCadence() > maxY4) {
+            maxY4 = p.getCadence();
+          }
+          if (p.getCadence() < minY4) {
+            minY4 = p.getCadence();
           }
           if (p.getSpeed() > maxY3Speed) {
             maxY3Speed = p.getSpeed();
@@ -1577,14 +1595,16 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
         if ((maxY2 - minY2) < 10) {
           maxY2 += 10;
         }
-        if (hasY4) {
-          double tmp = maxY4;
-          maxY4 = Math.round(maxY4 / 10) * 10;
-          maxY4 += (tmp > maxY4) ? 10 : 0;
 
-          tmp = minY4;
-          minY4 = Math.round(minY4 / 10) * 10;
-          minY4 += (tmp < minY4) ? -10 : 0;
+        double tmp = maxY4;
+        maxY4 = Math.round(maxY4 / 10) * 10;
+        maxY4 += (tmp > maxY4) ? 10 : 0;
+
+        tmp = minY4;
+        minY4 = Math.round(minY4 / 10) * 10;
+        minY4 += (tmp < minY4) ? -10 : 0;
+        if (minY4 == 0 && maxY4 == 0) {
+          maxY4 = 140;
         }
 
         // Axe des x (distance en metre)
@@ -1608,12 +1628,9 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
         }
 
         // Axe des y courbe 4
-        if (hasY4) {
-          gridY4 = new int[gridY1.length];
-          for (int i = 0; i < gridY4.length; i++) {
-            gridY4[i] = (int) (minY4 + (maxY4 - minY4) * i
-                                       / (gridY4.length - 1));
-          }
+        gridY4 = new int[gridY1.length];
+        for (int i = 0; i < gridY4.length; i++) {
+          gridY4[i] = (int) (minY4 + (maxY4 - minY4) * i / (gridY4.length - 1));
         }
 
         // Axe des y courbe 3
@@ -1911,7 +1928,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       int x = e.getX();
       int y = e.getY();
       int w = getWidth();
-      if (x > WIDTH_TITLE_1 && x < w - WIDTH_TITLE_1 && y > HEIGHT_TITLE_1
+      if (x > WIDTH_LEFT && x < w - WIDTH_LEFT && y > HEIGHT_TITLE_1
           && y < (getHeight() - HEIGHT_TITLE_2)) {
         model.zoom((x < w / 2));
       }
@@ -1935,7 +1952,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       int x = e.getX();
       int y = e.getY();
       int w = getWidth();
-      if (x > WIDTH_TITLE_1 && x < w - WIDTH_TITLE_1 && y > HEIGHT_TITLE_1
+      if (x > WIDTH_LEFT && x < w - WIDTH_LEFT && y > HEIGHT_TITLE_1
           && y < (getHeight() - HEIGHT_TITLE_2)) {
         model.bZoom = (e.getWheelRotation() < 0);
         model.zoom((x < w / 2));

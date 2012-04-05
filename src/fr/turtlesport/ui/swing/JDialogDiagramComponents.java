@@ -214,7 +214,7 @@ public class JDialogDiagramComponents extends JDialog {
       jPanelX = new JPanel();
       jPanelX.setLayout(new FlowLayout(FlowLayout.RIGHT));
       jPanelX.add(getJComboBoxX());
-      Dimension dim = new Dimension(JDiagramComponent.WIDTH_TITLE_1 / 2, 20);
+      Dimension dim = new Dimension(JDiagramComponent.WIDTH_LEFT / 2, 20);
       jPanelX.add(getJComboBoxX());
       jPanelX.add(new Box.Filler(dim, dim, dim));
     }
