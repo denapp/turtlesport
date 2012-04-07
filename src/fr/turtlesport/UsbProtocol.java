@@ -42,7 +42,7 @@ public final class UsbProtocol {
    * 
    * @return une instance unique.
    */
-  protected static UsbProtocol getInstance() {
+  public static UsbProtocol getInstance() {
     return singleton;
   }
 

@@ -1,11 +1,11 @@
 package fr.turtlesport.protocol;
 
-import fr.turtlesport.GarminDevice;
 import fr.turtlesport.UsbDecodeException;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbPacketInputStream;
 import fr.turtlesport.UsbPacketOutputStream;
 import fr.turtlesport.UsbProtocolException;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.D1004FitnessUserProfileType;
 
@@ -77,7 +77,7 @@ public class A1004FitnessUserProfile extends AbstractTransfertProtocol {
       sendCommand();
 
       // Recuperation de la reponse
-      UsbPacket packet = GarminDevice.getDevice().read();
+      UsbPacket packet = GarminUsbDevice.getDevice().read();
 
       if (log.isDebugEnabled()) {
         log.debug("PacketType=" + packet.getPacketType());
@@ -96,7 +96,7 @@ public class A1004FitnessUserProfile extends AbstractTransfertProtocol {
       // Fermeture du garmin
       try {
         log.debug("Fermeture du garmin");
-        GarminDevice.close();
+        GarminUsbDevice.close();
       }
       catch (UsbProtocolException e) {
         log.error("", e);

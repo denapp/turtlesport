@@ -2,7 +2,7 @@ package fr.turtlesport.protocol.data;
 
 import java.util.Date;
 
-import fr.turtlesport.GarminDevice;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 
 /**
@@ -52,7 +52,7 @@ public abstract class AbstractTrkPointType extends AbstractData {
     log.debug(">>newInstance");
 
     AbstractTrkPointType res;
-    String[] data = GarminDevice.getDevice().getDataProtocol(PROTOCOL);
+    String[] data = GarminUsbDevice.getDevice().getDataProtocol(PROTOCOL);
     if (data.length != 2) {
       throw new RuntimeException("pas de protocole " + PROTOCOL);
     }

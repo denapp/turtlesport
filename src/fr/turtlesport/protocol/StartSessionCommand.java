@@ -1,8 +1,8 @@
 package fr.turtlesport.protocol;
 
-import fr.turtlesport.GarminDevice;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbProtocolException;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 
 /**
@@ -51,7 +51,7 @@ public final class StartSessionCommand implements ICommand {
 
     // On attend jusqu'a ce que le device demarre la session.
     while (true) {
-      packet = GarminDevice.getDevice().read();
+      packet = GarminUsbDevice.getDevice().read();
       if (packet.getPacketType() == ICommand.USB_PROTOCOL_LAYER
           && packet.getPacketID() == PID_SESSION_STATED) {
         // session demarre
@@ -71,7 +71,7 @@ public final class StartSessionCommand implements ICommand {
     log.debug(">>send");
 
     UsbPacket packet = new UsbPacket(USB_PROTOCOL_LAYER, PID_START_SESSION);
-    GarminDevice.getDevice().send(packet);
+    GarminUsbDevice.getDevice().send(packet);
 
     log.debug("<<send");
   }

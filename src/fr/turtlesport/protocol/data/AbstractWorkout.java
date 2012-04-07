@@ -2,7 +2,7 @@ package fr.turtlesport.protocol.data;
 
 import java.util.List;
 
-import fr.turtlesport.GarminDevice;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 
 public abstract class AbstractWorkout extends AbstractData {
@@ -33,7 +33,7 @@ public abstract class AbstractWorkout extends AbstractData {
     log.debug(">>newInstance");
 
     AbstractWorkout res;
-    String[] data = GarminDevice.getDevice().getDataProtocol(PROTOCOL);
+    String[] data = GarminUsbDevice.getDevice().getDataProtocol(PROTOCOL);
     if (data.length != 1) {
       throw new RuntimeException("pas de protocole " + PROTOCOL);
     }

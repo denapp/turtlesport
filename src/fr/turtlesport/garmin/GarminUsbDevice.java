@@ -1,8 +1,12 @@
-package fr.turtlesport;
+package fr.turtlesport.garmin;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
+import fr.turtlesport.UsbPacket;
+import fr.turtlesport.UsbProtocol;
+import fr.turtlesport.UsbProtocolException;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.AppProtocolCommand;
 import fr.turtlesport.protocol.StartSessionCommand;
@@ -14,10 +18,14 @@ import fr.turtlesport.protocol.data.ProtocolDataType;
  * @author Denis Apparicio
  * 
  */
-public final class GarminDevice {
+/**
+ * @author denisapparicio
+ * 
+ */
+public final class GarminUsbDevice implements IGarminDevice {
   private static TurtleLogger                  log;
   static {
-    log = (TurtleLogger) TurtleLogger.getLogger(GarminDevice.class);
+    log = (TurtleLogger) TurtleLogger.getLogger(GarminUsbDevice.class);
   }
 
   /** Liste des prototoles. */
@@ -26,7 +34,30 @@ public final class GarminDevice {
   /** Le produit. */
   private ProductDataType                      pdtDataType;
 
-  private static ThreadLocal<GarminDevice>     trans = new ThreadLocal<GarminDevice>();
+  private static ThreadLocal<GarminUsbDevice>  trans = new ThreadLocal<GarminUsbDevice>();
+
+  /**
+   * 
+   */
+  private GarminUsbDevice() throws UsbProtocolException {
+    super();
+
+    log.debug(">>GarminDevice");
+
+    // Initialisation du garmin
+    UsbProtocol.getInstance().init();
+
+    log.debug("<<GarminDevice");
+  }
+  
+  /**
+   * @return Restitue la liste des Garmin devices.
+   */
+  public List<GarminUsbDevice> list() {
+    ArrayList<GarminUsbDevice> devices = new ArrayList<GarminUsbDevice>();
+
+    return devices;
+  }
 
   /**
    * Initilisation du garmin device.
@@ -37,15 +68,15 @@ public final class GarminDevice {
    * @throws GarminDeviceNotInitialized
    *           si garmin non initialis&eacute;.
    */
-  public static GarminDevice init() throws UsbProtocolException {
-    GarminDevice device;
+  public static GarminUsbDevice init() throws UsbProtocolException {
+    GarminUsbDevice device;
     if (trans.get() != null) {
       log.warn("GarminDevice deja initialise");
       device = trans.get();
     }
     else {
       // Construction du device
-      device = new GarminDevice();
+      device = new GarminUsbDevice();
       trans.set(device);
       try {
         // Demarrage de la session
@@ -91,7 +122,7 @@ public final class GarminDevice {
    * @throws GarminDeviceNotInitialized
    *           si garmin non initialis&eacute;.
    */
-  public static GarminDevice getDevice() {
+  public static GarminUsbDevice getDevice() {
     checkInit();
     return trans.get();
   }
@@ -164,45 +195,42 @@ public final class GarminDevice {
     return res;
   }
 
-  /**
-   * L'ID du produit.
+  /*
+   * (non-Javadoc)
    * 
-   * @return l'ID du produit
+   * @see fr.turtlesport.garmin.IGarminDevice#id()
    */
-  public int getProductID() {
-    return pdtDataType.getProductID();
+  public String id() {
+    return Integer.toString(pdtDataType.getProductID());
   }
 
-  /**
-   * La version du software.
+  /*
+   * (non-Javadoc)
    * 
-   * @return la version du software.
+   * @see fr.turtlesport.garmin.IGarminDevice#softwareVersion()
    */
-  public int getSoftwareVersion() {
-    return pdtDataType.getSoftwareVersion();
+  public String softwareVersion() {
+    return Integer.toString(pdtDataType.getSoftwareVersion());
   }
 
-  /**
-   * Restitue la description.
+  /*
+   * (non-Javadoc)
    * 
-   * @return la a description.
+   * @see fr.turtlesport.garmin.IGarminDevice#displayName()
    */
-  public String[] getDescription() {
-    return pdtDataType.getDescription();
-  }
+  public String displayName() {
+    if (pdtDataType.getDescription() == null
+        || pdtDataType.getDescription().length == 0) {
+      return null;
+    }
 
-  /**
-   * 
-   */
-  private GarminDevice() throws UsbProtocolException {
-    super();
-
-    log.debug(">>GarminDevice");
-
-    // Initialisation du garmin
-    UsbProtocol.getInstance().init();
-
-    log.debug("<<GarminDevice");
+    StringBuilder result = new StringBuilder();
+    result.append(pdtDataType.getDescription()[0]);
+    for (int i = 1; i < pdtDataType.getDescription().length; i++) {
+      result.append(' ');
+      result.append(pdtDataType.getDescription()[i]);
+    }
+    return result.toString();
   }
 
   private void initProtocol(ProtocolCapability pc) {
@@ -226,6 +254,16 @@ public final class GarminDevice {
     if (!isInit()) {
       throw new GarminDeviceNotInitialized();
     }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return displayName();
   }
 
 }

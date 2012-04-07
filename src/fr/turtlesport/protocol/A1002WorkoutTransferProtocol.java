@@ -2,9 +2,9 @@ package fr.turtlesport.protocol;
 
 import java.util.Hashtable;
 
-import fr.turtlesport.GarminDevice;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbProtocolException;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.AbstractRunType;
 import fr.turtlesport.protocol.data.AbstractWorkout;
@@ -100,7 +100,7 @@ public class A1002WorkoutTransferProtocol extends AbstractTransfertProtocol {
     finally {
       try {
         // Fermeture du device
-        GarminDevice.close();
+        GarminUsbDevice.close();
       }
       catch (UsbProtocolException e) {
       }
@@ -148,7 +148,7 @@ public class A1002WorkoutTransferProtocol extends AbstractTransfertProtocol {
     nbPaquet++;
     while (!progress.abortTransfert()) {
       // lecture
-      packet = GarminDevice.getDevice().read();
+      packet = GarminUsbDevice.getDevice().read();
       nbPacketRead++;
 
       // Notification nombre de packet lu
@@ -210,7 +210,7 @@ public class A1002WorkoutTransferProtocol extends AbstractTransfertProtocol {
 
     while (!progress.abortTransfert()) {
       // lecture
-      packet = GarminDevice.getDevice().read();
+      packet = GarminUsbDevice.getDevice().read();
       nbPacketRead++;
 
       // Notification nombre de packet lu

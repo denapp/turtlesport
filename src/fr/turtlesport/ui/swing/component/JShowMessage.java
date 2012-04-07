@@ -129,8 +129,8 @@ public final class JShowMessage {
    *          les options.
    * @param initialValue
    *          l'option initiale.
-   * @return l'option s�lectionn� ou <code>CLOSED_OPTION</code> si l'utilisateur
-   *         a ferm� la boite de dialogue.
+   * @return l'option s�lectionn� ou <code>CLOSED_OPTION</code> si
+   *         l'utilisateur a ferm� la boite de dialogue.
    */
   public static int option(Component parentComponent,
                            String msg,
@@ -164,8 +164,8 @@ public final class JShowMessage {
    *          les options.
    * @param initialValue
    *          l'option initiale.
-   * @return l'option s�lectionn� ou <code>CLOSED_OPTION</code> si l'utilisateur
-   *         a ferm� la boite de dialogue.
+   * @return l'option s�lectionn� ou <code>CLOSED_OPTION</code> si
+   *         l'utilisateur a ferm� la boite de dialogue.
    */
   public static int option(String msg,
                            String title,
@@ -181,6 +181,69 @@ public final class JShowMessage {
                   msgType,
                   options,
                   initialValue);
+  }
+
+  /**
+   * Affiche une boite de dialogue option.
+   * 
+   * @param parentComponent
+   *          le composant parent
+   * @param msg
+   *          le message
+   * @param title
+   *          le titre de la boite de dialogue.
+  * @param msgType
+   *          le type du message.
+   * @param options
+   *          les options.
+   * @param initialValue
+   *          l'option initiale.
+   * @return l'option s�lectionn� ou <code>CLOSED_OPTION</code> si
+   *         l'utilisateur a ferm� la boite de dialogue.
+   */
+  public static Object input(Component parentComponent,
+                             String msg,
+                             String title,
+                             int msgType,
+                             Object[] options,
+                             Object initialValue) {
+    return JOptionPane.showInputDialog(parentComponent,
+                                       getMessage(msg),
+                                       title,
+                                       msgType,
+                                       null,
+                                       options,
+                                       initialValue);
+  }
+
+  /**
+   * Affiche dans une boite de dialogue input.
+   * 
+   * @param msg
+   *          le message
+   * @param title
+   *          le titre de la boite de dialogue.
+   * @param msgType
+   *          le type du message.
+   * @param options
+   *          les options.
+   * @param initialValue
+   *          l'option initiale.
+   * @return l'option s�lectionn� ou <code>CLOSED_OPTION</code> si
+   *         l'utilisateur a ferm� la boite de dialogue.
+   */
+  public static Object input(String msg,
+                             String title,
+                             int msgType,
+                             Object[] options,
+                             Object initialValue) {
+
+    return input(MainGui.getWindow(),
+                 msg,
+                 title,
+                 msgType,
+                 options,
+                 initialValue);
   }
 
   /**

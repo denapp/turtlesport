@@ -2,8 +2,8 @@ package fr.turtlesport.protocol.data;
 
 import java.util.Date;
 
-import fr.turtlesport.GarminDevice;
 import fr.turtlesport.UsbPacketInputStream;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 
 // typedef struct
@@ -83,7 +83,7 @@ public abstract class AbstractLapType extends AbstractData {
     log.debug(">>newInstance");
 
     AbstractLapType res;
-    String[] data = GarminDevice.getDevice().getDataProtocol(PROTOCOL);
+    String[] data = GarminUsbDevice.getDevice().getDataProtocol(PROTOCOL);
     if (data.length != 1) {
       throw new RuntimeException("pas de protocole " + PROTOCOL);
     }

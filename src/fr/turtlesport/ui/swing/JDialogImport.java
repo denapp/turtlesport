@@ -159,7 +159,7 @@ public final class JDialogImport extends JDialog implements
    */
   private JDialogImport(Frame owner) throws SQLException {
     super(owner, true);
-
+    
     rb = ResourceBundleUtility.getBundle(LanguageManager.getManager()
         .getCurrentLang(), getClass());
 
@@ -209,10 +209,16 @@ public final class JDialogImport extends JDialog implements
   }
 
   /**
-   * @param files
+   *
    */
   public static void prompt() {
-    File[] files = getSelectedFiles();
+    prompt(getSelectedFiles());
+  }
+
+  /**
+  *
+  */
+  public static void prompt(File[] files) {
     if (files == null) {
       return;
     }
@@ -718,20 +724,23 @@ public final class JDialogImport extends JDialog implements
       IGeoRoute[] routes = FactoryGeoLoad.getRoutes(file);
       if (routes != null) {
         for (IGeoRoute r : routes) {
+          if (r.totalTime() < 1000) {
+            continue;
+          }
           int size = listRows.size();
-            TableRowObject rowObj = new TableRowObject(size, r, file);
-            listRows.add(rowObj);
-            switch (r.getSportType()) {
-              case IGeoRoute.SPORT_TYPE_RUNNING:
-              case IGeoRoute.SPORT_TYPE_BIKE:
-                rowObj.setActivity(r.getSportType());
-                break;
-              default:
-                rowObj.setActivity(IGeoRoute.SPORT_TYPE_OTHER);
-                break;
-            }
-            fireTableRowsInserted(size, size);
-            isAdd = true;
+          TableRowObject rowObj = new TableRowObject(size, r, file);
+          listRows.add(rowObj);
+          switch (r.getSportType()) {
+            case IGeoRoute.SPORT_TYPE_RUNNING:
+            case IGeoRoute.SPORT_TYPE_BIKE:
+              rowObj.setActivity(r.getSportType());
+              break;
+            default:
+              rowObj.setActivity(IGeoRoute.SPORT_TYPE_OTHER);
+              break;
+          }
+          fireTableRowsInserted(size, size);
+          isAdd = true;
         }
       }
 

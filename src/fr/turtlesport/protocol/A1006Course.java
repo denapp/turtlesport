@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import fr.turtlesport.GarminDevice;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbPacketOutputStream;
 import fr.turtlesport.UsbProtocolException;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.D1006CourseType;
 import fr.turtlesport.protocol.data.D1007CourseLapType;
@@ -208,7 +208,7 @@ public class A1006Course extends AbstractTransfertProtocol {
     finally {
       try {
         // Fermeture du device
-        GarminDevice.close();
+        GarminUsbDevice.close();
       }
       catch (UsbProtocolException e) {
       }
@@ -297,7 +297,7 @@ public class A1006Course extends AbstractTransfertProtocol {
     finally {
       try {
         // Fermeture du device
-        GarminDevice.close();
+        GarminUsbDevice.close();
       }
       catch (UsbProtocolException e) {
       }
@@ -380,7 +380,7 @@ public class A1006Course extends AbstractTransfertProtocol {
     packet.setData(ByteUtil.to2Bytes(size));
 
     // envoie du packet
-    GarminDevice.getDevice().send(packet);
+    GarminUsbDevice.getDevice().send(packet);
 
     log.debug("<<sendPidRecords");
   }
@@ -412,7 +412,7 @@ public class A1006Course extends AbstractTransfertProtocol {
         packet.setData(out.toByteArray());
 
         // envoie du packet
-        GarminDevice.getDevice().send(packet);
+        GarminUsbDevice.getDevice().send(packet);
 
         // abort
         if (progress.abortTransfert()) {
@@ -451,7 +451,7 @@ public class A1006Course extends AbstractTransfertProtocol {
           packet = new UsbPacket(ICommand.PACKET_TYPE_APP_LAYER, PID_COURSE_LAP);
           packet.setData(out.toByteArray());
           // envoie du packet
-          GarminDevice.getDevice().send(packet);
+          GarminUsbDevice.getDevice().send(packet);
 
           // abort
           if (progress.abortTransfert()) {
@@ -491,7 +491,7 @@ public class A1006Course extends AbstractTransfertProtocol {
         packet.setData(out.toByteArray());
 
         // envoie du packet
-        GarminDevice.getDevice().send(packet);
+        GarminUsbDevice.getDevice().send(packet);
 
         // notification
         nbSend++;
@@ -515,7 +515,7 @@ public class A1006Course extends AbstractTransfertProtocol {
           packet.setData(out.toByteArray());
 
           // envoie du packet
-          GarminDevice.getDevice().send(packet);
+          GarminUsbDevice.getDevice().send(packet);
 
           // notification
           nbSend++;
@@ -564,7 +564,7 @@ public class A1006Course extends AbstractTransfertProtocol {
             packet.setData(out.toByteArray());
 
             // envoie du packet
-            GarminDevice.getDevice().send(packet);
+            GarminUsbDevice.getDevice().send(packet);
 
             // notification
             nbSend++;
@@ -600,7 +600,7 @@ public class A1006Course extends AbstractTransfertProtocol {
     packet.setData(ByteUtil.to2Bytes(commandId));
 
     // envoie du packet
-    GarminDevice.getDevice().send(packet);
+    GarminUsbDevice.getDevice().send(packet);
 
     log.debug("<<sendXferCmplt");
   }
@@ -619,7 +619,7 @@ public class A1006Course extends AbstractTransfertProtocol {
     int nbPacketD1006 = 0;
 
     while (!progress.abortTransfert()) {
-      packet = GarminDevice.getDevice().read();
+      packet = GarminUsbDevice.getDevice().read();
       nbPacketRead++;
 
       if (packet.getPacketType() == PACKET_TYPE_APP_LAYER
@@ -683,7 +683,7 @@ public class A1006Course extends AbstractTransfertProtocol {
 
     while (!progress.abortTransfert()) {
 
-      packet = GarminDevice.getDevice().read();
+      packet = GarminUsbDevice.getDevice().read();
       nbPacketRead++;
 
       if (packet.getPacketType() == PACKET_TYPE_APP_LAYER
@@ -764,7 +764,7 @@ public class A1006Course extends AbstractTransfertProtocol {
 
     do {
       // k+2
-      packet = GarminDevice.getDevice().read();
+      packet = GarminUsbDevice.getDevice().read();
       nbPacketRead++;
 
       if (packet.getPacketType() == PACKET_TYPE_APP_LAYER
@@ -841,7 +841,7 @@ public class A1006Course extends AbstractTransfertProtocol {
 
     while (!progress.abortTransfert()) {
 
-      packet = GarminDevice.getDevice().read();
+      packet = GarminUsbDevice.getDevice().read();
       nbPacketRead++;
 
       if (packet.getPacketType() == PACKET_TYPE_APP_LAYER
