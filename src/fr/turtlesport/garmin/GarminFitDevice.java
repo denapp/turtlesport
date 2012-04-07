@@ -138,7 +138,7 @@ public class GarminFitDevice implements IGarminDevice {
     ArrayList<GarminFitDevice> list = new ArrayList<GarminFitDevice>();
 
     File dir = getDirDevices();
-    if (!dir.exists()) {
+    if (dir == null || !dir.exists()) {
       return list;
     }
 
@@ -171,7 +171,7 @@ public class GarminFitDevice implements IGarminDevice {
   }
 
   /**
-   * Recupere les repetoires des devices.
+   * Recupere les repertoires des devices.
    */
   private static File getDirDevices() {
     if (OperatingSystem.isMacOSX()) {
@@ -181,7 +181,13 @@ public class GarminFitDevice implements IGarminDevice {
     }
 
     if (OperatingSystem.isWindows()) {
-      throw new NotImplementedException();
+      StringBuilder st = new StringBuilder();
+      String tmp = System.getenv("APPDATA");
+      if (tmp != null) {
+        st.append(tmp);
+        st.append("\\GARMIN\\Devices");
+        return new File(st.toString());
+      }
     }
 
     return null;
