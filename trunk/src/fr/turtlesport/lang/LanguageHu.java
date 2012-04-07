@@ -102,7 +102,7 @@ public final class LanguageHu extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#cancel()
    */
   public String cancel() {
-    return "Mégsem";
+    return "Megszak\u0205t";
   }
 
   /*
