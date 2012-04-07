@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import fr.turtlesport.GarminDevice;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 
 public abstract class AbstractRunType extends AbstractData {
@@ -69,7 +69,7 @@ public abstract class AbstractRunType extends AbstractData {
     log.debug(">>newInstance");
 
     AbstractRunType res;
-    String[] data = GarminDevice.getDevice().getDataProtocol(PROTOCOL);
+    String[] data = GarminUsbDevice.getDevice().getDataProtocol(PROTOCOL);
     if (data.length != 1) {
       throw new RuntimeException("pas de protocole " + PROTOCOL);
     }

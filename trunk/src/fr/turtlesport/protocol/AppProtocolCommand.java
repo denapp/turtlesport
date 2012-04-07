@@ -1,8 +1,8 @@
 package fr.turtlesport.protocol;
 
-import fr.turtlesport.GarminDevice;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbProtocolException;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.ProductDataType;
 import fr.turtlesport.protocol.data.ProtocolCapability;
@@ -68,7 +68,7 @@ public class AppProtocolCommand implements ICommand {
 
     // Recuperation de la reponse
     while (true) {
-      packet = GarminDevice.getDevice().read();
+      packet = GarminUsbDevice.getDevice().read();
       if (packet.getPacketType() == ICommand.PACKET_TYPE_APP_LAYER) {
         if (packet.getPacketID() == PID_PRODUCT_DATA) {
           // Recuperation Pid_Product_Data
@@ -96,7 +96,7 @@ public class AppProtocolCommand implements ICommand {
 
     UsbPacket packet = new UsbPacket(ICommand.PACKET_TYPE_APP_LAYER,
                                      PID_PRODUCT_RQST);
-    GarminDevice.getDevice().send(packet);
+    GarminUsbDevice.getDevice().send(packet);
 
     log.debug("<<send");
   }

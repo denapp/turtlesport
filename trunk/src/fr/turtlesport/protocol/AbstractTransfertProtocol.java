@@ -1,8 +1,8 @@
 package fr.turtlesport.protocol;
 
-import fr.turtlesport.GarminDevice;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbProtocolException;
+import fr.turtlesport.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.ByteUtil;
 
@@ -45,10 +45,10 @@ public abstract class AbstractTransfertProtocol {
     }
 
     // Initialisation
-    GarminDevice.init();
+    GarminUsbDevice.init();
 
     // Verification presence du protocol
-    if (!GarminDevice.getDevice().containsProtocol(getProtocolName())) {
+    if (!GarminUsbDevice.getDevice().containsProtocol(getProtocolName())) {
       log.error("Pas de protocole " + getProtocolName());
       throw new UsbProtocolException(UsbProtocolException.ERR_NO_PROTOCOL);
     }
@@ -98,7 +98,7 @@ public abstract class AbstractTransfertProtocol {
     packet.setData(ByteUtil.to2Bytes(getCommandIdType()));
 
     // envoie du packet
-    GarminDevice.getDevice().send(packet);
+    GarminUsbDevice.getDevice().send(packet);
 
     log.debug("<<sendCommand");
   }
@@ -117,7 +117,7 @@ public abstract class AbstractTransfertProtocol {
     packet.setData(ByteUtil.to2Bytes(commandId));
 
     // envoie du packet
-    GarminDevice.getDevice().send(packet);
+    GarminUsbDevice.getDevice().send(packet);
 
     log.debug("<<sendCommand");
   }
@@ -133,7 +133,7 @@ public abstract class AbstractTransfertProtocol {
     if (packet == null) {
       throw new IllegalArgumentException("packet est null");
     }
-    GarminDevice.getDevice().send(packet);
+    GarminUsbDevice.getDevice().send(packet);
 
     log.debug("<<sendCommand");
   }
@@ -154,7 +154,7 @@ public abstract class AbstractTransfertProtocol {
     data[1] = (byte) ((getCommandIdType() & 0xFF00) >> 8);
     packet.setData(data);
 
-    GarminDevice.getDevice().send(packet);
+    GarminUsbDevice.getDevice().send(packet);
 
     log.debug("<<sendRecord");
   }
@@ -168,7 +168,7 @@ public abstract class AbstractTransfertProtocol {
     int nbPaquet = 0;
 
     // Lecture
-    UsbPacket packet = GarminDevice.getDevice().read();
+    UsbPacket packet = GarminUsbDevice.getDevice().read();
 
     // Premier paquet Pid_Records (spec 5.4)
     if (packet.getPacketType() == PACKET_TYPE_APP_LAYER

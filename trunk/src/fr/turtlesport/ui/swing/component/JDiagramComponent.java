@@ -1588,8 +1588,12 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
             minY3Pace = p.getPace();
           }
         }
-
-        if (maxY2 == 0) {
+        
+        if (minY2 < 0) {
+          minY2 = 0;
+        }
+        if (maxY2 < 0) {
+          maxY2 = 0;
           minY2 = 0;
         }
         if ((maxY2 - minY2) < 10) {

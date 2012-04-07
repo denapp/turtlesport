@@ -307,7 +307,7 @@ public class JPanelGraph extends JPanel implements LanguageListener,
 //      panelWest.add(getJCheckBoxTime());
       panelWest.add(getJCheckBox4());
       panelWest.add(getJCheckBoxFilter());
-      panelWest.add(new JLabel("  "));
+      //panelWest.add(new JLabel("  "));
       panelWest.add(getJButtonZoomPlus());
       panelWest.add(getJButtonZoomMoins());
       panelWest.add(getJButtonReload());

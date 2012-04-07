@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,6 +31,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
@@ -40,9 +42,14 @@ import javax.swing.WindowConstants;
 import fr.turtlesport.Configuration;
 import fr.turtlesport.Launcher;
 import fr.turtlesport.MacOSXTurleApp;
+import fr.turtlesport.UsbProtocolException;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.UserTableManager;
+import fr.turtlesport.garmin.GarminDevices;
+import fr.turtlesport.garmin.GarminFitDevice;
+import fr.turtlesport.garmin.GarminUsbDevice;
+import fr.turtlesport.garmin.IGarminDevice;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
@@ -499,12 +506,12 @@ public class MainGui extends JFrame implements LanguageListener {
     usersMouseListener = new MainGuiMouseListener("");
     jXSplitButtonUser.addMouseListener(usersMouseListener);
 
-//    WorkoutAction workoutAction = new WorkoutAction();
-//    jButtonWorkout.addActionListener(workoutAction);
-//    if (jMenuItemMail != null) {
-//      MailAction mailAction = new MailAction();
-//      jMenuItemMail.addActionListener(mailAction);
-//    }
+    // WorkoutAction workoutAction = new WorkoutAction();
+    // jButtonWorkout.addActionListener(workoutAction);
+    // if (jMenuItemMail != null) {
+    // MailAction mailAction = new MailAction();
+    // jMenuItemMail.addActionListener(mailAction);
+    // }
 
     jMenuItemCheckUpdate.addActionListener(new CheckUpdateAction());
     jMenuItemDonate.addActionListener(new DonationAction());
@@ -592,7 +599,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jToolBar.add(getJButtonStat());
       jToolBar.addSeparator();
       jToolBar.add(getJButtonPreference());
-//      jToolBar.add(getJButtonWorkout());
+      // jToolBar.add(getJButtonWorkout());
     }
     return jToolBar;
   }
@@ -624,7 +631,7 @@ public class MainGui extends JFrame implements LanguageListener {
     }
     return jButtonStat;
   }
-  
+
   private JButton getJButtonWorkout() {
     if (jButtonWorkout == null) {
       jButtonWorkout = new JButton();
@@ -633,8 +640,7 @@ public class MainGui extends JFrame implements LanguageListener {
     }
     return jButtonWorkout;
   }
-  
-  
+
   /**
    * This method initializes jButtonPreference
    * 
@@ -1471,15 +1477,89 @@ public class MainGui extends JFrame implements LanguageListener {
 
         @Override
         public Object construct() {
-          A1000RunTransferProtocol a1000 = new A1000RunTransferProtocol();
+          IGarminDevice deviceSelected = null;
 
+          List<IGarminDevice> devices = GarminDevices.list();
+          switch (devices.size()) {
+            case 0:
+              try {
+                throw new UsbProtocolException(0);
+              }
+              catch (UsbProtocolException th) {
+                JShowMessage.error(th.getMessage());
+                return null;
+              }
+            case 1:
+              deviceSelected = devices.get(0);
+              break;
+            default:
+              deviceSelected = selectDevice(devices);
+          }
+
+          if (deviceSelected instanceof GarminUsbDevice) {
+            doUsbDevice();
+          }
+          else if (deviceSelected instanceof GarminFitDevice) {
+            GarminFitDevice fitDevice = (GarminFitDevice) deviceSelected;
+
+            List<File> list = fitDevice.getNewTcxFiles();
+            File[] files = new File[list.size()];
+            JDialogImport.prompt(list.toArray(files));
+          }
+
+          return null;
+        }
+
+        @Override
+        public void finished() {
+          afterRunnableSwing();
+        }
+
+        private IGarminDevice selectDevice(List<IGarminDevice> devices) {
+
+          String name = Configuration.getConfig().getProperty("DeviceGPS",
+                                                              "lastused");
+          IGarminDevice defaultDevice = devices.get(0);
+          for (IGarminDevice d : devices) {
+            if (d.toString().equals(name)) {
+              defaultDevice = d;
+              break;
+            }
+          }
+          ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+              .getManager().getCurrentLang(), MainGui.class);
+
+          final String msgChooseWatch = rb.getString("msgChooseWatch");
+          final String titleChooseWatch = rb.getString("titleChooseWatch");
+          final IGarminDevice[] options = new IGarminDevice[devices.size()];
+          devices.toArray(options);
+          IGarminDevice selected = (IGarminDevice) JShowMessage
+              .input(msgChooseWatch,
+                     titleChooseWatch,
+                     JOptionPane.INFORMATION_MESSAGE,
+                     options,
+                     defaultDevice);
+
+          if (selected != null) {
+            Configuration.getConfig().addProperty("DeviceGPS",
+                                                  "lastused",
+                                                  selected.toString());
+
+          }
+
+          return selected;
+        }
+
+        private void doUsbDevice() {
+          A1000RunTransferProtocol a1000;
           try {
+            a1000 = new A1000RunTransferProtocol();
             a1000.init();
           }
           catch (Throwable th) {
             log.error("", th);
             JShowMessage.error(th.getMessage());
-            return null;
+            return;
           }
 
           // ui
@@ -1496,12 +1576,6 @@ public class MainGui extends JFrame implements LanguageListener {
                 .getManager().getCurrentLang(), MainGui.class);
             JShowMessage.error(rb.getString("errorSQL"));
           }
-          return null;
-        }
-
-        @Override
-        public void finished() {
-          afterRunnableSwing();
         }
 
       }.start();
@@ -1668,7 +1742,7 @@ public class MainGui extends JFrame implements LanguageListener {
           try {
             JPanelWorkout panel = new JPanelWorkout();
             setRightComponent(panel);
-            
+
             ModelWorkout w = new ModelWorkout();
             panel.setModel(w);
             MainGui.getWindow().setEnableMenuRun(false);

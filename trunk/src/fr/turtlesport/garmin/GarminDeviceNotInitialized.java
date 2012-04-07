@@ -1,4 +1,4 @@
-package fr.turtlesport;
+package fr.turtlesport.garmin;
 
 /**
  * @author Denis Apparicio
