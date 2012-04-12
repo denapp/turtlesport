@@ -619,7 +619,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
    * Affiche l'intervalle.
    */
   private void paintInterval(Graphics2D g2) {
-    if (!model.isVisibleY1() && !model.isVisibleY2() && model.isVisibleY3()
+    if (!model.isVisibleY1() && !model.isVisibleY2() && !model.isVisibleY3()
         && !model.isVisibleY4()) {
       return;
     }
