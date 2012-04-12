@@ -37,37 +37,56 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     hashDiskCache.put(tileProviderInfo.getName(),
                       new DiskTitleCache(dir, tileProviderInfo));
 
-    // osma
-    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tah.openstreetmap.org/Tiles/tile",
-                                                         "osma");
+    // osma plus valide
+    // tileProviderInfo = new
+    // OpenStreetMapTileProviderInfo("http://tah.openstreetmap.org/Tiles/tile",
+    // "osma");
+    // dir = new File(dirCache, tileProviderInfo.getName());
+    // hashDiskCache.put(tileProviderInfo.getName(),
+    // new DiskTitleCache(dir, tileProviderInfo));
+
+    // opencyclemap
+    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile.opencyclemap.org/cycle",
+                                                         "cyclemap");
     dir = new File(dirCache, tileProviderInfo.getName());
     hashDiskCache.put(tileProviderInfo.getName(),
                       new DiskTitleCache(dir, tileProviderInfo));
-
-    // cyclemap                                          tile.opencyclemap.org
-//    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://andy.sandbox.cloudmade.com/tiles/cycle",
-//                                                         "cyclemap");
-    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile.opencyclemap.org/cycle",
-        "cyclemap");
+    // MapQuest
+    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://otile1.mqcdn.com/tiles/1.0.0/osm",
+                                                         "MapQuest");
     dir = new File(dirCache, tileProviderInfo.getName());
     hashDiskCache.put(tileProviderInfo.getName(),
                       new DiskTitleCache(dir, tileProviderInfo));
 
     // MapQuest-OSM
-//    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://otile1.mqcdn.com/tiles/1.0.0/osm",
-//                                                         "MapQuest-OSM");
-//    dir = new File(dirCache, tileProviderInfo.getName());
-//    hashDiskCache.put(tileProviderInfo.getName(),
-//                      new DiskTitleCache(dir, tileProviderInfo));
-
+    // tileProviderInfo = new
+    // OpenStreetMapTileProviderInfo("http://otile1.mqcdn.com/tiles/1.0.0/osm",
+    // "MapQuest-OSM");
+    // dir = new File(dirCache, tileProviderInfo.getName());
+    // hashDiskCache.put(tileProviderInfo.getName(),
+    // new DiskTitleCache(dir, tileProviderInfo));
 
     // MapQuest-Aerial
-//    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://oatile2.mqcdn.com/naip",
-//                                                         "MapQuest-Aerial");
-//    dir = new File(dirCache, tileProviderInfo.getName());
-//    hashDiskCache.put(tileProviderInfo.getName(),
-//                      new DiskTitleCache(dir, tileProviderInfo));
+    // tileProviderInfo = new
+    // OpenStreetMapTileProviderInfo("http://oatile2.mqcdn.com/naip",
+    // "MapQuest-Aerial");
+    // dir = new File(dirCache, tileProviderInfo.getName());
+    // hashDiskCache.put(tileProviderInfo.getName(),
+    // new DiskTitleCache(dir, tileProviderInfo));
 
+  }
+
+  /**
+   * Restitue les noms des maps.
+   * 
+   * @return les noms des maps
+   */
+  public static String[] getTileNames() {
+    String[] names = { TurtleEmptyTileFactory.NAME,
+        "mapnik",
+        "cyclemap",
+        "MapQuest" };
+    return names;
   }
 
   /**
@@ -98,22 +117,6 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
   }
 
   /**
-   * Restitue les noms des maps.
-   * 
-   * @return les noms des maps
-   */
-  public static String[] getTileNames() {
-    String[] names = { TurtleEmptyTileFactory.NAME,
-        "mapnik",
-        "osma",
-        "cyclemap",
-        //"MapQuest-OSM",
-        //"MapQuest-Aerial"
-        };
-    return names;
-  }
-
-  /**
    * Restitue la factory.
    * 
    * @return
@@ -140,8 +143,7 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
    * @return la factory par d&eacute;faut.
    */
   public static TileFactory getDefaultTileFactory() {
-    String key = Configuration.getConfig()
-        .getProperty("map", "tile",  "mapnik");
+    String key = Configuration.getConfig().getProperty("map", "tile", "mapnik");
 
     TileFactory tileFactory;
     if (TurtleEmptyTileFactory.NAME.equals(key) /* || !URLPing.ping() */) {
@@ -149,6 +151,9 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     }
     else {
       tileFactory = getTileFactory(key);
+      if (tileFactory == null) {
+        tileFactory = getTileFactory(getTileNames()[1]);
+      }
       if (tileFactory == null) {
         tileFactory = new TurtleEmptyTileFactory();
       }
@@ -202,7 +207,7 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     for (String key : getTileNames()) {
       DiskTitleCache cache = hashDiskCache.get(key);
       if (cache != null) {
-       length += cache.length(); 
+        length += cache.length();
       }
     }
     return length;
