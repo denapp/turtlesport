@@ -10,7 +10,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ResourceBundle;
 
-import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -195,8 +195,10 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
     if (jPanelSouth == null) {
       jLabelOpenStreeetMap = new JLabel();
       jLabelOpenStreeetMap.setFont(GuiFont.FONT_PLAIN);
+      //jLabelOpenStreeetMap
+      //    .setText("<html><body>Data/Maps Copyright &#169; 2012</body></html>");
       jLabelOpenStreeetMap
-          .setText("<html><body>Data/Maps Copyright &#169; 2012</body></html>");
+      .setText("<html><body>Data/Maps by MapQuest, OpenStreetMap &#169; </body></html>");
 
       jxHyperlinkOpenStreetMap = new JXHyperlink();
       jxHyperlinkOpenStreetMap.setText("OpenStreetMap Contributors");
@@ -210,7 +212,7 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
           }
         }
       });
-       jLabelLicence = new JLabel(" Licence");
+      jLabelLicence = new JLabel(" Licence");
       jLabelLicence.setFont(GuiFont.FONT_PLAIN);
       jxHyperlinklicence = new JXHyperlink();
       jxHyperlinklicence.setText("CC-BY-SA");
@@ -230,12 +232,12 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
       FlowLayout flowLayout = new FlowLayout();
       flowLayout.setAlignment(FlowLayout.LEFT);
       jPanelSouth.setLayout(flowLayout);
+      //jPanelSouth.setLayout(new BoxLayout(jPanelSouth, BoxLayout.Y_AXIS));
       jPanelSouth.setAlignmentY(TOP_ALIGNMENT);
       jPanelSouth.add(jLabelOpenStreeetMap, null);
       jPanelSouth.add(jxHyperlinkOpenStreetMap, null);
       jPanelSouth.add(jLabelLicence, null);
       jPanelSouth.add(jxHyperlinklicence, null);
-
     }
     return jPanelSouth;
   }
