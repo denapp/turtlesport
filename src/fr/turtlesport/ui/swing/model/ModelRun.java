@@ -176,11 +176,16 @@ public class ModelRun {
 
     if (dataRun != null) {
       double distTot = 0;
+      int timeElapsedTot = 0;
       int timeTot = 0;
+      int timePauseTot = 0;
       try {
         timeTot = dataRun.computeTimeTot();
+        timePauseTot = dataRun.computeTimePauseTot();
+        timeElapsedTot = timePauseTot + timeTot;
         dataRun.setUnit(e.getUnit());
         distTot = dataRun.getComputeDistanceTot();
+        System.out.println("timeElapsedTot=" + timeElapsedTot);
       }
       catch (SQLException sqle) {
         // ne peut arriver
@@ -189,9 +194,17 @@ public class ModelRun {
       // distance
       view.getJLabelValDistTot().setText(DistanceUnit.formatWithUnit(distTot));
 
+      // Temps ecoule
+      view.getJLabelValTimeMovingTot()
+          .setText(TimeUnit.formatHundredSecondeTime(timeTot));
+
       // Temps
       view.getJLabelValTimeTot()
-          .setText(TimeUnit.formatHundredSecondeTime(timeTot));
+          .setText(TimeUnit.formatHundredSecondeTime(timeElapsedTot));
+
+      // Temps Pause
+      view.getJLabelValTimePauseTot()
+          .setText(TimeUnit.formatHundredSecondeTime(timePauseTot));
 
       // vitesse moyenne
       view.getJLabelValSpeedMoy()
@@ -262,7 +275,9 @@ public class ModelRun {
   private void eraseGui(JPanelRun view) {
     view.getjLabelValDateTime().setText(null);
     view.getJLabelValDistTot().setText(null);
+    view.getJLabelValTimeMovingTot().setText(null);
     view.getJLabelValTimeTot().setText(null);
+    view.getJLabelValTimePauseTot().setText(null);
     view.getJLabelValAllure().setText(null);
     view.getJLabelValSpeedMoy().setText(null);
     view.getJLabelValCalories().setText(null);
@@ -318,7 +333,18 @@ public class ModelRun {
 
     // Temps
     view.getJLabelValTimeTot()
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()
+                                                   + dataRun
+                                                   .computeTimePauseTot()));
+
+    // Temps actif
+    view.getJLabelValTimeMovingTot()
         .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
+
+    // Temps pause
+    view.getJLabelValTimePauseTot()
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun
+            .computeTimePauseTot()));
 
     // vitesse moyenne
     view.getJLabelValSpeedMoy()
@@ -454,7 +480,7 @@ public class ModelRun {
     }
 
     String newLocation = (String) view.getModelLocation().getSelectedItem();
-    newLocation = (newLocation==null)?"":newLocation.trim();
+    newLocation = (newLocation == null) ? "" : newLocation.trim();
 
     if (!newLocation.equals(location)) {
       RunTableManager.getInstance()

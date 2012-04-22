@@ -306,7 +306,7 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
                                                     SQLException {
 
     // recuperation des points du tour
-    Date dateEnd = new Date(l.getStartTime().getTime() + l.getTotalTime() * 10);
+    Date dateEnd = new Date(l.getStartTime().getTime() + l.getRealTotalTime() * 10);
     DataRunTrk[] trks = RunTrkTableManager.getInstance()
         .getTrks(data.getId(), l.getStartTime(), dateEnd);
 
@@ -320,7 +320,7 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
     writer.write("<Lap StartTime=\"" + timeFormat.format(l.getStartTime())
                  + "\">");
     // TotalTimeSeconds
-    double totalTime = l.getTotalTime() / 100.0;
+    double totalTime = l.getRealTotalTime() / 100.0;
     writer.write("<TotalTimeSeconds>" + totalTime + "</TotalTimeSeconds>");
     // DistanceMeters
     writeln(writer);

@@ -470,7 +470,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     log.debug(">>writeLap");
 
     // recuperation des points du tour
-    Date dateEnd = new Date(l.getStartTime().getTime() + l.getTotalTime() * 10);
+    Date dateEnd = new Date(l.getStartTime().getTime() + l.getRealTotalTime() * 10);
     DataRunTrk[] trks = RunTrkTableManager.getInstance()
         .getTrks(data.getId(), l.getStartTime(), dateEnd);
 

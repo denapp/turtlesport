@@ -11,24 +11,20 @@ import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.RunTrkTableManager;
-import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.GeoPositionMapKit;
 import fr.turtlesport.unit.DistanceUnit;
-import fr.turtlesport.util.GeoUtil;
 
 /**
  * @author Denis Apparicio
  * 
  */
 public final class ModelPointsManager {
-  private static TurtleLogger           log;
-  static {
-    log = (TurtleLogger) TurtleLogger.getLogger(ModelPointsManager.class);
-  }
 
   protected transient ChangePointsEvent changeEvent     = new ChangePointsEvent(this);
 
   private List<GeoPositionMapKit>       listGeo;
+
+  private List<DataRunTrk>              listTrksOriginal;
 
   private List<DataRunTrk>              listTrks;
 
@@ -67,14 +63,14 @@ public final class ModelPointsManager {
    *         <code>false</code> sinon.
    */
   public final boolean hasCadencePoints() {
-      if (getListTrks() != null) {
-        for (DataRunTrk p : getListTrks()) {
-          if (p.isValidCadence()) {
-            return true;
-          }
+    if (getListTrks() != null) {
+      for (DataRunTrk p : getListTrks()) {
+        if (p.isValidCadence()) {
+          return true;
         }
       }
-      return false;
+    }
+    return false;
   }
 
   /**
@@ -129,6 +125,11 @@ public final class ModelPointsManager {
    *          the dataRun to set
    * @throws SQLException
    */
+  /**
+   * @param source
+   * @param dataRun
+   * @throws SQLException
+   */
   public final void setDataRun(Object source, DataRun dataRun) throws SQLException {
     if (dataRun != null && dataRun.equals(this.dataRun)) {
       return;
@@ -145,8 +146,47 @@ public final class ModelPointsManager {
 
     if (dataRun != null) {
       // Les points
-      listTrks = RunTrkTableManager.getInstance().getAllTrks(dataRun.getId());
-      if (listTrks != null && listTrks.size() > 0) {
+      listTrksOriginal = RunTrkTableManager.getInstance()
+          .getAllTrks(dataRun.getId());
+      listTrks = new ArrayList<DataRunTrk>();
+
+      if (listTrksOriginal != null && listTrksOriginal.size() > 0) {
+        // recherche du premier point valide
+        int i;
+        DataRunTrk trkValid = null;
+        for (i = 0; i < listTrksOriginal.size(); i++) {
+          DataRunTrk t = listTrksOriginal.get(i);
+          if (t.isValidGps() && t.isValidDistance()) {
+            trkValid = t;
+            break;
+          }
+        }
+        if (i > 0 && i < listTrksOriginal.size()) {
+          // remplacement des premiers points invalides
+          for (int index = 0; index < i; index++) {
+            DataRunTrk d = cloneInvalid(listTrksOriginal.get(index),
+                                        trkValid,
+                                        0);
+            listTrks.add(d);
+          }
+        }
+
+        // points suivants
+        for (int index = i; index < listTrksOriginal.size(); index++) {
+          DataRunTrk t = listTrksOriginal.get(index);
+          if (t.isValidGps() && t.isValidDistance()) {
+            trkValid = t;
+            listTrks.add(t);
+          }
+          else {
+            DataRunTrk d = cloneInvalid(listTrksOriginal.get(index),
+                                        trkValid,
+                                        trkValid.getDistance());
+            listTrks.add(d);
+          }
+        }
+
+        // conversion distance
         if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
           for (DataRunTrk t : listTrks) {
             t.setDistance((float) DistanceUnit.convert(DistanceUnit.unitKm(),
@@ -155,16 +195,20 @@ public final class ModelPointsManager {
                                                        t.getDistance()));
           }
         }
-        for (int i = 0; i < listTrks.size() - 1; i++) {
-          long time = listTrks.get(i + 1).getTime().getTime()
-                      - listTrks.get(i).getTime().getTime();
-          float dist = listTrks.get(i + 1).getDistance()
-                       - listTrks.get(i).getDistance();
+
+        // vitesse
+        for (int index = 0; index < listTrks.size() - 1; index++) {
+          long time = listTrks.get(index + 1).getTime().getTime()
+                      - listTrks.get(index).getTime().getTime();
+          float dist = listTrks.get(index + 1).getDistance()
+                       - listTrks.get(index).getDistance();
 
           double speed = (time == 0) ? 0.D : (dist / time) * 3600;
-          listTrks.get(i + 1).setSpeed(speed);
+          listTrks.get(index + 1).setSpeed(speed);
         }
-        listTrks.get(0).setSpeed(listTrks.get(1).getSpeed());
+        if (listTrks.size() >= 2) {
+          listTrks.get(0).setSpeed(listTrks.get(1).getSpeed());
+        }
       }
 
       // Les Laps
@@ -174,12 +218,9 @@ public final class ModelPointsManager {
       listGeo = new ArrayList<GeoPositionMapKit>();
 
       // recuperation des donnees
-      if (listTrks != null) {
-        for (int i = 0; i < listTrks.size(); i++) {
-          if (listTrks.get(i).isValidGps()) {
-            listGeo.add(new GeoPositionMapKit(listTrks.get(i), i));
-          }
-        }
+      for (int i = 0; i < listTrks.size(); i++) {
+        GeoPositionMapKit geo = new GeoPositionMapKit(listTrks.get(i), i);
+        listGeo.add(geo);
       }
     }
 
@@ -202,36 +243,33 @@ public final class ModelPointsManager {
     lapGeoBegin = null;
     lapGeoEnd = null;
     if (runLaps != null) {
-      DataRunTrk deb = null;
-      DataRunTrk end = null;
-
-      try {
-        // Map
-        deb = RunLapTableManager.getInstance()
-            .lapTrkBegin(runLaps[lapIndex].getId(),
-                         runLaps[lapIndex].getLapIndex());
-        if (deb != null) {
-          end = RunLapTableManager.getInstance()
-              .lapTrkEnd(runLaps[lapIndex].getId(),
-                         runLaps[lapIndex].getLapIndex());
-        }
-
-        if (deb != null && end != null) {
-          lapGeoBegin = makeGeoMapFromGarmin(deb.getLatitude(),
-                                             deb.getLongitude());
-          lapGeoEnd = makeGeoMapFromGarmin(end.getLatitude(),
-                                           end.getLongitude());
+      long searchTime = runLaps[lapIndex].getStartTime().getTime();
+      int i = 0;
+      for (i = 0; i < listGeo.size(); i++) {
+        long l = searchTime - listGeo.get(i).getTime();
+        if (l <= 0) {
+          lapGeoBegin = listGeo.get(i);
+          break;
         }
       }
-      catch (SQLException e) {
-        lapGeoBegin = null;
-        lapGeoEnd = null;
-        log.error("", e);
+      if (lapGeoBegin != null) {
+        if (lapIndex < runLaps.length - 1) {
+          searchTime = runLaps[lapIndex + 1].getStartTime().getTime();
+          for (; i < listGeo.size(); i++) {
+            long l = searchTime - listGeo.get(i).getTime();
+            if (l <= 0) {
+              lapGeoEnd = listGeo.get(i);
+              break;
+            }
+          }
+        }
+        else {
+          lapGeoEnd = listGeo.get(listGeo.size() - 1);
+        }
       }
-
     }
 
-    // on deckenche
+    // on declenche
     fireLapChanged(source);
   }
 
@@ -404,20 +442,17 @@ public final class ModelPointsManager {
     }
   }
 
-  /**
-   * Conversion d'un point garmin en point g&eacute;graphique.
-   * 
-   * @param latitude
-   * @param longitude
-   * @return
-   */
-  private GeoPosition makeGeoMapFromGarmin(int gLatitude, int gLongitude) {
-    if (GeoUtil.isInvalidGarminGpx(gLatitude)
-        || GeoUtil.isInvalidGarminGpx(gLongitude)) {
-      return null;
-    }
-    return new GeoPosition(GeoUtil.makeLatitudeFromGarmin(gLatitude),
-                           GeoUtil.makeLongitudeFromGarmin(gLongitude));
+  private DataRunTrk cloneInvalid(DataRunTrk current,
+                                  DataRunTrk trkValid,
+                                  float distance) {
+    return new DataRunTrk(current.getId(),
+                          current.getTime(),
+                          trkValid.getLongitude(),
+                          trkValid.getLatitude(),
+                          current.getHeartRate(),
+                          current.getCadence(),
+                          distance,
+                          trkValid.getAltitude());
   }
 
 }

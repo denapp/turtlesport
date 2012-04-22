@@ -624,8 +624,12 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       return;
     }
 
+    if (model.getIntervalX1() == 0) {
+      System.out.println("");
+    }
     if (model.getIntervalX1() != -1
-        && (model.getIntervalX1() >= model.getDistance(model.indexX1))
+        && (model.getIntervalX1() == 0 || (model.getIntervalX1() >= model
+            .getDistance(model.indexX1)))
         && (model.getIntervalX2() <= model.getDistance(model.indexX2 - 1))) {
       int intX1 = computeRelativeXDistance(model.getIntervalX1() / 1000.0);
       int intX2 = computeRelativeXDistance(model.getIntervalX2() / 1000.0);
@@ -1289,22 +1293,18 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
           mouseX = computeRelativeX(model.getX(index));
 
           currentTime = getTime(index);
-          currentDistance = getX(index);
-
+          currentDistance = getDistanceX(index);
           if (model.isVisibleY1()) {
             currentY1 = getY1(index);
             tabMouseY[0] = computeRelativeY1(currentY1);
-
           }
           if (model.isVisibleY2()) {
             currentY2 = getY2(index);
             tabMouseY[1] = computeRelativeY2(currentY2);
-
           }
           if (model.isVisibleY3()) {
             currentY3 = getY3(index);
             tabMouseY[2] = computeRelativeY3(currentY3);
-
           }
           if (model.isVisibleY4()) {
             currentY4 = getY4(index);
@@ -1588,7 +1588,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
             minY3Pace = p.getPace();
           }
         }
-        
+
         if (minY2 < 0) {
           minY2 = 0;
         }

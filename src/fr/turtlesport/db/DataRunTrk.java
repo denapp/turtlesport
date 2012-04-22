@@ -7,38 +7,63 @@ import java.sql.Timestamp;
  * 
  */
 public class DataRunTrk {
+  private static final double INVALID2       = Math.pow(2, 31) - 1;
 
-  private static final int INVALID        = 0x7FFFFFFF;
+  private static final int    INVALID        = 0x7FFFFFFF;
 
-  private int              id;
+  private static final float  INVALID_DIST   = (float) 9.9E24;
 
-  private int              latitude       = INVALID;
+  private int                 id;
 
-  private int              longitude      = INVALID;
+  private int                 latitude       = INVALID;
 
-  private Timestamp        time;
+  private int                 longitude      = INVALID;
 
-  private float            altitude;
+  private Timestamp           time;
 
-  private float            distance;
+  private float               altitude;
 
-  private int              heartRate      = 0;
+  private float               distance       = -1;
 
-  private int              cadence        = 0xff;
+  private int                 heartRate      = 0;
+
+  private int                 cadence        = 0xff;
 
   /** Vitesse en km/h */
-  private double           speed          = 0;
+  private double              speed          = 0;
 
   /** Allure en mn/km */
-  private double           pace           = 0;
+  private double              pace           = 0;
 
-  private double           MAX_PACE_VALUE = 20;
+  private double              MAX_PACE_VALUE = 20;
 
   /**
    * 
    */
   public DataRunTrk() {
     super();
+  }
+
+  /**
+   * 
+   */
+  public DataRunTrk(int id,
+                    Timestamp time,
+                    int longitude,
+                    int latitude,
+                    int heartRate,
+                    int cadence,
+                    float distance,
+                    float altitude) {
+    super();
+    this.id = id;
+    this.time = time;
+    this.longitude = longitude;
+    this.latitude = latitude;
+    this.heartRate = heartRate;
+    this.cadence = cadence;
+    this.distance = distance;
+    this.altitude = altitude;
   }
 
   /**
@@ -57,7 +82,7 @@ public class DataRunTrk {
   public boolean isPause() {
     return !isValidGps() && !isValidCadence() && heartRate == 0;
   }
-  
+
   /**
    * D&eacute;termine si coordonn&eacute;es GPS sont valides.
    * 
@@ -65,7 +90,18 @@ public class DataRunTrk {
    *         <code>false</code> sinon.
    */
   public boolean isValidGps() {
-    return (getLongitude() != INVALID) && (getLatitude() != INVALID);
+    return !(getLongitude() == 0 && getLatitude() == 0)
+           && !(getLongitude() >= INVALID2 && getLatitude() >= INVALID2);
+  }
+
+  /**
+   * D&eacute;termine si la distance est valide.
+   * 
+   * @return <code>true</code> si la distance est valide, <code>false</code>
+   *         sinon.
+   */
+  public boolean isValidDistance() {
+    return getDistance() >= 0 && getDistance() < INVALID_DIST;
   }
 
   /**

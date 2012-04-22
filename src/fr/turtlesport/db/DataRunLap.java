@@ -2,7 +2,7 @@ package fr.turtlesport.db;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-
+import java.util.Date;
 
 /**
  * @author Denis Apparicio
@@ -18,6 +18,8 @@ public class DataRunLap {
 
   private int       totalTime;
 
+  private int       timePause   = -1;
+
   private float     totalDist;
 
   private float     maxSpeed;
@@ -31,6 +33,10 @@ public class DataRunLap {
   private int       denivelePos = -1;
 
   private int       deniveleNeg = 1;
+
+  private int       totalLap;
+
+  private int       realTotalTime;
 
   /**
    * 
@@ -99,6 +105,14 @@ public class DataRunLap {
     this.lapIndex = lapIndex;
   }
 
+  public int getTotalLap() {
+    return totalLap;
+  }
+
+  public void setTotalLap(int totalLap) {
+    this.totalLap = totalLap;
+  }
+
   /**
    * @return the maxHeartRate
    */
@@ -160,18 +174,88 @@ public class DataRunLap {
   }
 
   /**
-   * @return the totalTime
+   * @deprecated temps du tcx invalide avec les pauses.
    */
   public int getTotalTime() {
     return totalTime;
   }
 
   /**
-   * @param totalTime
+   * @param realTotalTime
    *          the totalTime to set
+   * @deprecated temps du tcx invalide avec les pauses.
    */
   public void setTotalTime(int totalTime) {
     this.totalTime = totalTime;
+  }
+
+  /**
+   * @return the totalTime
+   */
+  public int getRealTotalTime() {
+    return realTotalTime;
+  }
+
+  /**
+   * @return the totalTime
+   * @throws SQLException
+   */
+  public int getMovingTotalTime() throws SQLException {
+    return realTotalTime - computeTimePauseTot();
+  }
+
+  /**
+   * @param totalTime
+   *          the totalTime to set
+   */
+  public void setRealTotalTime(int realTotalTime) {
+    this.realTotalTime = realTotalTime;
+  }
+
+  /**
+   * Restitue le temps total de pause.
+   * 
+   * @return le temps total pause.
+   * @throws SQLException
+   */
+  public int computeTimePauseTot() throws SQLException {
+    if (timePause == -1) {
+      timePause = 0;
+
+      if (lapIndex < (totalLap - 1)) {
+
+      }
+      Date dateEnd = new Date(getStartTime().getTime() + getRealTotalTime() * 10);
+      DataRunTrk[] trks = RunTrkTableManager.getInstance()
+          .getTrks(id, getStartTime(), dateEnd);
+
+      if (trks.length < 2) {
+        return timePause;
+      }
+
+      int iPauseBegin = -1;
+      int iPauseEnd = -1;
+      // 2 points consecutifs = pause
+      int size = trks.length - 1;
+      for (int i = 0; i < size; i++) {
+        if (trks[i].isPause() && trks[i + 1].isPause()) {
+          iPauseBegin = i;
+          iPauseEnd = ++i;
+          // debut de pause recherche fin pause
+          for (; i < size; i++) {
+            if (!trks[i].isPause()) {
+              iPauseEnd = i - 1;
+              break;
+            }
+          }
+          timePause += (trks[iPauseEnd].getTime().getTime() - trks[iPauseBegin]
+              .getTime().getTime()) / 10;
+          iPauseBegin = -1;
+          iPauseEnd = -1;
+        }
+      }
+    }
+    return timePause;
   }
 
   /**

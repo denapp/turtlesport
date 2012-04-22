@@ -2,6 +2,7 @@ package fr.turtlesport.db;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.List;
 
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.unit.DistanceUnit;
@@ -35,6 +36,8 @@ public class DataRun {
   private String              location;
 
   private double              distanceTot = -1;
+
+  private int                 timePause   = -1;
 
   private int                 timeTot     = -1;
 
@@ -287,6 +290,46 @@ public class DataRun {
       timeTot = RunLapTableManager.getInstance().timeTot(id);
     }
     return timeTot;
+  }
+
+  /**
+   * Restitue le temps total de pause.
+   * 
+   * @return le temps total pause.
+   * @throws SQLException
+   */
+  public int computeTimePauseTot() throws SQLException {
+    if (timePause == -1) {
+      timePause = 0;
+
+      List<DataRunTrk> list = RunTrkTableManager.getInstance().getAllTrks(id);
+      if (list.size() < 2) {
+        return timePause;
+      }
+
+      int iPauseBegin = -1;
+      int iPauseEnd = -1;
+      // 2 points consecutifs = pause
+      int size = list.size() - 1;
+      for (int i = 0; i < size; i++) {
+        if (list.get(i).isPause() && list.get(i + 1).isPause()) {
+          iPauseBegin = i;
+          iPauseEnd = ++i;
+          // debut de pause recherche fin pause
+          for (; i < size; i++) {
+            if (!list.get(i).isPause()) {
+              iPauseEnd = i - 1;
+              break;
+            }
+          }
+          timePause += (list.get(iPauseEnd).getTime().getTime() - list
+              .get(iPauseBegin).getTime().getTime()) / 10;
+          iPauseBegin = -1;
+          iPauseEnd = -1;
+        }
+      }
+    }
+    return timePause;
   }
 
   /**
