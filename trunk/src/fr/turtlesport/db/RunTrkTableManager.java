@@ -270,12 +270,12 @@ public final class RunTrkTableManager extends AbstractTableManager {
       st.append("SELECT * FROM ");
       st.append(getTableName());
       st.append(" WHERE id=?");
-      st.append(" AND distance <> ?");
-      st.append(" ORDER BY distance");
+      //st.append(" AND distance <> ?");
+      st.append(" ORDER BY time");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       pstmt.setInt(1, idRun);
-      pstmt.setFloat(2, 1.0e25f);
+      //pstmt.setFloat(2, 1.0e25f);
 
       DataRunTrk trk;
       ResultSet rs = pstmt.executeQuery();
@@ -581,6 +581,49 @@ public final class RunTrkTableManager extends AbstractTableManager {
 
     log.debug("<<altitude");
     return res;
+  }
+  
+  //
+  /**
+   * Restitue le dernier point d'un run.
+   * 
+   * @param idRun
+   * @return
+   * @throws SQLException
+   */
+  public DataRunTrk getLastTrk(int idRun) throws SQLException {
+
+    Connection conn = DatabaseManager.getConnection();
+
+    DataRunTrk trk = null;
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT * FROM ");
+      st.append(getTableName());
+      st.append(" WHERE id=?");
+      st.append(" ORDER BY time DESC");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, idRun);
+ 
+      ResultSet rs = pstmt.executeQuery();
+      if (rs.next()) {
+        trk = new DataRunTrk();
+
+        trk.setId(rs.getInt(1));
+        trk.setLatitude(rs.getInt(2));
+        trk.setLongitude(rs.getInt(3));
+        trk.setTime(rs.getTimestamp(4));
+        trk.setAltitude(rs.getFloat(5));
+        trk.setDistance(rs.getFloat(6));
+        trk.setHeartRate(rs.getInt(7));
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+    
+    return trk;
   }
 
   private int[] computeAltitude(ResultSet rs) throws SQLException {

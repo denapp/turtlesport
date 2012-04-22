@@ -1496,17 +1496,22 @@ public class MainGui extends JFrame implements LanguageListener {
               deviceSelected = selectDevice(devices);
           }
 
-          if (deviceSelected instanceof GarminUsbDevice) {
-            doUsbDevice();
-          }
-          else if (deviceSelected instanceof GarminFitDevice) {
-            GarminFitDevice fitDevice = (GarminFitDevice) deviceSelected;
+          if (deviceSelected != null) {
+            Configuration.getConfig()
+                .addProperty("DeviceGPS",
+                             Integer.toString(getCurrentIdUser()),
+                             deviceSelected.toString());
+            if (deviceSelected instanceof GarminUsbDevice) {
+              doUsbDevice();
+            }
+            else if (deviceSelected instanceof GarminFitDevice) {
+              GarminFitDevice fitDevice = (GarminFitDevice) deviceSelected;
 
-            List<File> list = fitDevice.getNewTcxFiles();
-            File[] files = new File[list.size()];
-            JDialogImport.prompt(list.toArray(files));
+              List<File> list = fitDevice.getNewTcxFiles();
+              File[] files = new File[list.size()];
+              JDialogImport.prompt(list.toArray(files));
+            }
           }
-
           return null;
         }
 
@@ -1516,9 +1521,9 @@ public class MainGui extends JFrame implements LanguageListener {
         }
 
         private IGarminDevice selectDevice(List<IGarminDevice> devices) {
+          String name = Configuration.getConfig()
+              .getProperty("DeviceGPS", Integer.toString(getCurrentIdUser()));
 
-          String name = Configuration.getConfig().getProperty("DeviceGPS",
-                                                              "lastused");
           IGarminDevice defaultDevice = devices.get(0);
           for (IGarminDevice d : devices) {
             if (d.toString().equals(name)) {
@@ -1533,21 +1538,12 @@ public class MainGui extends JFrame implements LanguageListener {
           final String titleChooseWatch = rb.getString("titleChooseWatch");
           final IGarminDevice[] options = new IGarminDevice[devices.size()];
           devices.toArray(options);
-          IGarminDevice selected = (IGarminDevice) JShowMessage
+          return (IGarminDevice) JShowMessage
               .input(msgChooseWatch,
                      titleChooseWatch,
                      JOptionPane.INFORMATION_MESSAGE,
                      options,
                      defaultDevice);
-
-          if (selected != null) {
-            Configuration.getConfig().addProperty("DeviceGPS",
-                                                  "lastused",
-                                                  selected.toString());
-
-          }
-
-          return selected;
         }
 
         private void doUsbDevice() {

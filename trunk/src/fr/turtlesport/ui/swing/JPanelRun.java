@@ -119,9 +119,17 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JLabel                  jLabelLibTimeTot;
 
+  private JLabel                  jLabelValTimeTot;
+
   private JLabel                  jLabelValDistTot;
 
-  private JLabel                  jLabelValTimeTot;
+  private JLabel                  jLabelLibTimePauseTot;
+
+  private JLabel                  jLabelValTimePauseTot;
+
+  private JLabel                  jLabelLibTimeMovingTot;
+
+  private JLabel                  jLabelValTimeMovingTot;
 
   private JLabel                  jLabelValAllure;
 
@@ -338,6 +346,14 @@ public class JPanelRun extends JPanel implements LanguageListener,
     return jLabelValTimeTot;
   }
 
+  public JLabel getJLabelValTimePauseTot() {
+    return jLabelValTimePauseTot;
+  }
+
+  public JLabel getJLabelValTimeMovingTot() {
+    return jLabelValTimeMovingTot;
+  }
+
   public JLabel getJLabelValAlt() {
     return jLabelValAlt;
   }
@@ -455,7 +471,9 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jButtonEmail.setToolTipText(rb.getString("jButtonEmailToolTipText"));
     }
     jLabelLibDistTot.setText(rb.getString("jLabelLibDistTot"));
+    jLabelLibTimeMovingTot.setText(rb.getString("jLabelLibTimeMovingTot"));
     jLabelLibTimeTot.setText(rb.getString("jLabelLibTimeTot"));
+    jLabelLibTimePauseTot.setText(rb.getString("jLabelLibTimePauseTot"));
     jLabelLibAllure.setText(rb.getString("jLabelLibAllure"));
     jLabelLibSpeedMoy.setText(rb.getString("jLabelLibSpeedMoy"));
     jLabelLibCalories.setText(rb.getString("jLabelLibCalories"));
@@ -962,7 +980,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
                              null);
       jTabbedPaneRace.addTab("Speed", getJPanelChartSpeed());
       jTabbedPaneRace.addTab("Meteo", getJPanelMeteo());
-      jTabbedPaneRace.setPreferredSize(new Dimension(200, 320));
+      jTabbedPaneRace.setPreferredSize(new Dimension(200, 370));
     }
     return jTabbedPaneRace;
   }
@@ -1048,7 +1066,53 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibTimeTot.setLabelFor(jLabelValTimeTot);
       jPanelRunSummary.add(jLabelValTimeTot, g);
 
+      // Ligne 2
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibTimeMovingTot = new JLabel();
+      jLabelLibTimeMovingTot.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimeMovingTot.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelLibTimeMovingTot, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      jLabelValTimeMovingTot = new JLabel();
+      jLabelValTimeMovingTot.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimeMovingTot.setLabelFor(jLabelLibTimeMovingTot);
+      jPanelRunSummary.add(jLabelValTimeMovingTot, g);
+
       // Ligne 3
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibTimePauseTot = new JLabel();
+      jLabelLibTimePauseTot.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimePauseTot.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelLibTimePauseTot, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      jLabelValTimePauseTot = new JLabel();
+      jLabelValTimePauseTot.setFont(GuiFont.FONT_PLAIN);
+      jLabelValTimePauseTot.setLabelFor(jLabelLibTimePauseTot);
+      jPanelRunSummary.add(jLabelValTimePauseTot, g);
+
+      // Ligne 4
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.weighty = 1.0;
@@ -1071,7 +1135,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibAllure.setLabelFor(jLabelValAllure);
       jPanelRunSummary.add(jLabelValAllure, g);
 
-      // Ligne 4
+      // Ligne 5
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.weighty = 1.0;
@@ -1094,7 +1158,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibSpeedMoy.setLabelFor(jLabelValSpeedMoy);
       jPanelRunSummary.add(jLabelValSpeedMoy, g);
 
-      // Ligne 5
+      // Ligne 6
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.weighty = 1.0;
@@ -1117,7 +1181,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibCalories.setLabelFor(jLabelValCalories);
       jPanelRunSummary.add(jLabelValCalories, g);
 
-      // Ligne 6
+      // Ligne 7
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.weighty = 1.0;
@@ -1141,7 +1205,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibHeart.setLabelFor(jLabelValHeartAverage);
       jPanelRunSummary.add(jLabelValHeartAverage, g);
 
-      // Ligne 7
+      // Ligne 8
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.weighty = 1.0;
@@ -1164,7 +1228,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibAlt.setLabelFor(jLabelValAlt);
       jPanelRunSummary.add(jLabelValAlt, g);
 
-      // Ligne 8
+      // Ligne 9
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
@@ -1186,7 +1250,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibActivity.setLabelFor(jComboBoxActivity);
       jPanelRunSummary.add(jComboBoxActivity, g);
 
-      // Ligne 9
+      // Ligne 10
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
@@ -1208,7 +1272,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibEquipment.setLabelFor(jComboBoxEquipment);
       jPanelRunSummary.add(jComboBoxEquipment, g);
 
-      // Ligne 10
+      // Ligne 11
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
@@ -1845,16 +1909,34 @@ public class JPanelRun extends JPanel implements LanguageListener,
               .formatMetersInKm(runLaps[rowIndex].getTotalDist());
 
         case 1: // Temps
-          return TimeUnit.formatHundredSecondeTime(runLaps[rowIndex]
-              .getTotalTime());
-
+          try {
+            return TimeUnit.formatHundredSecondeTime(runLaps[rowIndex]
+                .getMovingTotalTime());
+          }
+          catch (SQLException e) {
+            return TimeUnit.formatHundredSecondeTime(runLaps[rowIndex]
+                                                             .getTotalTime());
+          }
         case 2: // Allure Moy.
-          return PaceUnit.computeAllure(runLaps[rowIndex].getTotalDist(),
-                                        runLaps[rowIndex].getTotalTime());
+          try {
+            return PaceUnit.computeAllure(runLaps[rowIndex].getTotalDist(),
+                                          runLaps[rowIndex]
+                                              .getMovingTotalTime());
+          }
+          catch (SQLException e) {
+            return PaceUnit.computeAllure(runLaps[rowIndex].getTotalDist(),
+                                          runLaps[rowIndex].getTotalTime());
+          }
 
         case 3: // Vitesse Moy.
-          return SpeedPaceUnit.computeFormatSpeed(runLaps[rowIndex]
-              .getTotalDist(), runLaps[rowIndex].getTotalTime());
+          try {
+            return SpeedPaceUnit.computeFormatSpeed(runLaps[rowIndex]
+                .getTotalDist(), runLaps[rowIndex].getMovingTotalTime());
+          }
+          catch (SQLException e) {
+            return SpeedPaceUnit.computeFormatSpeed(runLaps[rowIndex]
+                .getTotalDist(), runLaps[rowIndex].getTotalTime());
+          }
 
         case 4: // Frequence cardiaque moy.
           return runLaps[rowIndex].getAvgHeartRate();

@@ -40,9 +40,17 @@ public class JPanelRunLap extends JPanel {
 
   private JLabel         jLabelValDistanceLap;
 
-  private JLabel         jLabelValTimeLap;
+  private JLabel         jLabelValTimeTotLap;
 
-  private JLabel         jLabelLibTimeLap;
+  private JLabel         jLabelLibTimeTotLap;
+
+  private JLabel         jLabelLibTimePauseLap;
+
+  private JLabel         jLabelValTimePauseLap;
+
+  private JLabel         jLabelLibTimeMovingLap;
+
+  private JLabel         jLabelValTimeMovingLap;
 
   private JLabel         jLabelLibPaceLap;
 
@@ -75,6 +83,14 @@ public class JPanelRunLap extends JPanel {
   private JLabel         jLabelLibTimeTot;
 
   private JLabel         jLabelValTimeTot;
+
+  private JLabel         jLabelLibTimePauseTot;
+
+  private JLabel         jLabelValTimePauseTot;
+
+  private JLabel         jLabelLibTimeMovingTot;
+
+  private JLabel         jLabelValTimeMovingTot;
 
   private JLabel         jLabelLibAllureTot;
 
@@ -151,8 +167,16 @@ public class JPanelRunLap extends JPanel {
     return jLabelValDistanceLap;
   }
 
-  public JLabel getJLabelValTimeLap() {
-    return jLabelValTimeLap;
+  public JLabel getJLabelValTimeTotLap() {
+    return jLabelValTimeTotLap;
+  }
+
+  public JLabel getjLabelValTimePauseLap() {
+    return jLabelValTimePauseLap;
+  }
+
+  public JLabel getjLabelValTimeMovingLap() {
+    return jLabelValTimeMovingLap;
   }
 
   public JLabel getJLabelValPaceLap() {
@@ -181,6 +205,14 @@ public class JPanelRunLap extends JPanel {
 
   public JLabel getJLabelValTimeTot() {
     return jLabelValTimeTot;
+  }
+
+  public JLabel getjLabelValTimePauseTot() {
+    return jLabelValTimePauseTot;
+  }
+
+  public JLabel getjLabelValTimeMovingTot() {
+    return jLabelValTimeMovingTot;
   }
 
   public JLabel getJLabelValAllureTot() {
@@ -296,6 +328,52 @@ public class JPanelRunLap extends JPanel {
       jLabelValTimeTot.setFont(GuiFont.FONT_PLAIN);
       jLabelLibTimeTot.setLabelFor(jLabelValTimeTot);
       jPanelRunSummary.add(jLabelValTimeTot, g);
+
+      // Ligne 2
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibTimeMovingTot = new JLabel(rb.getString("jLabelLibTimeMovingTot"));
+      jLabelLibTimeMovingTot.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimeMovingTot.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelLibTimeMovingTot, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      jLabelValTimeMovingTot = new JLabel();
+      jLabelValTimeMovingTot.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimeMovingTot.setLabelFor(jLabelLibTimeMovingTot);
+      jPanelRunSummary.add(jLabelValTimeMovingTot, g);
+
+      // Ligne 3
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibTimePauseTot = new JLabel(rb.getString("jLabelLibTimePauseTot"));
+      jLabelLibTimePauseTot.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimePauseTot.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelLibTimePauseTot, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      jLabelValTimePauseTot = new JLabel();
+      jLabelValTimePauseTot.setFont(GuiFont.FONT_PLAIN);
+      jLabelValTimePauseTot.setLabelFor(jLabelLibTimePauseTot);
+      jPanelRunSummary.add(jLabelValTimePauseTot, g);
 
       // Ligne 3
       g = new GridBagConstraints();
@@ -613,11 +691,11 @@ public class JPanelRunLap extends JPanel {
       g.anchor = GridBagConstraints.EAST;
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
-      jLabelLibTimeLap = new JLabel();
-      jLabelLibTimeLap.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibTimeLap.setText(rb.getString("jLabelLibTimeLap"));
-      jLabelLibTimeLap.setHorizontalAlignment(SwingConstants.TRAILING);
-      jPanelRunLap.add(jLabelLibTimeLap, g);
+      jLabelLibTimeTotLap = new JLabel();
+      jLabelLibTimeTotLap.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimeTotLap.setText(rb.getString("jLabelLibTimeTot"));
+      jLabelLibTimeTotLap.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunLap.add(jLabelLibTimeTotLap, g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
       g.weighty = 1.0;
@@ -625,10 +703,58 @@ public class JPanelRunLap extends JPanel {
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
-      jLabelValTimeLap = new JLabel();
-      jLabelValTimeLap.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibTimeLap.setLabelFor(jLabelValTimeLap);
-      jPanelRunLap.add(jLabelValTimeLap, g);
+      jLabelValTimeTotLap = new JLabel();
+      jLabelValTimeTotLap.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimeTotLap.setLabelFor(jLabelValTimeTotLap);
+      jPanelRunLap.add(jLabelValTimeTotLap, g);
+
+      // Ligne 5
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibTimePauseLap = new JLabel();
+      jLabelLibTimePauseLap.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimePauseLap.setText(rb.getString("jLabelLibTimePauseTot"));
+      jLabelLibTimePauseLap.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunLap.add(jLabelLibTimePauseLap, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      jLabelValTimePauseLap = new JLabel();
+      jLabelValTimePauseLap.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimePauseLap.setLabelFor(jLabelValTimePauseLap);
+      jPanelRunLap.add(jLabelValTimePauseLap, g);
+
+      // Ligne 5
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibTimeMovingLap = new JLabel();
+      jLabelLibTimeMovingLap.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimeMovingLap.setText(rb.getString("jLabelLibTimeMovingTot"));
+      jLabelLibTimeMovingLap.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunLap.add(jLabelLibTimeMovingLap, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      jLabelValTimeMovingLap = new JLabel();
+      jLabelValTimeMovingLap.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibTimeMovingLap.setLabelFor(jLabelValTimeMovingLap);
+      jPanelRunLap.add(jLabelValTimeMovingLap, g);
 
       // Ligne 6
       g = new GridBagConstraints();

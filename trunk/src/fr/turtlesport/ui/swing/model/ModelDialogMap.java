@@ -98,21 +98,30 @@ public class ModelDialogMap {
       view.getJPanelRight().getJLabelValDistanceLap()
           .setText(DistanceUnit.formatMetersInKm(lap.getTotalDist()));
 
+      // Temps Total
+      view.getJPanelRight().getJLabelValTimeTotLap()
+          .setText(TimeUnit.formatHundredSecondeTime(lap.getRealTotalTime()));
+
       // Temps
-      view.getJPanelRight().getJLabelValTimeLap()
-          .setText(TimeUnit.formatHundredSecondeTime(lap.getTotalTime()));
+      view.getJPanelRight().getjLabelValTimeMovingLap()
+          .setText(TimeUnit.formatHundredSecondeTime(lap.getMovingTotalTime()));
+
+      // Temps de pause
+      view.getJPanelRight()
+          .getjLabelValTimePauseLap()
+          .setText(TimeUnit.formatHundredSecondeTime(lap.computeTimePauseTot()));
 
       // Allure moy.
       view.getJPanelRight()
           .getJLabelValPaceLap()
           .setText(PaceUnit.computeAllure(lap.getTotalDist(),
-                                          lap.getTotalTime()));
+                                          lap.getMovingTotalTime()));
 
       // Vitesse Moy.
       view.getJPanelRight()
           .getJLabelValSpeedLap()
           .setText(SpeedPaceUnit.computeFormatSpeedWithUnit(lap.getTotalDist(),
-                                                            lap.getTotalTime()));
+                                                            lap.getMovingTotalTime()));
 
       // Frequence cardiaque
       view.getJPanelRight()
@@ -141,9 +150,11 @@ public class ModelDialogMap {
     view.getJPanelRight().getjLabelValDateTime().setText("");
     view.getJPanelRight().getJLabelValDayLap().setText("");
     view.getJPanelRight().getJLabelValHourLap().setText("");
-    view.getJPanelRight().getJLabelValTimeLap().setText("");
+    view.getJPanelRight().getJLabelValTimeTotLap().setText("");
+    view.getJPanelRight().getjLabelValTimeMovingLap().setText("");
+    view.getJPanelRight().getjLabelValTimePauseLap().setText("");
     view.getJPanelRight().getJLabelValDistanceLap().setText("");
-    view.getJPanelRight().getJLabelValTimeLap().setText("");
+    view.getJPanelRight().getJLabelValTimeTotLap().setText("");
     view.getJPanelRight().getJLabelValPaceLap().setText("");
     view.getJPanelRight().getJLabelValSpeedLap().setText("");
     view.getJPanelRight().getJLabelValHeartLap().setText("");
@@ -178,9 +189,21 @@ public class ModelDialogMap {
     view.getJPanelRight().getJLabelValDistTot()
         .setText(DistanceUnit.formatWithUnit(dataRun.getComputeDistanceTot()));
 
+    // Temps tot
+    view.getJPanelRight()
+        .getJLabelValTimeTot()
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun
+            .computeTimePauseTot() + dataRun.computeTimeTot()));
+
     // Temps
-    view.getJPanelRight().getJLabelValTimeTot()
+    view.getJPanelRight().getjLabelValTimeMovingTot()
         .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
+
+    // Temps pause
+    view.getJPanelRight()
+        .getjLabelValTimePauseTot()
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun
+            .computeTimePauseTot()));
 
     // vitesse moyenne
     view.getJPanelRight()
@@ -225,8 +248,7 @@ public class ModelDialogMap {
         .setText(dataRun.getEquipement());
 
     // Location
-    view.getJPanelRight().getjLabelValLocation()
-        .setText(dataRun.getLocation());
+    view.getJPanelRight().getjLabelValLocation().setText(dataRun.getLocation());
 
     log.info("<<updateSummary");
   }

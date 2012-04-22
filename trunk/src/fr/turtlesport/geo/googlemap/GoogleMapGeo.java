@@ -338,11 +338,11 @@ public class GoogleMapGeo implements IGeoConvertRun {
             }
 
             String dist = DistanceUnit.formatMetersInKm(lap.getTotalDist());
-            String time = TimeUnit.formatHundredSecondeTime(lap.getTotalTime());
+            String time = TimeUnit.formatHundredSecondeTime(lap.getMovingTotalTime());
             String speed = SpeedPaceUnit.computeFormatSpeed(lap.getTotalDist(),
-                                                            lap.getTotalTime());
+                                                            lap.getMovingTotalTime());
             String allure = PaceUnit.computeAllure(lap.getTotalDist(),
-                                                   lap.getTotalTime());
+                                                   lap.getRealTotalTime());
             String lineLap = new String(line);
             writer.write(MessageFormat.format(lineLap,
                                               time,

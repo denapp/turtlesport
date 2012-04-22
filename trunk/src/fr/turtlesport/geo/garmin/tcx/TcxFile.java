@@ -367,8 +367,6 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     writeln(writer);
     writer.write("<Id>");
     writer.write(timeFormat.format(data.getTime()));
-
-    // writer.write(getTimeFormat().format(data.getTime()));
     writer.write("</Id>");
     writeln(writer);
 
@@ -523,31 +521,30 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
                      + getDecimalFormat().format(longitude)
                      + "</LongitudeDegrees>");
         writer.write("</Position>");
-        // Altitude
-        if (point.isValidAltitude()) {
-          writer.write("<AltitudeMeters>"
-                       + getDecimalFormat().format(point.getAltitude())
-                       + "</AltitudeMeters>");
-        }
-        // DistanceMeters
-        writer.write("<DistanceMeters>"
-                     + getDecimalFormat().format(point.getDistance())
-                     + "</DistanceMeters>");
-        // HeartRateBpm
-        if (point.getHeartRate() > 0) {
-          writer
-              .write("<HeartRateBpm xsi:type=\"HeartRateInBeatsPerMinute_t\">");
-          writer.write("<Value>" + point.getHeartRate() + "</Value>");
-          writer.write("</HeartRateBpm>");
-          writer.write("<SensorState>Present</SensorState>");
-        }
-        else {
-          writer.write("<SensorState>Absent</SensorState>");
-        }
-        // Cadence
-        if (point.isValidCadence()) {
-          writer.write("<Cadence>" + point.getCadence() + "</Cadence>");
-        }
+      }
+      // Altitude
+      if (point.isValidAltitude()) {
+        writer.write("<AltitudeMeters>"
+                     + getDecimalFormat().format(point.getAltitude())
+                     + "</AltitudeMeters>");
+      }
+      // DistanceMeters
+      writer.write("<DistanceMeters>"
+                   + getDecimalFormat().format(point.getDistance())
+                   + "</DistanceMeters>");
+      // HeartRateBpm
+      if (point.getHeartRate() > 0) {
+        writer.write("<HeartRateBpm xsi:type=\"HeartRateInBeatsPerMinute_t\">");
+        writer.write("<Value>" + point.getHeartRate() + "</Value>");
+        writer.write("</HeartRateBpm>");
+        writer.write("<SensorState>Present</SensorState>");
+      }
+      else {
+        writer.write("<SensorState>Absent</SensorState>");
+      }
+      // Cadence
+      if (point.isValidCadence()) {
+        writer.write("<Cadence>" + point.getCadence() + "</Cadence>");
       }
     }
 
@@ -559,7 +556,11 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     log.debug(">>writeLap");
 
     // recuperation des points du tour
-    Date dateEnd = new Date(l.getStartTime().getTime() + l.getTotalTime() * 10);
+    // Date dateEnd = new Date(l.getStartTime().getTime() + l.getTotalTime() *
+    // 10);
+    Date dateEnd = new Date(l.getStartTime().getTime()
+                            + (l.getRealTotalTime() * 10));
+
     DataRunTrk[] trks = RunTrkTableManager.getInstance()
         .getTrks(data.getId(), l.getStartTime(), dateEnd);
 
@@ -578,7 +579,7 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     writeln(writer);
 
     // TotalTimeSeconds
-    double totalTime = l.getTotalTime() / 100.0;
+    double totalTime = l.getRealTotalTime() / 100.0;
     writer.write("<TotalTimeSeconds>" + getDecimalFormat().format(totalTime)
                  + "</TotalTimeSeconds>");
     // DistanceMeters
@@ -615,28 +616,35 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     // Track
     writeln(writer);
     writer.write("<Track>");
-    DataRunTrk trkPause = null;
-    for (DataRunTrk t : trks) {
-      if (t.isPause()) {
-        if (trkPause == null) {
-          writeln(writer);
-          writeTrkPoint(writer, t);
-          trkPause = t;
-        }
-      }
-      else {
-        if (trkPause != null) {
-          writeln(writer);
-          writeTrkPoint(writer, trkPause);
-          trkPause = null;
+
+    // 2 points consecutifs = pause
+    int iPauseBegin = -1;
+    int iPauseEnd = -1;
+    int size = trks.length - 1;
+    for (int i = 0; i < size; i++) {
+      if (trks[i].isPause() && trks[i + 1].isPause()) {
+        iPauseBegin = i;
+        iPauseEnd = ++i;
+        // debut de pause recherche fin pause
+        for (; i < size; i++) {
+          if (!trks[i].isPause()) {
+            iPauseEnd = i - 1;
+            break;
+          }
         }
         writeln(writer);
-        writeTrkPoint(writer, t);
+        writeTrkPoint(writer, trks[iPauseBegin]);
+        if (iPauseEnd != -1) {
+          writeln(writer);
+          writeTrkPoint(writer, trks[iPauseEnd]);
+        }
+        iPauseBegin = -1;
+        iPauseEnd = -1;
       }
-    }
-    if (trkPause != null) {
-      writeln(writer);
-      writeTrkPoint(writer, trkPause);
+      else {
+        writeln(writer);
+        writeTrkPoint(writer, trks[i]);
+      }
     }
 
     writeln(writer);

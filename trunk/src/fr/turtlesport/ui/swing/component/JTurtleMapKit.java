@@ -514,7 +514,7 @@ public class JTurtleMapKit extends JXPanel {
       setOriginalZoom(mainMap.getZoom());
       setOriginalPosition(mainMap.getCenterPosition());
 
-      final GeoPosition[] tab = new GeoPosition[listGeoMap.size()];
+      final GeoPositionMapKit[] tab = new GeoPositionMapKit[listGeoMap.size()];
       listGeoMap.toArray(tab);
 
       mainMap.setOverlayPainter(new Painter<JXMapViewer>() {
@@ -532,11 +532,18 @@ public class JTurtleMapKit extends JXPanel {
               .getGeoPositionLapDeb();
           GeoPosition lapEnd = ModelPointsManager.getInstance()
               .getGeoPositionLapEnd();
+
+          int current = ModelMapkitManager.getInstance()
+              .getMapIndexCurrentPoint();
+          GeoPosition geoCurrentPoint = null;
           for (int i = 0; i < tab.length - 1; i++) {
+            if (current != -1 && current == tab[i].getIndex()) {
+              geoCurrentPoint = tab[i];
+            }
             Point2D p1 = map.getTileFactory().geoToPixel(tab[i], map.getZoom());
             Point2D p2 = map.getTileFactory().geoToPixel(tab[i + 1],
                                                          map.getZoom());
-            if (lapDeb != null) {
+            if (lapDeb != null && lapEnd != null) {
               if (lapDeb.equals(tab[i])) {
                 deb = i;
               }
@@ -556,6 +563,7 @@ public class JTurtleMapKit extends JXPanel {
           }
 
           if (ModelPointsManager.getInstance().getGeoPositionLapDeb() != null
+              && ModelPointsManager.getInstance().getGeoPositionLapEnd() != null
               && end == -1
               && ModelPointsManager.getInstance().getGeoPositionLapEnd()
                   .equals(tab[tab.length - 1])) {
@@ -600,10 +608,8 @@ public class JTurtleMapKit extends JXPanel {
 
           // currentPoint
           p = null;
-          int current = ModelMapkitManager.getInstance()
-              .getMapIndexCurrentPoint();
-          if (current != -1) {
-            p = map.getTileFactory().geoToPixel(tab[current], map.getZoom());
+          if (geoCurrentPoint != null) {
+            p = map.getTileFactory().geoToPixel(geoCurrentPoint, map.getZoom());
             g2.setColor(Color.RED);
             g2.fillOval((int) p.getX() - 3, (int) p.getY() - 3, 6, 6);
           }
