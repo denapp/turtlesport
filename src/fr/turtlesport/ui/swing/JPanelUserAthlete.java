@@ -1,6 +1,7 @@
 package fr.turtlesport.ui.swing;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -207,8 +208,10 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
                                                      Float.TYPE);
       jTextFieldHeight.getDocument().addDocumentListener(docLstUserHeight);
 
-      docLstUserBirthDate = new GenericModelDocListener(jXDatePicker
-          .getEditor(), data, "setBirthDate", Date.class);
+      docLstUserBirthDate = new GenericModelDocListener(jXDatePicker.getEditor(),
+                                                        data,
+                                                        "setBirthDate",
+                                                        Date.class);
 
       focusListenerWeight = new FocusAdapter() {
         @Override
@@ -286,8 +289,8 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
     jTextFieldMinHeartRate.getDocument()
         .removeDocumentListener(docLstUserMinHeartRate);
 
-    // jTextFieldBirthDate.getDocument()
-    // .removeDocumentListener(docLstUserBirthDate);
+    jXDatePicker.getEditor().getDocument()
+        .removeDocumentListener(docLstUserBirthDate);
     jButtonPhoto.removePhotoListener(photoListener);
     jRadioButtonMale.removeActionListener(actionListenerMale);
     jRadioButtonFemale.removeActionListener(actionListenerFemale);
@@ -417,25 +420,33 @@ public class JPanelUserAthlete extends JPanel implements LanguageListener,
     g.anchor = GridBagConstraints.WEST;
     this.add(getJDatePicker(), g);
     jLabelLibBirthday.setLabelFor(getJDatePicker());
+
+    JPanel panelSex = new JPanel();
+    panelSex.setLayout(new FlowLayout());
     jLabelLibSexe = new JLabel("Sexe :");
     jLabelLibSexe.setHorizontalAlignment(SwingConstants.LEFT);
     jLabelLibSexe.setFont(GuiFont.FONT_PLAIN);
+    panelSex.add(jLabelLibSexe);
+    // g = new GridBagConstraints();
+    // g.fill = GridBagConstraints.HORIZONTAL;
+    // g.insets = insets1;
+    // g.weightx = 0.0;
+    // this.add(jLabelLibSexe, g);
+    // g = new GridBagConstraints();
+    // g.insets = insets1;
+    // g.weightx = 0.0;
+    // g.anchor = GridBagConstraints.WEST;
+    // g.gridwidth = GridBagConstraints.RELATIVE;
+    // this.add(getJRadioButtonMale(), g);
+    panelSex.add(getJRadioButtonMale());
     g = new GridBagConstraints();
-    g.insets = insets1;
-    g.weightx = 0.0;
-    g.anchor = GridBagConstraints.WEST;
-    this.add(jLabelLibSexe, g);
-    g = new GridBagConstraints();
-    g.insets = insets1;
-    g.weightx = 0.0;
-    g.anchor = GridBagConstraints.WEST;
-    g.gridwidth = GridBagConstraints.RELATIVE;
-    this.add(getJRadioButtonMale(), g);
     g.insets = insets1;
     g.weightx = 0.0;
     g.anchor = GridBagConstraints.WEST;
     g.gridwidth = GridBagConstraints.REMAINDER;
-    this.add(getJRadioButtonFemale(), g);
+    // this.add(getJRadioButtonFemale(), g);
+    panelSex.add(getJRadioButtonFemale());
+    this.add(panelSex, g);
 
     // Poids
     jLabelLibWeight = new JLabel("Poids :");
