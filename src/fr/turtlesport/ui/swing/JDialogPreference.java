@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Enumeration;
 import java.util.ResourceBundle;
 
 import javax.swing.JButton;
@@ -55,6 +56,8 @@ public class JDialogPreference extends JDialog implements LanguageListener {
   private ModelPref      modelPrefMail;
 
   private ModelPref      modelPrefUnit;
+
+  private ModelPref      modelPrefTracks;
 
   private ModelPref      modelPrefGoogleEarth;
 
@@ -150,23 +153,23 @@ public class JDialogPreference extends JDialog implements LanguageListener {
     setTitle(rb.getString("title"));
     jButtonOK.setText(lang.ok());
     jButtonCancel.setText(lang.cancel());
-
     rb = ResourceBundleUtility.getBundle(lang, ModelPref.class);
+
     modelPrefGen.setTitle(rb.getString("modelPrefGen"));
+    modelPrefUnit.setTitle(rb.getString("modelPrefUnit"));
+    modelPrefTracks.setTitle(rb.getString("modelPrefTracks"));
     if (GoogleEarthFactory.getDefault().isConfigurable()) {
       modelPrefGoogleEarth.setTitle(rb.getString("modelPrefGoogleEarth"));
     }
-    modelPrefUnit.setTitle(rb.getString("modelPrefUnit"));
     if (Mail.isConfigurable()) {
       modelPrefMail.setTitle(rb.getString("modelPrefMail"));
     }
     modelPrefMap.setTitle(rb.getString("modelPrefMap"));
     modelPrefProxy.setTitle(rb.getString("modelPrefProxy"));
-
-    jTreePref.revalidate();
-    jTreePref.repaint();
+    
+    jTreePref.updateUI();
   }
-
+  
   /*
    * (non-Javadoc)
    * 
@@ -200,6 +203,10 @@ public class JDialogPreference extends JDialog implements LanguageListener {
     modelPrefUnit = new ModelPref("UnitesfqsfqSFQSffqsfqSF",
                                   JPanelPrefUnits.class);
     jTreePref.addObject(node, modelPrefUnit);
+
+    modelPrefTracks = new ModelPref("UnitesfqsfqSFQSffqsfqSF",
+                                    JPanelPrefTracks.class);
+    jTreePref.addObject(node, modelPrefTracks);
 
     if (GoogleEarthFactory.getDefault().isConfigurable()) {
       modelPrefGoogleEarth = new ModelPref("Google EarthFQSfqSF",
