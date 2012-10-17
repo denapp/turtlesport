@@ -58,6 +58,10 @@ public class GoogleMapGeo implements IGeoConvertRun {
 
   private static final String  TIME_TOT        = "#TIME_TOT#";
 
+  private static final String  TIME_MOVING     = "#TIME_MOVING#";
+
+  private static final String  TIME_PAUSE      = "#TIME_PAUSE#";
+
   private static final String  AVG_ALL         = "#AVG_ALL#";
 
   private static final String  AVG_SPEED       = "#AVG_SPEED#";
@@ -160,6 +164,12 @@ public class GoogleMapGeo implements IGeoConvertRun {
         else if (line.startsWith(TIME_TOT)) {
           timeTot(dataRun, rb, writer, line);
         }
+        else if (line.startsWith(TIME_MOVING)) {
+          timeMoving(dataRun, rb, writer, line);
+        }
+        else if (line.startsWith(TIME_PAUSE)) {
+          timePause(dataRun, rb, writer, line);
+        }
         else if (line.startsWith(AVG_ALL)) {
           avgAll(dataRun, rb, writer, line);
         }
@@ -234,6 +244,39 @@ public class GoogleMapGeo implements IGeoConvertRun {
     writer.write(MessageFormat.format(line, rb.getString("TIME_TOT"), TimeUnit
         .formatHundredSecondeTime(dataRun.computeTimeTot())));
     writer.write("\r\n");
+  }
+
+  private void timeMoving(DataRun dataRun,
+                          ResourceBundle rb,
+                          BufferedWriter writer,
+                          String line) throws IOException, SQLException {
+    if (dataRun.computeTimePauseTot() > 0) {
+      line = line.substring(TIME_MOVING.length());
+      writer
+          .write(MessageFormat.format(line,
+                                      rb.getString("TIME_MOVING"),
+                                      TimeUnit.formatHundredSecondeTime(dataRun
+                                          .computeTimeTot()
+                                                                        - dataRun
+                                                                            .computeTimePauseTot())));
+      writer.write("\r\n");
+    }
+  }
+
+  private void timePause(DataRun dataRun,
+                         ResourceBundle rb,
+                         BufferedWriter writer,
+                         String line) throws IOException, SQLException {
+    if (dataRun.computeTimePauseTot() > 0) {
+
+      line = line.substring(TIME_PAUSE.length());
+      writer.write(MessageFormat.format(line,
+                                        rb.getString("TIME_PAUSE"),
+                                        TimeUnit
+                                            .formatHundredSecondeTime(dataRun
+                                                .computeTimePauseTot())));
+      writer.write("\r\n");
+    }
   }
 
   private void avgAll(DataRun dataRun,
@@ -338,9 +381,11 @@ public class GoogleMapGeo implements IGeoConvertRun {
             }
 
             String dist = DistanceUnit.formatMetersInKm(lap.getTotalDist());
-            String time = TimeUnit.formatHundredSecondeTime(lap.getMovingTotalTime());
-            String speed = SpeedPaceUnit.computeFormatSpeed(lap.getTotalDist(),
-                                                            lap.getMovingTotalTime());
+            String time = TimeUnit.formatHundredSecondeTime(lap
+                .getMovingTotalTime());
+            String speed = SpeedPaceUnit
+                .computeFormatSpeed(lap.getTotalDist(),
+                                    lap.getMovingTotalTime());
             String allure = PaceUnit.computeAllure(lap.getTotalDist(),
                                                    lap.getRealTotalTime());
             String lineLap = new String(line);
