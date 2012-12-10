@@ -724,9 +724,9 @@ public final class JDialogImport extends JDialog implements
       IGeoRoute[] routes = FactoryGeoLoad.getRoutes(file);
       if (routes != null) {
         for (IGeoRoute r : routes) {
-          if (r.totalTime() < 1000) {
-            continue;
-          }
+//          if (r.totalTime() < 1000) {
+//            continue;
+//          }
           int size = listRows.size();
           TableRowObject rowObj = new TableRowObject(size, r, file);
           listRows.add(rowObj);

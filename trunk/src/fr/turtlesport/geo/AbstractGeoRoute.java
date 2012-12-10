@@ -125,6 +125,10 @@ public abstract class AbstractGeoRoute implements IGeoRoute {
     return distanceTot;
   }
 
+  public void setDistanceTot(double distanceTot) {
+    this.distanceTot = distanceTot;
+  }
+
   /*
    * (non-Javadoc)
    * 

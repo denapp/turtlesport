@@ -130,7 +130,7 @@ public final class TemperatureUnit extends Unit {
   }
 
   /**
-   * Conversion de degre vers fahrenheit.
+   * Conversion de fahrenheit vers degre.
    * 
    * @param value
    *          la valeur.

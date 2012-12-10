@@ -12,7 +12,6 @@ import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.ui.swing.component.GeoPositionMapKit;
-import fr.turtlesport.unit.DistanceUnit;
 
 /**
  * @author Denis Apparicio
@@ -148,68 +147,7 @@ public final class ModelPointsManager {
       // Les points
       listTrksOriginal = RunTrkTableManager.getInstance()
           .getAllTrks(dataRun.getId());
-      listTrks = new ArrayList<DataRunTrk>();
-
-      if (listTrksOriginal != null && listTrksOriginal.size() > 0) {
-        // recherche du premier point valide
-        int i;
-        DataRunTrk trkValid = null;
-        for (i = 0; i < listTrksOriginal.size(); i++) {
-          DataRunTrk t = listTrksOriginal.get(i);
-          if (t.isValidGps() && t.isValidDistance()) {
-            trkValid = t;
-            break;
-          }
-        }
-        if (i > 0 && i < listTrksOriginal.size()) {
-          // remplacement des premiers points invalides
-          for (int index = 0; index < i; index++) {
-            DataRunTrk d = cloneInvalid(listTrksOriginal.get(index),
-                                        trkValid,
-                                        0);
-            listTrks.add(d);
-          }
-        }
-
-        // points suivants
-        for (int index = i; index < listTrksOriginal.size(); index++) {
-          DataRunTrk t = listTrksOriginal.get(index);
-          if (t.isValidGps() && t.isValidDistance()) {
-            trkValid = t;
-            listTrks.add(t);
-          }
-          else {
-            DataRunTrk d = cloneInvalid(listTrksOriginal.get(index),
-                                        trkValid,
-                                        trkValid.getDistance());
-            listTrks.add(d);
-          }
-        }
-
-        // conversion distance
-        if (!DistanceUnit.isUnitKm(DistanceUnit.getDefaultUnit())) {
-          for (DataRunTrk t : listTrks) {
-            t.setDistance((float) DistanceUnit.convert(DistanceUnit.unitKm(),
-                                                       DistanceUnit
-                                                           .getDefaultUnit(),
-                                                       t.getDistance()));
-          }
-        }
-
-        // vitesse
-        for (int index = 0; index < listTrks.size() - 1; index++) {
-          long time = listTrks.get(index + 1).getTime().getTime()
-                      - listTrks.get(index).getTime().getTime();
-          float dist = listTrks.get(index + 1).getDistance()
-                       - listTrks.get(index).getDistance();
-
-          double speed = (time == 0) ? 0.D : (dist / time) * 3600;
-          listTrks.get(index + 1).setSpeed(speed);
-        }
-        if (listTrks.size() >= 2) {
-          listTrks.get(0).setSpeed(listTrks.get(1).getSpeed());
-        }
-      }
+      listTrks = DataRunTrk.cloneList(listTrksOriginal);
 
       // Les Laps
       runLaps = RunLapTableManager.getInstance().findLaps(dataRun.getId());

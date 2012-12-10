@@ -113,6 +113,8 @@ public final class RunLapTableManager extends AbstractTableManager {
         drl.setLapIndex(rs.getInt("lap_index"));
         drl.setStartTime(rs.getTimestamp("start_time"));
         drl.setTotalTime(rs.getInt("total_time"));
+        drl.setRealTotalTime(rs.getInt("total_time"));
+        drl.setMovingTotalTime(rs.getInt("total_moving_time"));
         drl.setTotalDist(rs.getInt("total_dist"));
         drl.setMaxSpeed(rs.getFloat("max_speed"));
         drl.setCalories(rs.getInt("calories"));
@@ -132,10 +134,13 @@ public final class RunLapTableManager extends AbstractTableManager {
           res[i].setRealTotalTime((int) time / 10);
         }
 
-        long time = RunTrkTableManager.getInstance().getLastTrk(idRun)
-            .getTime().getTime()
-                    - res[list.size() - 1].getStartTime().getTime();
-        res[list.size() - 1].setRealTotalTime((int) time / 10);
+        DataRunTrk trk = RunTrkTableManager.getInstance().getLastTrk(idRun);
+        if (trk != null && trk.getTime() != null) {
+          long time = trk.getTime().getTime()
+        	           - res[list.size() - 1].getStartTime().getTime();
+          res[list.size() - 1].setRealTotalTime((int) time / 10); 	
+        }
+       
       }
 
     }
@@ -168,6 +173,7 @@ public final class RunLapTableManager extends AbstractTableManager {
           lap.getIndex(),
           lap.getStartTime(),
           lap.getTotalTime(),
+          0,
           lap.getTotalDist(),
           lap.getMaxSpeed(),
           lap.getCalories(),
@@ -191,9 +197,15 @@ public final class RunLapTableManager extends AbstractTableManager {
       throw new IllegalArgumentException("lapType est null");
     }
 
+    if (log.isDebugEnabled()) {
+      log.debug("TotalTime="+ lap.getTotalTime());
+      log.debug("TotalPauseTime="+ lap.getTotalPauseTime());
+    }
+    
     store(id,
           lap.index(),
           lap.getStartTime(),
+          (int) ((lap.getTotalTime() + lap.getTotalPauseTime()) / 10),
           (int) (lap.getTotalTime() / 10),
           (float) lap.distance(),
           (float) lap.getMaxSpeed(),
@@ -287,6 +299,7 @@ public final class RunLapTableManager extends AbstractTableManager {
                       int lapIndex,
                       Date startTime,
                       int totalTime,
+                      int movingTime,
                       float totalDist,
                       float maxSpeed,
                       int calories,
@@ -305,11 +318,15 @@ public final class RunLapTableManager extends AbstractTableManager {
       if (!RunTableManager.getInstance().exist(id)) {
         throw new SQLException("id non trouve.");
       }
-
+      
+      if (calories < 0) {
+        calories = 0;
+      }
+      
       StringBuilder st = new StringBuilder();
       st.append("INSERT INTO ");
       st.append(getTableName());
-      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
 
@@ -319,9 +336,10 @@ public final class RunLapTableManager extends AbstractTableManager {
       pstmt.setInt(4, totalTime);
       pstmt.setFloat(5, totalDist);
       pstmt.setFloat(6, maxSpeed);
-      pstmt.setInt(7, calories);
-      pstmt.setInt(8, avgHeartRate);
-      pstmt.setInt(9, maxHeartRate);
+      pstmt.setInt(7, avgHeartRate);
+      pstmt.setInt(8, maxHeartRate);
+      pstmt.setInt(9, calories);
+      pstmt.setInt(10, movingTime);
       pstmt.executeUpdate();
     }
     catch (SQLException e) {
@@ -941,7 +959,8 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" APP.yearWeek(LAP.start_time) AS THE_YEAR,");
         st.append(" APP.week(LAP.start_time) AS THE_WEEK,");
         st.append(" LAP.total_dist AS THE_TOT_DIST,");
-        st.append(" LAP.total_time AS THE_TOT_TIME,");
+        st.append(" CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end AS THE_TOT_TIME,");   
+        //st.append(" LAP.total_time AS THE_TOT_TIME,");
         st.append(" LAP.id AS THE_ID");
         st.append(" FROM ");
         st.append(getTableName() + " LAP, ");
@@ -963,7 +982,8 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" APP.yearWeek(LAP.start_time) AS THE_YEAR,");
         st.append(" APP.week(LAP.start_time) AS THE_WEEK,");
         st.append(" LAP.total_dist AS THE_TOT_DIST,");
-        st.append(" LAP.total_time AS THE_TOT_TIME,");
+//        st.append(" LAP.total_time AS THE_TOT_TIME,");
+        st.append(" CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end AS THE_TOT_TIME,");   
         st.append(" LAP.id AS THE_ID");
         st.append(" FROM ");
         st.append(getTableName() + " LAP, ");
@@ -1100,7 +1120,7 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" Year(LAP.start_time) AS THE_YEAR,");
         st.append(" Month(LAP.start_time) AS THE_MONTH,");
         st.append(" SUM(LAP.total_dist) AS TOT_DIST, ");
-        st.append(" SUM(LAP.total_time) AS TOT_TIME, ");
+        st.append(" SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");   
         st.append("COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
@@ -1114,7 +1134,7 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" Year(LAP.start_time) AS THE_YEAR,");
         st.append(" Month(LAP.start_time) AS THE_MONTH,");
         st.append(" SUM(LAP.total_dist) AS TOT_DIST, ");
-        st.append(" SUM(LAP.total_time) AS TOT_TIME, ");
+        st.append(" SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");   
         st.append("COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
@@ -1164,7 +1184,7 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append("SELECT ");
         st.append("Year(LAP.start_time) AS THE_YEAR,");
         st.append("SUM(LAP.total_dist),");
-        st.append("SUM(LAP.total_time),");
+        st.append("SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");   
         st.append("COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
@@ -1176,7 +1196,7 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append("SELECT ");
         st.append("Year(LAP.start_time) AS THE_YEAR,");
         st.append("SUM(LAP.total_dist),");
-        st.append("SUM(LAP.total_time),");
+        st.append("SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");   
         st.append("COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
@@ -1608,7 +1628,7 @@ public final class RunLapTableManager extends AbstractTableManager {
   }
 
   /**
-   * Restitue le temp total.
+   * Restitue le temp total avec les pauses.
    * 
    * @param idRun
    * @return le temp total.
@@ -1641,7 +1661,7 @@ public final class RunLapTableManager extends AbstractTableManager {
       DatabaseManager.releaseConnection(conn);
     }
 
-    log.debug("<<distanceTot");
+    log.debug("<<timeTot");
     return timeTot;
   }
 

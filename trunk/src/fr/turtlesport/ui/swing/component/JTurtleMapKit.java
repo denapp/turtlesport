@@ -18,8 +18,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.AbstractButton;
@@ -483,37 +483,45 @@ public class JTurtleMapKit extends JXPanel {
         jMediaMapKit.getModel().setTimeTot("");
       }
 
-      jMediaMapKit.getModel().setMaximum(e.getListGeo().size());
-      mainMap.setZoom(mainMap.getTileFactory().getInfo().getMinimumZoomLevel());
+       jMediaMapKit.getModel().setMaximum(e.getListGeo().size());
+       mainMap.setZoom(mainMap.getTileFactory().getInfo().getMinimumZoomLevel());
+      // HashSet<org.jdesktop.swingx.mapviewer.GeoPosition> hashGeoMap = new
+      // HashSet<org.jdesktop.swingx.mapviewer.GeoPosition>();
+      // List<GeoPositionMapKit> listGeoMap = e.getListGeo();
+      // org.jdesktop.swingx.mapviewer.GeoPosition gp;
+      // for (GeoPositionMapKit g : e.getListGeo()) {
+      // hashGeoMap.add(g);
+      // }
+      //
+      // mainMap.calculateZoomFrom(hashGeoMap);
 
-      HashSet<org.jdesktop.swingx.mapviewer.GeoPosition> hashGeoMap = new HashSet<org.jdesktop.swingx.mapviewer.GeoPosition>();
+      // // Ajout des drapeaux
+      // Point2D p = mainMap.getTileFactory().geoToPixel(listGeoMap.get(0),
+      // mainMap.getZoom());
+      // p.setLocation(p.getX(), p.getY() - widthImg);
+      // gp = mainMap.getTileFactory().pixelToGeo(p, mainMap.getZoom());
+      // hashGeoMap.add(gp);
+      //
+      // p = mainMap.getTileFactory()
+      // .geoToPixel(listGeoMap.get(listGeoMap.size() - 1), mainMap.getZoom());
+      // p.setLocation(p.getX(), p.getY() - widthImg);
+      // gp = mainMap.getTileFactory().pixelToGeo(p, mainMap.getZoom());
+      // hashGeoMap.add(gp);
+
+      // // re-calculate
+      // mainMap.calculateZoomFrom(hashGeoMap);
+      //
+      // setOriginalZoom(mainMap.getZoom());
+      // setOriginalPosition(mainMap.getCenterPosition());
+
       List<GeoPositionMapKit> listGeoMap = e.getListGeo();
-      org.jdesktop.swingx.mapviewer.GeoPosition gp;
+      List<GeoPosition> positions = new ArrayList<GeoPosition>();
       for (GeoPositionMapKit g : e.getListGeo()) {
-        hashGeoMap.add(g);
+        positions.add(g);
       }
-
-      mainMap.calculateZoomFrom(hashGeoMap);
-
-      // Ajout des drapeaux
-      Point2D p = mainMap.getTileFactory().geoToPixel(listGeoMap.get(0),
-                                                      mainMap.getZoom());
-      p.setLocation(p.getX(), p.getY() - widthImg);
-      gp = mainMap.getTileFactory().pixelToGeo(p, mainMap.getZoom());
-      hashGeoMap.add(gp);
-
-      p = mainMap.getTileFactory()
-          .geoToPixel(listGeoMap.get(listGeoMap.size() - 1), mainMap.getZoom());
-      p.setLocation(p.getX(), p.getY() - widthImg);
-      gp = mainMap.getTileFactory().pixelToGeo(p, mainMap.getZoom());
-      hashGeoMap.add(gp);
-
-      // re-calculate
-      mainMap.calculateZoomFrom(hashGeoMap);
-
-      setOriginalZoom(mainMap.getZoom());
-      setOriginalPosition(mainMap.getCenterPosition());
-
+      mainMap.setupZoomAndCenterPosition(positions);
+      
+      
       final GeoPositionMapKit[] tab = new GeoPositionMapKit[listGeoMap.size()];
       listGeoMap.toArray(tab);
 

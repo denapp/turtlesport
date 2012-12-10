@@ -22,7 +22,7 @@ public final class XmlUtil {
   }
      
   /**
-   * Restittue une date.
+   * Restitue une date.
    * 
    * @param value
    * @return

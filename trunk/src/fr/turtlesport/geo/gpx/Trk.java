@@ -142,7 +142,7 @@ public class Trk extends AbstractGeoRoute {
    * 
    * @param seg
    */
-  protected void addTrkseg(Trkseg seg) {
+  public void addTrkseg(Trkseg seg) {
     if (seg == null) {
       throw new IllegalArgumentException();
     }
@@ -160,7 +160,7 @@ public class Trk extends AbstractGeoRoute {
    * 
    * @return le segment &agrave; l'index sp&eacute;cifi&eacute;.
    */
-  protected Trkseg getTrkseg(int index) {
+  public Trkseg getTrkseg(int index) {
     if (listTrkseg == null) {
       throw new IndexOutOfBoundsException("Index: " + index + ", Size: 0");
     }

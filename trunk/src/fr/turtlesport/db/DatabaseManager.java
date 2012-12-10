@@ -1,5 +1,9 @@
 package fr.turtlesport.db;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
@@ -14,7 +18,9 @@ import java.util.GregorianCalendar;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.derby.jdbc.EmbeddedDriver;
 
+import fr.turtlesport.CantWriteIOException;
 import fr.turtlesport.Configuration;
+import fr.turtlesport.NotDirIOException;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.JSplashScreen;
 import fr.turtlesport.util.Location;
@@ -60,6 +66,77 @@ public class DatabaseManager {
   }
 
   /**
+   * @return Restitue le repertoire par d&eacute;faut database.
+   */
+  public static String getDefaultDirectory() {
+    return Location.userLocation();
+  }
+
+  /**
+   * @return Restitue le repertoire de la database.
+   */
+  public static String getDirectory() {
+    String dirName = Configuration.getConfig()
+        .getProperty("configuration", "database", getDefaultDirectory());
+    if (dirName.endsWith(File.separatorChar + DB_NAME)) {
+      dirName.substring(0, dirName.lastIndexOf(File.separatorChar));
+    }
+    try {
+      checkDir(new File(dirName));
+    }
+    catch (IOException e) {
+      log.error("", e);
+      dirName = Location.userLocation();
+    }
+    return dirName;
+  }
+
+  /**
+   * Valorise le nouveau r&eacute;pertoire de la database.
+   * 
+   * @param Restitue
+   *          le repertoire de la database.
+   * @throws FileNotFoundException
+   * @throws NotDirIOException
+   * @throws CantWriteIOException
+   */
+  public static void setDirectory(File dir) throws FileNotFoundException,
+                                           CantWriteIOException,
+                                           NotDirIOException {
+    checkDir(dir);
+
+    String dirName = dir.getAbsolutePath();
+    if (dirName.endsWith(File.separatorChar + DB_NAME)) {
+      dirName.substring(0, dirName.lastIndexOf(File.separatorChar));
+    }
+    Configuration.getConfig().addProperty("configuration", "database", dirName);
+  }
+
+  /**
+   * Copie la databse courante.
+   * 
+   * @param dir
+   * @throws FileNotFoundException
+   * @throws SQLException
+   * @throws NotDirIOException
+   * @throws CantWriteIOException
+   */
+  public static void backUpDatabase(File dir) throws FileNotFoundException,
+                                             SQLException,
+                                             CantWriteIOException,
+                                             NotDirIOException {
+    checkDir(dir);
+
+    String backupdirectory = dir.getAbsolutePath();
+    CallableStatement cs = getConnection()
+        .prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
+    cs.setString(1, backupdirectory);
+    cs.execute();
+    cs.close();
+    log.warn("backed up database to " + dir);
+  }
+
+  /**
    * Initialisation de la database.
    * 
    * @param isDropTables
@@ -69,8 +146,9 @@ public class DatabaseManager {
 
     log.debug(">>initDatabase");
 
-    String derbyHome = Location.userLocation();
-    log.info("derby.system.home=" + derbyHome);
+    String derbyHome = getDirectory();
+
+    log.warn("derby.system.home=" + derbyHome);
     System.setProperty("derby.system.home", derbyHome);
 
     logJDBCSupportInVM();
@@ -111,8 +189,8 @@ public class DatabaseManager {
 
     log.debug(">>initDatabase");
 
-    String derbyHome = Location.userLocation();
-    log.info("derby.system.home=" + derbyHome);
+    String derbyHome = getDirectory();
+    log.warn("derby.system.home=" + derbyHome);
     System.setProperty("derby.system.home", derbyHome);
 
     logJDBCSupportInVM();
@@ -516,6 +594,16 @@ public class DatabaseManager {
         }
         else {
           // la table existe
+          if (rs.getMetaData().getColumnDisplaySize(7) != 500) {
+            // on augmente la taille des commentaires
+            releaseConnection(conn);
+            conn = null;
+            StringBuilder st = new StringBuilder();
+            st.append("ALTER TABLE ");
+            st.append(TABLE_RUN);
+            st.append(" ALTER COLUMN comments SET DATA TYPE VARCHAR(500)");
+            executeUpdate(st.toString());
+          }
           return;
         }
       }
@@ -538,7 +626,7 @@ public class DatabaseManager {
     st.append("program_type SMALLINT, ");
     st.append("multisport INTEGER, ");
     st.append("start_time TIMESTAMP, ");
-    st.append("comments VARCHAR(100), ");
+    st.append("comments VARCHAR(500), ");
     st.append("equipement VARCHAR(50), ");
     st.append("location VARCHAR(100))");
 
@@ -667,6 +755,65 @@ public class DatabaseManager {
         DatabaseManager.releaseConnection(conn);
       }
 
+      conn = DatabaseManager.getConnection();
+      try {
+        ResultSet rs;
+        PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM "
+                                                        + TABLE_RUN_LAP);
+        rs = pstmt.executeQuery();
+
+        if (rs.getMetaData().getColumnCount() != 10) {
+          releaseConnection(conn);
+          try {
+
+            beginTransaction();
+
+            // modification de la colonne calories de smallint vers int
+            st = new StringBuilder();
+            st.append("ALTER TABLE ");
+            st.append(TABLE_RUN_LAP);
+            st.append(" ADD COLUMN CALORIES_INT INTEGER");
+            executeUpdate(st.toString());
+
+            st = new StringBuilder();
+            st.append("UPDATE ");
+            st.append(TABLE_RUN_LAP);
+            st.append(" SET CALORIES_INT = CALORIES");
+            executeUpdate(st.toString());
+
+            st = new StringBuilder();
+            st.append("ALTER TABLE ");
+            st.append(TABLE_RUN_LAP);
+            st.append(" DROP COLUMN CALORIES");
+            executeUpdate(st.toString());
+
+            st = new StringBuilder();
+            st.append("RENAME COLUMN ");
+            st.append(TABLE_RUN_LAP);
+            st.append(".CALORIES_INT TO CALORIES");
+            executeUpdate(st.toString());
+
+            // ajout d'une colonne total_moving_time
+            st = new StringBuilder();
+            st.append("ALTER TABLE ");
+            st.append(TABLE_RUN_LAP);
+            st.append(" ADD COLUMN total_moving_time INTEGER");
+            executeUpdate(st.toString());
+
+            commitTransaction();
+          }
+          catch (SQLException e) {
+            rollbackTransaction();
+            throw e;
+          }
+        }
+      }
+      finally {
+        if (conn != null) {
+          releaseConnection(conn);
+        }
+      }
+
       return;
     }
 
@@ -682,10 +829,12 @@ public class DatabaseManager {
     st.append("total_time INTEGER, ");
     st.append("total_dist FLOAT, ");
     st.append("max_speed FLOAT, ");
-    st.append("calories SMALLINT, ");
     st.append("avg_heart_rate SMALLINT, ");
-    st.append("max_heart_rate SMALLINT");
+    st.append("max_heart_rate SMALLINT, ");
+    st.append("calories INTEGER, ");
+    st.append("total_moving_time INTEGER");
     st.append(')');
+
     executeUpdate(st.toString());
 
     st = new StringBuilder();
@@ -743,7 +892,6 @@ public class DatabaseManager {
       }
       return;
     }
-
     log.info("createTableTrk");
 
     StringBuilder st = new StringBuilder();
@@ -1236,6 +1384,23 @@ public class DatabaseManager {
         isInit = true;
         initDatabase(false);
       }
+    }
+  }
+
+  private static void checkDir(File dir) throws FileNotFoundException,
+                                        CantWriteIOException,
+                                        NotDirIOException {
+    if (!dir.exists()) {
+      log.warn("le repertoire  n'existe pas " + dir.getAbsolutePath());
+      throw new FileNotFoundException(dir.getAbsolutePath());
+    }
+    if (!dir.isDirectory()) {
+      log.warn("ce nest pas un repertoire " + dir.getAbsolutePath());
+      throw new NotDirIOException(dir.getAbsolutePath());
+    }
+    if (!dir.canWrite()) {
+      log.warn("Impossible d'ecrire dans" + dir.getAbsolutePath());
+      throw new CantWriteIOException(dir.getAbsolutePath());
     }
   }
 

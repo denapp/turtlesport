@@ -121,6 +121,39 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
     return file;
   }
 
+  /**
+   * Restitue la date du fichier du run.
+   * 
+   * @param file
+   * @return
+   * @throws GeoLoadException
+   * @throws FileNotFoundException
+   */
+  public Date retreiveDate(File file) throws GeoLoadException,
+                                     FileNotFoundException {
+    // Lecture
+    FileInputStream fis = new FileInputStream(file);
+    try {
+      Decode decode = new Decode();
+      DateMesgListener listener = new DateMesgListener();
+      decode.read(fis, listener);
+
+      if (log.isDebugEnabled()) {
+        log.debug("date : " + nbMsg);
+        log.debug("Nombre de points : " + session.listRecord.size());
+      }
+      return listener.date;
+    }
+    finally {
+      try {
+        fis.close();
+      }
+      catch (IOException e) {
+      }
+    }
+
+  }
+
   /*
    * (non-Javadoc)
    * 
@@ -165,7 +198,7 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
    */
   public void onMesg(Mesg msg) {
     SimpleDateFormat dateFormat = null;
-    if (log.isDebugEnabled()) {
+    if (log.isDebugEnabled() || log.isInfoEnabled()) {
       dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     }
 
@@ -202,68 +235,69 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
       case MesgNum.ACTIVITY:
         activityMsg = new ActivityMesg(msg);
         list.add(activityMsg);
-        if (log.isDebugEnabled()) {
-          log.debug("-->ACTIVITY");
-          log.debug("   Timestamp="
-                    + dateFormat.format(activityMsg.getTimestamp().getDate()));
-          log.debug("   LocalTimestamp=" + activityMsg.getLocalTimestamp());
-          log.debug("   TotalTimerTime=" + activityMsg.getTotalTimerTime());
-          log.debug("   NumSessions=" + activityMsg.getNumSessions());
-          log.debug("   Type=" + activityMsg.getType());
-          log.debug("   EventType=" + activityMsg.getEventType());
-          log.debug("-----------");
+        if (log.isInfoEnabled()) {
+          log.info("-->ACTIVITY");
+          log.info("   Timestamp="
+                   + dateFormat.format(activityMsg.getTimestamp().getDate()));
+          log.info("   LocalTimestamp=" + activityMsg.getLocalTimestamp());
+          log.info("   TotalTimerTime=" + activityMsg.getTotalTimerTime());
+          log.info("   NumSessions=" + activityMsg.getNumSessions());
+          log.info("   Type=" + activityMsg.getType());
+          log.info("   EventType=" + activityMsg.getEventType());
+          log.info("-----------");
         }
         break;
 
       case MesgNum.SESSION:
         SessionMesg sessionMesg = new SessionMesg(msg);
         addSession(sessionMesg);
-        if (log.isDebugEnabled()) {
-          log.debug("-->SESSION");
-          log.debug("   Timestamp="
-                    + dateFormat.format(sessionMesg.getTimestamp().getDate()));
-          log.debug("   TotalDistance=" + sessionMesg.getTotalDistance());
-          log.debug("   TotalElapsedTime=" + sessionMesg.getTotalElapsedTime());
-          log.debug("   TotalCalories=" + sessionMesg.getTotalCalories());
-          log.debug("   AvgSpeed=" + sessionMesg.getAvgSpeed());
-          log.debug("   MaxSpeed=" + sessionMesg.getMaxSpeed());
-          log.debug("   AvgHeartRate=" + sessionMesg.getAvgHeartRate());
-          log.debug("   MaxHeartRate=" + sessionMesg.getMaxHeartRate());
-          log.debug("   StartTime="
-                    + dateFormat.format(sessionMesg.getStartTime().getDate()));
-          log.debug("   StartPositionLat=" + sessionMesg.getStartPositionLat());
-          log.debug("   StartPositionLong="
-                    + sessionMesg.getStartPositionLong());
-          log.debug("   Type=" + sessionMesg.getEventType());
-          log.debug("   Event=" + sessionMesg.getEvent());
-          log.debug("-----------");
+        if (log.isInfoEnabled()) {
+          log.info("-->SESSION");
+          log.info("   Timestamp="
+                   + dateFormat.format(sessionMesg.getTimestamp().getDate()));
+          log.info("   TotalDistance=" + sessionMesg.getTotalDistance());
+          log.info("   TotalElapsedTime=" + sessionMesg.getTotalElapsedTime());
+          log.info("   TotalTimerTime=" + sessionMesg.getTotalTimerTime());
+          log.info("   TotalCalories=" + sessionMesg.getTotalCalories());
+          log.info("   AvgSpeed=" + sessionMesg.getAvgSpeed());
+          log.info("   MaxSpeed=" + sessionMesg.getMaxSpeed());
+          log.info("   AvgHeartRate=" + sessionMesg.getAvgHeartRate());
+          log.info("   MaxHeartRate=" + sessionMesg.getMaxHeartRate());
+          log.info("   StartTime="
+                   + dateFormat.format(sessionMesg.getStartTime().getDate()));
+          log.info("   StartPositionLat=" + sessionMesg.getStartPositionLat());
+          log.info("   StartPositionLong=" + sessionMesg.getStartPositionLong());
+          log.info("   Type=" + sessionMesg.getEventType());
+          log.info("   Event=" + sessionMesg.getEvent());
+          log.info("-----------");
         }
         break;
 
       case MesgNum.LAP:
         LapMesg lapMsg = new LapMesg(msg);
         addLap(lapMsg);
-        if (log.isDebugEnabled()) {
-          log.debug("-->LAP");
+        if (log.isInfoEnabled()) {
+          log.info("-->LAP");
           if (lapMsg.getTimestamp() != null) {
-            log.debug("   Timestamp="
-                      + dateFormat.format(lapMsg.getTimestamp().getDate()));
+            log.info("   Timestamp="
+                     + dateFormat.format(lapMsg.getTimestamp().getDate()));
           }
-          log.debug("   TotalDistance=" + lapMsg.getTotalDistance());
-          log.debug("   TotalElapsedTime=" + lapMsg.getTotalElapsedTime());
-          log.debug("   TotalCalories=" + lapMsg.getTotalCalories());
-          log.debug("   AvgSpeed=" + lapMsg.getAvgSpeed());
-          log.debug("   MaxSpeed=" + lapMsg.getMaxSpeed());
-          log.debug("   AvgHeartRate=" + lapMsg.getAvgHeartRate());
-          log.debug("   MaxHeartRate=" + lapMsg.getMaxHeartRate());
-          log.debug("   StartTime="
-                    + dateFormat.format(lapMsg.getStartTime().getDate()));
-          log.debug("   StartPositionLat=" + lapMsg.getStartPositionLat());
-          log.debug("   StartPositionLong=" + lapMsg.getStartPositionLong());
-          log.debug("   Cadence=" + lapMsg.getAvgCadence());
-          log.debug("   Type=" + lapMsg.getEventType());
-          log.debug("   Event=" + lapMsg.getEvent());
-          log.debug("-----------");
+          log.info("   TotalDistance=" + lapMsg.getTotalDistance());
+          log.info("   TotalElapsedTime=" + lapMsg.getTotalElapsedTime());
+          log.info("   TotalTimerTime=" + lapMsg.getTotalTimerTime());
+          log.info("   TotalCalories=" + lapMsg.getTotalCalories());
+          log.info("   AvgSpeed=" + lapMsg.getAvgSpeed());
+          log.info("   MaxSpeed=" + lapMsg.getMaxSpeed());
+          log.info("   AvgHeartRate=" + lapMsg.getAvgHeartRate());
+          log.info("   MaxHeartRate=" + lapMsg.getMaxHeartRate());
+          log.info("   StartTime="
+                   + dateFormat.format(lapMsg.getStartTime().getDate()));
+          log.info("   StartPositionLat=" + lapMsg.getStartPositionLat());
+          log.info("   StartPositionLong=" + lapMsg.getStartPositionLong());
+          log.info("   Cadence=" + lapMsg.getAvgCadence());
+          log.info("   Type=" + lapMsg.getEventType());
+          log.info("   Event=" + lapMsg.getEvent());
+          log.info("-----------");
         }
         break;
 
@@ -277,7 +311,8 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
                     + record.getHeartRate() + " Speed=" + record.getSpeed()
                     + " Altitude=" + record.getAltitude() + " Lat="
                     + record.getPositionLat() + " lon="
-                    + record.getPositionLat() + " cadence="+ record.getCadence());
+                    + record.getPositionLat() + " cadence="
+                    + record.getCadence());
         }
         break;
 
@@ -546,8 +581,19 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
      * @see fr.turtlesport.geo.IGeoSegment#getTotalTime()
      */
     public long getTotalTime() {
-      return (long) ((lapmsg.getTotalElapsedTime() == null) ? 0 : lapmsg
-          .getTotalElapsedTime() * 1000);
+      return (long) ((lapmsg.getTotalTimerTime() == null) ? 0 : lapmsg
+          .getTotalTimerTime() * 1000);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see fr.turtlesport.geo.IGeoSegment#getTotalPauseTime()
+     */
+    @Override
+    public long getTotalPauseTime() {
+      return (long) ((lapmsg.getTotalElapsedTime() == null) ? 0 : (lapmsg
+          .getTotalElapsedTime() - lapmsg.getTotalTimerTime()) * 1000);
     }
 
     /*
@@ -641,4 +687,56 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
     }
 
   }
+
+  /**
+   * Fit listener pou recuperer la date.
+   * 
+   * @author Denis Apparicio
+   * 
+   */
+  private class DateMesgListener implements MesgListener {
+
+    public Date date;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.garmin.fit.MesgListener#onMesg(com.garmin.fit.Mesg)
+     */
+    @Override
+    public void onMesg(Mesg msg) {
+      SimpleDateFormat dateFormat = null;
+      if (log.isDebugEnabled() || log.isInfoEnabled()) {
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+      }
+
+      if (msg.getNum() == MesgNum.SESSION) {
+        SessionMesg sessionMesg = new SessionMesg(msg);
+        date = sessionMesg.getStartTime().getDate();
+        if (log.isInfoEnabled()) {
+          log.info("-->SESSION");
+          log.info("   Timestamp="
+                   + dateFormat.format(sessionMesg.getTimestamp().getDate()));
+          log.info("   TotalDistance=" + sessionMesg.getTotalDistance());
+          log.info("   TotalElapsedTime=" + sessionMesg.getTotalElapsedTime());
+          log.info("   TotalTimerTime=" + sessionMesg.getTotalTimerTime());
+          log.info("   TotalCalories=" + sessionMesg.getTotalCalories());
+          log.info("   AvgSpeed=" + sessionMesg.getAvgSpeed());
+          log.info("   MaxSpeed=" + sessionMesg.getMaxSpeed());
+          log.info("   AvgHeartRate=" + sessionMesg.getAvgHeartRate());
+          log.info("   MaxHeartRate=" + sessionMesg.getMaxHeartRate());
+          log.info("   StartTime="
+                   + dateFormat.format(sessionMesg.getStartTime().getDate()));
+          log.info("   StartPositionLat=" + sessionMesg.getStartPositionLat());
+          log.info("   StartPositionLong=" + sessionMesg.getStartPositionLong());
+          log.info("   Type=" + sessionMesg.getEventType());
+          log.info("   Event=" + sessionMesg.getEvent());
+          log.info("-----------");
+        }
+      }
+
+    }
+
+  }
+
 }

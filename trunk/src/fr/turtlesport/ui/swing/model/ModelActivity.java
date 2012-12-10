@@ -36,7 +36,6 @@ public class ModelActivity {
    */
   public ModelActivity(AbstractDataActivity dataActivity) {
     this.dataActivity = dataActivity;
-
     unitSpeedAndPace = SpeedPaceUnit.getDefaultUnit();
   }
 
@@ -72,10 +71,41 @@ public class ModelActivity {
     setUnitHeart(view);
 
     // mis a jour sport par defaut
-    view.getJCheckBoxDefaultActivity().setSelected(dataActivity
-        .isDefaultActivity());
+    view.getJCheckBoxDefaultActivity()
+        .setSelected(dataActivity.isDefaultActivity());
 
     log.debug("<<updateView");
+  }
+
+  /**
+   * Calcul des zones de fréquence cardiaque.
+   * 
+   * @param view
+   *          la vue
+   */
+  public void calculateHeartZones(JPanelUserActivity view) {
+    // FCE = FCM x pourcentage
+
+    int fcm = dataActivity.getMaxHeartRate();
+
+    final double[] plage = { 0.65, 0.75, 0.80, 0.85, 0.90, 0.95 };
+    final int[] result = new int[plage.length];
+    for (int i = 0; i < plage.length; i++) {
+      result[i] = (int) (fcm * plage[i]);
+      System.out.println(result[i]);
+    }
+
+    DataHeartZone data;
+    for (int i = 0; i < dataActivity.getHeartZones().length; i++) {
+      data = dataActivity.getHeartZones()[i];
+      data.setLowHeartRate(isFcMax ? convertHeartToPourcentage(result[i]):result[i]);
+      data.setHighHeartRate(isFcMax ? convertHeartToPourcentage(result[i+1]):result[i+1]);
+    }
+
+    int index = view.getJComboBoxZoneHeart().getSelectedIndex();
+    data = dataActivity.getHeartZones()[index];
+    view.getJTextFieldZoneHeartMax().setValue(data.getHighHeartRate());
+    view.getJTextFieldZoneHeartMin().setValue(data.getLowHeartRate());
   }
 
   /**
@@ -92,7 +122,6 @@ public class ModelActivity {
     view.getJTextFieldSpeedName().setText("");
     view.getJTextFieldZoneSpeedMin().setValue(0.0);
     view.getJTextFieldZoneSpeedMax().setValue(0.0);
-
   }
 
   /**
@@ -118,20 +147,21 @@ public class ModelActivity {
       Object newSpeedLow, newSpeedHigh;
 
       for (DataSpeedZone data : dataActivity.getSpeedZones()) {
-        newSpeedLow = SpeedPaceUnit.convert(unitSpeedAndPace, SpeedPaceUnit
-            .unitKmPerH(), data.getLowSpeed());
-        newSpeedHigh = SpeedPaceUnit.convert(unitSpeedAndPace, SpeedPaceUnit
-            .unitKmPerH(), data.getHighSpeed());
+        newSpeedLow = SpeedPaceUnit.convert(unitSpeedAndPace,
+                                            SpeedPaceUnit.unitKmPerH(),
+                                            data.getLowSpeed());
+        newSpeedHigh = SpeedPaceUnit.convert(unitSpeedAndPace,
+                                             SpeedPaceUnit.unitKmPerH(),
+                                             data.getHighSpeed());
         data.setLowSpeed(new Float((Double) newSpeedLow));
         data.setHighSpeed(new Float((Double) newSpeedHigh));
       }
     }
 
     if (isFcMax) {
-      int maxHeart = dataActivity.getMaxHeartRate();
       for (DataHeartZone data : dataActivity.getHeartZones()) {
-        data.setHighHeartRate((data.getHighHeartRate() * maxHeart) / 100);
-        data.setLowHeartRate((data.getLowHeartRate() * maxHeart) / 100);
+        data.setLowHeartRate(convertPourcentageToHeart(data.getLowHeartRate()));
+        data.setHighHeartRate(convertPourcentageToHeart(data.getHighHeartRate()));
       }
     }
   }
@@ -163,14 +193,14 @@ public class ModelActivity {
         }
       }
     }
-
+    
     if (isFcMax) {
-      int maxHeart = dataActivity.getMaxHeartRate();
       for (DataHeartZone data : dataActivity.getHeartZones()) {
-        data.setHighHeartRate(100 * data.getHighHeartRate() / maxHeart);
-        data.setLowHeartRate(100 * data.getLowHeartRate() / maxHeart);
+        data.setLowHeartRate(convertHeartToPourcentage(data.getLowHeartRate()));
+        data.setHighHeartRate(convertHeartToPourcentage(data.getHighHeartRate()));
       }
     }
+
   }
 
   /**
@@ -208,14 +238,14 @@ public class ModelActivity {
     for (int i = 0; i < dataActivity.getHeartZones().length; i++) {
       data = dataActivity.getHeartZones()[i];
 
-      // mis a jour valeurs
+      // mise a jour valeurs
       if (isFcMax && maxHeart != 0) {
-        data.setHighHeartRate(100 * data.getHighHeartRate() / maxHeart);
-        data.setLowHeartRate(100 * data.getLowHeartRate() / maxHeart);
+        data.setLowHeartRate(convertHeartToPourcentage(data.getLowHeartRate()));
+        data.setHighHeartRate(convertHeartToPourcentage(data.getHighHeartRate()));
       }
       else {
-        data.setHighHeartRate((data.getHighHeartRate() * maxHeart) / 100);
-        data.setLowHeartRate((data.getLowHeartRate() * maxHeart) / 100);
+        data.setLowHeartRate(convertPourcentageToHeart(data.getLowHeartRate()));
+        data.setHighHeartRate(convertPourcentageToHeart(data.getHighHeartRate()));
       }
     }
 
@@ -245,10 +275,12 @@ public class ModelActivity {
     for (int i = 0; i < dataActivity.getSpeedZones().length; i++) {
       data = dataActivity.getSpeedZones()[i];
 
-      newSpeedLow = SpeedPaceUnit.convert(unitSpeedAndPace, newUnit, data
-          .getLowSpeed());
-      newSpeedHigh = SpeedPaceUnit.convert(unitSpeedAndPace, newUnit, data
-          .getHighSpeed());
+      newSpeedLow = SpeedPaceUnit.convert(unitSpeedAndPace,
+                                          newUnit,
+                                          data.getLowSpeed());
+      newSpeedHigh = SpeedPaceUnit.convert(unitSpeedAndPace,
+                                           newUnit,
+                                           data.getHighSpeed());
 
       // Les formatters
       if (i == index) {
@@ -261,8 +293,8 @@ public class ModelActivity {
         // Time
         data.setLowSpeed(Float.parseFloat(((String) newSpeedLow).replace(':',
                                                                          '.')));
-        data.setHighSpeed(Float
-            .parseFloat(((String) newSpeedHigh).replace(':', '.')));
+        data.setHighSpeed(Float.parseFloat(((String) newSpeedHigh).replace(':',
+                                                                           '.')));
       }
       else {
         data.setLowSpeed(new Float((Double) newSpeedLow));
@@ -299,6 +331,18 @@ public class ModelActivity {
     catch (Throwable e) {
       log.warn("", e);
     }
+  }
+
+  private int convertHeartToPourcentage(int value) {
+    int maxHeartRate = (dataActivity.getMaxHeartRate() <= 0) ? 1 : dataActivity
+        .getMaxHeartRate();
+    return (int) (value*100 / maxHeartRate);
+  }
+
+  private int convertPourcentageToHeart(int pourc) {
+    int maxHeartRate = (dataActivity.getMaxHeartRate() <= 0) ? 1 : dataActivity
+        .getMaxHeartRate();
+    return (int) (maxHeartRate * (pourc / 100.0));
   }
 
 }

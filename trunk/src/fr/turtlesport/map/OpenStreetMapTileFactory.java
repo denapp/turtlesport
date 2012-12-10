@@ -58,6 +58,20 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     hashDiskCache.put(tileProviderInfo.getName(),
                       new DiskTitleCache(dir, tileProviderInfo));
 
+    // Transport
+    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile2.opencyclemap.org/transport",
+                                                         "Transport");
+    dir = new File(dirCache, tileProviderInfo.getName());
+    hashDiskCache.put(tileProviderInfo.getName(),
+                      new DiskTitleCache(dir, tileProviderInfo));
+
+    // Landscape
+    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile3.opencyclemap.org/landscape",
+                                                         "Landscape");
+    dir = new File(dirCache, tileProviderInfo.getName());
+    hashDiskCache.put(tileProviderInfo.getName(),
+                      new DiskTitleCache(dir, tileProviderInfo));
+
     // MapQuest-OSM
     // tileProviderInfo = new
     // OpenStreetMapTileProviderInfo("http://otile1.mqcdn.com/tiles/1.0.0/osm",
@@ -85,7 +99,9 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     String[] names = { TurtleEmptyTileFactory.NAME,
         "mapnik",
         "cyclemap",
-        "MapQuest" };
+        "MapQuest",
+        "Transport",
+        "Landscape"};
     return names;
   }
 

@@ -18,7 +18,7 @@ public class DataRunLap {
 
   private int       totalTime;
 
-  private int       timePause   = -1;
+  private int       timePause       = -1;
 
   private float     totalDist;
 
@@ -30,13 +30,15 @@ public class DataRunLap {
 
   private int       maxHeartRate;
 
-  private int       denivelePos = -1;
+  private int       denivelePos     = -1;
 
-  private int       deniveleNeg = 1;
+  private int       deniveleNeg     = 1;
 
   private int       totalLap;
 
   private int       realTotalTime;
+
+  private int       movingTotalTime = 0;
 
   /**
    * 
@@ -197,19 +199,29 @@ public class DataRunLap {
   }
 
   /**
-   * @return the totalTime
-   * @throws SQLException
-   */
-  public int getMovingTotalTime() throws SQLException {
-    return realTotalTime - computeTimePauseTot();
-  }
-
-  /**
    * @param totalTime
    *          the totalTime to set
    */
   public void setRealTotalTime(int realTotalTime) {
     this.realTotalTime = realTotalTime;
+  }
+  
+  /**
+   * @return the totalTime
+   * @throws SQLException
+   */
+  public int getMovingTotalTime() throws SQLException {
+    if (movingTotalTime <= 0) {
+      movingTotalTime = realTotalTime - computeTimePauseTot();
+    }
+    return movingTotalTime;
+  }
+
+  /**
+   * @param movingTotalTime
+   */
+  public void setMovingTotalTime(int movingTotalTime) {
+    this.movingTotalTime = movingTotalTime;
   }
 
   /**
@@ -225,7 +237,8 @@ public class DataRunLap {
       if (lapIndex < (totalLap - 1)) {
 
       }
-      Date dateEnd = new Date(getStartTime().getTime() + getRealTotalTime() * 10);
+      Date dateEnd = new Date(getStartTime().getTime() + getRealTotalTime()
+                              * 10);
       DataRunTrk[] trks = RunTrkTableManager.getInstance()
           .getTrks(id, getStartTime(), dateEnd);
 
@@ -254,6 +267,7 @@ public class DataRunLap {
           iPauseEnd = -1;
         }
       }
+      
     }
     return timePause;
   }

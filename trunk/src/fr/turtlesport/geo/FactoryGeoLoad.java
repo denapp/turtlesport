@@ -7,6 +7,7 @@ import fr.turtlesport.geo.garmin.fit.FitFile;
 import fr.turtlesport.geo.garmin.hst.HstFile;
 import fr.turtlesport.geo.garmin.tcx.TcxFile;
 import fr.turtlesport.geo.gpx.GpxFile;
+import fr.turtlesport.geo.suunto.SuuntoFile;
 
 /**
  * @author Denis Apparicio
@@ -26,6 +27,10 @@ public final class FactoryGeoLoad {
   /** Pour conversion FIT. */
   public static final String FIT = "fit";
 
+  /** Pour conversion Suunto. */
+  public static final String XML = "xml";
+
+  
   private FactoryGeoLoad() {
   }
 
@@ -49,7 +54,10 @@ public final class FactoryGeoLoad {
     if (FIT.equals(extension)) {
       return new FitFile();
     }
-
+    if (XML.equals(extension)) {
+      return new SuuntoFile();
+    }
+    
     throw new IllegalArgumentException();
   }
 
@@ -89,6 +97,9 @@ public final class FactoryGeoLoad {
     }
     else if (isIn(FitFile.EXT, ext)) {
       geo = new FitFile();
+    }
+    else if (isIn(SuuntoFile.EXT, ext)) {
+      geo = new SuuntoFile();
     }
     else {
       throw new IllegalArgumentException();

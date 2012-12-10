@@ -557,6 +557,7 @@ public final class RunTableManager extends AbstractTableManager {
                                              0,
                                              startTime,
                                              data.getTimeTot(),
+                                             data.getTimeTot(),
                                              (float) data.getDistanceTot(),
                                              0,
                                              0,
@@ -602,27 +603,27 @@ public final class RunTableManager extends AbstractTableManager {
    */
   public void store(DataRun dataRun, List<DataRunTrk> listTrks) throws SQLException {
     log.debug(">>store dataRun  listTrks");
-
+  
     if (dataRun == null || listTrks == null || listTrks.size() == 0) {
       return;
     }
-
+  
     // Debut de tansaction
     DatabaseManager.beginTransaction();
-
+  
     try {
       int id = dataRun.getId();
-
+  
       // update du run
       StringBuilder st = new StringBuilder();
       st.append("UPDATE ");
       st.append(getTableName());
       st.append(" SET start_time=?");
       st.append(" WHERE id = ?");
-
+  
       Connection conn = DatabaseManager.getConnection();
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
-
+  
       for (DataRunTrk trk : listTrks) {
         if (trk.getTime() != null) {
           pstmt.setTimestamp(1, trk.getTime());
@@ -631,10 +632,10 @@ public final class RunTableManager extends AbstractTableManager {
       }
       pstmt.setInt(2, id);
       pstmt.executeUpdate();
-
+  
       // effacement des points pour un run existant
       RunTrkTableManager.getInstance().delete(id);
-
+  
       // insertion des points
       for (int i = 0; i < listTrks.size(); i++) {
         DataRunTrk trk = listTrks.get(i);
@@ -670,11 +671,11 @@ public final class RunTableManager extends AbstractTableManager {
       DatabaseManager.getConnection().close();
       throw new RuntimeException(e);
     }
-
+  
     // ok -> commit
     DatabaseManager.commitTransaction();
     DatabaseManager.getConnection().close();
-
+  
     log.debug("<<store");
   }
 

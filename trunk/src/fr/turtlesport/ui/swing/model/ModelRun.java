@@ -180,12 +180,11 @@ public class ModelRun {
       int timeTot = 0;
       int timePauseTot = 0;
       try {
-        timeTot = dataRun.computeTimeTot();
+        timeTot = dataRun.computeTimeTot() - dataRun.computeTimePauseTot();
         timePauseTot = dataRun.computeTimePauseTot();
-        timeElapsedTot = timePauseTot + timeTot;
+        timeElapsedTot = dataRun.computeTimeTot();
         dataRun.setUnit(e.getUnit());
         distTot = dataRun.getComputeDistanceTot();
-        System.out.println("timeElapsedTot=" + timeElapsedTot);
       }
       catch (SQLException sqle) {
         // ne peut arriver
@@ -333,13 +332,12 @@ public class ModelRun {
 
     // Temps
     view.getJLabelValTimeTot()
-        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()
-                                                   + dataRun
-                                                   .computeTimePauseTot()));
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
 
     // Temps actif
+    int timeActif = dataRun.computeTimeTot() - dataRun.computeTimePauseTot();
     view.getJLabelValTimeMovingTot()
-        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
+        .setText(TimeUnit.formatHundredSecondeTime(timeActif));
 
     // Temps pause
     view.getJLabelValTimePauseTot()
@@ -349,12 +347,12 @@ public class ModelRun {
     // vitesse moyenne
     view.getJLabelValSpeedMoy()
         .setText(SpeedPaceUnit.computeFormatSpeedWithUnit(dataRun
-            .getComputeDistanceTot(), dataRun.computeTimeTot()));
+            .getComputeDistanceTot(), timeActif));
 
     // allure moyenne
     view.getJLabelValAllure()
         .setText(PaceUnit.computeFormatAllureWithUnit(dataRun
-            .getComputeDistanceTot(), dataRun.computeTimeTot()));
+            .getComputeDistanceTot(), timeActif));
 
     // calories.
     value = RunLapTableManager.getInstance().computeCalories(dataRun.getId());

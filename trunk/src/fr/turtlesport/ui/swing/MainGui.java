@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -12,6 +13,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -136,6 +138,8 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private JButton              jButtonWorkout;
 
+  private JButton              jButtonCompare;
+
   private MainGuiMouseListener quitMouseListener;
 
   private MainGuiMouseListener aboutMouseListener;
@@ -194,6 +198,8 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private JMenuItemTurtle      jMenuItemRunGoogleMap;
 
+  private JMenuItemTurtle      jMenuItemRunCompare;
+
   /**
    * 
    */
@@ -202,7 +208,22 @@ public class MainGui extends JFrame implements LanguageListener {
     window = this;
 
     initialize();
+    // menuLinuxUnity();
   }
+
+  // private void menuLinuxUnity() {
+  // if (!OperatingSystem.isLinux()) {
+  // return;
+  // }
+  // try {
+  // Class<?> clazz = Class.forName("org.java.ayatana.ApplicationMenu");
+  // Method method = clazz.getDeclaredMethod("tryInstall", Window.class);
+  // method.invoke(clazz, this);
+  // }
+  // catch (Throwable e) {
+  // log.error("", e);
+  // }
+  // }
 
   public Properties getMenuProperties() {
     if (menuProperties == null) {
@@ -268,6 +289,7 @@ public class MainGui extends JFrame implements LanguageListener {
     jMenuItemRunDetail.setText(rb.getString("jMenuItemRunDetail"));
     jMenuItemRunDetailGps.setText(rb.getString("jMenuItemRunDetailGps"));
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
+    // jMenuItemRunCompare.setText(rb.getString("jMenuItemRunCompare"));
     if (jMenuItemRunEmail != null) {
       jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail"));
     }
@@ -394,6 +416,7 @@ public class MainGui extends JFrame implements LanguageListener {
   public void setEnableMenuRun(boolean b) {
     getJMenuItemRunDetail().setEnabled(b);
     getJMenuItemRunDetailGps().setEnabled(b);
+    getJMenuItemRunCompare().setEnabled(b);
     getJMenuItemRunMap().setEnabled(b);
     getJMenuItemRunGoogleEarth().setEnabled(b);
     getJMenuItemRunGoogleMap().setEnabled(b);
@@ -508,10 +531,14 @@ public class MainGui extends JFrame implements LanguageListener {
 
     // WorkoutAction workoutAction = new WorkoutAction();
     // jButtonWorkout.addActionListener(workoutAction);
-    // if (jMenuItemMail != null) {
-    // MailAction mailAction = new MailAction();
-    // jMenuItemMail.addActionListener(mailAction);
-    // }
+
+    if (jMenuItemMail != null) {
+      MailAction mailAction = new MailAction();
+      jMenuItemMail.addActionListener(mailAction);
+    }
+
+    // CompareAction cmpAction = new CompareAction();
+    // jButtonCompare.addActionListener(cmpAction);
 
     jMenuItemCheckUpdate.addActionListener(new CheckUpdateAction());
     jMenuItemDonate.addActionListener(new DonationAction());
@@ -598,6 +625,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jToolBar.add(getJButtonPrefUser());
       jToolBar.add(getJButtonStat());
       jToolBar.addSeparator();
+      // jToolBar.add(getJButtonCompare());
       jToolBar.add(getJButtonPreference());
       // jToolBar.add(getJButtonWorkout());
     }
@@ -630,6 +658,15 @@ public class MainGui extends JFrame implements LanguageListener {
       jButtonStat.setEnabled(true);
     }
     return jButtonStat;
+  }
+
+  private JButton getJButtonCompare() {
+    if (jButtonCompare == null) {
+      jButtonCompare = new JButton();
+      jButtonCompare.setIcon(ImagesMenuRepository.getImageIcon("turtle.png"));
+      jButtonCompare.setEnabled(true);
+    }
+    return jButtonCompare;
   }
 
   private JButton getJButtonWorkout() {
@@ -736,6 +773,7 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuRun.setFont(GuiFont.FONT_PLAIN);
       jMenuRun.add(getJMenuItemRunDetail());
       jMenuRun.add(getJMenuItemRunDetailGps());
+      jMenuRun.add(getJMenuItemRunCompare());
       jMenuRun.add(getJMenuItemRunMap());
       if (Mail.isSupported()) {
         jMenuRun.add(getJMenuItemRunEmail());
@@ -843,6 +881,21 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuItemRunGoogleMap.setEnabled(false);
     }
     return jMenuItemRunGoogleMap;
+  }
+
+  /**
+   * This method initializes jMenuItemRunGoogleEarth.
+   * 
+   * @return javax.swing.JMenuItem
+   */
+  protected JMenuItemTurtle getJMenuItemRunCompare() {
+    if (jMenuItemRunCompare == null) {
+      jMenuItemRunCompare = new JMenuItemTurtle();
+      jMenuItemRunCompare.setFont(GuiFont.FONT_PLAIN);
+      jMenuItemRunCompare.setAccelerator(menuProperties, "jMenuItemRunCompare");
+      jMenuItemRunCompare.setEnabled(false);
+    }
+    return jMenuItemRunCompare;
   }
 
   /**
@@ -1174,7 +1227,7 @@ public class MainGui extends JFrame implements LanguageListener {
    * 
    * @return javax.swing.JPanel
    */
-  private JSplitPane getJSplitPanelCenter() {
+  public JSplitPane getJSplitPanelCenter() {
     if (jSplitPaneCenter == null) {
       jSplitPaneCenter = new JSplitPane();
       jSplitPaneCenter.setOpaque(false);
@@ -1263,7 +1316,8 @@ public class MainGui extends JFrame implements LanguageListener {
      * (non-Javadoc)
      * 
      * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent
+     * )
      */
     public void actionPerformed(ActionEvent e) {
       // Affichage de l'IHM
@@ -1288,7 +1342,8 @@ public class MainGui extends JFrame implements LanguageListener {
      * (non-Javadoc)
      * 
      * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent
+     * )
      */
     public void actionPerformed(ActionEvent e) {
       try {
@@ -1319,7 +1374,8 @@ public class MainGui extends JFrame implements LanguageListener {
      * (non-Javadoc)
      * 
      * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent
+     * )
      */
     public void actionPerformed(ActionEvent e) {
       try {
@@ -1356,7 +1412,8 @@ public class MainGui extends JFrame implements LanguageListener {
      * (non-Javadoc)
      * 
      * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent
+     * )
      */
     public void actionPerformed(ActionEvent e) {
       // Affichage de l'IHM
@@ -1507,7 +1564,7 @@ public class MainGui extends JFrame implements LanguageListener {
             else if (deviceSelected instanceof GarminFitDevice) {
               GarminFitDevice fitDevice = (GarminFitDevice) deviceSelected;
 
-              List<File> list = fitDevice.getNewTcxFiles();
+              List<File> list = fitDevice.getNewFiles();
               File[] files = new File[list.size()];
               JDialogImport.prompt(list.toArray(files));
             }
@@ -1590,7 +1647,8 @@ public class MainGui extends JFrame implements LanguageListener {
      * (non-Javadoc)
      * 
      * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent
+     * )
      */
     public void actionPerformed(ActionEvent actionevent) {
       // ui
@@ -1609,7 +1667,8 @@ public class MainGui extends JFrame implements LanguageListener {
      * (non-Javadoc)
      * 
      * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent
+     * )
      */
     public void actionPerformed(ActionEvent actionevent) {
       // ui
@@ -1758,6 +1817,50 @@ public class MainGui extends JFrame implements LanguageListener {
 
   }
 
+  private class CompareAction extends AbstractAction {
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+     */
+    public void actionPerformed(ActionEvent e) {
+      if (jSplitPaneCenter.getRightComponent() instanceof JPanelCompareRun) {
+        return;
+      }
+
+      beforeRunnableSwing();
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+
+          try {
+            JPanelCompareRun panel = new JPanelCompareRun();
+            setRightComponent(panel);
+
+            // Appel du calendar
+            JPanelListDateRun panelListDateRun = (JPanelListDateRun) jSplitPaneCenter
+                .getLeftComponent();
+            // panelListDateRun.needDrngDrop(true);
+
+            // ModelWorkout w = new ModelWorkout();
+            // panel.setModel(w);
+            MainGui.getWindow().setEnableMenuRun(false);
+            // Pour les boutons de navigation avec CDE/Motif
+            if (SwingLookAndFeel.isLookAndFeelMotif()) {
+              MainGui.getWindow().updateComponentTreeUI();
+            }
+          }
+          catch (Throwable e) {
+            log.error("", e);
+          }
+          afterRunnableSwing();
+        }
+      });
+
+    }
+
+  }
+
   /**
    * @author Denis Apparicio
    * 
@@ -1855,6 +1958,12 @@ public class MainGui extends JFrame implements LanguageListener {
         ModelPointsManager.getInstance().removeAllChangeListener();
         ModelMapkitManager.getInstance().removeAllChangeListener();
       }
+      // else {
+      // JPanelListDateRun panelCalendar = getListDateRun();
+      // if (panelCalendar != null) {
+      // panelCalendar.needDrngDrop(false);
+      // }
+      // }
 
       if (LanguageListener.class.isAssignableFrom(jSplitPaneCenter
           .getRightComponent().getClass())) {
@@ -1906,7 +2015,8 @@ public class MainGui extends JFrame implements LanguageListener {
      * (non-Javadoc)
      * 
      * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent
+     * )
      */
     public void actionPerformed(ActionEvent e) {
       MainGui.this.setTitle("Turtle Sport - " + getText());

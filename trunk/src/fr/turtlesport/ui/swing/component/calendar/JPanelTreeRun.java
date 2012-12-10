@@ -3,6 +3,8 @@ package fr.turtlesport.ui.swing.component.calendar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -15,7 +17,11 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataHandler;
+import javax.swing.DropMode;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
@@ -25,6 +31,7 @@ import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -142,6 +149,8 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
 
   private JMenuItemTurtle                 jMenuItemDateExportTcx;
 
+//  private MyTransferHandler               transfertHandler         = new MyTransferHandler();
+
   // Ressource
   private ResourceBundle                  rb;
 
@@ -152,6 +161,27 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     super();
     initialize();
   }
+
+  /*
+   * // * (non-Javadoc) // * // * @see // *
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#needDrngDrop //
+   * * (boolean) //
+   */
+  // @Override
+  // public void needDrngDrop(boolean isNeeded) {
+  // if (isNeeded) {
+  // jTreeTable.getSelectionModel()
+  // .removeListSelectionListener(selectionListener);
+  // jTreeTable.setDragEnabled(true);
+  // jTreeTable.setDropMode(DropMode.USE_SELECTION);
+  // jTreeTable.setTransferHandler(transfertHandler);
+  // }
+  // else {
+  // jTreeTable.getSelectionModel()
+  // .addListSelectionListener(selectionListener);
+  // jTreeTable.setDragEnabled(false);
+  // }
+  // }
 
   /*
    * (non-Javadoc)
@@ -272,7 +302,6 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     add(getJLabelRun(), BorderLayout.SOUTH);
 
     selectionListener = new JTreeTableListSelectionListener();
-    jTreeTable.getSelectionModel().addListSelectionListener(selectionListener);
 
     getJPopupMenuDate();
     getJPopupMenuRun();
@@ -300,7 +329,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
       final EmailActionListener actionMail = new EmailActionListener();
       getJMenuItemRunEmail().addActionListener(actionMail);
     }
-    
+
     final ExportActionListener actionKml = new ExportActionListener(FactoryGeoConvertRun.KML);
     getJMenuItemRunExportGoogleEarth().addActionListener(actionKml);
 
@@ -326,6 +355,8 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
+
+    jTreeTable.getSelectionModel().addListSelectionListener(selectionListener);
   }
 
   /**
@@ -1094,9 +1125,8 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event
-     * .ListSelectionEvent)
+     * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.
+     * event .ListSelectionEvent)
      */
     public void valueChanged(ListSelectionEvent e) {
       if (e != null && e.getValueIsAdjusting()) {
@@ -1234,6 +1264,11 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     }
 
     @Override
+    public void mouseClicked(MouseEvent e) {
+      rowChanged();
+    }
+
+    @Override
     public void mouseEntered(MouseEvent e) {
       jTreeTable.requestFocusInWindow();
     }
@@ -1283,7 +1318,66 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
         // Annee et Mois
         getJPopupMenuDate().show(e.getComponent(), e.getX(), e.getY());
       }
+    }
 
+    public void rowChanged() {
+      jTreeTable.requestFocusInWindow();
+
+      // recuperation de la selection
+      int[] tabIndex = jTreeTable.getSelectedRows();
+      if (tabIndex == null || tabIndex.length != 1) {
+        // une seule selection autorisee
+        return;
+      }
+      int viewRow = jTreeTable.getSelectedRow();
+      if (viewRow < 0) {
+        return;
+      }
+      TreePath treePath = jTreeTable.getPathForRow(viewRow);
+      DefaultMutableTreeTableNode node = (DefaultMutableTreeTableNode) treePath
+          .getLastPathComponent();
+      if (node.getUserObject() == null
+          || !(node.getUserObject() instanceof DataRun)) {
+        return;
+      }
+
+      final DataRun dataRun = (DataRun) node.getUserObject();
+      final int index = tableModel.listRun.indexOf(dataRun);
+
+      MainGui.getWindow().beforeRunnableSwing();
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          try {
+            if (index != -1) {
+              updateNumCourse(index + 1);
+            }
+
+            JPanelRun panelRun = null;
+
+            Object obj = MainGui.getWindow().getRightComponent();
+            if (!(obj instanceof JPanelRun)) {
+              panelRun = new JPanelRun();
+              MainGui.getWindow().setRightComponent(panelRun);
+            }
+            else {
+              panelRun = (JPanelRun) obj;
+            }
+
+            // Recuperation du run.
+            ModelRun model = panelRun.getModel();
+            model.updateView(panelRun, dataRun);
+          }
+          catch (SQLException e) {
+            log.error("", e);
+            ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+                .getManager().getCurrentLang(), JPanelCalendar.class);
+            JShowMessage.error(rb.getString("errorSQL"));
+          }
+          finally {
+            MainGui.getWindow().afterRunnableSwing();
+          }
+        }
+      });
     }
   }
 
@@ -1366,7 +1460,8 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
   // * (non-Javadoc)
   // *
   // * @see
-  // * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+  // *
+  // java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
   // */
   // public void actionPerformed(ActionEvent ae) {
   //
@@ -1436,9 +1531,8 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * fr.turtlesport.ui.swing.action.ExportAllActionListener.YearMonth#getLibelle
-     * ()
+     * @see fr.turtlesport.ui.swing.action.ExportAllActionListener.YearMonth#
+     * getLibelle ()
      */
     @Override
     public String getLibelle() {
@@ -1448,6 +1542,45 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
         name.append(formatMonth.getMonths()[getMonth() - 1]);
       }
       return name.toString();
+    }
+  }
+
+  private class MyTransferHandler extends TransferHandler {
+    private DataFlavor localObjectFlavor = new ActivationDataFlavor(DataRun.class,
+                                                                    DataFlavor.javaJVMLocalObjectMimeType,
+                                                                    "datarun");
+
+    @Override
+    protected Transferable createTransferable(JComponent c) {
+      // recuperation de la selection
+      int[] tabIndex = jTreeTable.getSelectedRows();
+      if (tabIndex == null || tabIndex.length != 1) {
+        // une seule selection autorisee
+        return null;
+      }
+      int viewRow = jTreeTable.getSelectedRow();
+      if (viewRow < 0) {
+        return null;
+      }
+      TreePath treePath = jTreeTable.getPathForRow(viewRow);
+      DefaultMutableTreeTableNode node = (DefaultMutableTreeTableNode) treePath
+          .getLastPathComponent();
+      if (node.getUserObject() == null
+          || !(node.getUserObject() instanceof DataRun)) {
+        return null;
+      }
+
+      return new DataHandler(node.getUserObject(),
+                             localObjectFlavor.getMimeType());
+    }
+
+    @Override
+    protected void exportDone(JComponent source, Transferable data, int action) {
+    }
+
+    @Override
+    public int getSourceActions(JComponent c) {
+      return COPY;
     }
   }
 

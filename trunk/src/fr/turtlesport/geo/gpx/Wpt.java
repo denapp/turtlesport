@@ -11,6 +11,10 @@ public class Wpt extends GeoPositionWithAlt {
 
   private String desc;
 
+  public Wpt() {
+    super();
+  }
+
   /**
    * @param latitude
    * @param longitude

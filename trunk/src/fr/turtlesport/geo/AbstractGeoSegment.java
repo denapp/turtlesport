@@ -113,6 +113,14 @@ public abstract class AbstractGeoSegment implements IGeoSegment {
     return timeTot;
   }
 
+  /* (non-Javadoc)
+   * @see fr.turtlesport.geo.IGeoSegment#getTotalMovingTime()
+   */
+  @Override
+  public long getTotalPauseTime() {
+    return getTotalTime();
+  }
+
   /*
    * (non-Javadoc)
    * 

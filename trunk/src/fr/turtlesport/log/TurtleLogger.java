@@ -30,7 +30,7 @@ public class TurtleLogger extends Logger {
    * This method overrides {@link Logger#getLogger}by supplying its own factory
    * type as a parameter.
    */
-  public static Logger getLogger(Class<?> clazz) {
+  public static Logger getLogger(Class clazz) {
     return getLogger(clazz.getName());
   }
 
