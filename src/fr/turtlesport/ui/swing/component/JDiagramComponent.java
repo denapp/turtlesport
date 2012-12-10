@@ -36,6 +36,7 @@ import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.model.ChangeMapEvent;
 import fr.turtlesport.ui.swing.model.ChangeMapListener;
@@ -57,6 +58,9 @@ import fr.turtlesport.util.ResourceBundleUtility;
  */
 public class JDiagramComponent extends JPanel implements LanguageListener,
                                              UnitListener {
+  private static TurtleLogger         log             = (TurtleLogger) TurtleLogger
+                                                          .getLogger(JDiagramComponent.class);
+
   private BufferedImage               bimg;
 
   private Toolkit                     toolkit;
@@ -624,9 +628,6 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       return;
     }
 
-    if (model.getIntervalX1() == 0) {
-      System.out.println("");
-    }
     if (model.getIntervalX1() != -1
         && (model.getIntervalX1() == 0 || (model.getIntervalX1() >= model
             .getDistance(model.indexX1)))
@@ -1669,8 +1670,8 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       for (int i = 0; i < points.size() - 1; i++) {
         long time = points.get(i + 1).getTime().getTime()
                     - points.get(i).getTime().getTime();
-        float dist = points.get(i + 1).getDistance()
-                     - points.get(i).getDistance();
+         float dist = points.get(i + 1).getDistance()
+         - points.get(i).getDistance();
 
         double speed = (time == 0) ? 0.D : (dist / time) * 3600;
         points.get(i + 1).setSpeed(speed);

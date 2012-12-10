@@ -61,7 +61,8 @@ public class GeoPosition implements IGeoPosition {
    * @see fr.turtlesport.geo.IGeoPosition#iPositionInvalid()
    */
   public boolean isInvalidPosition() {
-    return (latitude == INVALID_POS && longitude == INVALID_POS);
+    //return (latitude == INVALID_POS && longitude == INVALID_POS);
+    return (Double.isNaN(latitude) && Double.isNaN(longitude));
   }
 
   /*

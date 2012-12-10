@@ -52,7 +52,7 @@ public class JPanelCalendar extends JPanel implements IListDateRunFire,
     initialize();
     setModel(new ModelRunCalendar());
   }
-
+  
   /*
    * (non-Javadoc)
    * 

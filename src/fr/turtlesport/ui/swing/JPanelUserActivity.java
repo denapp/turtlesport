@@ -15,6 +15,7 @@ import java.util.ResourceBundle;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
@@ -153,6 +154,8 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
 
   private JCheckBox                           jCheckBoxDefaultActivity;
 
+  private JButton                             jButtonCalculate;                             ;
+
   // Formatter
   public static final DefaultFormatterFactory TIME_FORMATTER_FACTORY  = TextFormatterFactory
                                                                           .createTime();
@@ -233,6 +236,7 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
     borderPanelZoneSpeed.setTitle(rb.getString("borderPanelZoneSpeed"));
     jRadioButtonBpm.setText(rb.getString("jRadioButtonBpm"));
     jRadioButtonPourFcMax.setText(rb.getString("jRadioButtonPourFcMax"));
+    jButtonCalculate.setText("Calculate");
   }
 
   /*
@@ -459,8 +463,14 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
     jComboBoxSpeedAndPaceUnits.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         JComboBox cb = (JComboBox) e.getSource();
-        model.setUnitSpeedAndSpace(JPanelUserActivity.this, (String) cb
-            .getSelectedItem());
+        model.setUnitSpeedAndSpace(JPanelUserActivity.this,
+                                   (String) cb.getSelectedItem());
+      }
+    });
+    
+    jButtonCalculate.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        model.calculateHeartZones(JPanelUserActivity.this);
       }
     });
 
@@ -596,6 +606,14 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
       g.anchor = GridBagConstraints.WEST;
       g.gridwidth = GridBagConstraints.REMAINDER;
       jPanelZoneHeart.add(getJRadioButtonPourFcMax(), g);
+      
+      jButtonCalculate = new JButton();
+      jButtonCalculate.setFont(GuiFont.FONT_PLAIN);
+      g = new GridBagConstraints();
+      g.insets = insets1;
+      g.anchor = GridBagConstraints.EAST;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      jPanelZoneHeart.add(jButtonCalculate, g);
     }
     return jPanelZoneHeart;
   }

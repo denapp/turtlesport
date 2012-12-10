@@ -192,12 +192,12 @@ public class ModelDialogMap {
     // Temps tot
     view.getJPanelRight()
         .getJLabelValTimeTot()
-        .setText(TimeUnit.formatHundredSecondeTime(dataRun
-            .computeTimePauseTot() + dataRun.computeTimeTot()));
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
 
     // Temps
+    int timeMoving = dataRun.computeTimeTot() - dataRun.computeTimePauseTot();
     view.getJPanelRight().getjLabelValTimeMovingTot()
-        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
+        .setText(TimeUnit.formatHundredSecondeTime(timeMoving));
 
     // Temps pause
     view.getJPanelRight()
@@ -209,13 +209,13 @@ public class ModelDialogMap {
     view.getJPanelRight()
         .getJLabelValSpeedMoyTot()
         .setText(SpeedPaceUnit.computeFormatSpeedWithUnit(dataRun
-            .getComputeDistanceTot(), dataRun.computeTimeTot()));
+            .getComputeDistanceTot(), timeMoving));
 
     // allure moyenne
     view.getJPanelRight()
         .getJLabelValAllureTot()
         .setText(PaceUnit.computeFormatAllureWithUnit(dataRun
-            .getComputeDistanceTot(), dataRun.computeTimeTot()));
+            .getComputeDistanceTot(), timeMoving));
 
     // calories.
     value = RunLapTableManager.getInstance().computeCalories(dataRun.getId());

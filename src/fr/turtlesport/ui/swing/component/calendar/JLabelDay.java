@@ -1,14 +1,23 @@
 package fr.turtlesport.ui.swing.component.calendar;
 
 import java.awt.Color;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataHandler;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 
+import fr.turtlesport.db.DataRun;
+import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.MainGui;
 
@@ -35,7 +44,7 @@ public class JLabelDay extends JLabel implements CalendarDayListener {
 
   /** texte du jour */
   private int                 dayOfMonth;
-
+  
   /*
    * 
    */
@@ -47,8 +56,10 @@ public class JLabelDay extends JLabel implements CalendarDayListener {
     isSelect = false;
     isActive = false;
     nbEvents = 0;
-
-    addMouseListener(new DayMouseListener());
+    
+    DayMouseListener listener = new DayMouseListener();
+    addMouseListener(listener);
+    addMouseMotionListener(listener);
   }
 
   /**
@@ -112,6 +123,7 @@ public class JLabelDay extends JLabel implements CalendarDayListener {
    * 
    */
   public void reset() {
+	setTransferHandler(null);
     isActive = false;
     isSelect = false;
     nbEvents = 0;
@@ -137,6 +149,7 @@ public class JLabelDay extends JLabel implements CalendarDayListener {
    * 
    */
   public void fireActive() {
+	setTransferHandler(new MyTransferHandler());
     isActive = true;
     isSelect = false;
     nbEvents++;
@@ -205,9 +218,20 @@ public class JLabelDay extends JLabel implements CalendarDayListener {
             MainGui.getWindow().afterRunnableSwing();
           }
         });
-
       }
     }
+
+	@Override
+	public void mouseDragged(MouseEvent evt) {
+	  if (JLabelDay.this.isActive) {
+	    JComponent comp = (JComponent)evt.getSource();
+	    TransferHandler th = comp.getTransferHandler();
+	    if (th != null) {
+	      // Start the drag operation
+	      th.exportAsDrag(comp, evt, TransferHandler.COPY);
+	    } 
+	  }
+	}
 
   }
 
@@ -252,6 +276,36 @@ public class JLabelDay extends JLabel implements CalendarDayListener {
         isSelect = false;
       }
     }
+  }
+  
+  private class MyTransferHandler extends TransferHandler {
+	  private DataFlavor localObjectFlavor = new ActivationDataFlavor(
+				DataRun.class, DataFlavor.javaJVMLocalObjectMimeType, "datarun");
+	  
+	  @Override
+		protected Transferable createTransferable(JComponent c) {
+		  // recuperation des donnees
+		   DataRun dataRun;
+	  	   try {
+			  dataRun = RunTableManager.getInstance().findNext(MainGui.getWindow()
+			                                                         .getCurrentIdUser(),
+			                                                     JLabelDay.this.getDate());
+			  return new DataHandler(dataRun, localObjectFlavor.getMimeType());
+
+		   } catch (SQLException e) { 
+		   }
+	  	   return null;
+		}
+
+		@Override
+		protected void exportDone(JComponent source, Transferable data,
+				int action) {
+		}
+
+		@Override
+		public int getSourceActions(JComponent c) {
+			return COPY;
+		}
   }
 
 }

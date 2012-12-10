@@ -24,6 +24,13 @@ public interface IGeoPositionWithAlt extends IGeoPosition {
   int getHeartRate();
 
   /**
+   * Restitue la vitesse pour ce point en km/h.
+   * 
+   * @return la vitesse pour ce point.
+   */
+  float getSpeed();
+  
+  /**
    * Restitue la distance pour ce point.
    * 
    * @return la distance pour ce point.

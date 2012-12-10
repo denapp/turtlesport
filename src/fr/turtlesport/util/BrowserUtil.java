@@ -1,5 +1,6 @@
 package fr.turtlesport.util;
 
+import java.awt.Desktop;
 import java.lang.reflect.Method;
 import java.net.URI;
 
@@ -50,26 +51,7 @@ public final class BrowserUtil {
         LaunchWinApp.launch("open", uri.toString());
       }
       else if (OperatingSystem.isUnix()) {
-        String[] browsers = { "firefox",
-            "google-chrome",
-            "konqueror",
-            "epiphany",
-            "mozilla",
-            "netscape",
-            "opera",
-            "links",
-            "lynx" };
-        String browser = null;
-        for (int i = 0; i < browsers.length; i++) {
-          if (Runtime.getRuntime().exec(new String[] { "which", browsers[i] })
-              .waitFor() == 0) {
-            browser = browsers[i];
-            break;
-          }
-        }
-        if (browser != null) {
-          Runtime.getRuntime().exec(new String[] { browser, uri.toString() });
-        }
+        Exec.exec(new String[] {"xdg-open", uri.toString()});
       }
       else if (OperatingSystem.isMacOSX()) {
         try {
@@ -92,29 +74,8 @@ public final class BrowserUtil {
 
   private static boolean isDesktopBrowseSupported() {
     try {
-      Class<?> classDesktop = Class.forName("java.awt.Desktop");
-
-      Boolean b = (Boolean) classDesktop.getMethod("isDesktopSupported")
-          .invoke(classDesktop);
-      if (!b.booleanValue()) {
-        return false;
-      }
-
-      Object objDesktop = classDesktop.getMethod("getDesktop")
-          .invoke(classDesktop);
-      Class<?> classAction = Class.forName("java.awt.Desktop$Action");
-      Method method = classDesktop.getMethod("isSupported", classAction);
-
-      Object enumMail = null;
-      for (Object c : classAction.getEnumConstants()) {
-        if ("BROWSE".equals(c.toString())) {
-          enumMail = c;
-          break;
-        }
-      }
-
-      b = (Boolean) method.invoke(objDesktop, enumMail);
-      return b.booleanValue();
+      return Desktop.isDesktopSupported()
+             && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE);
     }
     catch (Throwable e) {
       return false;
@@ -123,11 +84,7 @@ public final class BrowserUtil {
 
   private static boolean desktopBrowse(URI uri) {
     try {
-      Class<?> clazz = Class.forName("java.awt.Desktop");
-      Object objDesktop = clazz.getMethod("getDesktop").invoke(clazz);
-
-      Method method = clazz.getMethod("browse", URI.class);
-      method.invoke(objDesktop, uri);
+      Desktop.getDesktop().browse(uri);
       return true;
     }
     catch (Throwable e) {

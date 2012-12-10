@@ -89,7 +89,9 @@ public final class Launcher {
       logProperty("java.vendor");
       logProperty("java.runtime.name");
       logProperty("java.version");
+      logProperty("java.vm.name");
       logProperty("java.vm.version");
+      logProperty("sun.arch.data.model"); 
       logProperty("prop application.home");
       logProperty("os.name");
       logProperty("os.arch");

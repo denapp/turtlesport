@@ -1,6 +1,7 @@
 package fr.turtlesport.garmin;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -13,6 +14,10 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
+/**
+ * @author Denis Apparicio
+ *
+ */
 public class FitInfo {
   private String id;
 
@@ -22,6 +27,14 @@ public class FitInfo {
 
   private File dir;
 
+  protected static String[] GARMIN_DEVICE_NAME = {"GarminDevice.XML", "GarminDevice.xml"};
+  
+  /**
+   * @param dir
+   * @throws SAXException
+   * @throws IOException
+   * @throws ParserConfigurationException
+   */
   protected FitInfo(File dir) throws SAXException,
                              IOException,
                              ParserConfigurationException {
@@ -30,10 +43,24 @@ public class FitInfo {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder = factory.newDocumentBuilder();
 
-    Document doc = builder.parse(new File(dir, "GarminDevice.XML"));
+    File file = null;
+    for(String s: GARMIN_DEVICE_NAME) {
+      file = new File(dir, s);  
+      if (file.isFile()) {
+        break;
+      }
+    }
+    if (file == null) {
+      throw new FileNotFoundException("GarminDevice.XML");
+    }
+    
+    Document doc = builder.parse(file);
 
     id = getText(doc.getDocumentElement(), "Id");
     displayName = getText(doc.getDocumentElement(), "DisplayName");
+    if (displayName == null) {
+      displayName = getText(doc.getDocumentElement(), "Description");
+    }
     softwareVersion = getText(doc.getDocumentElement(), "SoftwareVersion");
   }
 

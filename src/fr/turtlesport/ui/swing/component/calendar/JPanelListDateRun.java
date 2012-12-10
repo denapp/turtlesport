@@ -41,10 +41,17 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
 
   private static final int VIEW_LIST     = 3;
 
+//  private boolean          isNeedDrngDrop;
+
   public JPanelListDateRun() {
     super();
     initialize();
   }
+
+//  public void needDrngDrop(boolean isNeedDrngDrop) {
+//    this.isNeedDrngDrop = isNeedDrngDrop;
+//    panelDateRun.needDrngDrop(isNeedDrngDrop);
+//  }
 
   private void initialize() {
     setLayout(new BorderLayout());
@@ -235,6 +242,7 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
         JPanelListDateRun.this.remove(cmp);
         JPanelListDateRun.this.add((Component) panelDateRun,
                                    BorderLayout.CENTER);
+        // panelDateRun.needDrngDrop(isNeedDrngDrop);
 
         // Recuperation des dates
         MainGui.getWindow().fireHistoric();
@@ -277,6 +285,7 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
         JPanelListDateRun.this.remove(cmp);
         JPanelListDateRun.this.add((Component) panelDateRun,
                                    BorderLayout.CENTER);
+        // panelDateRun.needDrngDrop(isNeedDrngDrop);
 
         // Recuperation des dates
         MainGui.getWindow().fireHistoric();

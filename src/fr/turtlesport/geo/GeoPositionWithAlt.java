@@ -25,6 +25,8 @@ public class GeoPositionWithAlt extends GeoPosition implements
 
   private double                        distanceMeters;
 
+  private float                         speed     = -1;
+
   /**
    * Construit une instance de GeoPosition.
    * 
@@ -69,6 +71,29 @@ public class GeoPositionWithAlt extends GeoPosition implements
    */
   public GeoPositionWithAlt(double latitude, double longitude) {
     this(latitude, longitude, Double.NaN);
+  }
+
+  public boolean isValidHeartRate() {
+    return (heartRate >= 10 && heartRate < 230);
+  }
+
+  public boolean isInvalidSpeed() {
+    return speed <= -1;
+  }
+  
+  /* (non-Javadoc)
+   * @see fr.turtlesport.geo.IGeoPositionWithAlt#getSpeed()
+   */
+  @Override
+  public float getSpeed() {
+    return speed;
+  }
+
+  /**
+   * @param speed
+   */
+  public void setSpeed(float speed) {
+    this.speed = speed;
   }
 
   /*
@@ -207,7 +232,7 @@ public class GeoPositionWithAlt extends GeoPosition implements
    * @see fr.turtlesport.geo.IGeoPositionWithAlt#isValidCadence()
    */
   public boolean isValidCadence() {
-    return cadence >=0 && cadence < 0xFF;
+    return cadence >= 0 && cadence < 0xFF;
   }
 
   /*

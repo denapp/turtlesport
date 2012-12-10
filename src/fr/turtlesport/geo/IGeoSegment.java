@@ -31,11 +31,18 @@ public interface IGeoSegment {
   void setStartTime(Date startTime);
 
   /**
-   * Restitue la dur&eacute;e  en milli-secondes.
+   * Restitue la dur&eacute;e  en milli-secondes sans les pauses.
    * 
    * @returnle la dur&eacute;e  en milli-secondes.
    */
   long getTotalTime();
+  
+  /**
+   * Restitue la dur&eacute;e  en milli-secondes de pause.
+   * 
+   * @returnle la dur&eacute;e  en milli-secondes.
+   */
+  long getTotalPauseTime();
   
   /**
    * Restitue la distance de ce segment.

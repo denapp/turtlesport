@@ -105,6 +105,9 @@ public abstract class AbstractDataActivity implements
    *          la nouvelle valeur.
    */
   public void setMaxHeartRate(int maxHeartRate) {
+    if (maxHeartRate < 60) {
+      maxHeartRate = 60;
+    }
     this.maxHeartRate = maxHeartRate;
   }
 

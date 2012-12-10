@@ -3,6 +3,8 @@ package fr.turtlesport.ui.swing.component.calendar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
@@ -11,6 +13,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataHandler;
+import javax.swing.DropMode;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
@@ -19,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -70,50 +77,56 @@ import fr.turtlesport.util.ResourceBundleUtility;
 public class JPanelTableRun extends JPanel implements IListDateRunFire,
                                           LanguageListener, UnitListener {
 
-  private static TurtleLogger      log;
+  private static TurtleLogger         log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelTableRun.class);
   }
 
-  private JXTable                  jTable;
+  private JXTable                     jTable;
 
-  private DateShortDayCellRenderer dateShortDayCellRenderer = new DateShortDayCellRenderer();
+  private DateShortDayCellRenderer    dateShortDayCellRenderer = new DateShortDayCellRenderer();
 
   // model
-  private ModelRunTable            model;
+  private ModelRunTable               model;
 
-  private TableModelRun            tableModel;
+  private TableModelRun               tableModel;
 
-  private JLabel                   jLabelRun;
+  private JLabel                      jLabelRun;
 
-  private JPopupMenu               jPopupMenu;
+  private JPopupMenu                  jPopupMenu;
 
-  private JMenuItemTurtle          jMenuItemRunDetail;
+  private JMenuItemTurtle             jMenuItemRunDetail;
 
-  private JMenuItemTurtle          jMenuItemRunDetailGps;
+  private JMenuItemTurtle             jMenuItemRunDetailGps;
 
-  private JMenuItemTurtle          jMenuItemRunMap;
+  private JMenuItemTurtle             jMenuItemRunMap;
 
-  private JMenuItemTurtle          jMenuItemRunGoogleEarth;
+  private JMenuItemTurtle             jMenuItemRunGoogleEarth;
 
-  private JMenuItemTurtle          jMenuItemRunEmail;
+  private JMenuItemTurtle             jMenuItemRunEmail;
 
-  private JMenuItemTurtle          jMenuItemRunDelete;
+  private JMenuItemTurtle             jMenuItemRunDelete;
 
-  private JMenuItemTurtle          jMenuItemRunExportGoogleEarth;
+  private JMenuItemTurtle             jMenuItemRunExportGoogleEarth;
 
-  private JMenu                    jMenuRunExport;
+  private JMenu                       jMenuRunExport;
 
-  private JMenuItemTurtle          jMenuItemRunExportGpx;
+  private JMenuItemTurtle             jMenuItemRunExportGpx;
 
-  private JMenuItemTurtle          jMenuItemRunExportTcx;
+  private JMenuItemTurtle             jMenuItemRunExportTcx;
 
-  private JMenuItemTurtle          jMenuItemRunExportHst;
+  private JMenuItemTurtle             jMenuItemRunExportHst;
 
-  private JMenuItemTurtle          jMenuItemRunGoogleMap;
+  private JMenuItemTurtle             jMenuItemRunGoogleMap;
+
+  private JMenuItemTurtle             jMenuItemRunCompare;
 
   // Ressource
-  private ResourceBundle           rb;
+  private ResourceBundle              rb;
+
+  private JTableListSelectionListener listSelectionListener    = new JTableListSelectionListener();
+
+//  private MyTransferHandler           transferHandler          = new MyTransferHandler();
 
   /**
    * Create the panel.
@@ -123,6 +136,30 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     initialize();
     setModel(new ModelRunTable());
   }
+
+//  /*
+//   * (non-Javadoc)
+//   * 
+//   * @see
+//   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#needDrngDrop
+//   * (boolean)
+//   */
+//  @Override
+//  public void needDrngDrop(boolean isNeeded) {
+//    if (isNeeded) {
+//      jTable.getSelectionModel()
+//          .removeListSelectionListener(listSelectionListener);
+//      jTable.setDragEnabled(true);
+//      jTable.setDropMode(DropMode.USE_SELECTION);
+//      jTable.setTransferHandler(transferHandler);
+//    }
+//    else {
+//      jTable.getSelectionModel()
+//          .addListSelectionListener(listSelectionListener);
+//      jTable.setDragEnabled(false);
+//    }
+//
+//  }
 
   /*
    * (non-Javadoc)
@@ -209,6 +246,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
     jMenuItemRunGoogleEarth.setText(rb.getString("jMenuItemRunGoogleEarth"));
     jMenuItemRunGoogleMap.setText(rb.getString("jMenuItemRunGoogleMap"));
+//    jMenuItemRunCompare.setText(rb.getString("jMenuItemRunCompare"));    
     if (jMenuItemRunEmail != null) {
       jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail"));
     }
@@ -220,7 +258,6 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     jMenuItemRunExportHst.setText(rb.getString("jMenuItemRunExportHst"));
     jMenuItemRunDelete.setText(rb.getString("jMenuItemRunDelete"));
     jMenuItemRunDetailGps.setText(rb.getString("jMenuItemRunDetailGps"));
-
   }
 
   private void initialize() {
@@ -234,9 +271,6 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     setLayout(new BorderLayout(0, 0));
     add(scrollPane, BorderLayout.CENTER);
     add(getJLabelRun(), BorderLayout.SOUTH);
-
-    jTable.getSelectionModel()
-        .addListSelectionListener(new JTableListSelectionListener());
 
     // Evenements
     jTable.addMouseListener(new PopupListener());
@@ -260,7 +294,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
       final EmailActionListener actionMail = new EmailActionListener();
       getJMenuItemRunEmail().addActionListener(actionMail);
     }
-    
+
     final ExportActionListener actionKml = new ExportActionListener(FactoryGeoConvertRun.KML);
     getJMenuItemRunExportGoogleEarth().addActionListener(actionKml);
 
@@ -276,6 +310,8 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     final DeleteActionListener actionDelete = new DeleteActionListener();
     getJMenuItemRunDelete().addActionListener(actionDelete);
 
+    jTable.getSelectionModel().addListSelectionListener(listSelectionListener);
+    
     // Langue / unit
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
@@ -289,9 +325,9 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
    *          <code>true</code> pour activer les menus de course.
    */
   public void setEnableMenuRun(boolean b) {
-    getJMenuItemRunMap().setEnabled(b);
     getJMenuItemRunDetail().setEnabled(b);
     getJMenuItemRunDetailGps().setEnabled(b);
+    getJMenuItemRunMap().setEnabled(b);
     getJMenuItemRunGoogleEarth().setEnabled(b);
     getJMenuItemRunGoogleMap().setEnabled(b);
     if (jMenuItemRunEmail != null) {
@@ -412,7 +448,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     }
     return jMenuItemRunGoogleMap;
   }
-
+  
   /**
    * This method initializes jMenuItemRunEmail.
    * 
@@ -568,6 +604,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
           column.setCellRenderer(tableModel.getCellRenderer(i));
         }
       }
+            
       jTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
       jTable.getTableHeader().setFont(GuiFont.FONT_PLAIN);
       jTable.setSortable(false);
@@ -851,10 +888,6 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     }
   }
 
-  /**
-   * @author Denis Apparicio
-   * 
-   */
   private class JTableListSelectionListener implements ListSelectionListener {
 
     /*
@@ -924,10 +957,15 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     }
 
     @Override
+    public void mouseClicked(MouseEvent e) {
+      rowChanged();
+    }
+
+    @Override
     public void mouseEntered(MouseEvent e) {
       jTable.requestFocusInWindow();
     }
-    
+
     @Override
     public void mousePressed(MouseEvent e) {
       maybeShowPopup(e);
@@ -956,6 +994,73 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
 
       getJPopupMenu().show(e.getComponent(), e.getX(), e.getY());
     }
+
+    public void rowChanged() {
+      int[] tabIndex = jTable.getSelectedRows();
+      if (tabIndex != null && tabIndex.length == 1) {
+        // une selection
+        int viewRow = jTable.getSelectedRow();
+        if (viewRow >= 0) {
+          int modelRow = jTable.convertRowIndexToModel(viewRow);
+          final DataRun dataRun = tableModel.listRows.get(modelRow);
+
+          MainGui.getWindow().beforeRunnableSwing();
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              JPanelRun panelRun = null;
+
+              Object obj = MainGui.getWindow().getRightComponent();
+              if (!(obj instanceof JPanelRun)) {
+                panelRun = new JPanelRun();
+                MainGui.getWindow().setRightComponent(panelRun);
+              }
+              else {
+                panelRun = (JPanelRun) obj;
+              }
+
+              // Recuperation du run.
+              try {
+                ModelRun model = panelRun.getModel();
+                model.updateView(panelRun, dataRun);
+              }
+              catch (SQLException e) {
+                log.error("", e);
+                ResourceBundle rb = ResourceBundleUtility
+                    .getBundle(LanguageManager.getManager().getCurrentLang(),
+                               JPanelCalendar.class);
+                JShowMessage.error(rb.getString("errorSQL"));
+              }
+              MainGui.getWindow().afterRunnableSwing();
+            }
+          });
+
+          // mis a jour libelle course
+          updateNumCourse();
+        }
+      }
+    }
   }
 
+  private class MyTransferHandler extends TransferHandler {
+    private DataFlavor localObjectFlavor = new ActivationDataFlavor(DataRun.class,
+                                                                    DataFlavor.javaJVMLocalObjectMimeType,
+                                                                    "datarun");
+
+    @Override
+    protected Transferable createTransferable(JComponent c) {
+      int viewRow = jTable.getSelectedRow();
+      DataRun run = tableModel.listRows.get(viewRow);
+      return new DataHandler(run, localObjectFlavor.getMimeType());
+    }
+
+    @Override
+    protected void exportDone(JComponent source, Transferable data, int action) {
+    }
+
+    @Override
+    public int getSourceActions(JComponent c) {
+      return COPY;
+    }
+
+  }
 }

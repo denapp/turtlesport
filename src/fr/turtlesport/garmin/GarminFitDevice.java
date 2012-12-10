@@ -2,6 +2,7 @@ package fr.turtlesport.garmin;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,17 +17,28 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.RunTableManager;
+import fr.turtlesport.geo.GeoLoadException;
+import fr.turtlesport.geo.garmin.fit.FitFile;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.OperatingSystem;
 
+/**
+ * @author Denis Apparicio
+ * 
+ */
 public class GarminFitDevice implements IGarminDevice {
-  private static TurtleLogger log = (TurtleLogger) TurtleLogger
-                                      .getLogger(GarminFitDevice.class);
+  private static TurtleLogger   log      = (TurtleLogger) TurtleLogger
+                                             .getLogger(GarminFitDevice.class);
 
-  private FitInfo             info;
+  private FitInfo               info;
+
+  /** Noms des repertoires TCX */
+  private static final String[] DIRS_TCX = { "History" };
+
+  /** Noms des repertoires FIT */
+  private static final String[] DIRS_FIT = { "Activities", "ACTIVITY" };
 
   private GarminFitDevice(File dir) throws SAXException,
                                    IOException,
@@ -35,12 +47,25 @@ public class GarminFitDevice implements IGarminDevice {
   }
 
   /**
-   * Restitue les fichiers tcx.
    * 
-   * @return les fichiers tcx.
+   * @return Restitue les nouveaux fichiers.
+   */
+  public List<File> getNewFiles() {
+    return (getTcxFiles().size() > 0) ? getNewTcxFiles() : getNewFitFiles();
+  }
+
+  /**
+   * 
+   * @return Restitue les fichiers tcx.
    */
   public List<File> getTcxFiles() {
-    return getFiles("History", ".tcx");
+    for (String dir : DIRS_TCX) {
+      List<File> files = getFiles(dir, ".tcx");
+      if (files.size() > 0) {
+        return files;
+      }
+    }
+    return new ArrayList<File>();
   }
 
   /**
@@ -49,45 +74,16 @@ public class GarminFitDevice implements IGarminDevice {
    * @return les fichiers tcx.
    */
   public List<File> getNewTcxFiles() {
-    List<File> files = getFiles("History", ".tcx");
+    List<File> files = getTcxFiles();
 
     Iterator<File> it = files.iterator();
     while (it.hasNext()) {
-      if (isAlreadyImport(it.next())) {
+      if (isTcxAlreadyImport(it.next())) {
         it.remove();
       }
     }
 
     return files;
-  }
-
-  private boolean isAlreadyImport(File file) {
-
-    String sDate = file.getName().substring(0, file.getName().length() - 4);
-
-    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
-    try {
-      Date date;
-      synchronized (getClass()) {
-        date = df.parse(sDate);
-      }
-      Calendar cal = Calendar.getInstance();
-      cal.setTimeZone(TimeZone.getTimeZone("GMT"));
-
-      cal.setTime(date);
-      date = cal.getTime();
-
-      return (RunTableManager.getInstance().find(DataUser.getAllUser().getId(),
-                                                 date) != -1);
-
-    }
-    catch (ParseException e) {
-      return true;
-    }
-    catch (Throwable e) {
-      log.error("", e);
-      return true;
-    }
   }
 
   /**
@@ -96,7 +92,75 @@ public class GarminFitDevice implements IGarminDevice {
    * @return les fichiers fit.
    */
   public List<File> getFitFiles() {
-    return getFiles("Activities", ".fit");
+    for (String dir : DIRS_FIT) {
+      List<File> files = getFiles(dir, ".fit");
+      if (files.size() > 0) {
+        return files;
+      }
+    }
+    return new ArrayList<File>();
+  }
+
+  /**
+   * Restitue les nouveaux fichiers fit.
+   * 
+   * @return les fichiers fir.
+   */
+  public List<File> getNewFitFiles() {
+    List<File> files = getFitFiles();
+
+    Iterator<File> it = files.iterator();
+    while (it.hasNext()) {
+      if (isFitAlreadyImport(it.next())) {
+        it.remove();
+      }
+    }
+
+    return files;
+  }
+
+  private boolean isTcxAlreadyImport(File file) {
+    String sDate = file.getName().substring(0, file.getName().length() - 4);
+
+    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+    try {
+      Date date;
+      synchronized (getClass()) {
+        date = df.parse(sDate);
+      }
+      return isAlreadyImport(date);
+    }
+    catch (ParseException e) {
+      return true;
+    }
+  }
+
+  private boolean isFitAlreadyImport(File file) {
+    try {
+      return isAlreadyImport(new FitFile().retreiveDate(file));
+    }
+    catch (FileNotFoundException e) {
+    }
+    catch (GeoLoadException e) {
+      log.error("", e);
+    }
+    return false;
+  }
+
+  private boolean isAlreadyImport(Date date) {
+    try {
+      Calendar cal = Calendar.getInstance();
+      cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+      cal.setTime(date);
+      date = cal.getTime();
+
+      return (RunTableManager.getInstance().find(DataUser.getAllUser().getId(),
+                                                 date) != -1);
+    }
+    catch (Throwable e) {
+      log.error("", e);
+      return true;
+    }
   }
 
   private List<File> getFiles(final String dirName, final String ext) {
@@ -135,67 +199,116 @@ public class GarminFitDevice implements IGarminDevice {
    * @return la liste des Mat&eacutes;riels fit support&eacute;s.
    */
   public static List<GarminFitDevice> getDevices() {
-    ArrayList<GarminFitDevice> list = new ArrayList<GarminFitDevice>();
+    List<GarminFitDevice> list = new ArrayList<GarminFitDevice>();
 
-    File dir = getDirDevices();
-    if (dir == null || !dir.exists()) {
+    List<File> dirs = getDirDevices();
+    if (dirs.size() == 0) {
       return list;
     }
 
     // recuperation des repertoires des montres FIT
-    File[] dirsFit = dir.listFiles(new FileFilter() {
-      public boolean accept(File pathname) {
-        return pathname != null && pathname.isDirectory()
-               && new File(pathname, "GarminDevice.XML").isFile()
-               && isFitSupported(pathname);
+    for (File dir : dirs) {
+      if (isGarminFitAvailable(dir)) {
+        addDevice(dir, list);
       }
-    });
-
-    // filtre sur les montres supportants TCX
-    if (dirsFit != null) {
-      for (File f : dirsFit) {
-        try {
-          GarminFitDevice device = new GarminFitDevice(f);
-          if (log.isDebugEnabled()) {
-            log.debug(device.getInfo());
-          }
-          list.add(device);
+      
+      // recherche sous repertoire
+      File[] dirsFit = dir.listFiles(new FileFilter() {
+        public boolean accept(File pathname) {
+          return isGarminFitAvailable(pathname);
         }
-        catch (Throwable e) {
-          log.error("", e);
+      });
+
+      // filtre sur les montres supportants fit
+      if (dirsFit != null) {
+        for (File f : dirsFit) {
+          addDevice(f, list);
         }
       }
     }
-
     return list;
+  }
+  
+  private static void addDevice(File f, List<GarminFitDevice> list) {
+    try {
+      GarminFitDevice device = new GarminFitDevice(f);
+      if (log.isDebugEnabled()) {
+        log.debug(device.getInfo());
+      }
+      list.add(device);
+    }
+    catch (Throwable e) {
+      log.error("", e);
+    }
+
+  }
+
+  private static boolean isGarminFitAvailable(File pathname) {
+    if (pathname != null && pathname.isDirectory()
+        && isFitorTcxSupported(pathname)) {
+      for (String s : FitInfo.GARMIN_DEVICE_NAME) {
+        if (new File(pathname, s).isFile()) {
+          return true;
+        }
+      }
+    }
+    return false;
+
   }
 
   /**
    * Recupere les repertoires des devices.
    */
-  private static File getDirDevices() {
+  private static List<File> getDirDevices() {
+    List<File> listDir = new ArrayList<File>();
+
+    // Mac OS X
     if (OperatingSystem.isMacOSX()) {
       File file = new File(System.getProperty("user.home"),
                            "/Library/Application Support/Garmin/Devices");
-      return file;
+      listDir.add(file);
+      return listDir;
     }
 
+    // Windows
     if (OperatingSystem.isWindows()) {
       StringBuilder st = new StringBuilder();
       String tmp = System.getenv("APPDATA");
       if (tmp != null) {
         st.append(tmp);
         st.append("\\GARMIN\\Devices");
-        return new File(st.toString());
+        listDir.add(new File(st.toString()));
+      }
+
+      // Ajout des Forerunner 10
+      for (File dir : File.listRoots()) {
+        if (new File(dir, "GARMIN").exists()) {
+          listDir.add(new File(dir, "GARMIN"));
+        }
       }
     }
 
-    return null;
+    // Linux
+    if (OperatingSystem.isLinux()) {
+      // Forerunner 10
+      listDir.add(new File("/media/GARMIN"));
+    }
+
+    return listDir;
   }
 
-  private static boolean isFitSupported(File dirFit) {
-    return new File(dirFit, "History").isDirectory()
-           || new File(dirFit, "Activities").isDirectory();
+  private static boolean isFitorTcxSupported(File dirFit) {
+    for (String dir : DIRS_TCX) {
+      if (new File(dirFit, dir).isDirectory()) {
+        return true;
+      }
+    }
+    for (String dir : DIRS_FIT) {
+      if (new File(dirFit, dir).isDirectory()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /*

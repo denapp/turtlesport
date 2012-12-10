@@ -591,8 +591,12 @@ public class JPanelStat extends JPanel implements LanguageListener,
       long timeInMillisDeb = cal.getTimeInMillis();
       cal.add(GregorianCalendar.HOUR_OF_DAY, 22);
       long timeInMillisEnd = cal.getTimeInMillis();
-      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), d
-          .computeTimeTot());
+
+      long timeTot = d.computeTimeTot() - d.computeTimePauseTot();
+      if (timeTot < 0) {
+        timeTot = d.computeTimeTot();
+      }
+      s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), timeTot);
       s1.addValueExt("", "");
     }
 

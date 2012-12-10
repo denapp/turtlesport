@@ -50,4 +50,11 @@ public interface IListDateRunFire {
    * @param event
    */
   void fireCalendarSelectActiveDayPerformed(Date date);
+
+  /**
+   * Drag and drop
+   * 
+   * @param isNeeded
+   */
+  //public void needDrngDrop(boolean isNeeded);
 }

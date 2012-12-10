@@ -280,7 +280,7 @@ public class DataRun {
   }
 
   /**
-   * Restitue le temps total.
+   * Restitue le temps total avec les pauses.
    * 
    * @return le temps total.
    * @throws SQLException
@@ -302,34 +302,56 @@ public class DataRun {
     if (timePause == -1) {
       timePause = 0;
 
-      List<DataRunTrk> list = RunTrkTableManager.getInstance().getAllTrks(id);
-      if (list.size() < 2) {
-        return timePause;
-      }
-
-      int iPauseBegin = -1;
-      int iPauseEnd = -1;
-      // 2 points consecutifs = pause
-      int size = list.size() - 1;
-      for (int i = 0; i < size; i++) {
-        if (list.get(i).isPause() && list.get(i + 1).isPause()) {
-          iPauseBegin = i;
-          iPauseEnd = ++i;
-          // debut de pause recherche fin pause
-          for (; i < size; i++) {
-            if (!list.get(i).isPause()) {
-              iPauseEnd = i - 1;
-              break;
-            }
-          }
-          timePause += (list.get(iPauseEnd).getTime().getTime() - list
-              .get(iPauseBegin).getTime().getTime()) / 10;
-          iPauseBegin = -1;
-          iPauseEnd = -1;
-        }
+      computeTimePauseTotByLaps();
+      if (timePause <= 0) {
+        computeTimePauseTotByPoints();
       }
     }
     return timePause;
+  }
+
+  private void computeTimePauseTotByLaps() throws SQLException {    
+    DataRunLap[] laps = RunLapTableManager.getInstance().findLaps(id);
+    if (laps != null) {
+      for (DataRunLap l : laps) {
+        if (l.getMovingTotalTime() > 0) {
+          timePause += l.getMovingTotalTime();
+        }
+      }
+      if (timePause > 0) {
+        timePause -= computeTimeTot();
+        timePause = Math.abs(timePause);
+      }
+    }
+  }
+
+  private void computeTimePauseTotByPoints() throws SQLException {
+    List<DataRunTrk> list = RunTrkTableManager.getInstance().getAllTrks(id);
+    if (list.size() < 2) {
+      return;
+    }
+
+    int iPauseBegin = -1;
+    int iPauseEnd = -1;
+    // 2 points consecutifs = pause
+    int size = list.size() - 1;
+    for (int i = 0; i < size; i++) {
+      if (list.get(i).isPause() && list.get(i + 1).isPause()) {
+        iPauseBegin = i;
+        iPauseEnd = ++i;
+        // debut de pause recherche fin pause
+        for (; i < size; i++) {
+          if (!list.get(i).isPause()) {
+            iPauseEnd = i - 1;
+            break;
+          }
+        }
+        timePause += (list.get(iPauseEnd).getTime().getTime() - list
+            .get(iPauseBegin).getTime().getTime()) / 10;
+        iPauseBegin = -1;
+        iPauseEnd = -1;
+      }
+    }
   }
 
   /**
@@ -409,4 +431,18 @@ public class DataRun {
     }
     return calories;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj != null && obj instanceof DataRun) {
+      return ((DataRun) obj).id == id;
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return id;
+  }
+
 }

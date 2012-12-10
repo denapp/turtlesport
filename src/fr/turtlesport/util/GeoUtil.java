@@ -213,6 +213,51 @@ public final class GeoUtil {
   }
 
   /**
+   * Calcule la distance d'une liste de points g&eacute;ographiques.
+   * 
+   * @param list
+   *          les points g&eacute;ographiques.
+   * @param ephe
+   *          distance min entre deux points.
+   * @return la distance en m&ecirc;tre.
+   */
+  public static double computeDistance(IGeoPosition[] list, int ephe) {
+    double distance = 0;
+    double diff;
+    if (list != null && list.length > 1) {
+      int indexBegin = 0;
+      for (int i = 0; i < list.length - 1; i++) {
+        diff = GeoUtil.computeDistance(list[indexBegin], list[i + 1]);
+        if (diff > ephe) {
+          distance += diff;
+          indexBegin = i + 1;
+        }
+      }
+    }
+
+    return distance;
+  }
+
+  /**
+   * Calcule la distance d'une liste de points g&eacute;ographiques.
+   * 
+   * @param list
+   *          les points g&eacute;ographiques.
+   * @return la distance en m&ecirc;tre.
+   */
+  public static double computeDistance(List<IGeoPosition> list) {
+    double distance = 0;
+
+    if (list != null && list.size() > 1) {
+      for (int i = 0; i < list.size() - 1; i++) {
+        distance += GeoUtil.computeDistance(list.get(i), list.get(i + 1));
+      }
+    }
+
+    return distance;
+  }
+
+  /**
    * @param gPos
    * @return
    */

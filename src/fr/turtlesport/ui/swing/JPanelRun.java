@@ -578,6 +578,9 @@ public class JPanelRun extends JPanel implements LanguageListener,
     MainGui.getWindow().getJMenuItemRunGoogleMap().addActionListener(action);
     getJButtonGoogleMap().addActionListener(action);
 
+    MainGui.getWindow().getJMenuItemRunGoogleMap().addActionListener(action);
+    getJButtonGoogleMap().addActionListener(action);
+
     if (jMenuItemRunEmail != null) {
       action = new EmailActionListener();
       jMenuItemRunEmail.addActionListener(action);
@@ -721,18 +724,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
           }
         });
 
-      }
-    });
-
-    // Localisation
-    jComboBoxLocation.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent event) {
-        try {
-          model.saveLocation(JPanelRun.this);
-        }
-        catch (SQLException e) {
-          log.error("", e);
-        }
       }
     });
 
@@ -1519,7 +1510,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   public JButton getJButtonDelete() {
     if (jButtonDelete == null) {
-      jButtonDelete = new JButtonCustom(ImagesRepository.getImageIcon("delete.png"));
+      jButtonDelete = new JButtonCustom(ImagesRepository.getImageIcon("trash.png"));
       Dimension dim = new Dimension(20, 20);
       jButtonDelete.setPreferredSize(dim);
       jButtonDelete.setMaximumSize(dim);
@@ -1915,7 +1906,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
           }
           catch (SQLException e) {
             return TimeUnit.formatHundredSecondeTime(runLaps[rowIndex]
-                                                             .getTotalTime());
+                .getTotalTime());
           }
         case 2: // Allure Moy.
           try {
