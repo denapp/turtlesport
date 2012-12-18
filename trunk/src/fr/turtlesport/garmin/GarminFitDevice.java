@@ -280,7 +280,7 @@ public class GarminFitDevice implements IGarminDevice {
         listDir.add(new File(st.toString()));
       }
 
-      // Ajout des Forerunner 10
+      // Ajout des Forerunner 10, 110...
       for (File dir : File.listRoots()) {
         if (new File(dir, "GARMIN").exists()) {
           listDir.add(new File(dir, "GARMIN"));
@@ -290,8 +290,13 @@ public class GarminFitDevice implements IGarminDevice {
 
     // Linux
     if (OperatingSystem.isLinux()) {
-      // Forerunner 10
+      // Forerunner 10, 110..
       listDir.add(new File("/media/GARMIN"));
+      
+      String userName = System.getProperty("user.name");
+      if (userName != null) {
+        listDir.add(new File("/media/" +userName + "/GARMIN"));
+      }
     }
 
     return listDir;
