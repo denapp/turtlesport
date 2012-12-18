@@ -3,8 +3,8 @@ package fr.turtlesport.ui.swing;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -13,7 +13,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -26,20 +25,31 @@ import java.util.ResourceBundle;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.border.TitledBorder;
+
+import org.jdesktop.swingx.JXCollapsiblePane;
+import org.jdesktop.swingx.JXFrame;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.Launcher;
@@ -628,6 +638,8 @@ public class MainGui extends JFrame implements LanguageListener {
       // jToolBar.add(getJButtonCompare());
       jToolBar.add(getJButtonPreference());
       // jToolBar.add(getJButtonWorkout());
+      jToolBar.add(Box.createHorizontalGlue());
+      jToolBar.add(new JTextField());
     }
     return jToolBar;
   }
@@ -1215,9 +1227,44 @@ public class MainGui extends JFrame implements LanguageListener {
       jContentPane.setLayout(new BorderLayout(5, 5));
       jContentPane.setBorder(javax.swing.BorderFactory
           .createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-      jContentPane.add(getJSplitPanelCenter(), BorderLayout.CENTER);
       jContentPane.add(getJPanelSouth(), BorderLayout.SOUTH);
       jContentPane.add(getJJToolbar(), BorderLayout.PAGE_START);
+       jContentPane.add(getJSplitPanelCenter(), BorderLayout.CENTER);
+
+      // Panel search
+      JXCollapsiblePane cp = new JXCollapsiblePane();
+      cp.setLayout(new BorderLayout());
+      try {
+        cp.add(new JPanelSearch(), BorderLayout.CENTER);
+      }
+      catch (SQLException e) {
+        e.printStackTrace();
+      }
+      jContentPane.add(cp, BorderLayout.NORTH);
+
+      // Show/hide the "Controls"
+      JButton toggle = new JButton(cp.getActionMap()
+          .get(JXCollapsiblePane.TOGGLE_ACTION));
+      toggle.setText("Show/Hide Search Panel");
+
+      // JPanel panel = new JPanel();
+      // panel.setLayout(new BorderLayout());
+      // JXTaskPaneContainer taskPaneContainer = new JXTaskPaneContainer();
+      // JXTaskPane details = new
+      // JXTaskPane(ImagesRepository.getImageIcon("loupe.png"));
+      // details.setFont(GuiFont.FONT_PLAIN);
+      // details.setAnimated(true);
+      // details.setCollapsed(true);
+      // try {
+      // details.add(new JPanelSearch());
+      // }
+      // catch (SQLException e) {
+      // e.printStackTrace();
+      // }
+      // taskPaneContainer.add(details);
+      // panel.add(taskPaneContainer, BorderLayout.NORTH);
+      // panel.add(getJSplitPanelCenter(), BorderLayout.CENTER);
+      // jContentPane.add(panel, BorderLayout.CENTER);
     }
     return jContentPane;
   }

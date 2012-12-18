@@ -726,6 +726,18 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
       }
     });
+    
+    // Localisation
+    jComboBoxLocation.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        try {
+          model.saveLocation(JPanelRun.this);
+        }
+        catch (SQLException e) {
+          log.error("", e);
+        }
+      }
+    });
 
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());

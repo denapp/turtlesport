@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -34,7 +35,9 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -44,7 +47,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import org.jdesktop.swingx.decorator.SortOrder;
 import org.xml.sax.SAXParseException;
 
 import fr.turtlesport.Configuration;
@@ -159,7 +161,7 @@ public final class JDialogImport extends JDialog implements
    */
   private JDialogImport(Frame owner) throws SQLException {
     super(owner, true);
-    
+
     rb = ResourceBundleUtility.getBundle(LanguageManager.getManager()
         .getCurrentLang(), getClass());
 
@@ -724,9 +726,9 @@ public final class JDialogImport extends JDialog implements
       IGeoRoute[] routes = FactoryGeoLoad.getRoutes(file);
       if (routes != null) {
         for (IGeoRoute r : routes) {
-//          if (r.totalTime() < 1000) {
-//            continue;
-//          }
+          // if (r.totalTime() < 1000) {
+          // continue;
+          // }
           int size = listRows.size();
           TableRowObject rowObj = new TableRowObject(size, r, file);
           listRows.add(rowObj);
@@ -917,31 +919,58 @@ public final class JDialogImport extends JDialog implements
 
         case 6: // Athlete
           listRows.get(row).setUser((User) value);
-          fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
+          fireTableCellUpdatedEventQueueConvert(row, col);
           break;
 
         case 7: // Activite
           listRows.get(row).setActivity((AbstractDataActivity) value);
-          fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
+          fireTableCellUpdatedEventQueueConvert(row, col);
           break;
 
         case 8: // Equipement
           listRows.get(row).setEquipement((String) value);
-          fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
+          fireTableCellUpdatedEventQueueConvert(row, col);
           break;
 
         case 9: // Sauvegarder
           listRows.get(row).setSave((Boolean) value);
-          fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
+          fireTableCellUpdatedEventQueueConvert(row, col);
           break;
 
         case 10: // Commentaires
           listRows.get(row).setComments((String) value);
-          fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
+          fireTableCellUpdatedEventQueueConvert(row, col);
           break;
 
         default:
           break;
+      }
+    }
+
+    public void fireTableCellUpdatedEventQueueConvert(final int row,
+                                                      final int col) {
+      if (!EventQueue.isDispatchThread()) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
+          }
+        });
+      }
+      else {
+        fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
+      }
+    }
+
+    public void fireTableCellUpdatedEventQueue(final int index, final int col) {
+      if (!EventQueue.isDispatchThread()) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            fireTableCellUpdated(index, col);
+          }
+        });
+      }
+      else {
+        fireTableCellUpdated(index, col);
       }
     }
 
@@ -1243,7 +1272,7 @@ public final class JDialogImport extends JDialog implements
         setSave(false);
       }
       timeTot = cal.getTime();
-      tableModel.fireTableCellUpdated(row, 5);
+      tableModel.fireTableCellUpdatedEventQueue(row, 5);
     }
 
     /**
@@ -1270,7 +1299,7 @@ public final class JDialogImport extends JDialog implements
         setSave(false);
       }
 
-      tableModel.fireTableCellUpdated(row, 5);
+      tableModel.fireTableCellUpdatedEventQueue(row, 5);
       log.debug("<<setTimeTot isValidTimeTot=" + isValidTimeTot);
     }
 
@@ -1291,7 +1320,7 @@ public final class JDialogImport extends JDialog implements
       if (!isValidDateTime) {
         setSave(false);
       }
-      tableModel.fireTableCellUpdated(row, 0);
+      tableModel.fireTableCellUpdatedEventQueue(row, 0);
     }
 
     public Date getTimeTot() {
@@ -1343,7 +1372,7 @@ public final class JDialogImport extends JDialog implements
       return activity;
     }
 
-    public void setActivity(AbstractDataActivity activity) {
+    public void setActivity(final AbstractDataActivity activity) {
       if (activity == null) {
         return;
       }
@@ -1352,16 +1381,25 @@ public final class JDialogImport extends JDialog implements
       }
       this.activity = activity;
 
-      int viewRow = jTable.convertRowIndexToView(row);
-
-      route.setSportType(activity.getSportType());
-      tableModel.fireTableCellUpdated(viewRow, 6);
+      if (!EventQueue.isDispatchThread()) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            int viewRow = jTable.convertRowIndexToView(row);
+            route.setSportType(activity.getSportType());
+            tableModel.fireTableCellUpdatedEventQueue(viewRow, 6);
+          }
+        });
+      }
+      else {
+        int viewRow = jTable.convertRowIndexToView(row);
+        route.setSportType(activity.getSportType());
+        tableModel.fireTableCellUpdatedEventQueue(viewRow, 6);
+      }      
     }
 
     public void setActivity(int sportType) {
       activity = find(sportType);
-      int viewRow = jTable.convertRowIndexToView(row);
-      tableModel.fireTableCellUpdated(viewRow, 6);
+      tableModel.fireTableCellUpdatedEventQueueConvert(row, 6);
     }
 
     private AbstractDataActivity find(int sportType) {
@@ -1385,7 +1423,7 @@ public final class JDialogImport extends JDialog implements
 
     public void setDistance(double distance) {
       this.distance = DistanceUnit.formatMetersInKm(distance);
-      tableModel.fireTableCellUpdated(row, 4);
+      tableModel.fireTableCellUpdatedEventQueue(row, 4);
     }
 
     public boolean isSave() {
@@ -1413,7 +1451,7 @@ public final class JDialogImport extends JDialog implements
         jButtonSave.setEnabled(hasRuntoSave);
       }
 
-      tableModel.fireTableCellUpdated(row, 8);
+      tableModel.fireTableCellUpdatedEventQueue(row, 8);
     }
 
     /**
@@ -1431,7 +1469,7 @@ public final class JDialogImport extends JDialog implements
         calendar.set(Calendar.MONTH, cal.get(Calendar.MONTH));
         calendar.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
       }
-      tableModel.fireTableCellUpdated(row, 2);
+      tableModel.fireTableCellUpdatedEventQueue(row, 2);
       tableModel.fireRowsDateChanged();
     }
 
@@ -1459,7 +1497,7 @@ public final class JDialogImport extends JDialog implements
         calendar.set(Calendar.MINUTE, cal.get(Calendar.MINUTE));
         calendar.set(Calendar.SECOND, cal.get(Calendar.SECOND));
       }
-      tableModel.fireTableCellUpdated(row, 3);
+      tableModel.fireTableCellUpdatedEventQueue(row, 3);
       tableModel.fireRowsDateChanged();
     }
 
@@ -1484,7 +1522,7 @@ public final class JDialogImport extends JDialog implements
      */
     public void setProgressValue(int progressValue) {
       this.progressValue = progressValue;
-      tableModel.fireTableCellUpdated(row, 1);
+      tableModel.fireTableCellUpdatedEventQueue(row, 1);
     }
 
     /**
@@ -1495,7 +1533,7 @@ public final class JDialogImport extends JDialog implements
       if (progressValue >= 100) {
         progressValue = 3;
       }
-      tableModel.fireTableCellUpdated(row, 1);
+      tableModel.fireTableCellUpdatedEventQueue(row, 1);
     }
 
     /**
@@ -1504,7 +1542,7 @@ public final class JDialogImport extends JDialog implements
     public void endProgress() {
       if (progressValue != 100) {
         progressValue = 100;
-        tableModel.fireTableCellUpdated(row, 1);
+        tableModel.fireTableCellUpdatedEventQueue(row, 1);
       }
     }
 
