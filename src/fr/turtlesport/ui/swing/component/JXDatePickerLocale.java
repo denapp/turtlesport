@@ -4,16 +4,22 @@ import java.awt.Font;
 import java.util.Date;
 import java.util.Locale;
 
+import javax.swing.UIManager;
+
 import org.jdesktop.swingx.JXDatePicker;
 
 import fr.turtlesport.lang.ILanguage;
+import fr.turtlesport.ui.swing.img.menu.ImagesMenuRepository;
 
 /**
  * @author Denis Apparicio
  * 
  */
 public class JXDatePickerLocale extends JXDatePicker {
-
+  static {
+    UIManager.put("JXDatePicker.arrowIcon", ImagesMenuRepository.getImageIcon("schedule-12px.png"));
+  }
+  
   public JXDatePickerLocale() {
     super();
   }

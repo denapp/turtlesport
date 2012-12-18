@@ -4,14 +4,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.net.URL;
+import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
 import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
-import org.jdesktop.swingx.JXImagePanel;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.ImagePainter;
 
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 
@@ -52,7 +53,7 @@ public class JSplashScreen extends JWindow {
    */
   private JXImagePanelStatus getJContentPane() {
     if (jContentPane == null) {
-      jContentPane = new JXImagePanelStatus(ImagesRepository.class.getResource("splash.jpg"));
+      jContentPane = new JXImagePanelStatus(ImagesRepository.getImage("splash.jpg"));
       jContentPane.setLayout(new BorderLayout(0,0));
       jContentPane.setBorder(BorderFactory.createLineBorder(Color.black, 1));
       jContentPane.add(getJProgressBar(), java.awt.BorderLayout.SOUTH);
@@ -158,7 +159,7 @@ public class JSplashScreen extends JWindow {
    * @author Denis Apparicio
    * 
    */
-  private static class JXImagePanelStatus extends JXImagePanel {
+  private static class JXImagePanelStatus extends JXPanel {
     /** Message. */
     private String             message;
 
@@ -177,8 +178,9 @@ public class JSplashScreen extends JWindow {
     /** Couleur du message de niveau erreur */
     private static final Color COLOR_LEVEL_ERROR    = Color.red;
 
-    public JXImagePanelStatus(URL url) {
-      super(url);
+    public JXImagePanelStatus(BufferedImage image) {
+      super(true);
+      setBackgroundPainter(new ImagePainter(image));
     }
 
     /*

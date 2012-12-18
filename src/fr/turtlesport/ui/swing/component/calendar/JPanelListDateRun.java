@@ -11,12 +11,15 @@ import java.util.Date;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.ui.swing.JDialogSearchRun;
 import fr.turtlesport.ui.swing.MainGui;
 import fr.turtlesport.ui.swing.img.menu.ImagesMenuRepository;
 import fr.turtlesport.unit.event.UnitListener;
@@ -32,7 +35,9 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
   private JToggleButton    jButtonList;
 
   private JToggleButton    jButtonTree;
-
+  
+  private JButton          jButtonSearch;
+  
   private IListDateRunFire panelDateRun;
 
   private static final int VIEW_CALENDAR = 1;
@@ -67,7 +72,9 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
     panelNorth.add(getJButtonCalendar());
     panelNorth.add(getJButtonList());
     panelNorth.add(getJButtonTree());
-
+    panelNorth.add(new JLabel("   "));
+    panelNorth.add(getJButtonSearch());
+    
     int prop = Configuration.getConfig().getPropertyAsInt("general",
                                                           "calendarView",
                                                           VIEW_CALENDAR);
@@ -91,6 +98,7 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
     getJButtonCalendar().addActionListener(new CalendarRunAction());
     getJButtonList().addActionListener(new ListRunAction());
     getJButtonTree().addActionListener(new ListTreeRunAction());
+    getJButtonSearch().addActionListener(new SearchRunAction());
   }
 
   private void removeLanguageListenerPanelDataRun() {
@@ -142,6 +150,19 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
     return jButtonTree;
   }
 
+  /**
+   * This method initializes jButtonSearch
+   * 
+   * @return javax.swing.JButton
+   */
+  private JButton getJButtonSearch() {
+    if (jButtonSearch == null) {
+      Icon icon = ImagesMenuRepository.getImageIcon("loupe-12px.png");
+      jButtonSearch = new JButton(icon);
+    }
+    return jButtonSearch;
+  }
+  
   /*
    * (non-Javadoc)
    * 
@@ -331,5 +352,32 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
       }
     }
   }
+  
+  /**
+   * 
+   * @author Denis Apparicio
+   * 
+   */
+  private class SearchRunAction extends AbstractAction {
+
+    public SearchRunAction() {
+      super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
+    public void actionPerformed(ActionEvent e) {
+      try {
+        JDialogSearchRun.prompt();
+      }
+      catch (SQLException sqle) {
+      }
+    }
+  }
+
 
 }
