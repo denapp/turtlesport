@@ -62,6 +62,68 @@ public final class RunTableManager extends AbstractTableManager {
   }
 
   /**
+   * Recuperation des run d'un utilisateur.
+   * 
+   * @param idUser
+   * @param date
+   * 
+   * @return
+   * @throws SQLException
+   */
+  public List<DataRun> retreiveDesc(int idUser, DataSearchRun search) throws SQLException {
+    if (search == null) {
+      return retreiveDesc(idUser);
+    }
+    
+    if (log.isInfoEnabled()) {
+      log.info(">>retreiveDesc search idUser=" + idUser);
+    }
+    
+    List<DataRun> listRun = new ArrayList<DataRun>();
+
+    long startTime = System.currentTimeMillis();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT id, sport_type, start_time FROM ");
+      st.append(getTableName());
+      st.append(" WHERE ");
+      if (!DataUser.isAllUser(idUser)) {
+        st.append(" id_user=?");
+      }
+      if (search.getLocation() != null) {
+        
+      }
+      st.append(" ORDER BY start_time DESC");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        DataRun dataRun = new DataRun();
+        dataRun.setId(rs.getInt("id"));
+        dataRun.setSportType(rs.getInt("sport_type"));
+        dataRun.setTime(rs.getTimestamp("start_time"));
+        listRun.add(dataRun);
+        log.debug("id" + dataRun.getId());
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      long delay = System.currentTimeMillis() - startTime;
+      log.info("<<retreiveDesc  idUser=" + idUser + " delay=" + delay + "ms");
+    }
+    return listRun;
+  }
+  
+  /**
    * D&eacute;termine si cette ligne existe.
    * 
    * @param idUser
