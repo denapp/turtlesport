@@ -1,4 +1,4 @@
-package fr.turtlesport.ui.swing;
+package fr.turtlesport.ui.swing.component;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -39,6 +39,26 @@ public final class TextFormatterFactory {
     MaskFormatter mf;
     try {
       mf = new MaskFormatter(s);
+      mf.setCommitsOnValidEdit(true);
+      return new DefaultFormatterFactory(mf);
+    }
+    catch (ParseException e) {
+      log.error("", e);
+    }
+    return null;
+  }
+
+  /**
+   * Formatteur.
+   * 
+   * @param s
+   *          le mask.
+   * @return
+   */
+  public static DefaultFormatterFactory formatterBlankAllowed(String s) {
+    MaskFormatter mf;
+    try {
+      mf = new BlankMaskFormatter(s);
       mf.setCommitsOnValidEdit(true);
       return new DefaultFormatterFactory(mf);
     }
@@ -95,6 +115,25 @@ public final class TextFormatterFactory {
       st.append("#");
     }
     return formatter(st.toString());
+  }
+
+  /**
+   * Formatteur.
+   * 
+   * @param size
+   * 
+   * @return
+   */
+  public static DefaultFormatterFactory createNumberBlankAllowed(int size) {
+    NumberFormat nf = NumberFormat.getInstance(LanguageManager.getManager()
+        .getLocale());
+    nf.setMaximumIntegerDigits(size);
+    nf.setMaximumFractionDigits(0);
+    nf.setParseIntegerOnly(true);
+
+    BlankInternationalFormatter bif = new BlankInternationalFormatter(nf);
+    bif.setCommitsOnValidEdit(true);
+    return new DefaultFormatterFactory(bif);
   }
 
   /**

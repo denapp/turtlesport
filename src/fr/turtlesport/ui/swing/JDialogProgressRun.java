@@ -35,6 +35,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.db.AbstractDataActivity;
 import fr.turtlesport.db.DataActivityOther;
 import fr.turtlesport.db.DataEquipement;
@@ -129,6 +130,8 @@ public class JDialogProgressRun extends JDialog implements
 
   private boolean                  isAbortTransfert = false;
 
+  private IProductDevice productDevice;
+
   /**
    * @param owner
    * @param modal
@@ -189,11 +192,12 @@ public class JDialogProgressRun extends JDialog implements
    * 
    * @param a1000
    */
-  public void retreive(A1000RunTransferProtocol a1000) {
+  public void retreive(A1000RunTransferProtocol a1000, IProductDevice productDevice) {
 
     long deb;
     try {
       this.a1000 = a1000;
+      this.productDevice = productDevice;
       // Recuperation des run.
       deb = System.currentTimeMillis();
       a1000.retrieve(this);
@@ -1367,7 +1371,7 @@ public class JDialogProgressRun extends JDialog implements
           // Sauvegarde des run
           try {
             long deb = System.currentTimeMillis();
-            RunTableManager.getInstance().store(a1000, JDialogProgressRun.this);
+            RunTableManager.getInstance().store(a1000, JDialogProgressRun.this, productDevice);
             log.warn("Temps pour sauvegarder " + a1000.getListRunTypeSize()
                      + " run (ms) --> " + (System.currentTimeMillis() - deb));
           }

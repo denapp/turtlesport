@@ -42,17 +42,20 @@ public class SwingApplication {
 
     ResourceBundle rb;
 
-    // Affichage splash screen
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    createSplashScreen(screenSize);
-    showSplashScreen();
-
     try {
       // Initialisation des localisations
       Location.initialize();
 
       // Chargement du fichier de configuration.
       Configuration.initialize();
+
+      // Mis a jour du look an feel
+      SwingLookAndFeel.setDefaultLookAndFeel();
+
+      // Affichage splash screen
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      createSplashScreen(screenSize);
+      showSplashScreen();
 
       // mis a jour du proxy
       ProxyConfiguration.configure();
@@ -81,9 +84,6 @@ public class SwingApplication {
     LanguageManager.getManager().fireLanguageChanged();
     rb = ResourceBundleUtility.getBundle(LanguageManager.getManager()
         .getCurrentLang(), getClass());
-
-    // Mis a jour du look an feel
-    SwingLookAndFeel.setDefaultLookAndFeel();
 
     // Initialisation de la database.
     splash.updateProgress(rb.getString("splashLoading"));

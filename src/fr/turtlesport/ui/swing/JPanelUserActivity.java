@@ -36,6 +36,7 @@ import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JTextFieldLength;
+import fr.turtlesport.ui.swing.component.TextFormatterFactory;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.model.GenericModelDocListener;
 import fr.turtlesport.ui.swing.model.ModelActivity;

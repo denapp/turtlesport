@@ -3,6 +3,7 @@ package fr.turtlesport.ui.swing.model;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 
+import fr.turtlesport.ProductDeviceUtil;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.RunLapTableManager;
@@ -25,6 +26,8 @@ public class ModelDialogMap {
     log = (TurtleLogger) TurtleLogger.getLogger(ModelDialogMap.class);
   }
 
+  private DataRun dataRun;
+
   /**
    * 
    */
@@ -41,13 +44,13 @@ public class ModelDialogMap {
   public void updateView(JDialogMap view) throws SQLException {
     log.debug(">>updateView");
 
-    DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
+    dataRun = ModelPointsManager.getInstance().getDataRun();
 
     view.getJLabelTitle().setText(title(dataRun));
 
     // resume
     // ----------------------------------------
-    updateSummary(view, dataRun);
+    updateSummary(view);
 
     // mis a jour des tours intermediaires
     // -------------------------------------------------------
@@ -165,7 +168,7 @@ public class ModelDialogMap {
   /**
    * 
    */
-  private void updateSummary(JDialogMap view, DataRun dataRun) throws SQLException {
+  private void updateSummary(JDialogMap view) throws SQLException {
     log.info(">>updateSummary");
 
     if (dataRun == null) {
@@ -233,12 +236,8 @@ public class ModelDialogMap {
                  + Integer.toString(max));
 
     // Altitude.
-    int[] alt = RunTrkTableManager.getInstance().altitude(dataRun.getId());
-    view.getJPanelRight()
-        .getJLabelValAltitudeTot()
-        .setText("+" + Integer.toString(alt[0]) + " / -"
-                 + Integer.toString(alt[1]));
-
+    correctAltitude(view);
+    
     // Categorie
     view.getJPanelRight().getJLabelValActivity()
         .setText(dataRun.getLibelleSportType());
@@ -248,11 +247,36 @@ public class ModelDialogMap {
         .setText(dataRun.getEquipement());
 
     // Location
-    view.getJPanelRight().getjLabelValLocation().setText(dataRun.getLocation());
+    view.getJPanelRight().getJLabelValLocation().setText(dataRun.getLocation());
+    
+    // Product
+    String product = ProductDeviceUtil.toExternalForm(dataRun.getProductId(),
+                                                      dataRun.getProductName(),
+                                                      dataRun
+                                                          .getProductVersion());
+    view.getJPanelRight().getJLabelValProduct().setText(product);
 
     log.info("<<updateSummary");
   }
 
+  /**
+   * Mis &agrave; jour des altitudes.
+   * 
+   * @param view
+   * @throws SQLException
+   */
+  public void correctAltitude(JDialogMap view) throws SQLException {
+    if (dataRun == null) {
+      return;
+    }
+    int[] alt = (view.getJPanelRight().getJSwitchBox().isOn()) ? dataRun
+        .computeAlt() : dataRun.computeAltOriginal();
+    view.getJPanelRight()
+        .getJLabelValAltitudeTot()
+        .setText("+" + Integer.toString(alt[0]) + " / -"
+                 + Integer.toString(alt[1]));
+  }
+  
   private String title(DataRun dataRun) {
     if (dataRun == null) {
       log.error("dataRun est null");

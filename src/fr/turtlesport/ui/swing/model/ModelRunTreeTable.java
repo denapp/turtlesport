@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import fr.turtlesport.db.DataRun;
+import fr.turtlesport.db.DataSearchRun;
 import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.MainGui;
@@ -43,11 +44,11 @@ public class ModelRunTreeTable {
    * @param view
    * @throws SQLException
    */
-  public void updateView(JPanelTreeRun view) throws SQLException {
+  public void updateView(JPanelTreeRun view, DataSearchRun search) throws SQLException {
     log.debug(">>updateView");
 
     List<DataRun> listRun = RunTableManager.getInstance().retreiveDesc(MainGui
-        .getWindow().getCurrentIdUser());
+        .getWindow().getCurrentIdUser(), search);
 
     for (DataRun d : listRun) {
       d.getComputeDistanceTot();

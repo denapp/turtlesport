@@ -28,6 +28,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;
@@ -708,6 +709,8 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
 
     private boolean             isActivity            = false;
 
+    private boolean             isCreator             = false;
+
     private Lap                 currentLap;
 
     private boolean             isLap                 = false;
@@ -761,6 +764,11 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
         // sport
         currentActivity = new Activity(attrs.getValue("Sport"));
         isActivity = true;
+      }
+      // Creator
+      else if (localName.equals("Creator") && isActivity) {
+        currentActivity.setCreator(new ActivityCreator());
+        isCreator = true;
       }
       // Lap
       else if (localName.equals("Lap") && isActivity) {
@@ -820,7 +828,8 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
       }
       else if (localName.equals("TotalTimeSeconds") && isLap) { // TotalTimeSeconds
         // isLap
-        currentLap.setTotalTimeSeconds(new Double(stBuffer.toString()));
+        currentLap
+            .setTotalTime((long) (1000 * new Double(stBuffer.toString())));
       }
       else if (localName.equals("Time") && isTrackpoint) { // Time
         // Trackpoint
@@ -892,6 +901,25 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
         // Position
         currentPosition.setLongitude(new Double(stBuffer.toString()));
       }
+      else if (localName.equals("Name") && isActivity && isCreator) {
+        currentActivity.getCreator().name = stBuffer.toString();
+        System.out.println("name="+currentActivity.getCreator().name);
+      }
+      else if (localName.equals("ProductID") && isActivity && isCreator) {
+        currentActivity.getCreator().productID = stBuffer.toString();
+      }
+      else if (localName.equals("VersionMajor") && isActivity && isCreator) {
+        currentActivity.getCreator().versionMajor = stBuffer.toString();
+      }
+      else if (localName.equals("VersionMinor") && isActivity && isCreator) {
+        currentActivity.getCreator().versionMinor = stBuffer.toString();
+      }
+      else if (localName.equals("BuildMajor") && isActivity && isCreator) {
+        currentActivity.getCreator().buildMajor = stBuffer.toString();
+      }
+      else if (localName.equals("BuildMinor") && isActivity && isCreator) {
+        currentActivity.getCreator().buildMinor = stBuffer.toString();
+      }
       stBuffer = null;
 
       // Activity
@@ -899,6 +927,10 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
       if (localName.equals("Activity")) {
         listActivity.add(currentActivity);
         isActivity = false;
+      }
+      // Creator
+      else if (localName.equals("Creator") && isActivity) {
+        isCreator = false;
       }
       // Lap
       // ---------
@@ -967,22 +999,70 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
     }
   }
 
+  private class TcxDevice implements IProductDevice {
+    ActivityCreator creator;
+
+    public TcxDevice(ActivityCreator creator) {
+      this.creator = creator;
+    }
+
+    @Override
+    public String displayName() {
+      return creator.name;
+    }
+
+    @Override
+    public String id() {
+      return creator.productID;
+    }
+
+    @Override
+    public String softwareVersion() {
+      if (creator.versionMajor == null) {
+        return null;
+      }
+
+      StringBuffer st = new StringBuffer();
+      st.append(creator.versionMajor);
+      if (creator.versionMinor != null) {
+        st.append('.');
+        st.append(creator.versionMinor);
+        if (creator.buildMajor != null) {
+          st.append('.');
+          st.append(creator.buildMajor);
+          if (creator.buildMinor != null) {
+            st.append('.');
+            st.append(creator.buildMinor);
+          }
+        }
+      }
+
+      return st.toString();
+    }
+
+  }
+
   /**
-   * Repr�sente une GEORoute pour une cativite.
+   * Repr&ecute;sente une GEORoute pour une activit&eacute;.
    * 
    * @author Denis Apparicio
    * 
    */
   private class ActivityGeoRoute extends AbstractGeoRoute {
-    private Activity activity;
+    private Activity  activity;
 
-    private double   distanceTot = 0;
+    private double    distanceTot = 0;
+
+    private TcxDevice device;
 
     /**
      * @param activity
      */
     public ActivityGeoRoute(Activity activity) {
       this.activity = activity;
+      if (activity.getCreator() != null) {
+        this.device = new TcxDevice(activity.getCreator());
+      }
       if (activity.isRunning()) {
         setSportType(IGeoRoute.SPORT_TYPE_RUNNING);
       }
@@ -994,12 +1074,18 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
       }
 
       // Distance et temps totale
-      double timeTot = 0;
+      long timeTot = 0;
       for (Lap lap : activity.getLaps()) {
         distanceTot += lap.getDistanceMeters();
-        timeTot += lap.getTotalTimeSeconds();
+        timeTot += lap.getTotalTime();
       }
-      initTimeTot((long) (timeTot * 1000));
+
+      initTimeTot(timeTot);
+    }
+
+    @Override
+    public IProductDevice getProductDevice() {
+      return device;
     }
 
     /*

@@ -3,6 +3,7 @@ package fr.turtlesport.ui.swing.model;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 
+import fr.turtlesport.ProductDeviceUtil;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.RunLapTableManager;
@@ -10,6 +11,7 @@ import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.JDialogDiagramComponents;
+import fr.turtlesport.ui.swing.JPanelRun;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
 import fr.turtlesport.unit.SpeedPaceUnit;
@@ -25,6 +27,8 @@ public class ModelDialogDiagramComponents {
     log = (TurtleLogger) TurtleLogger
         .getLogger(ModelDialogDiagramComponents.class);
   }
+
+  private DataRun             dataRun;
 
   /**
    * 
@@ -42,7 +46,7 @@ public class ModelDialogDiagramComponents {
   public void updateView(JDialogDiagramComponents view) throws SQLException {
     log.debug(">>updateView");
 
-    DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
+    dataRun = ModelPointsManager.getInstance().getDataRun();
 
     // resume
     // ----------------------------------------
@@ -98,10 +102,9 @@ public class ModelDialogDiagramComponents {
           .setText(DistanceUnit.formatMetersInKm(lap.getTotalDist()));
 
       // Temps Total
-      view.getJPanelRight()
-          .getJLabelValTimeTotLap()
+      view.getJPanelRight().getJLabelValTimeTotLap()
           .setText(TimeUnit.formatHundredSecondeTime(lap.getRealTotalTime()));
-      
+
       // Temps
       view.getJPanelRight().getjLabelValTimeMovingLap()
           .setText(TimeUnit.formatHundredSecondeTime(lap.getMovingTotalTime()));
@@ -190,10 +193,8 @@ public class ModelDialogDiagramComponents {
         .setText(DistanceUnit.formatWithUnit(dataRun.getComputeDistanceTot()));
 
     // Temps tot
-    view.getJPanelRight()
-        .getJLabelValTimeTot()
-        .setText(TimeUnit.formatHundredSecondeTime(dataRun
-            .computeTimeTot()));
+    view.getJPanelRight().getJLabelValTimeTot()
+        .setText(TimeUnit.formatHundredSecondeTime(dataRun.computeTimeTot()));
 
     // Temps
     int timeMoving = dataRun.computeTimeTot() - dataRun.computeTimePauseTot();
@@ -234,6 +235,8 @@ public class ModelDialogDiagramComponents {
                  + Integer.toString(max));
 
     // Altitude.
+    correctAltitude(view);
+
     int[] alt = RunTrkTableManager.getInstance().altitude(dataRun.getId());
     view.getJPanelRight()
         .getJLabelValAltitudeTot()
@@ -249,9 +252,34 @@ public class ModelDialogDiagramComponents {
         .setText(dataRun.getEquipement());
 
     // Location
-    view.getJPanelRight().getjLabelValLocation().setText(dataRun.getLocation());
+    view.getJPanelRight().getJLabelValLocation().setText(dataRun.getLocation());
+
+    // Product
+    String product = ProductDeviceUtil.toExternalForm(dataRun.getProductId(),
+                                                      dataRun.getProductName(),
+                                                      dataRun
+                                                          .getProductVersion());
+    view.getJPanelRight().getJLabelValProduct().setText(product);
 
     log.info("<<updateSummary");
+  }
+
+  /**
+   * Mis &agrave; jour des altitudes.
+   * 
+   * @param view
+   * @throws SQLException
+   */
+  public void correctAltitude(JDialogDiagramComponents view) throws SQLException {
+    if (dataRun == null) {
+      return;
+    }
+    int[] alt = (view.getJPanelRight().getJSwitchBox().isOn()) ? dataRun
+        .computeAlt() : dataRun.computeAltOriginal();
+    view.getJPanelRight()
+        .getJLabelValAltitudeTot()
+        .setText("+" + Integer.toString(alt[0]) + " / -"
+                 + Integer.toString(alt[1]));
   }
 
 }

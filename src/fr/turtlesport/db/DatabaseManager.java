@@ -136,6 +136,12 @@ public class DatabaseManager {
     log.warn("backed up database to " + dir);
   }
 
+  private static void logStatements() {
+    System.setProperty("derby.infolog.append", "true");
+    System.setProperty("derby.language.logStatementText", "true");
+    System.setProperty("derby.language.logQueryPlan", "true");
+   }
+
   /**
    * Initialisation de la database.
    * 
@@ -169,6 +175,9 @@ public class DatabaseManager {
     // executeUpdate("DROP TABLE " + TABLE_METEO);
 
     isInit = true;
+    if (log.isDebugEnabled()) {
+      logStatements();
+    }
 
     // create function
     createFunctions();
@@ -204,6 +213,10 @@ public class DatabaseManager {
     ds.setCreateDatabase("create");
 
     isInit = true;
+    if (log.isDebugEnabled()) {
+      logStatements();
+    }
+
     loadDbVersion();
 
     createTables(splash);
@@ -567,7 +580,7 @@ public class DatabaseManager {
 
           executeUpdate("DROP TABLE " + TABLE_RUN);
         }
-        else if (rs.getMetaData().getColumnCount() != 9) {
+        else if (rs.getMetaData().getColumnCount() == 8) {
           // la table existe
           if (rs.getMetaData().getColumnDisplaySize(7) != 500) {
             // on augmente la taille des commentaires
@@ -590,6 +603,36 @@ public class DatabaseManager {
           st.append(TABLE_RUN);
           st.append(" ADD COLUMN location VARCHAR(100)");
           executeUpdate(st.toString());
+          return;
+        }
+        else if (rs.getMetaData().getColumnCount() == 9) {
+          
+          // la table existe ajout produit montre
+          if (conn != null) {
+            releaseConnection(conn);
+            conn = null;
+          }
+          StringBuilder st = new StringBuilder();
+          st.append("ALTER TABLE ");
+          st.append(TABLE_RUN);
+          st.append(" ADD");
+          st.append(" COLUMN product_id VARCHAR(8)");
+          executeUpdate(st.toString());
+
+          st = new StringBuilder();
+          st.append("ALTER TABLE ");
+          st.append(TABLE_RUN);
+          st.append(" ADD");
+          st.append(" COLUMN product_version VARCHAR(15)");
+          executeUpdate(st.toString());
+
+          st = new StringBuilder();
+          st.append("ALTER TABLE ");
+          st.append(TABLE_RUN);
+          st.append(" ADD");
+          st.append(" COLUMN product_name VARCHAR(25)");
+          executeUpdate(st.toString());
+
           return;
         }
         else {
@@ -628,7 +671,10 @@ public class DatabaseManager {
     st.append("start_time TIMESTAMP, ");
     st.append("comments VARCHAR(500), ");
     st.append("equipement VARCHAR(50), ");
-    st.append("location VARCHAR(100))");
+    st.append("location VARCHAR(100),");
+    st.append("product_id VARCHAR(8),");
+    st.append("product_version VARCHAR(15),");
+    st.append("product_name VARCHAR(25)");
 
     executeUpdate(st.toString());
 

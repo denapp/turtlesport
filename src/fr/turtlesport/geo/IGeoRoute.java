@@ -3,6 +3,8 @@ package fr.turtlesport.geo;
 import java.util.Date;
 import java.util.List;
 
+import fr.turtlesport.IProductDevice;
+
 /**
  * @author Denis Apparicio
  * 
@@ -17,6 +19,13 @@ public interface IGeoRoute {
 
   /** OTHER. */
   int SPORT_TYPE_OTHER   = 2;
+
+  /**
+   * Restitue le produit associ&eacute; &agrave; la route.
+   * 
+   * @return
+   */
+  IProductDevice getProductDevice();
 
   /**
    * Restitue le nom.

@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.db.progress.GeoRouteStoreProgressAdaptor;
 import fr.turtlesport.db.progress.IGeoRouteStoreProgress;
 import fr.turtlesport.db.progress.IRunStoreProgress;
@@ -71,14 +72,21 @@ public final class RunTableManager extends AbstractTableManager {
    * @throws SQLException
    */
   public List<DataRun> retreiveDesc(int idUser, DataSearchRun search) throws SQLException {
-    if (search == null) {
+    if (search == null || search.isEmpty()) {
       return retreiveDesc(idUser);
     }
-    
+
+    if (search.getDateMin() != null && search.getDateMax() != null
+        && search.getDateMin().after(search.getDateMax())) {
+      Date dateMin = search.getDateMax();
+      search.setDateMax(search.getDateMin());
+      search.setDateMin(dateMin);
+    }
+
     if (log.isInfoEnabled()) {
       log.info(">>retreiveDesc search idUser=" + idUser);
     }
-    
+
     List<DataRun> listRun = new ArrayList<DataRun>();
 
     long startTime = System.currentTimeMillis();
@@ -86,30 +94,210 @@ public final class RunTableManager extends AbstractTableManager {
     Connection conn = DatabaseManager.getConnection();
     try {
       StringBuilder st = new StringBuilder();
-      st.append("SELECT id, sport_type, start_time FROM ");
-      st.append(getTableName());
-      st.append(" WHERE ");
+
+      st.append("SELECT RUN.id, RUN.sport_type, RUN.start_time, SUM(LAP.total_dist)");
+      if (search.getDurationMin() != -1 || search.getDurationMax() != -1) {
+        st.append(", SUM(LAP.total_time)");
+        st.append(", SUM(case when LAP.total_moving_time is null");
+        st.append("           then LAP.total_time");
+        st.append("           else LAP.total_moving_time");
+        st.append("       end)");
+      }
+      st.append(" FROM ");
+      st.append(getTableName() + " RUN, ");
+      st.append(DatabaseManager.TABLE_RUN_LAP + " LAP");
+      if (search.hasDataMeteo()) {
+        st.append(", " + DatabaseManager.TABLE_METEO + " RUNMETEO");
+      }
+      st.append(" WHERE RUN.id=LAP.id");
+      if (search.hasDataMeteo()) {
+        // meteo
+        st.append(" AND RUN.id=RUNMETEO.id");
+        if (search.isConditionValid()) {
+          st.append(" AND RUNMETEO.condition=?");
+        }
+        if (search.isTempMinValid()) {
+          st.append(" AND RUNMETEO.temperature >= ?");
+        }
+        if (search.isTempMaxValid()) {
+          st.append(" AND RUNMETEO.temperature <= ?");
+        }
+      }
       if (!DataUser.isAllUser(idUser)) {
-        st.append(" id_user=?");
+        st.append(" AND RUN.id_user=?");
       }
-      if (search.getLocation() != null) {
-        
+      if (search.getSportType() != -1) {
+        st.append(" AND RUN.sport_type=?");
       }
-      st.append(" ORDER BY start_time DESC");
+      if (search.getEquipment() != null && !"".equals(search.getEquipment())) {
+        st.append(" AND RUN.equipement=?");
+      }
+      if (search.getLocation() != null && !"".equals(search.getLocation())) {
+        st.append(" AND RUN.location=?");
+      }
+      if (search.getComments() != null && !"".equals(search.getComments())) {
+        st.append(" AND upper(RUN.comments) LIKE upper(?)");
+      }
+      if (search.getDateMin() != null && search.getDateMax() != null) {
+        st.append(" AND (RUN.start_time BETWEEN ? AND ?)");
+      }
+      else if (search.getDateMin() != null) {
+        st.append(" AND RUN.start_time >= ?");
+      }
+      else if (search.getDateMax() != null) {
+        st.append(" AND RUN.start_time <= ?");
+      }
+      st.append(" GROUP BY RUN.id, RUN.start_time, RUN.SPORT_TYPE");
+      if (search.isDistanceMinValid() || search.isDistanceMaxValid()
+          || search.getDurationMin() != -1 || search.getDurationMax() != -1) {
+        st.append(" HAVING ");
+        boolean isAnd = false;
+        if (search.isDistanceMinValid()) {
+          st.append("SUM(LAP.total_dist) >= ?");
+          isAnd = true;
+          if (search.isDistanceMaxValid()) {
+            st.append(" AND ");
+          }
+        }
+        if (search.isDistanceMaxValid()) {
+          isAnd = true;
+          st.append("SUM(LAP.total_dist) <= ?");
+        }
+        if (search.getDurationMin() > 0) {
+          if (isAnd) {
+            st.append(" AND");
+          }
+          isAnd = true;
+          st.append(" SUM(case when LAP.total_moving_time is null");
+          st.append("           then LAP.total_time");
+          st.append("           else LAP.total_moving_time");
+          st.append("       end)");
+          st.append(" >= ?");
+        }
+        if (search.getDurationMax() > 0) {
+          if (isAnd) {
+            st.append(" AND");
+          }
+          st.append(" SUM(case when LAP.total_moving_time is null");
+          st.append("           then LAP.total_time");
+          st.append("           else LAP.total_moving_time");
+          st.append("       end)");
+          st.append(" <= ?");
+        }
+      }
+      st.append(" ORDER BY RUN.start_time DESC");
+
+      if (log.isInfoEnabled()) {
+        log.info(st.toString());
+      }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int i = 0;
+      if (search.hasDataMeteo()) {
+        // meteo
+        if (search.isConditionValid()) {
+          pstmt.setInt(++i, search.getCondition());
+          if (log.isInfoEnabled()) {
+            log.info("condition=" + search.getCondition());
+          }
+        }
+        if (search.isTempMinValid()) {
+          pstmt.setInt(++i, search.getTempMin());
+          if (log.isInfoEnabled()) {
+            log.info("TempMin=" + search.getTempMin());
+          }
+        }
+        if (search.isTempMaxValid()) {
+          pstmt.setInt(++i, search.getTempMax());
+          if (log.isInfoEnabled()) {
+            log.info("TempMax=" + search.getTempMax());
+          }
+        }
+      }
       if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
+        pstmt.setInt(++i, idUser);
+        if (log.isInfoEnabled()) {
+          log.info("idUser=" + idUser);
+        }
+      }
+      if (search.getSportType() != -1) {
+        pstmt.setInt(++i, search.getSportType());
+        if (log.isInfoEnabled()) {
+          log.info("SportType=" + search.getSportType());
+        }
+      }
+      if (search.getEquipment() != null && !"".equals(search.getEquipment())) {
+        pstmt.setString(++i, search.getEquipment());
+        if (log.isInfoEnabled()) {
+          log.info("Equipment=" + search.getEquipment());
+        }
+      }
+      if (search.getLocation() != null && !"".equals(search.getLocation())) {
+        pstmt.setString(++i, search.getLocation());
+        if (log.isInfoEnabled()) {
+          log.info("Location=" + search.getLocation());
+        }
+      }
+      if (search.getComments() != null && !"".equals(search.getComments())) {
+        pstmt.setString(++i, "%" + search.getComments() + "%");
+        if (log.isInfoEnabled()) {
+          log.info("Comments=" + search.getComments());
+        }
+      }
+      if (search.getDateMin() != null) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(search.getDateMin());
+        pstmt.setTimestamp(++i, new Timestamp(cal.getTimeInMillis()));
+        if (log.isInfoEnabled()) {
+          log.info("DateMin=" + search.getDateMin());
+        }
+      }
+      if (search.getDateMax() != null) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(search.getDateMax());
+        pstmt.setTimestamp(++i, new Timestamp(cal.getTimeInMillis()));
+        if (log.isInfoEnabled()) {
+          log.info("DateMax=" + search.getDateMax());
+        }
+      }
+      if (search.getDurationMin() != -1) {
+        pstmt.setInt(++i, (int) search.getDurationMin() * 100);
+        if (log.isInfoEnabled()) {
+          log.info("DurationMin=" + search.getDurationMin() * 100);
+        }
+      }
+      if (search.getDurationMax() != -1) {
+        pstmt.setInt(++i, (int) search.getDurationMax() * 100);
+        if (log.isInfoEnabled()) {
+          log.info("DurationMax=" + search.getDurationMax() * 100);
+        }
+      }
+      if (search.isDistanceMinValid()) {
+        pstmt.setInt(++i, search.getDistanceMin() * 1000);
+        if (log.isInfoEnabled()) {
+          log.info("DistanceMin=" + search.getDistanceMin() * 1000);
+        }
+      }
+      if (search.isDistanceMaxValid()) {
+        pstmt.setInt(++i, search.getDistanceMax() * 1000);
+        if (log.isInfoEnabled()) {
+          log.info("DistanceMax=" + search.getDistanceMax() * 1000);
+        }
       }
 
       ResultSet rs = pstmt.executeQuery();
       while (rs.next()) {
         DataRun dataRun = new DataRun();
-        dataRun.setId(rs.getInt("id"));
-        dataRun.setSportType(rs.getInt("sport_type"));
-        dataRun.setTime(rs.getTimestamp("start_time"));
+        dataRun.setId(rs.getInt(1));
+        dataRun.setSportType(rs.getInt(2));
+        dataRun.setTime(rs.getTimestamp(3));
+        dataRun.setComputeDistanceTot(rs.getFloat(4));
         listRun.add(dataRun);
-        log.debug("id" + dataRun.getId());
+        // if (log.isInfoEnabled()) {
+        // log.info("id : " + dataRun.getId() + "  --> "
+        // + dataRun.getComputeDistanceTot() + " " + dataRun.getTime());
+        //
+        // }
       }
     }
     finally {
@@ -118,11 +306,12 @@ public final class RunTableManager extends AbstractTableManager {
 
     if (log.isInfoEnabled()) {
       long delay = System.currentTimeMillis() - startTime;
-      log.info("<<retreiveDesc  idUser=" + idUser + " delay=" + delay + "ms");
+      log.info("<<retreiveDesc search idUser=" + idUser + " delay=" + delay
+               + "ms --> " + listRun.size() + " records");
     }
     return listRun;
   }
-  
+
   /**
    * D&eacute;termine si cette ligne existe.
    * 
@@ -250,9 +439,12 @@ public final class RunTableManager extends AbstractTableManager {
    * 
    * @param a1000
    * @param progress
+   * @param device
    * @throws SQLException
    */
-  public void store(A1000RunTransferProtocol a1000, IRunStoreProgress progress) throws SQLException {
+  public void store(A1000RunTransferProtocol a1000,
+                    IRunStoreProgress progress,
+                    IProductDevice device) throws SQLException {
     log.debug(">>store a1000");
 
     if (a1000 == null || a1000.getListRunType() == null) {
@@ -312,7 +504,12 @@ public final class RunTableManager extends AbstractTableManager {
                      runType.getComputeStartTime(),
                      comments,
                      equipement,
-                     null);
+                     null,
+                     (device == null) ? null : device.id(),
+                     (device == null) ? null : device
+                         .softwareVersion(),
+                     (device == null) ? null : device
+                         .displayName());
 
           hashLap.put(runType.getTrackIndex(), id);
         }
@@ -482,6 +679,9 @@ public final class RunTableManager extends AbstractTableManager {
           comments = ((DataRunExtra) route.getExtra()).getComments();
           equipement = ((DataRunExtra) route.getExtra()).getEquipement();
         }
+
+        IProductDevice device = route.getProductDevice();
+
         id = store(idUser,
                    route.getSportType(),
                    0,
@@ -489,7 +689,10 @@ public final class RunTableManager extends AbstractTableManager {
                    startTime,
                    comments,
                    equipement,
-                   null);
+                   null,
+                   (device == null) ? null : device.id(),
+                   (device == null) ? null : device.softwareVersion(),
+                   (device == null) ? null : device.displayName());
         // notification
         if (++nbSave % IRunTransfertProgress.POINT_NOTIFY == 0) {
           progress.store(nbSave, maxLine);
@@ -611,6 +814,9 @@ public final class RunTableManager extends AbstractTableManager {
                  startTime,
                  data.getComments(),
                  data.getEquipement(),
+                 null,
+                 null,
+                 null,
                  null);
 
       // Lap
@@ -665,27 +871,27 @@ public final class RunTableManager extends AbstractTableManager {
    */
   public void store(DataRun dataRun, List<DataRunTrk> listTrks) throws SQLException {
     log.debug(">>store dataRun  listTrks");
-  
+
     if (dataRun == null || listTrks == null || listTrks.size() == 0) {
       return;
     }
-  
+
     // Debut de tansaction
     DatabaseManager.beginTransaction();
-  
+
     try {
       int id = dataRun.getId();
-  
+
       // update du run
       StringBuilder st = new StringBuilder();
       st.append("UPDATE ");
       st.append(getTableName());
       st.append(" SET start_time=?");
       st.append(" WHERE id = ?");
-  
+
       Connection conn = DatabaseManager.getConnection();
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
-  
+
       for (DataRunTrk trk : listTrks) {
         if (trk.getTime() != null) {
           pstmt.setTimestamp(1, trk.getTime());
@@ -694,10 +900,10 @@ public final class RunTableManager extends AbstractTableManager {
       }
       pstmt.setInt(2, id);
       pstmt.executeUpdate();
-  
+
       // effacement des points pour un run existant
       RunTrkTableManager.getInstance().delete(id);
-  
+
       // insertion des points
       for (int i = 0; i < listTrks.size(); i++) {
         DataRunTrk trk = listTrks.get(i);
@@ -733,11 +939,11 @@ public final class RunTableManager extends AbstractTableManager {
       DatabaseManager.getConnection().close();
       throw new RuntimeException(e);
     }
-  
+
     // ok -> commit
     DatabaseManager.commitTransaction();
     DatabaseManager.getConnection().close();
-  
+
     log.debug("<<store");
   }
 
@@ -746,11 +952,13 @@ public final class RunTableManager extends AbstractTableManager {
    * 
    * @return <code>true</code> si ligne trouv&eacute;e.
    */
-  public boolean delete(int idUser, int year, int month) throws SQLException {
-
+  public boolean delete(int idUser, int year, int month, DataSearchRun search) throws SQLException {
+    if (log.isInfoEnabled()) {
+      log.info(">>delete search " + year + "-" + month);
+    }
     boolean bRes = false;
 
-    List<DataRun> runs = retreiveDesc(idUser, year, month);
+    List<DataRun> runs = retreiveDesc(idUser, year, month, search);
     if (runs == null || runs.size() == 0) {
       return false;
     }
@@ -773,7 +981,9 @@ public final class RunTableManager extends AbstractTableManager {
     }
     DatabaseManager.releaseConnection(conn);
 
-    log.debug("<<delete bRes=" + bRes);
+    if (log.isInfoEnabled()) {
+      log.info("<<delete bRes=" + bRes);
+    }
     return bRes;
   }
 
@@ -902,6 +1112,8 @@ public final class RunTableManager extends AbstractTableManager {
    * @param distance
    * @param comments
    * @param location
+   * @param productID
+   * @param productVersion
    * @return
    * @throws SQLException
    */
@@ -912,7 +1124,10 @@ public final class RunTableManager extends AbstractTableManager {
                       Date startTime,
                       String comments,
                       String equipement,
-                      String location) throws SQLException {
+                      String location,
+                      String productID,
+                      String productVersion,
+                      String productDisplayName) throws SQLException {
     log.debug(">>store");
     int id;
 
@@ -924,6 +1139,19 @@ public final class RunTableManager extends AbstractTableManager {
     Connection conn = DatabaseManager.getConnection();
 
     try {
+      String sProductID = productID;
+      if (productID != null && productID.length() > 8) {
+        sProductID = productID.substring(0, 7);
+      }
+      String sProductVersion = productVersion;
+      if (productVersion != null && productVersion.length() > 15) {
+        sProductVersion = productID.substring(0, 14);
+      }
+      String sProductDisplayName = productDisplayName;
+      if (productDisplayName != null && productDisplayName.length() > 25) {
+        sProductDisplayName = productDisplayName.substring(0, 24);
+      }
+      
       // Insertion de la course.
       StringBuilder st = new StringBuilder();
       st.append("INSERT INTO ");
@@ -935,8 +1163,11 @@ public final class RunTableManager extends AbstractTableManager {
       st.append(" start_time,");
       st.append(" comments,");
       st.append(" equipement,");
-      st.append(" location)");
-      st.append("VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+      st.append(" location,");
+      st.append(" product_id,");
+      st.append(" product_version,");
+      st.append(" product_name)");
+      st.append("VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       pstmt.setInt(1, idUser);
@@ -947,6 +1178,9 @@ public final class RunTableManager extends AbstractTableManager {
       pstmt.setString(6, comments);
       pstmt.setString(7, equipement);
       pstmt.setString(8, location);
+      pstmt.setString(9, sProductID);
+      pstmt.setString(10, sProductVersion);
+      pstmt.setString(11, sProductDisplayName);
       pstmt.executeUpdate();
 
       // Recuperation de l'id
@@ -1043,8 +1277,30 @@ public final class RunTableManager extends AbstractTableManager {
    * @param time
    * @return <code>true</code> si ligne trouv&eacute;e.
    */
+  public DataRun findPrev(int idUser, Timestamp time, DataSearchRun search) throws SQLException {
+    return findNextOrPrev(idUser, time, false, search);
+  }
+
+  /**
+   * D&eacute;termine si cette ligne existe.
+   * 
+   * @param idUser
+   * @param time
+   * @return <code>true</code> si ligne trouv&eacute;e.
+   */
   public DataRun findNext(int idUser, Timestamp time) throws SQLException {
     return findNextOrPrev(idUser, time, true);
+  }
+
+  /**
+   * D&eacute;termine si cette ligne existe.
+   * 
+   * @param idUser
+   * @param time
+   * @return <code>true</code> si ligne trouv&eacute;e.
+   */
+  public DataRun findNext(int idUser, Timestamp time, DataSearchRun search) throws SQLException {
+    return findNextOrPrev(idUser, time, true, search);
   }
 
   private DataRun findNextOrPrev(int idUser, Timestamp time, boolean isNext) throws SQLException {
@@ -1102,6 +1358,235 @@ public final class RunTableManager extends AbstractTableManager {
     return dataRun;
   }
 
+  private DataRun findNextOrPrev(int idUser,
+                                 Timestamp time,
+                                 boolean isNext,
+                                 DataSearchRun search) throws SQLException {
+    if (search == null || search.isEmpty()) {
+      return findNextOrPrev(idUser, time, isNext);
+    }
+
+    if (log.isInfoEnabled()) {
+      log.info(">>findNextOrPrev search idUser=" + idUser + " time=" + time
+               + " isNext=" + isNext);
+    }
+
+    DataRun dataRun = null;
+
+    if (search.getDateMin() != null && search.getDateMax() != null
+        && search.getDateMin().after(search.getDateMax())) {
+      Date dateMin = search.getDateMax();
+      search.setDateMax(search.getDateMin());
+      search.setDateMin(dateMin);
+    }
+
+    if (log.isInfoEnabled()) {
+      log.info(">>retreiveDesc search idUser=" + idUser);
+    }
+
+    long startTime = System.currentTimeMillis();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT");
+      st.append(" RUN.id, RUN.sport_type, RUN.program_type, RUN.multisport, RUN.start_time,");
+      st.append(" RUN.comments, RUN.equipement, RUN.location, SUM(LAP.total_dist)");
+      st.append(" FROM ");
+      st.append(getTableName() + " RUN, ");
+      st.append(DatabaseManager.TABLE_RUN_LAP + " LAP");
+      if (search.hasDataMeteo()) {
+        st.append(", " + DatabaseManager.TABLE_METEO + " RUNMETEO");
+      }
+      st.append(" WHERE RUN.id=LAP.id");
+      if (search.hasDataMeteo()) {
+        // meteo
+        st.append(" AND RUN.id=RUNMETEO.id");
+        if (search.isConditionValid()) {
+          st.append(" AND RUNMETEO.condition=?");
+        }
+        if (search.isTempMinValid()) {
+          st.append(" AND RUNMETEO.temperature >= ?");
+        }
+        if (search.isTempMaxValid()) {
+          st.append(" AND RUNMETEO.temperature <= ?");
+        }
+      }
+      if (!DataUser.isAllUser(idUser)) {
+        st.append(" AND RUN.id_user=?");
+      }
+      if (search.getSportType() != -1) {
+        st.append(" AND RUN.sport_type=?");
+      }
+      if (search.getEquipment() != null && !"".equals(search.getEquipment())) {
+        st.append(" AND RUN.equipement=?");
+      }
+      if (search.getLocation() != null && !"".equals(search.getLocation())) {
+        st.append(" AND RUN.location=?");
+      }
+      if (search.getComments() != null && !"".equals(search.getComments())) {
+        st.append(" AND upper(RUN.comments) LIKE upper(?)");
+      }
+      st.append(" AND RUN.start_time ");
+      if (isNext) {
+        st.append("> ?");
+        if (search.getDateMax() != null) {
+          st.append(" AND RUN.start_time <= ?");
+        }
+      }
+      else {
+        st.append("< ?");
+        if (search.getDateMin() != null) {
+          st.append(" AND RUN.start_time >= ?");
+        }
+      }
+      // if (search.getDateMin() != null && search.getDateMax() != null) {
+      // and(isAnd, st);
+      // st.append("(RUN.start_time BETWEEN ? AND ?)");
+      // isAnd = true;
+      // }s
+
+      st.append(" GROUP BY RUN.id, RUN.start_time, RUN.sport_type, RUN.program_type, RUN.multisport,");
+      st.append(" RUN.comments, RUN.equipement, RUN.location");
+      if (search.isDistanceMinValid() || search.isDistanceMaxValid()) {
+        st.append(" HAVING ");
+        if (search.isDistanceMinValid()) {
+          st.append("SUM(LAP.total_dist) >= ?");
+          if (search.isDistanceMaxValid()) {
+            st.append(" AND ");
+          }
+        }
+        if (search.isDistanceMaxValid()) {
+          st.append("SUM(LAP.total_dist) <= ? ");
+        }
+      }
+      st.append(" ORDER BY RUN.start_time ");
+      st.append((isNext) ? "ASC" : "DESC");
+
+      if (log.isInfoEnabled()) {
+        log.info(st.toString());
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int i = 0;
+      if (search.hasDataMeteo()) {
+        // meteo
+        if (search.isConditionValid()) {
+          pstmt.setInt(++i, search.getCondition());
+          if (log.isInfoEnabled()) {
+            log.info("condition=" + search.getCondition());
+          }
+        }
+        if (search.isTempMinValid()) {
+          pstmt.setInt(++i, search.getTempMin());
+          if (log.isInfoEnabled()) {
+            log.info("TempMin=" + search.getTempMin());
+          }
+        }
+        if (search.isTempMaxValid()) {
+          pstmt.setInt(++i, search.getTempMax());
+          if (log.isInfoEnabled()) {
+            log.info("TempMax=" + search.getTempMax());
+          }
+        }
+      }
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(++i, idUser);
+        if (log.isInfoEnabled()) {
+          log.info("idUser=" + idUser);
+        }
+      }
+      if (search.getSportType() != -1) {
+        pstmt.setInt(++i, search.getSportType());
+        if (log.isInfoEnabled()) {
+          log.info("SportType=" + search.getSportType());
+        }
+      }
+      if (search.getEquipment() != null && !"".equals(search.getEquipment())) {
+        pstmt.setString(++i, search.getEquipment());
+        if (log.isInfoEnabled()) {
+          log.info("Equipment=" + search.getEquipment());
+        }
+      }
+      if (search.getLocation() != null && !"".equals(search.getLocation())) {
+        pstmt.setString(++i, search.getLocation());
+        if (log.isInfoEnabled()) {
+          log.info("Location=" + search.getLocation());
+        }
+      }
+      if (search.getComments() != null && !"".equals(search.getComments())) {
+        pstmt.setString(++i, "%" + search.getComments() + "%");
+        if (log.isInfoEnabled()) {
+          log.info("Comments=" + search.getComments());
+        }
+      }
+      // time
+      pstmt.setTimestamp(++i, time);
+      if (log.isInfoEnabled()) {
+        log.info("time=" + time);
+      }
+      if (isNext) {
+        if (search.getDateMax() != null) {
+          Calendar cal = Calendar.getInstance();
+          cal.setTime(search.getDateMax());
+          pstmt.setTimestamp(++i, new Timestamp(cal.getTimeInMillis()));
+          if (log.isInfoEnabled()) {
+            log.info("DateMax=" + search.getDateMax());
+          }
+        }
+      }
+      else if (search.getDateMin() != null) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(search.getDateMin());
+        pstmt.setTimestamp(++i, new Timestamp(cal.getTimeInMillis()));
+        if (log.isInfoEnabled()) {
+          log.info("DateMin=" + search.getDateMin());
+        }
+      }
+      if (search.isDistanceMinValid()) {
+        pstmt.setInt(++i, search.getDistanceMin() * 1000);
+        if (log.isInfoEnabled()) {
+          log.info("DistanceMin=" + search.getDistanceMin() * 1000);
+        }
+      }
+      if (search.isDistanceMaxValid()) {
+        pstmt.setInt(++i, search.getDistanceMax() * 1000);
+        if (log.isInfoEnabled()) {
+          log.info("DistanceMax=" + search.getDistanceMax());
+        }
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      if (rs.next()) {
+        dataRun = new DataRun();
+        dataRun.setId(rs.getInt(1));
+        dataRun.setSportType(rs.getInt(2));
+        dataRun.setProgramType(rs.getInt(3));
+        dataRun.setMultisport(rs.getInt(4));
+        dataRun.setTime(rs.getTimestamp(5));
+        dataRun.setComments(rs.getString(6));
+        dataRun.setEquipement(rs.getString(7));
+        dataRun.setLocation(rs.getString(8));
+        dataRun.setComputeDistanceTot(rs.getFloat(9));
+        if (log.isInfoEnabled()) {
+          log.info("id : " + dataRun.getId() + "  --> "
+                   + dataRun.getComputeDistanceTot() + " " + dataRun.getTime());
+
+        }
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      long delay = System.currentTimeMillis() - startTime;
+      log.info("<<findNextOrPrev search delay=" + delay + "ms (" + dataRun
+               + ")");
+    }
+    return dataRun;
+  }
+
   /**
    * Recuperation des run d'un utilisateur avec ann&eacute; et le mois en
    * criit&egrave;re.
@@ -1112,7 +1597,178 @@ public final class RunTableManager extends AbstractTableManager {
    * @return
    * @throws SQLException
    */
-  public List<DataRun> retreiveDesc(int idUser, int year, int month) throws SQLException {
+  public List<DataRun> retreiveDesc(int idUser,
+                                    int year,
+                                    int month,
+                                    DataSearchRun search) throws SQLException {
+    if (search == null || search.isEmpty()) {
+      return retreiveDesc(idUser, year, month);
+    }
+
+    if (log.isInfoEnabled()) {
+      log.info(">>retreiveDesc  search idUser=" + idUser + " year=" + year
+               + " month=" + month);
+    }
+
+    List<DataRun> listRun = new ArrayList<DataRun>();
+
+    long startTime = System.currentTimeMillis();
+
+    if (search.getDateMin() != null && search.getDateMax() != null
+        && search.getDateMin().after(search.getDateMax())) {
+      Date dateMin = search.getDateMax();
+      search.setDateMax(search.getDateMin());
+      search.setDateMin(dateMin);
+    }
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+
+      st.append("SELECT RUN.id, RUN.sport_type, RUN.start_time FROM ");
+      st.append(getTableName() + " RUN");
+      if (search.hasDataMeteo()) {
+        st.append(", " + DatabaseManager.TABLE_METEO + " RUNMETEO");
+      }
+      st.append(" WHERE YEAR(start_time)=?");
+      if (month >= 0 && month <= 12) {
+        st.append(" AND MONTH(start_time)=?");
+      }
+      if (search.hasDataMeteo()) {
+        // meteo
+        st.append(" AND RUN.id=RUNMETEO.id");
+        if (search.isConditionValid()) {
+          st.append(" AND RUNMETEO.condition=?");
+        }
+        if (search.isTempMinValid()) {
+          st.append(" AND RUNMETEO.temperature >= ?");
+        }
+        if (search.isTempMaxValid()) {
+          st.append(" AND RUNMETEO.temperature <= ?");
+        }
+      }
+      if (!DataUser.isAllUser(idUser)) {
+        st.append(" AND RUN.id_user=?");
+      }
+      if (search.getSportType() != -1) {
+        st.append(" AND RUN.sport_type=?");
+      }
+      if (search.getEquipment() != null) {
+        st.append(" AND RUN.equipement=?");
+      }
+      if (search.getLocation() != null) {
+        st.append(" AND RUN.location=?");
+      }
+      if (search.getComments() != null) {
+        st.append(" AND upper(RUN.comments) LIKE upper(?)");
+      }
+      if (search.getDateMin() != null && search.getDateMax() != null) {
+        st.append(" AND (RUN.start_time BETWEEN ? AND ?)");
+      }
+      else if (search.getDateMin() != null) {
+        st.append(" AND RUN.start_time >= ?");
+      }
+      else if (search.getDateMax() == null) {
+        st.append(" AND RUN.start_time <= ?");
+      }
+      st.append(" ORDER BY RUN.start_time DESC, RUN.id, RUN.SPORT_TYPE");
+      if (search.isDistanceMinValid() || search.isDistanceMaxValid()) {
+        st.append(" HAVING ");
+        if (search.isDistanceMinValid()) {
+          st.append("SUM(LAP.total_dist) > =?");
+          if (search.isDistanceMaxValid()) {
+            st.append(" AND ");
+          }
+        }
+        if (search.isDistanceMaxValid()) {
+          st.append("SUM(LAP.total_dist) <= ? ");
+        }
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
+
+      pstmt.setInt(++index, year);
+      if (month >= 0 && month <= 12) {
+        pstmt.setInt(++index, month);
+      }
+
+      if (search.hasDataMeteo()) {
+        // meteo
+        if (search.isConditionValid()) {
+          pstmt.setInt(++index, search.getCondition());
+        }
+        if (search.isTempMinValid()) {
+          pstmt.setInt(++index, search.getTempMin());
+        }
+        if (search.isTempMaxValid()) {
+          pstmt.setInt(++index, search.getTempMax());
+        }
+      }
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(++index, idUser);
+      }
+      if (search.getSportType() != -1) {
+        pstmt.setInt(++index, search.getSportType());
+      }
+      if (search.getEquipment() != null) {
+        pstmt.setString(++index, search.getEquipment());
+      }
+      if (search.getLocation() != null) {
+        pstmt.setString(++index, search.getLocation());
+      }
+      if (search.getComments() != null) {
+        pstmt.setString(++index, "%" + search.getComments() + "%");
+      }
+      if (search.getDateMin() != null) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(search.getDateMin());
+        pstmt.setTimestamp(++index, new Timestamp(cal.getTimeInMillis()));
+      }
+      if (search.getDateMax() != null) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(search.getDateMax());
+        pstmt.setTimestamp(++index, new Timestamp(cal.getTimeInMillis()));
+      }
+      if (search.isDistanceMinValid()) {
+        pstmt.setInt(++index, search.getDistanceMin());
+      }
+      if (search.isDistanceMaxValid()) {
+        pstmt.setInt(++index, search.getDistanceMax());
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        DataRun dataRun = new DataRun();
+        dataRun.setId(rs.getInt(1));
+        dataRun.setSportType(rs.getInt(2));
+        dataRun.setTime(rs.getTimestamp(3));
+        listRun.add(dataRun);
+        log.debug("id" + dataRun.getId());
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      long delay = System.currentTimeMillis() - startTime;
+      log.info("<<retreiveDesc  idUser=" + idUser + " delay=" + delay + "ms");
+    }
+    return listRun;
+  }
+
+  /**
+   * Recuperation des run d'un utilisateur avec ann&eacute; et le mois en
+   * criit&egrave;re.
+   * 
+   * @param idUser
+   * @param year
+   * @param month
+   * @return
+   * @throws SQLException
+   */
+  private List<DataRun> retreiveDesc(int idUser, int year, int month) throws SQLException {
     if (log.isInfoEnabled()) {
       log.info(">>retreiveDesc  idUser=" + idUser + " year=" + year + " month="
                + month);
@@ -1175,9 +1831,9 @@ public final class RunTableManager extends AbstractTableManager {
    * @return
    * @throws SQLException
    */
-  public List<DataRun> retreiveDesc(int idUser) throws SQLException {
+  private List<DataRun> retreiveDesc(int idUser) throws SQLException {
     if (log.isInfoEnabled()) {
-      log.info(">>retreiveDesc  idUser=" + idUser);
+      log.info(">>retreiveDesc idUser=" + idUser);
     }
     List<DataRun> listRun = new ArrayList<DataRun>();
 
@@ -1262,6 +1918,9 @@ public final class RunTableManager extends AbstractTableManager {
         dataRun.setComments(rs.getString("comments"));
         dataRun.setEquipement(rs.getString("equipement"));
         dataRun.setLocation(rs.getString("location"));
+        dataRun.setProductId(rs.getString("product_id"));
+        dataRun.setProductVersion(rs.getString("product_version"));
+        dataRun.setProductName(rs.getString("product_name"));
         listRun.add(dataRun);
         log.debug("id" + dataRun.getId() + " " + rs.getString("location"));
       }
@@ -1313,6 +1972,9 @@ public final class RunTableManager extends AbstractTableManager {
         dataRun.setComments(rs.getString("comments"));
         dataRun.setEquipement(rs.getString("equipement"));
         dataRun.setLocation(rs.getString("location"));
+        dataRun.setProductId(rs.getString("product_id"));
+        dataRun.setProductName(rs.getString("product_name"));
+        dataRun.setProductVersion(rs.getString("product_version"));
         log.debug("id" + dataRun.getId());
       }
     }
@@ -1396,7 +2058,10 @@ public final class RunTableManager extends AbstractTableManager {
    * @return les dates.
    * @throws SQLException
    */
-  public Date[] retrieveDates(int idUser, Date dateFirst, Date dateEnd) throws SQLException {
+  public Date[] retrieveDates(int idUser,
+                              Date dateFirst,
+                              Date dateEnd,
+                              DataSearchRun search) throws SQLException {
     if (log.isInfoEnabled()) {
       log.info(">>retrieveDates between idUser");
       logTable();
@@ -1503,10 +2168,10 @@ public final class RunTableManager extends AbstractTableManager {
    * @return
    * @throws SQLException
    */
-  public boolean hasNext(int idUser, java.util.Date date) throws SQLException {
+  public boolean hasNext(int idUser, java.util.Date date, DataSearchRun search) throws SQLException {
     log.debug(">>hasNext  " + date);
 
-    boolean bRes = hasNextOrPrev(idUser, date, true);
+    boolean bRes = hasNextOrPrev(idUser, date, true, search);
 
     log.debug("<< hasNext " + bRes);
     return bRes;
@@ -1521,10 +2186,10 @@ public final class RunTableManager extends AbstractTableManager {
    * @return
    * @throws SQLException
    */
-  public boolean hasPrev(int idUser, java.util.Date date) throws SQLException {
+  public boolean hasPrev(int idUser, java.util.Date date, DataSearchRun search) throws SQLException {
     log.debug(">>hasPrev  " + date);
 
-    boolean bRes = hasNextOrPrev(idUser, date, false);
+    boolean bRes = hasNextOrPrev(idUser, date, false, search);
 
     log.debug("<< hasPrev " + bRes);
     return bRes;
@@ -1565,6 +2230,21 @@ public final class RunTableManager extends AbstractTableManager {
     }
 
     return isFound;
+  }
+
+  private boolean hasNextOrPrev(int idUser,
+                                java.util.Date date,
+                                boolean isNext,
+                                DataSearchRun search) throws SQLException {
+    if (search == null || search.isEmpty()) {
+      return hasNextOrPrev(idUser, date, isNext);
+    }
+
+    if (date == null) {
+      throw new IllegalArgumentException("date est null");
+    }
+
+    return findNextOrPrev(idUser, new Timestamp(date.getTime()), isNext, search) != null;
   }
 
   /**

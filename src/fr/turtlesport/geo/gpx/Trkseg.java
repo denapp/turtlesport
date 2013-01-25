@@ -3,14 +3,13 @@ package fr.turtlesport.geo.gpx;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.turtlesport.geo.AbstractGeoSegment;
 import fr.turtlesport.geo.IGeoPositionWithAlt;
 
 /**
  * @author Denis Apparicio
  * 
  */
-public class Trkseg extends AbstractGeoSegment {
+public class Trkseg extends AbstractGpxSegment {
   private List<Wpt> listPoints;
 
   private String    name;

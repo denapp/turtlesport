@@ -22,6 +22,7 @@ import org.jfree.chart.util.RelativeDateFormat;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import fr.turtlesport.ProductDeviceUtil;
 import fr.turtlesport.db.AbstractDataActivity;
 import fr.turtlesport.db.DataHeartZone;
 import fr.turtlesport.db.DataRun;
@@ -127,7 +128,9 @@ public class ModelRun {
     // recuperation des donnees
     dataRun = RunTableManager.getInstance().findNext(MainGui.getWindow()
                                                          .getCurrentIdUser(),
-                                                     dataRun.getTime());
+                                                     dataRun.getTime(),
+                                                     MainGui.getWindow()
+                                                         .getDataSearch());
 
     // mis a jour de la vue
     update(view);
@@ -151,7 +154,9 @@ public class ModelRun {
     // recuperation des donnees
     dataRun = RunTableManager.getInstance().findPrev(MainGui.getWindow()
                                                          .getCurrentIdUser(),
-                                                     dataRun.getTime());
+                                                     dataRun.getTime(),
+                                                     MainGui.getWindow()
+                                                         .getDataSearch());
 
     // mis a jour de la vue
     update(view);
@@ -282,6 +287,7 @@ public class ModelRun {
     view.getJLabelValCalories().setText(null);
     view.getJLabelValHeart().setText(null);
     view.getJLabelValAlt().setText(null);
+    view.getjLabelValProduct().setText(null);
     view.getModelActivities().setSelectedItem("");
     view.getModelEquipements().setSelectedItem("");
     view.getModelLocation().setSelectedItem("");
@@ -368,9 +374,7 @@ public class ModelRun {
                                      + Integer.toString(max));
 
     // Altitude.
-    int[] alt = RunTrkTableManager.getInstance().altitude(dataRun.getId());
-    view.getJLabelValAlt().setText("+" + Integer.toString(alt[0]) + " / -"
-                                   + Integer.toString(alt[1]));
+    correctAltitude(view);
 
     // Activites
     view.getModelActivities().setSelectedActivity(dataRun.getSportType());
@@ -391,6 +395,13 @@ public class ModelRun {
     // Location
     view.getModelLocation().setSelectedLocation(dataRun.getLocation());
 
+    // Product
+    String product = ProductDeviceUtil.toExternalForm(dataRun.getProductId(),
+                                                      dataRun.getProductName(),
+                                                      dataRun
+                                                          .getProductVersion());
+    view.getjLabelValProduct().setText(product);
+
     updateViewButtons(view);
 
     log.info("<<updateSummary");
@@ -406,11 +417,15 @@ public class ModelRun {
     if (dataRun != null) {
       // Bouton suivant
       view.getJButtonNext().setEnabled(RunTableManager.getInstance()
-          .hasNext(MainGui.getWindow().getCurrentIdUser(), dataRun.getTime()));
+          .hasNext(MainGui.getWindow().getCurrentIdUser(),
+                   dataRun.getTime(),
+                   MainGui.getWindow().getDataSearch()));
 
       // Bouton precedent
       view.getJButtonPrev().setEnabled(RunTableManager.getInstance()
-          .hasPrev(MainGui.getWindow().getCurrentIdUser(), dataRun.getTime()));
+          .hasPrev(MainGui.getWindow().getCurrentIdUser(),
+                   dataRun.getTime(),
+                   MainGui.getWindow().getDataSearch()));
     }
   }
 
@@ -489,6 +504,22 @@ public class ModelRun {
         view.getModelLocation().setSelectedItem(newLocation);
       }
     }
+  }
+
+  /**
+   * Mis &agrave; jour des altitudes.
+   * 
+   * @param view
+   * @throws SQLException
+   */
+  public void correctAltitude(JPanelRun view) throws SQLException {
+    if (dataRun == null) {
+      return;
+    }
+    int[] alt = (view.getJSwitchBox().isOn()) ? dataRun.computeAlt() : dataRun
+        .computeAltOriginal();
+    view.getJLabelValAlt().setText("+" + Integer.toString(alt[0]) + " / -"
+                                   + Integer.toString(alt[1]));
   }
 
   /**

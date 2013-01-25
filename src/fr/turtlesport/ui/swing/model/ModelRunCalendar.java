@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import fr.turtlesport.db.DataSearchRun;
 import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.MainGui;
@@ -56,7 +57,7 @@ public class ModelRunCalendar {
    * @param view
    * @throws SQLException
    */
-  public void updateView(JPanelCalendar view) throws SQLException {
+  public void updateView(JPanelCalendar view, DataSearchRun search) throws SQLException {
     log.debug(">>updateView");
 
     Date d1;
@@ -69,7 +70,7 @@ public class ModelRunCalendar {
     d1 = view.getJPanelMonthSelect().monthFirstDay();
     d2 = view.getJPanelMonthSelect().monthLastDay();
     dates = RunTableManager.getInstance()
-        .retrieveDates(MainGui.getWindow().getCurrentIdUser(), d1, d2);
+        .retrieveDates(MainGui.getWindow().getCurrentIdUser(), d1, d2, search);
     view.getJPanelMonthSelect().fireCurrentDates(dates);
 
     for (Date d : dates) {
@@ -80,7 +81,7 @@ public class ModelRunCalendar {
     d1 = view.getJPanelMonthPrev1().monthFirstDay();
     d2 = view.getJPanelMonthPrev1().monthLastDay();
     dates = RunTableManager.getInstance()
-        .retrieveDates(MainGui.getWindow().getCurrentIdUser(), d1, d2);
+        .retrieveDates(MainGui.getWindow().getCurrentIdUser(), d1, d2, search);
     view.getJPanelMonthPrev1().fireCurrentDates(dates);
     for (Date d : dates) {
       listDate.add(d);
@@ -90,7 +91,7 @@ public class ModelRunCalendar {
     d1 = view.getJPanelMonthPrev2().monthFirstDay();
     d2 = view.getJPanelMonthPrev2().monthLastDay();
     dates = RunTableManager.getInstance()
-        .retrieveDates(MainGui.getWindow().getCurrentIdUser(), d1, d2);
+        .retrieveDates(MainGui.getWindow().getCurrentIdUser(), d1, d2, search);
     view.getJPanelMonthPrev2().fireCurrentDates(dates);
     for (Date d : dates) {
       listDate.add(d);
@@ -126,7 +127,10 @@ public class ModelRunCalendar {
       d1 = view.getJPanelMonthSelect().monthFirstDay();
       d2 = view.getJPanelMonthSelect().monthLastDay();
       dates = RunTableManager.getInstance()
-          .retrieveDates(MainGui.getWindow().getCurrentIdUser(), d1, d2);
+          .retrieveDates(MainGui.getWindow().getCurrentIdUser(),
+                         d1,
+                         d2,
+                         MainGui.getWindow().getDataSearch());
       view.getJPanelMonthSelect().fireCurrentDates(dates);
       for (Date d : dates) {
         listDate.add(d);
@@ -139,7 +143,10 @@ public class ModelRunCalendar {
       d1 = view.getJPanelMonthPrev1().monthFirstDay();
       d2 = view.getJPanelMonthPrev1().monthLastDay();
       dates = RunTableManager.getInstance()
-          .retrieveDates(MainGui.getWindow().getCurrentIdUser(), d1, d2);
+          .retrieveDates(MainGui.getWindow().getCurrentIdUser(),
+                         d1,
+                         d2,
+                         MainGui.getWindow().getDataSearch());
       view.getJPanelMonthPrev1().fireCurrentDates(dates);
       for (Date d : dates) {
         listDate.add(d);
@@ -152,7 +159,10 @@ public class ModelRunCalendar {
       d1 = view.getJPanelMonthPrev2().monthFirstDay();
       d2 = view.getJPanelMonthPrev2().monthLastDay();
       dates = RunTableManager.getInstance()
-          .retrieveDates(MainGui.getWindow().getCurrentIdUser(), d1, d2);
+          .retrieveDates(MainGui.getWindow().getCurrentIdUser(),
+                         d1,
+                         d2,
+                         MainGui.getWindow().getDataSearch());
       view.getJPanelMonthPrev2().fireCurrentDates(dates);
       for (Date d : dates) {
         listDate.add(d);

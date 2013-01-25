@@ -93,7 +93,7 @@ public class GenericModelDocListener implements DocumentListener {
   }
 
   /**
-   * Mis a jour de la valeur.
+   * Mis a jour de la valeur. 
    */
   private void update() {
     try {

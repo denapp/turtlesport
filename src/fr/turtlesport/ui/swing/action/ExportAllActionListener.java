@@ -76,7 +76,8 @@ public class ExportAllActionListener implements ActionListener {
         runs = RunTableManager.getInstance()
             .retreiveDesc(MainGui.getWindow().getCurrentIdUser(),
                           date.year,
-                          date.month);
+                          date.month,
+                          MainGui.getWindow().getDataSearch());
       }
 
       if (runs != null && runs.size() > 0) {

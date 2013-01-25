@@ -3,6 +3,8 @@ package fr.turtlesport.ui.swing.component.calendar;
 import java.sql.SQLException;
 import java.util.Date;
 
+import fr.turtlesport.db.DataSearchRun;
+
 /**
  * @author Denis Apparicio
  * 
@@ -35,7 +37,7 @@ public interface IListDateRunFire {
   /**
    * Mis a jour du calendrier.
    */
-  void fireHistoric(int idUser) throws SQLException;
+  void fireHistoric(int idUser, DataSearchRun search) throws SQLException;
 
   /**
    * Notifie suppression d'une date.

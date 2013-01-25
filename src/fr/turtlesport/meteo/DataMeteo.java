@@ -107,7 +107,7 @@ public class DataMeteo {
     mapIcon.put("Unknown", "32px-unknown.png");
   }
 
-  private static final String[]            IMAGES_ICON_NAMES = { "32px-sunny.png",
+  private static final String[]            IMAGES_ICON_NAMES  = { "32px-sunny.png",
       "32px-mostlysunny.png",
       "32px-mostlycloudy.png",
       "32px-cloudy.png",
@@ -116,36 +116,51 @@ public class DataMeteo {
       "32px-snow.png",
       "32px-fog.png",
       "32px-storm.png",
-      "32px-unknown.png"                                    };
+      "32px-unknown.png"                                     };
 
-  private static List<ImageIcon>           listImageICon     = new ArrayList<ImageIcon>();
+  private static final String[]            IMAGES_ICON_NAMES_SMALL  = { "18px-sunny.png",
+      "18px-mostlysunny.png",
+      "18px-mostlycloudy.png",
+      "18px-cloudy.png",
+      "18px-rain.png",
+      "18px-heavyrain.png",
+      "18px-snow.png",
+      "18px-fog.png",
+      "18px-storm.png",
+      "18px-unknown.png"                                     };
+
+  private static List<ImageIcon>           listImageIcon      = new ArrayList<ImageIcon>();
+  private static List<ImageIcon>           listImageIconSmall = new ArrayList<ImageIcon>();
   static {
     for (String s : IMAGES_ICON_NAMES) {
-      listImageICon.add(new ImageIcon(DataMeteo.class.getResource(s)));
+      listImageIcon.add(new ImageIcon(DataMeteo.class.getResource(s)));
+    }
+    for (String s : IMAGES_ICON_NAMES_SMALL) {
+      listImageIconSmall.add(new ImageIcon(DataMeteo.class.getResource(s)));
     }
   }
 
-  private static final String              DATE_FORMAT       = "yyyy-MM-dd HH:mm:ss";
+  private static final String              DATE_FORMAT        = "yyyy-MM-dd HH:mm:ss";
 
-  private int                              temperature       = Integer.MAX_VALUE;
+  private int                              temperature        = Integer.MAX_VALUE;
 
-  private int                              humidity          = -1;
+  private int                              humidity           = -1;
 
-  private int                              pressurehPa       = -1;
+  private int                              pressurehPa        = -1;
 
   private String                           windDirection;
 
-  private float                            windSpeedkmh      = -1;
+  private float                            windSpeedkmh       = -1;
 
   private int                              windDirectionDegree;
 
   private String                           condition;
 
-  private int                              conditionIndex    = -1;
+  private int                              conditionIndex     = -1;
 
   private Date                             date;
 
-  private float                            visibility        = -1;
+  private float                            visibility         = -1;
 
   private static List<String>              listWinDir;
   static {
@@ -179,7 +194,7 @@ public class DataMeteo {
       DataMeteo d = new DataMeteo(date);
       d.temperature = (int) Float.parseFloat(datas[1]);
       d.humidity = (int) Float.parseFloat(datas[3]);
-      d.pressurehPa =(int)  Float.parseFloat(datas[4]);
+      d.pressurehPa = (int) Float.parseFloat(datas[4]);
       d.visibility = Float.parseFloat(datas[5]);
 
       d.windDirection = datas[6];
@@ -207,7 +222,16 @@ public class DataMeteo {
    * @return la liste des icones
    */
   public static List<ImageIcon> getIcons() {
-    return listImageICon;
+    return listImageIcon;
+  }
+
+  /**
+   * Restitue la liste des icones
+   * 
+   * @return la liste des icones
+   */
+  public static List<ImageIcon> getIconsSmall() {
+    return listImageIconSmall;
   }
 
   public boolean isTemperatureValid() {
@@ -325,7 +349,7 @@ public class DataMeteo {
     }
     return conditionIndex;
   }
-
+  
   public void setImageIconIndex(int index) {
     conditionIndex = index;
   }

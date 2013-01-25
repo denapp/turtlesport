@@ -41,6 +41,7 @@ import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTextAreaLength;
 import fr.turtlesport.ui.swing.component.JTextFieldTime;
 import fr.turtlesport.ui.swing.component.JXDatePickerLocale;
+import fr.turtlesport.ui.swing.component.TextFormatterFactory;
 import fr.turtlesport.ui.swing.model.GenericModelDocListener;
 import fr.turtlesport.ui.swing.model.ModelAddRun;
 import fr.turtlesport.unit.DistanceUnit;

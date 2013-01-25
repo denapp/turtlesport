@@ -16,8 +16,6 @@ public class Lap extends AbstractGeoSegment {
 
   private Date             startTimeXml;
 
-  private double           totalTimeSeconds;
-
   private double           distanceMeters;
 
   private int              calories;
@@ -40,6 +38,8 @@ public class Lap extends AbstractGeoSegment {
 
   private double           maxSpeed            = 0;
 
+  private long             totalTime           = 0;
+
   /**
    * 
    * @param startTime
@@ -48,6 +48,16 @@ public class Lap extends AbstractGeoSegment {
   public Lap(Date startTime, int index) {
     super(index);
     this.startTimeXml = startTime;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.IGeoSegment#getTotalPauseTime()
+   */
+  @Override
+  public long getTotalPauseTime() {
+    return super.getTotalTime() - getTotalTime();
   }
 
   /*
@@ -96,6 +106,20 @@ public class Lap extends AbstractGeoSegment {
       return avgHeartRate;
     }
     return averageHeartRateBpm;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.AbstractGeoSegment#getTotalTime()
+   */
+  @Override
+  public long getTotalTime() {
+    return totalTime;
+  }
+
+  public void setTotalTime(long totalTime) {
+    this.totalTime = totalTime;
   }
 
   /*
@@ -200,21 +224,6 @@ public class Lap extends AbstractGeoSegment {
     this.startTimeXml = startTimeXml;
   }
 
-  /**
-   * @return the totalTimeSeconds
-   */
-  public double getTotalTimeSeconds() {
-    return totalTimeSeconds;
-  }
-
-  /**
-   * @param totalTimeSeconds
-   *          the totalTimeSeconds to set
-   */
-  public void setTotalTimeSeconds(double totalTimeSeconds) {
-    this.totalTimeSeconds = totalTimeSeconds;
-  }
-
   /*
    * (non-Javadoc)
    * 
@@ -223,16 +232,6 @@ public class Lap extends AbstractGeoSegment {
   @Override
   public double distance() {
     return distanceMeters;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.geo.AbstractGeoSegment#getTotalTime()
-   */
-  @Override
-  public long getTotalTime() {
-    return (long) (totalTimeSeconds * 1000);
   }
 
   /**

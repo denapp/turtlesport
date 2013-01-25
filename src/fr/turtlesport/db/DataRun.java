@@ -49,7 +49,15 @@ public class DataRun {
 
   private int[]               alt;
 
+  private int[]               altOrignal;
+
   private int                 calories    = -1;
+
+  private String              productId;
+
+  private String              productVersion;
+
+  private String              productName;
 
   /**
    * 
@@ -250,6 +258,30 @@ public class DataRun {
     this.equipement = equipement;
   }
 
+  public String getProductId() {
+    return productId;
+  }
+
+  public void setProductId(String productId) {
+    this.productId = productId;
+  }
+
+  public String getProductVersion() {
+    return productVersion;
+  }
+
+  public void setProductVersion(String productVersion) {
+    this.productVersion = productVersion;
+  }
+
+  public String getProductName() {
+    return productName;
+  }
+
+  public void setProductName(String productName) {
+    this.productName = productName;
+  }
+
   /**
    * Restitue la distance totale.
    * 
@@ -277,6 +309,11 @@ public class DataRun {
    */
   public void setComputeDistanceTot(double distanceTot) {
     this.distanceTot = distanceTot;
+    if (!DistanceUnit.isDefaultUnitKm()) {
+      this.distanceTot = DistanceUnit.convert(DistanceUnit.unitKm(),
+                                              DistanceUnit.getDefaultUnit(),
+                                              distanceTot);
+    }
   }
 
   /**
@@ -310,7 +347,7 @@ public class DataRun {
     return timePause;
   }
 
-  private void computeTimePauseTotByLaps() throws SQLException {    
+  private void computeTimePauseTotByLaps() throws SQLException {
     DataRunLap[] laps = RunLapTableManager.getInstance().findLaps(id);
     if (laps != null) {
       for (DataRunLap l : laps) {
@@ -400,10 +437,28 @@ public class DataRun {
    * @throws SQLException
    */
   public int computeAltPlus() throws SQLException {
+    return computeAlt()[0];
+  }
+
+  /**
+   * Calcul d&eacute;nivel&eacute; positif dans lissage.
+   * 
+   * @return d&eacute;nivel&eacute; positif.
+   * @throws SQLException
+   */
+  public int computeAltPlusOriginal() throws SQLException {
+    return computeAltOriginal()[0];
+  }
+
+  /**
+   * @return Calcul des altitudes.
+   * @throws SQLException
+   */
+  public int[] computeAlt() throws SQLException {
     if (alt == null) {
       alt = RunTrkTableManager.getInstance().altitude(id);
     }
-    return alt[0];
+    return alt;
   }
 
   /**
@@ -413,10 +468,28 @@ public class DataRun {
    * @throws SQLException
    */
   public int computeAltMoins() throws SQLException {
-    if (alt == null) {
-      alt = RunTrkTableManager.getInstance().altitude(id);
+    return computeAlt()[1];
+  }
+
+  /**
+   * @return Calcul des altitudes sans lissage.
+   * @throws SQLException
+   */
+  public int[] computeAltOriginal() throws SQLException {
+    if (altOrignal == null) {
+      altOrignal = RunTrkTableManager.getInstance().altitudeOriginal(id);
     }
-    return alt[1];
+    return altOrignal;
+  }
+  
+  /**
+   * Calcul d&eacute;nivel&eacute; n&eacute;gatif sans lissage.
+   * 
+   * @return d&eacute;nivel&eacute; n&eacute;gatif.
+   * @throws SQLException
+   */
+  public int computeAltMoinsOriginal() throws SQLException {
+    return computeAltOriginal()[1];
   }
 
   /**

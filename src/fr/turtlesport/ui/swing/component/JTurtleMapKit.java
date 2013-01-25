@@ -128,7 +128,7 @@ public class JTurtleMapKit extends JXPanel {
     mainMap.setCenterPosition(new GeoPosition(0, 0));
     mainMap.setRestrictOutsidePanning(true);
   }
-
+  
   /**
    * @return the mapListener
    */
@@ -725,5 +725,4 @@ public class JTurtleMapKit extends JXPanel {
     }
 
   }
-
 }

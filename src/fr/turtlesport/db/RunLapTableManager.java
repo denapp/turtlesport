@@ -201,7 +201,7 @@ public final class RunLapTableManager extends AbstractTableManager {
       log.debug("TotalTime="+ lap.getTotalTime());
       log.debug("TotalPauseTime="+ lap.getTotalPauseTime());
     }
-    
+
     store(id,
           lap.index(),
           lap.getStartTime(),
@@ -606,7 +606,7 @@ public final class RunLapTableManager extends AbstractTableManager {
     Connection conn = DatabaseManager.getConnection();
     try {
       StringBuilder st = new StringBuilder();
-      st.append(" SELECT SUM(total_time) FROM ");
+      st.append("SELECT SUM(total_time) FROM ");
       st.append(getTableName());
       st.append(" WHERE id=?");
 
@@ -620,7 +620,7 @@ public final class RunLapTableManager extends AbstractTableManager {
         log.info("sumTotalTime=" + sumTotalTime);
 
         st = new StringBuilder();
-        st.append(" SELECT avg_heart_rate, total_time FROM ");
+        st.append("SELECT avg_heart_rate, total_time FROM ");
         st.append(getTableName());
         st.append(" WHERE id=?");
 
@@ -1673,15 +1673,26 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @throws SQLException
    */
   public int[] altitude(int idRun, int lapIndex) throws SQLException {
+    return  altitude(idRun, lapIndex, true);
+  }
+
+  /**
+   * Restitue les denivel&eacute;s sans correction.
+   * 
+   * @param idRun
+   * @return idLap
+   * @throws SQLException
+   */
+  public int[] altitudeOriginal(int idRun, int lapIndex) throws SQLException {
+    return  altitude(idRun, lapIndex, false);
+   }
+
+  private int[] altitude(int idRun, int lapIndex, boolean isFilter) throws SQLException {
     int[] res = new int[2];
 
     Connection conn = DatabaseManager.getConnection();
 
     try {
-
-      if (log.isDebugEnabled()) {
-        logTable();
-      }
 
       StringBuilder st = new StringBuilder();
       st.append("SELECT start_time, total_time FROM ");
@@ -1701,8 +1712,9 @@ public final class RunLapTableManager extends AbstractTableManager {
         cal.add(Calendar.MILLISECOND, totTime * 10);
         Date dateEnd = cal.getTime();
 
-        res = RunTrkTableManager.getInstance()
-            .altitude(idRun, dateDeb, dateEnd);
+        res = isFilter?RunTrkTableManager.getInstance()
+            .altitude(idRun, dateDeb, dateEnd):RunTrkTableManager.getInstance()
+            .altitudeOriginal(idRun, dateDeb, dateEnd);
       }
       else {
         res[0] = 0;
@@ -1714,7 +1726,6 @@ public final class RunLapTableManager extends AbstractTableManager {
       DatabaseManager.releaseConnection(conn);
     }
 
-    log.debug("<<findLap");
     return res;
   }
 

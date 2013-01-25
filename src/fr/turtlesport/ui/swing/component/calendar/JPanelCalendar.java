@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 
 import javax.swing.JPanel;
 
+import fr.turtlesport.db.DataSearchRun;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
@@ -52,7 +53,7 @@ public class JPanelCalendar extends JPanel implements IListDateRunFire,
     initialize();
     setModel(new ModelRunCalendar());
   }
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -140,11 +141,12 @@ public class JPanelCalendar extends JPanel implements IListDateRunFire,
    * (non-Javadoc)
    * 
    * @see
-   * fr.turtlesport.ui.swing.component.calendar.IListDateRun#fireHistoric(int)
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireHistoric
+   * (int, fr.turtlesport.db.DataSearchRun)
    */
-  public void fireHistoric(int idUser) throws SQLException {
+  public void fireHistoric(int idUser, DataSearchRun search) throws SQLException {
     model.setIdUser(idUser);
-    model.updateView(this);
+    model.updateView(this, search);
 
     // mis a jour des boutons date en cours
     if (MainGui.getWindow().getRightComponent() instanceof JPanelRun) {
@@ -263,7 +265,8 @@ public class JPanelCalendar extends JPanel implements IListDateRunFire,
     jPanelMonthSelect.addCalendarListener(new CalendarMonthListener() {
       public void nextMonth() {
         try {
-          model.updateView(JPanelCalendar.this);
+          model.updateView(JPanelCalendar.this, MainGui.getWindow()
+              .getDataSearch());
         }
         catch (SQLException e) {
           log.error("", e);
@@ -272,7 +275,8 @@ public class JPanelCalendar extends JPanel implements IListDateRunFire,
 
       public void prevMonth() {
         try {
-          model.updateView(JPanelCalendar.this);
+          model.updateView(JPanelCalendar.this, MainGui.getWindow()
+              .getDataSearch());
         }
         catch (SQLException e) {
           log.error("", e);
@@ -337,4 +341,4 @@ public class JPanelCalendar extends JPanel implements IListDateRunFire,
     return jPanelMonthPrev2;
   }
 
-} // @jve:decl-index=0:visual-constraint="10,10"
+}

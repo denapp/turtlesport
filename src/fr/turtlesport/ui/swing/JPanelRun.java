@@ -17,13 +17,11 @@ import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -54,13 +52,8 @@ import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jfree.chart.ChartPanel;
 
 import fr.turtlesport.Configuration;
-import fr.turtlesport.db.AbstractDataActivity;
-import fr.turtlesport.db.DataActivityOther;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataUser;
-import fr.turtlesport.db.EquipementTableManager;
-import fr.turtlesport.db.RunTableManager;
-import fr.turtlesport.db.UserActivityTableManager;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
@@ -81,10 +74,14 @@ import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
 import fr.turtlesport.ui.swing.component.JPanelGraph;
 import fr.turtlesport.ui.swing.component.JPanelMap;
 import fr.turtlesport.ui.swing.component.JShowMessage;
+import fr.turtlesport.ui.swing.component.JSwitchBox;
 import fr.turtlesport.ui.swing.component.JTextAreaLength;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
+import fr.turtlesport.ui.swing.model.ActivityComboBoxModel;
 import fr.turtlesport.ui.swing.model.ChangePointsEvent;
 import fr.turtlesport.ui.swing.model.ChangePointsListener;
+import fr.turtlesport.ui.swing.model.EquipementComboBoxModel;
+import fr.turtlesport.ui.swing.model.LocationComboBoxModel;
 import fr.turtlesport.ui.swing.model.ModelPointsManager;
 import fr.turtlesport.ui.swing.model.ModelRun;
 import fr.turtlesport.unit.DistanceUnit;
@@ -157,6 +154,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JLabel                  jLabelValAlt;
 
+  private JSwitchBox              jSwitchBox;
+
   private JLabel                  jLabelLibActivity;
 
   private JComboBox               jComboBoxActivity;
@@ -168,6 +167,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
   private JLabel                  jLabelLibLocation;
 
   private JComboBox               jComboBoxLocation;
+
+  private JLabel                  jLabelLibProduct;
+
+  private JLabel                  jLabelValProduct;
 
   private JTextAreaLength         jTextFieldNotes;
 
@@ -350,6 +353,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
     return jLabelValTimePauseTot;
   }
 
+  public JLabel getjLabelValProduct() {
+    return jLabelValProduct;
+  }
+
   public JLabel getJLabelValTimeMovingTot() {
     return jLabelValTimeMovingTot;
   }
@@ -484,6 +491,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
     jLabelLibAlt.setText(rb.getString("jLabelLibAlt"));
     jLabelLibEquipment.setText(rb.getString("jLabelLibEquipment"));
     jLabelLibLocation.setText(rb.getString("jLabelLibLocation"));
+    getJSwitchBox().setToolTipText(rb.getString("toolTipTextSwitchBox"));
+    jLabelLibProduct.setText(rb.getString("jLabelLibProduct"));
     jLabelLibActivity.setText(rb.getString("jLabelLibActivity"));
     jMenuItemRunDetail.setText(rb.getString("jMenuItemRunDetail"));
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
@@ -726,12 +735,30 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
       }
     });
-    
+
     // Localisation
     jComboBoxLocation.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent event) {
         try {
           model.saveLocation(JPanelRun.this);
+        }
+        catch (SQLException e) {
+          log.error("", e);
+        }
+      }
+    });
+
+    // Denivele
+    jSwitchBox.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent event) {
+        try {
+          Configuration.getConfig().getPropertyAsBoolean("general",
+                                                         "isCorrectAltitude",
+                                                         jSwitchBox.isOn());
+          model.correctAltitude(JPanelRun.this);
+          tableModelLap.fireTableDataChanged();
+          jDiagram.fireCorrectAltitude(jSwitchBox.isOn());
         }
         catch (SQLException e) {
           log.error("", e);
@@ -772,6 +799,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jPopupMenu.add(getJMenuItemRunDelete());
     }
     return jPopupMenu;
+  }
+
+  public JSwitchBox getJSwitchBox() {
+    return jSwitchBox;
   }
 
   /**
@@ -1220,16 +1251,29 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jLabelLibAlt.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibAlt, g);
       g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelValAlt = new JLabel("           ");
+      jLabelValAlt.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibAlt.setLabelFor(jLabelValAlt);
+      jLabelValAlt.setPreferredSize(new Dimension(100, 20));
+      jPanelRunSummary.add(jLabelValAlt, g);
+
+      g = new GridBagConstraints();
       g.weightx = 1.0;
       g.weighty = 1.0;
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
-      jLabelValAlt = new JLabel();
-      jLabelValAlt.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibAlt.setLabelFor(jLabelValAlt);
-      jPanelRunSummary.add(jLabelValAlt, g);
+      boolean isOn = Configuration.getConfig()
+          .getPropertyAsBoolean("general", "isCorrectAltitude", true);
+      jSwitchBox = new JSwitchBox(isOn);
+      jSwitchBox.setFont(GuiFont.FONT_PLAIN_VERY_SMALL);
+      jPanelRunSummary.add(jSwitchBox, g);
 
       // Ligne 9
       g = new GridBagConstraints();
@@ -1297,6 +1341,27 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jComboBoxLocation.setFont(GuiFont.FONT_PLAIN);
       jLabelLibLocation.setLabelFor(jComboBoxLocation);
       jPanelRunSummary.add(jComboBoxLocation, g);
+
+      // Ligne 12
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibProduct = new JLabel();
+      jLabelLibProduct.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibProduct.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelLibProduct, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      jLabelValProduct = new JLabel();
+      jLabelValProduct.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibProduct.setLabelFor(jLabelValProduct);
+      jPanelRunSummary.add(jLabelValProduct, g);
     }
     return jPanelRunSummary;
   }
@@ -1952,7 +2017,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
         case 7: // Denivele +
           try {
-            return Integer.toString(runLaps[rowIndex].computeDenivelePos());
+            int value = getJSwitchBox().isOn() ? runLaps[rowIndex]
+                .computeDenivelePos() : runLaps[rowIndex]
+                .computeDenivelePosOriginal();
+            return Integer.toString(value);
           }
           catch (SQLException e) {
             log.error("", e);
@@ -1961,7 +2029,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
         case 8: // Denivele -
           try {
-            return Integer.toString(runLaps[rowIndex].computeDeniveleNeg());
+            int value = getJSwitchBox().isOn() ? runLaps[rowIndex]
+                .computeDeniveleNeg() : runLaps[rowIndex]
+                .computeDeniveleNegOriginal();
+            return Integer.toString(value);
           }
           catch (SQLException e) {
             log.error("", e);
@@ -2135,112 +2206,4 @@ public class JPanelRun extends JPanel implements LanguageListener,
     }
   }
 
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  public class ActivityComboBoxModel extends DefaultComboBoxModel {
-    public ActivityComboBoxModel() {
-      super();
-
-      try {
-        List<AbstractDataActivity> list = UserActivityTableManager
-            .getInstance().retreive();
-        for (AbstractDataActivity d : list) {
-          addElement(d);
-        }
-      }
-      catch (SQLException e) {
-        log.error("", e);
-      }
-    }
-
-    public void setSelectedActivity(int sportType) {
-      for (int i = 0; i < getSize(); i++) {
-        AbstractDataActivity d = (AbstractDataActivity) getElementAt(i);
-        if (d.getSportType() == sportType) {
-          setSelectedItem(d);
-          return;
-        }
-      }
-
-      for (int i = 0; i < getSize(); i++) {
-        AbstractDataActivity d = (AbstractDataActivity) getElementAt(i);
-        if (d.getSportType() == DataActivityOther.SPORT_TYPE) {
-          setSelectedItem(d);
-          return;
-        }
-      }
-    }
-
-    public int getSportType() {
-      Object obj = getSelectedItem();
-      if (obj instanceof String || obj == null) {
-        return DataActivityOther.SPORT_TYPE;
-      }
-      return ((AbstractDataActivity) obj).getSportType();
-    }
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  public class EquipementComboBoxModel extends DefaultComboBoxModel {
-    public EquipementComboBoxModel() {
-      super();
-      addElement("");
-      try {
-        List<String> list = EquipementTableManager.getInstance()
-            .retreiveNames();
-        for (String d : list) {
-          addElement(d);
-        }
-      }
-      catch (SQLException e) {
-        log.error("", e);
-      }
-    }
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  public class LocationComboBoxModel extends DefaultComboBoxModel {
-    public LocationComboBoxModel() {
-      super();
-      fill();
-    }
-
-    public void fill() {
-      removeAllElements();
-      addElement("");
-      try {
-        List<String> list = RunTableManager.getInstance()
-            .retreiveLocations(MainGui.getWindow().getCurrentIdUser());
-        for (String d : list) {
-          if (d != null && d.trim().length() > 0) {
-            addElement(d.trim());
-          }
-        }
-      }
-      catch (SQLException e) {
-        log.error("", e);
-      }
-    }
-
-    public void setSelectedLocation(String location) {
-      setSelectedItem((location == null) ? "" : location);
-    }
-
-    public boolean contains(Object value) {
-      for (int i = 0; i < getSize(); i++) {
-        if (getElementAt(i).equals(value)) {
-          return true;
-        }
-      }
-      return false;
-    }
-  }
 }
