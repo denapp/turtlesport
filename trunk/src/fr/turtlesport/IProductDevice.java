@@ -1,12 +1,12 @@
-package fr.turtlesport.garmin;
+package fr.turtlesport;
 
 /**
- * Carat&eacute;rise un produit Garmin.
+ * Carat&eacute;rise un produit Garmin ou autres.
  * 
  * @author Denis Apparicio
  * 
  */
-public interface IGarminDevice {
+public interface IProductDevice {
 
   String displayName();
 

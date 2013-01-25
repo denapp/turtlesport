@@ -1086,7 +1086,22 @@ public class JDiagramOneComponent extends JPanel {
           minY = Math.round(minY/10)*10;
           minY += (tmp < minY)?-10:0;
         }
-
+        
+        if (type == ALTITUDE) {
+          if (minY < 0) {
+            minY = 0;
+          }
+          if (maxY < 0) {
+            maxY = 0;
+            minY = 0;
+          }
+          minY = (minY - minY % 10);
+          maxY = (maxY - maxY % 10) + 10;
+          if ((maxY - minY) < 10) {
+            maxY += 10;
+          }
+        }
+        
         // Axe des x (distance en metre)
         double max = maxX / 1000.0;
         gridXDistance[0] = 0;

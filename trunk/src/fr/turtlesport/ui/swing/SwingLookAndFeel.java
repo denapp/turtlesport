@@ -2,6 +2,7 @@ package fr.turtlesport.ui.swing;
 
 import java.util.ArrayList;
 
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import fr.turtlesport.Configuration;
@@ -23,14 +24,14 @@ public final class SwingLookAndFeel {
     // Les icones de JOptionPane sont mal geres sous MacoSX suivant la version
     // de JVM
     if (OperatingSystem.isMacOSX()) {
-      UIManager.put("OptionPane.errorIcon", ImagesMacosxRepository
-          .getImageIcon("error.png"));
-      UIManager.put("OptionPane.informationIcon", ImagesMacosxRepository
-          .getImageIcon("info.png"));
-      UIManager.put("OptionPane.questionIcon", ImagesMacosxRepository
-          .getImageIcon("question.png"));
-      UIManager.put("OptionPane.warningIcon", ImagesMacosxRepository
-          .getImageIcon("warning.png"));
+      UIManager.put("OptionPane.errorIcon",
+                    ImagesMacosxRepository.getImageIcon("error.png"));
+      UIManager.put("OptionPane.informationIcon",
+                    ImagesMacosxRepository.getImageIcon("info.png"));
+      UIManager.put("OptionPane.questionIcon",
+                    ImagesMacosxRepository.getImageIcon("question.png"));
+      UIManager.put("OptionPane.warningIcon",
+                    ImagesMacosxRepository.getImageIcon("warning.png"));
     }
   }
 
@@ -90,6 +91,7 @@ public final class SwingLookAndFeel {
 
     try {
       UIManager.setLookAndFeel(getLookAndFeelClassName(name));
+      SwingUtilities.updateComponentTreeUI(MainGui.getWindow());
     }
     catch (Exception e) {
       log.error("set LookAndFeel", e);
@@ -106,21 +108,19 @@ public final class SwingLookAndFeel {
 
     // recuperation du look and feel dans le .ini
     String value = getProperty();
-    if (value == null || "".equals(value.trim())) {
-      try {
+    try {
+      if (value == null || "".equals(value.trim())) {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        setProperty(getCurrentLookAndFeel());
       }
-      catch (Exception e) {
-        log.error("set LookAndFeel", e);
+      else if (!value.equals(getCurrentLookAndFeel())
+               && getLookAndFeelClassName(value) != null) {
+        UIManager.setLookAndFeel(getLookAndFeelClassName(value));
       }
-    }
-    else if (!value.equals(getCurrentLookAndFeel())
-             && getLookAndFeelClassName(value) != null) {
-      setLookAndFeel(value);
       setProperty(getCurrentLookAndFeel());
     }
-
+    catch (Exception e) {
+      log.error("set LookAndFeel", e);
+    }
     log.debug("<<setDefaultLookAndFeel");
   }
 

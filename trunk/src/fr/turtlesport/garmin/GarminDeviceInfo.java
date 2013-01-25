@@ -18,7 +18,7 @@ import org.xml.sax.SAXException;
  * @author Denis Apparicio
  *
  */
-public class FitInfo {
+public class GarminDeviceInfo {
   private String id;
 
   private String softwareVersion;
@@ -35,7 +35,7 @@ public class FitInfo {
    * @throws IOException
    * @throws ParserConfigurationException
    */
-  protected FitInfo(File dir) throws SAXException,
+  protected GarminDeviceInfo(File dir) throws SAXException,
                              IOException,
                              ParserConfigurationException {
     this.dir = dir;

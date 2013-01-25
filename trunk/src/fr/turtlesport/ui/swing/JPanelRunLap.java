@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -15,7 +17,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
+import fr.turtlesport.Configuration;
 import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.ui.swing.component.JSwitchBox;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.util.ResourceBundleUtility;
 
@@ -24,111 +29,122 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * 
  */
 public class JPanelRunLap extends JPanel {
-  private ResourceBundle rb;
+  private static TurtleLogger log;
+  static {
+    log = (TurtleLogger) TurtleLogger.getLogger(JPanelRunLap.class);
+  }
 
-  private JPanel         jPanelRunLap;
+  private ResourceBundle      rb;
 
-  private JLabel         jLabelLibDayLap;
+  private JPanel              jPanelRunLap;
 
-  private JLabel         jLabelValDayLap;
+  private JLabel              jLabelLibDayLap;
 
-  private JLabel         jLabelLibHourLap;
+  private JLabel              jLabelValDayLap;
 
-  private JLabel         jLabelValHourLap;
+  private JLabel              jLabelLibHourLap;
 
-  private JLabel         jLabelLibDistanceLap;
+  private JLabel              jLabelValHourLap;
 
-  private JLabel         jLabelValDistanceLap;
+  private JLabel              jLabelLibDistanceLap;
 
-  private JLabel         jLabelValTimeTotLap;
+  private JLabel              jLabelValDistanceLap;
 
-  private JLabel         jLabelLibTimeTotLap;
+  private JLabel              jLabelValTimeTotLap;
 
-  private JLabel         jLabelLibTimePauseLap;
+  private JLabel              jLabelLibTimeTotLap;
 
-  private JLabel         jLabelValTimePauseLap;
+  private JLabel              jLabelLibTimePauseLap;
 
-  private JLabel         jLabelLibTimeMovingLap;
+  private JLabel              jLabelValTimePauseLap;
 
-  private JLabel         jLabelValTimeMovingLap;
+  private JLabel              jLabelLibTimeMovingLap;
 
-  private JLabel         jLabelLibPaceLap;
+  private JLabel              jLabelValTimeMovingLap;
 
-  private JLabel         jLabelValPaceLap;
+  private JLabel              jLabelLibPaceLap;
 
-  private JLabel         jLabelLibSpeedLap;
+  private JLabel              jLabelValPaceLap;
 
-  private JLabel         jLabelValSpeedLap;
+  private JLabel              jLabelLibSpeedLap;
 
-  private JLabel         jLabelLibCaloriesLap;
+  private JLabel              jLabelValSpeedLap;
 
-  private JLabel         jLabelValCaloriesLap;
+  private JLabel              jLabelLibCaloriesLap;
 
-  private JLabel         jLabelValAltitudeLap;
+  private JLabel              jLabelValCaloriesLap;
 
-  private JLabel         jLabelLibHeartLap;
+  private JLabel              jLabelValAltitudeLap;
 
-  private JLabel         jLabelValHeartLap;
+  private JLabel              jLabelLibHeartLap;
 
-  private JPanel         jPanelRunSummary;
+  private JLabel              jLabelValHeartLap;
 
-  private TitledBorder   borderPanelRunSummary;
+  private JPanel              jPanelRunSummary;
 
-  private JLabel         jLabelValDateTime;
+  private TitledBorder        borderPanelRunSummary;
 
-  private JLabel         jLabelLibDistTot;
+  private JLabel              jLabelValDateTime;
 
-  private JLabel         jLabelValDistTot;
+  private JLabel              jLabelLibDistTot;
 
-  private JLabel         jLabelLibTimeTot;
+  private JLabel              jLabelValDistTot;
 
-  private JLabel         jLabelValTimeTot;
+  private JLabel              jLabelLibTimeTot;
 
-  private JLabel         jLabelLibTimePauseTot;
+  private JLabel              jLabelValTimeTot;
 
-  private JLabel         jLabelValTimePauseTot;
+  private JLabel              jLabelLibTimePauseTot;
 
-  private JLabel         jLabelLibTimeMovingTot;
+  private JLabel              jLabelValTimePauseTot;
 
-  private JLabel         jLabelValTimeMovingTot;
+  private JLabel              jLabelLibTimeMovingTot;
 
-  private JLabel         jLabelLibAllureTot;
+  private JLabel              jLabelValTimeMovingTot;
 
-  private JLabel         jLabelValAllureTot;
+  private JLabel              jLabelLibAllureTot;
 
-  private JLabel         jLabelLibSpeedMoyTot;
+  private JLabel              jLabelValAllureTot;
 
-  private JLabel         jLabelValSpeedMoyTot;
+  private JLabel              jLabelLibSpeedMoyTot;
 
-  private JLabel         jLabelLibCaloriesTot;
+  private JLabel              jLabelValSpeedMoyTot;
 
-  private JLabel         jLabelValCaloriesTot;
+  private JLabel              jLabelLibCaloriesTot;
 
-  private JLabel         jLabelLibHeartTot;
+  private JLabel              jLabelValCaloriesTot;
 
-  private JLabel         jLabelValHeartTot;
+  private JLabel              jLabelLibHeartTot;
 
-  private JLabel         jLabelLibActivity;
+  private JLabel              jLabelValHeartTot;
 
-  private JLabel         jLabelValActivity;
+  private JLabel              jLabelLibActivity;
 
-  private JLabel         jLabelLibEquipment;
+  private JLabel              jLabelValActivity;
 
-  private JLabel         jLabelValEquipment;
+  private JLabel              jLabelLibEquipment;
 
-  private JLabel         jLabelLibAltitudeTot;
+  private JLabel              jLabelValEquipment;
 
-  private JLabel         jLabelValAltitudeTot;
+  private JLabel              jLabelLibAltitudeTot;
 
-  private JLabel         jLabelLibAltitudeLap;
+  private JLabel              jLabelValAltitudeTot;
 
-  private JLabel         jLabelLibLap;
+  private JSwitchBox          jSwitchBox;
 
-  private JLabel         jLabelLibLocation;
+  private JLabel              jLabelLibAltitudeLap;
 
-  private JLabel         jLabelValLocation;
+  private JLabel              jLabelLibLap;
 
-  private JComboBox      jComboBoxLap;
+  private JLabel              jLabelLibLocation;
+
+  private JLabel              jLabelValLocation;
+
+  private JComboBox           jComboBoxLap;
+
+  private JLabel              jLabelLibProduct;
+
+  private JLabel              jLabelValProduct;
 
   public JPanelRunLap() {
     super();
@@ -145,6 +161,20 @@ public class JPanelRunLap extends JPanel {
     add(getJPanelRunSummary());
     add(Box.createRigidArea(new Dimension(5, 0)));
     add(getJPanelRunLap());
+
+    // Denivele
+    jSwitchBox.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent event) {
+        Configuration.getConfig().getPropertyAsBoolean("general",
+                                                       "isCorrectAltitude",
+                                                       jSwitchBox.isOn());
+      }
+    });
+  }
+
+  public JSwitchBox getJSwitchBox() {
+    return jSwitchBox;
   }
 
   public JLabel getjLabelValDateTime() {
@@ -243,8 +273,12 @@ public class JPanelRunLap extends JPanel {
     return jLabelValAltitudeTot;
   }
 
-  public JLabel getjLabelValLocation() {
+  public JLabel getJLabelValLocation() {
     return jLabelValLocation;
+  }
+
+  public JLabel getJLabelValProduct() {
+    return jLabelValProduct;
   }
 
   /**
@@ -479,6 +513,26 @@ public class JPanelRunLap extends JPanel {
       jLabelLibAltitudeTot.setFont(GuiFont.FONT_PLAIN);
       jLabelLibAltitudeTot.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelRunSummary.add(jLabelLibAltitudeTot, g);
+      // g = new GridBagConstraints();
+      // g.weightx = 1.0;
+      // g.weighty = 1.0;
+      // g.anchor = GridBagConstraints.WEST;
+      // g.fill = GridBagConstraints.BOTH;
+      // g.gridwidth = GridBagConstraints.REMAINDER;
+      // g.insets = insets;
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+
+      jLabelValAltitudeTot = new JLabel();
+      jLabelValAltitudeTot.setPreferredSize(new Dimension(100, 20));
+      jLabelValAltitudeTot.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibAltitudeTot.setLabelFor(jLabelValAltitudeTot);
+      jPanelRunSummary.add(jLabelValAltitudeTot, g);
+
       g = new GridBagConstraints();
       g.weightx = 1.0;
       g.weighty = 1.0;
@@ -486,10 +540,17 @@ public class JPanelRunLap extends JPanel {
       g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
-      jLabelValAltitudeTot = new JLabel();
-      jLabelValAltitudeTot.setFont(GuiFont.FONT_PLAIN);
-      jLabelLibAltitudeTot.setLabelFor(jLabelValAltitudeTot);
-      jPanelRunSummary.add(jLabelValAltitudeTot, g);
+
+      boolean isOn = Configuration.getConfig()
+          .getPropertyAsBoolean("general", "isCorrectAltitude", true);
+      jSwitchBox = new JSwitchBox(isOn);
+      ResourceBundleUtility.getBundle(LanguageManager.getManager()
+          .getCurrentLang(), JPanelRun.class);
+      jSwitchBox.setToolTipText(ResourceBundleUtility
+          .getBundle(LanguageManager.getManager().getCurrentLang(),
+                     JPanelRun.class).getString("toolTipTextSwitchBox"));
+      jSwitchBox.setFont(GuiFont.FONT_PLAIN_VERY_SMALL);
+      jPanelRunSummary.add(jSwitchBox, g);
 
       // Ligne 8
       g = new GridBagConstraints();
@@ -559,6 +620,32 @@ public class JPanelRunLap extends JPanel {
       jLabelValLocation.setFont(GuiFont.FONT_PLAIN);
       jLabelLibLocation.setLabelFor(jLabelValLocation);
       jPanelRunSummary.add(jLabelValLocation, g);
+
+      // Ligne 11
+      ResourceBundle rb1 = ResourceBundleUtility.getBundle(LanguageManager
+          .getManager().getCurrentLang(), JPanelRun.class);
+
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.weighty = 1.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.BOTH;
+      g.insets = insets;
+      jLabelLibProduct = new JLabel(rb1.getString("jLabelLibProduct"));
+      jLabelLibProduct.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibProduct.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelRunSummary.add(jLabelLibProduct, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.BOTH;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      g.anchor = GridBagConstraints.WEST;
+      jLabelValProduct = new JLabel();
+      jLabelValProduct.setFont(GuiFont.FONT_PLAIN);
+      jLabelValProduct.setLabelFor(jLabelValProduct);
+      jPanelRunSummary.add(jLabelValProduct, g);
     }
     return jPanelRunSummary;
   }

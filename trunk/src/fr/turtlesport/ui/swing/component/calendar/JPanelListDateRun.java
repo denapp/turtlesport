@@ -11,16 +11,15 @@ import java.util.Date;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
 import fr.turtlesport.Configuration;
+import fr.turtlesport.db.DataSearchRun;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
-import fr.turtlesport.ui.swing.JDialogSearchRun;
 import fr.turtlesport.ui.swing.MainGui;
+import fr.turtlesport.ui.swing.component.CursorSwingWorker;
 import fr.turtlesport.ui.swing.img.menu.ImagesMenuRepository;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
@@ -35,9 +34,7 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
   private JToggleButton    jButtonList;
 
   private JToggleButton    jButtonTree;
-  
-  private JButton          jButtonSearch;
-  
+
   private IListDateRunFire panelDateRun;
 
   private static final int VIEW_CALENDAR = 1;
@@ -46,17 +43,17 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
 
   private static final int VIEW_LIST     = 3;
 
-//  private boolean          isNeedDrngDrop;
+  // private boolean isNeedDrngDrop;
 
   public JPanelListDateRun() {
     super();
     initialize();
   }
 
-//  public void needDrngDrop(boolean isNeedDrngDrop) {
-//    this.isNeedDrngDrop = isNeedDrngDrop;
-//    panelDateRun.needDrngDrop(isNeedDrngDrop);
-//  }
+  // public void needDrngDrop(boolean isNeedDrngDrop) {
+  // this.isNeedDrngDrop = isNeedDrngDrop;
+  // panelDateRun.needDrngDrop(isNeedDrngDrop);
+  // }
 
   private void initialize() {
     setLayout(new BorderLayout());
@@ -72,9 +69,7 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
     panelNorth.add(getJButtonCalendar());
     panelNorth.add(getJButtonList());
     panelNorth.add(getJButtonTree());
-    panelNorth.add(new JLabel("   "));
-    panelNorth.add(getJButtonSearch());
-    
+
     int prop = Configuration.getConfig().getPropertyAsInt("general",
                                                           "calendarView",
                                                           VIEW_CALENDAR);
@@ -98,7 +93,6 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
     getJButtonCalendar().addActionListener(new CalendarRunAction());
     getJButtonList().addActionListener(new ListRunAction());
     getJButtonTree().addActionListener(new ListTreeRunAction());
-    getJButtonSearch().addActionListener(new SearchRunAction());
   }
 
   private void removeLanguageListenerPanelDataRun() {
@@ -150,19 +144,6 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
     return jButtonTree;
   }
 
-  /**
-   * This method initializes jButtonSearch
-   * 
-   * @return javax.swing.JButton
-   */
-  private JButton getJButtonSearch() {
-    if (jButtonSearch == null) {
-      Icon icon = ImagesMenuRepository.getImageIcon("loupe-12px.png");
-      jButtonSearch = new JButton(icon);
-    }
-    return jButtonSearch;
-  }
-  
   /*
    * (non-Javadoc)
    * 
@@ -201,10 +182,10 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
    * 
    * @see
    * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireHistoric
-   * (int)
+   * (int, fr.turtlesport.db.DataSearchRun)
    */
-  public void fireHistoric(final int idUser) throws SQLException {
-    panelDateRun.fireHistoric(idUser);
+  public void fireHistoric(final int idUser, DataSearchRun search) throws SQLException {
+    panelDateRun.fireHistoric(idUser, search);
   }
 
   /*
@@ -246,28 +227,35 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
      * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
-      if (!(panelDateRun instanceof JPanelTableRun)) {
-        // listener
-        removeLanguageListenerPanelDataRun();
-        removeUnitListenerPanelDataRun();
+      new CursorSwingWorker() {
+        @Override
+        protected Object doInBackground() throws Exception {
 
-        // Config
-        Configuration.getConfig().addProperty("general",
-                                              "calendarView",
-                                              Integer.toString(VIEW_LIST));
+          if (!(panelDateRun instanceof JPanelTableRun)) {
+            // listener
+            removeLanguageListenerPanelDataRun();
+            removeUnitListenerPanelDataRun();
 
-        // Ajout du composant
-        Component cmp = (Component) panelDateRun;
+            // Config
+            Configuration.getConfig().addProperty("general",
+                                                  "calendarView",
+                                                  Integer.toString(VIEW_LIST));
 
-        panelDateRun = new JPanelTableRun();
-        JPanelListDateRun.this.remove(cmp);
-        JPanelListDateRun.this.add((Component) panelDateRun,
-                                   BorderLayout.CENTER);
-        // panelDateRun.needDrngDrop(isNeedDrngDrop);
+            // Ajout du composant
+            Component cmp = (Component) panelDateRun;
 
-        // Recuperation des dates
-        MainGui.getWindow().fireHistoric();
-      }
+            panelDateRun = new JPanelTableRun();
+            JPanelListDateRun.this.remove(cmp);
+            JPanelListDateRun.this.add((Component) panelDateRun,
+                                       BorderLayout.CENTER);
+            // panelDateRun.needDrngDrop(isNeedDrngDrop);
+
+            // Recuperation des dates
+            MainGui.getWindow().fireHistoric();
+          }
+          return null;
+        }
+      }.execute();
     }
   }
 
@@ -289,28 +277,34 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
      * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
-      if (!(panelDateRun instanceof JPanelTreeRun)) {
-        // listener
-        removeLanguageListenerPanelDataRun();
-        removeUnitListenerPanelDataRun();
+      new CursorSwingWorker() {
+        @Override
+        protected Object doInBackground() throws Exception {
+          if (!(panelDateRun instanceof JPanelTreeRun)) {
+            // listener
+            removeLanguageListenerPanelDataRun();
+            removeUnitListenerPanelDataRun();
 
-        // Config
-        Configuration.getConfig().addProperty("general",
-                                              "calendarView",
-                                              Integer.toString(VIEW_TREE));
+            // Config
+            Configuration.getConfig().addProperty("general",
+                                                  "calendarView",
+                                                  Integer.toString(VIEW_TREE));
 
-        // Ajout du composant
-        Component cmp = (Component) panelDateRun;
+            // Ajout du composant
+            Component cmp = (Component) panelDateRun;
 
-        panelDateRun = new JPanelTreeRun();
-        JPanelListDateRun.this.remove(cmp);
-        JPanelListDateRun.this.add((Component) panelDateRun,
-                                   BorderLayout.CENTER);
-        // panelDateRun.needDrngDrop(isNeedDrngDrop);
+            panelDateRun = new JPanelTreeRun();
+            JPanelListDateRun.this.remove(cmp);
+            JPanelListDateRun.this.add((Component) panelDateRun,
+                                       BorderLayout.CENTER);
+            // panelDateRun.needDrngDrop(isNeedDrngDrop);
 
-        // Recuperation des dates
-        MainGui.getWindow().fireHistoric();
-      }
+            // Recuperation des dates
+            MainGui.getWindow().fireHistoric();
+          }
+          return null;
+        }
+      }.execute();
     }
   }
 
@@ -332,52 +326,32 @@ public class JPanelListDateRun extends JPanel implements IListDateRunFire {
      * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
-      if (!(panelDateRun instanceof JPanelCalendar)) {
-        removeLanguageListenerPanelDataRun();
-        removeUnitListenerPanelDataRun();
-        // Config
-        Configuration.getConfig().addProperty("general",
-                                              "calendarView",
-                                              Integer.toString(VIEW_CALENDAR));
-        // Ajout du composant
-        Component cmp = (Component) panelDateRun;
+      new CursorSwingWorker() {
+        @Override
+        protected Object doInBackground() throws Exception {
+          if (!(panelDateRun instanceof JPanelCalendar)) {
+            removeLanguageListenerPanelDataRun();
+            removeUnitListenerPanelDataRun();
+            // Config
+            Configuration.getConfig().addProperty("general",
+                                                  "calendarView",
+                                                  Integer
+                                                      .toString(VIEW_CALENDAR));
+            // Ajout du composant
+            Component cmp = (Component) panelDateRun;
 
-        panelDateRun = new JPanelCalendar();
-        JPanelListDateRun.this.remove(cmp);
-        JPanelListDateRun.this.add((Component) panelDateRun,
-                                   BorderLayout.CENTER);
+            panelDateRun = new JPanelCalendar();
+            JPanelListDateRun.this.remove(cmp);
+            JPanelListDateRun.this.add((Component) panelDateRun,
+                                       BorderLayout.CENTER);
 
-        // Recuperation des dates
-        MainGui.getWindow().fireHistoric();
-      }
+            // Recuperation des dates
+            MainGui.getWindow().fireHistoric();
+          }
+          return null;
+        }
+      }.execute();
     }
   }
-  
-  /**
-   * 
-   * @author Denis Apparicio
-   * 
-   */
-  private class SearchRunAction extends AbstractAction {
-
-    public SearchRunAction() {
-      super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent e) {
-      try {
-        JDialogSearchRun.prompt();
-      }
-      catch (SQLException sqle) {
-      }
-    }
-  }
-
 
 }

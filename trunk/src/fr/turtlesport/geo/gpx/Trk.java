@@ -3,6 +3,7 @@ package fr.turtlesport.geo.gpx;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.geo.AbstractGeoRoute;
 import fr.turtlesport.geo.IGeoPositionWithAlt;
 import fr.turtlesport.geo.IGeoSegment;
@@ -14,19 +15,30 @@ import fr.turtlesport.util.GeoUtil;
  */
 public class Trk extends AbstractGeoRoute {
 
-  private String       name;
+  private String         name;
 
-  private String       desc;
+  private String         desc;
 
-  private List<Trkseg> listTrkseg;
+  private List<Trkseg>   listTrkseg;
 
-  private boolean      isComputeDistanceDone = false;
+  private boolean        isComputeDistanceDone = false;
+
+  private IProductDevice productDevice;
 
   /**
    * 
    */
   public Trk() {
     super();
+  }
+
+  @Override
+  public IProductDevice getProductDevice() {
+    return productDevice;
+  }
+
+  public void setProductDevice(IProductDevice productDevice) {
+    this.productDevice = productDevice;
   }
 
   /*

@@ -96,29 +96,57 @@ public abstract class AbstractGeoSegment implements IGeoSegment {
       return 0;
     }
 
+    SimpleDateFormat df = null;
     if (log.isDebugEnabled()) {
-      SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy k:mm:ss.S");
-      for (IGeoPositionWithAlt geo : list) {
-        Date d = geo.getDate();
-        log.debug("date=" + ((d == null) ? null : df.format(d)));
+      df = new SimpleDateFormat("dd/MM/yyyy k:mm:ss.S");
+      log.debug("nb points : " + list.size());
+
+    }
+    int i = 0;
+    Date dateDeb = null, dateFin = null;
+    for (i = 0; i < list.size() - 1; i++) {
+      if (list.get(i).getDate() != null) {
+        dateDeb = list.get(i).getDate();
+        if (log.isDebugEnabled()) {
+          log.debug("dateDeb=" + df.format(dateDeb));
+        }
+        break;
       }
     }
+    if (dateDeb == null) {
+      return 0;
+    }
+    for (i = list.size() - 1; i > 0; i--) {
+      if (list.get(i).getDate() != null) {
+        dateFin = list.get(i).getDate();
+        if (log.isDebugEnabled()) {
+          log.debug("dateFin=" + df.format(dateFin));
+        }
+        break;
+      }
+    }
+    if (dateFin == null) {
+      return 0;
+    }
+
     Calendar c = Calendar.getInstance();
-    c.setTime(list.get(list.size() - 1).getDate());
+    c.setTime(dateFin);
     long timeTot = c.getTimeInMillis();
-    c.setTime(list.get(0).getDate());
+    c.setTime(dateDeb);
     timeTot -= c.getTimeInMillis();
 
     log.debug("<<getTotalTime timeTot=" + timeTot);
     return timeTot;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.turtlesport.geo.IGeoSegment#getTotalMovingTime()
    */
   @Override
   public long getTotalPauseTime() {
-    return getTotalTime();
+    return 0;
   }
 
   /*

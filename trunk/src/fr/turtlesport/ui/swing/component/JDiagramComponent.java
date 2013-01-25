@@ -36,7 +36,6 @@ import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
-import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.model.ChangeMapEvent;
 import fr.turtlesport.ui.swing.model.ChangeMapListener;
@@ -58,9 +57,6 @@ import fr.turtlesport.util.ResourceBundleUtility;
  */
 public class JDiagramComponent extends JPanel implements LanguageListener,
                                              UnitListener {
-  private static TurtleLogger         log             = (TurtleLogger) TurtleLogger
-                                                          .getLogger(JDiagramComponent.class);
-
   private BufferedImage               bimg;
 
   private Toolkit                     toolkit;
@@ -1056,6 +1052,8 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
     private boolean          isFilter;
 
+    private boolean          isFilterAltitude;
+
     private DecimalFormat    dfAxisXDistance        = new DecimalFormat("#.#");
 
     private DecimalFormat    dfDistance             = new DecimalFormat("#.###");
@@ -1074,12 +1072,12 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       isVisibleY4 = Configuration.getConfig()
           .getPropertyAsBoolean("Diagram", "isVisibleY4", false);
 
-      // isVisibleTime = Configuration.getConfig()
-      // .getPropertyAsBoolean("Diagram", "isVisibleTime", true);
-
       isFilter = Configuration.getConfig().getPropertyAsBoolean("Diagram",
                                                                 "isFilter",
                                                                 false);
+      isFilterAltitude = Configuration.getConfig()
+          .getPropertyAsBoolean("general", "isCorrectAltitude", true);
+
       isAxisXDistance = Configuration.getConfig()
           .getPropertyAsBoolean("Diagram", "isAxisXDistance", true);
 
@@ -1103,6 +1101,16 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
                                               "isFilter",
                                               Boolean.toString(isFilter));
         if (isFilter && points != null && pointsFilter == null) {
+          applyFilterSavitzyGolay();
+        }
+        changeVisible();
+      }
+    }
+
+    public void setFilterAltitude(boolean isFilterAltitude) {
+      if (this.isFilterAltitude != isFilterAltitude) {
+        this.isFilterAltitude = isFilterAltitude;
+        if (isFilterAltitude && points != null && pointsFilter == null) {
           applyFilterSavitzyGolay();
         }
         changeVisible();
@@ -1163,6 +1171,10 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
     public boolean isFilter() {
       return isFilter;
+    }
+
+    public boolean isFilterAltitude() {
+      return isFilterAltitude;
     }
 
     public boolean isVisibleTime() {
@@ -1390,7 +1402,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     }
 
     protected double getY2(int i) {
-      return (model.isFilter()) ? pointsFilter[i].getAltitude() : points.get(i)
+      return (model.isFilterAltitude()) ? pointsFilter[i].getAltitude() : points.get(i)
           .getAltitude();
     }
 
@@ -1597,6 +1609,8 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
           maxY2 = 0;
           minY2 = 0;
         }
+        minY2 = (minY2 - minY2 % 10);
+        maxY2 = (maxY2 - maxY2 % 10) + 10;
         if ((maxY2 - minY2) < 10) {
           maxY2 += 10;
         }
@@ -1657,7 +1671,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
         maxZoom = (int) (Math.log(max) / Math.log(2));
 
         // filtre
-        if (model.isFilter()) {
+        if (model.isFilter() || model.isFilterAltitude()) {
           applyFilterSavitzyGolay();
         }
       }
@@ -1670,8 +1684,8 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       for (int i = 0; i < points.size() - 1; i++) {
         long time = points.get(i + 1).getTime().getTime()
                     - points.get(i).getTime().getTime();
-         float dist = points.get(i + 1).getDistance()
-         - points.get(i).getDistance();
+        float dist = points.get(i + 1).getDistance()
+                     - points.get(i).getDistance();
 
         double speed = (time == 0) ? 0.D : (dist / time) * 3600;
         points.get(i + 1).setSpeed(speed);

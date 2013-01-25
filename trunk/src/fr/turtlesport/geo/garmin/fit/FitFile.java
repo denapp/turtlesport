@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import com.garmin.fit.ActivityMesg;
 import com.garmin.fit.Decode;
+import com.garmin.fit.DeviceInfoMesg;
 import com.garmin.fit.EventMesg;
 import com.garmin.fit.FileCreatorMesg;
 import com.garmin.fit.FileIdMesg;
@@ -22,7 +22,10 @@ import com.garmin.fit.MesgListener;
 import com.garmin.fit.MesgNum;
 import com.garmin.fit.RecordMesg;
 import com.garmin.fit.SessionMesg;
+import com.garmin.fit.SoftwareMesg;
 
+import fr.turtlesport.IProductDevice;
+import fr.turtlesport.ProductDeviceUtil;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.geo.AbstractGeoRoute;
 import fr.turtlesport.geo.GeoConvertException;
@@ -36,13 +39,14 @@ import fr.turtlesport.geo.IGeoRoute;
 import fr.turtlesport.geo.IGeoSegment;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.util.GeoUtil;
 import fr.turtlesport.util.Location;
 
 /**
  * @author Denis Apparicio
  * 
  */
-public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
+public class FitFile implements IGeoFile, IGeoConvertRun {
   private static TurtleLogger  log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(FitFile.class);
@@ -50,16 +54,6 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
 
   /** Extensions. */
   public static final String[] EXT           = { "fit" };
-
-  private List<ActivityMesg>   list          = new ArrayList<ActivityMesg>();
-
-  private Session              session       = new Session();
-
-  private FileIdMesg           fileId;
-
-  private ActivityMesg         activityMsg;
-
-  private int                  nbMsg         = 0;
 
   private static final double  CONST_CONVERT = 180 / Math.pow(2, 31);
 
@@ -139,8 +133,7 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
       decode.read(fis, listener);
 
       if (log.isDebugEnabled()) {
-        log.debug("date : " + nbMsg);
-        log.debug("Nombre de points : " + session.listRecord.size());
+        log.debug("date : " + listener.date);
       }
       return listener.date;
     }
@@ -168,17 +161,25 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
 
     try {
       Decode decode = new Decode();
-      decode.read(fis, this);
 
-      if (log.isDebugEnabled()) {
-        log.debug("Nombre de msg : " + nbMsg);
-        log.debug("Nombre de points : " + session.listRecord.size());
+      FitMesgListener listener = new FitMesgListener();
+      decode.read(fis, listener);
+
+      if (log.isInfoEnabled()) {
+        log.info("Nombre de msg : " + listener.nbMsg);
+        log.info("Nombre de points : " + listener.session.listRecord.size());
       }
 
-      checkIsValid();
+      listener.checkIsValid();
 
       geos = new IGeoRoute[1];
-      geos[0] = new FitGeoRoute(session);
+      geos[0] = new FitGeoRoute(listener.session);
+      if (log.isInfoEnabled()) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        log.info("Lap 0 StartTime :"
+                 + dateFormat.format(listener.session.listLap.get(0)
+                     .getStartTime()));
+      }
     }
     finally {
       try {
@@ -191,185 +192,220 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
     return geos;
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * @author Denis Apparicio
    * 
-   * @see com.garmin.fit.MesgListener#onMesg(com.garmin.fit.Mesg)
    */
-  public void onMesg(Mesg msg) {
-    SimpleDateFormat dateFormat = null;
-    if (log.isDebugEnabled() || log.isInfoEnabled()) {
-      dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    }
+  private class FitMesgListener implements MesgListener {
 
-    nbMsg++;
-    switch (msg.getNum()) {
-      case MesgNum.FILE_ID:
-        fileId = new FileIdMesg(msg);
-        if (log.isDebugEnabled()) {
-          log.debug("FILE_ID found GarminProduct=" + fileId.getGarminProduct()
-                    + " " + fileId.getType());
-        }
-        if (log.isDebugEnabled()) {
-          log.debug("-->FILE_ID");
-          log.debug("   GarminProduct=" + fileId.getGarminProduct());
-          log.debug("   Manufacturer=" + fileId.getManufacturer());
-          log.debug("   Number=" + fileId.getNumber());
-          log.debug("   SerialNumber=" + fileId.getSerialNumber());
-          log.debug("   Type=" + fileId.getType());
-          log.debug("-----------");
-        }
-        break;
+    private List<ActivityMesg> list    = new ArrayList<ActivityMesg>();
 
-      case MesgNum.FILE_CREATOR:
-        if (log.isDebugEnabled()) {
-          FileCreatorMesg fileCreator = new FileCreatorMesg(msg);
+    private Session            session = new Session();
 
-          log.debug("-->FILE_CREATOR");
-          log.debug("   HardwareVersion=" + fileCreator.getHardwareVersion());
-          log.debug("   SoftwareVersion=" + fileCreator.getSoftwareVersion());
-          log.debug("-----------");
-        }
-        break;
+    private FileIdMesg         fileId;
 
-      case MesgNum.ACTIVITY:
-        activityMsg = new ActivityMesg(msg);
-        list.add(activityMsg);
-        if (log.isInfoEnabled()) {
-          log.info("-->ACTIVITY");
-          log.info("   Timestamp="
-                   + dateFormat.format(activityMsg.getTimestamp().getDate()));
-          log.info("   LocalTimestamp=" + activityMsg.getLocalTimestamp());
-          log.info("   TotalTimerTime=" + activityMsg.getTotalTimerTime());
-          log.info("   NumSessions=" + activityMsg.getNumSessions());
-          log.info("   Type=" + activityMsg.getType());
-          log.info("   EventType=" + activityMsg.getEventType());
-          log.info("-----------");
-        }
-        break;
+    private ActivityMesg       activityMsg;
 
-      case MesgNum.SESSION:
-        SessionMesg sessionMesg = new SessionMesg(msg);
-        addSession(sessionMesg);
-        if (log.isInfoEnabled()) {
-          log.info("-->SESSION");
-          log.info("   Timestamp="
-                   + dateFormat.format(sessionMesg.getTimestamp().getDate()));
-          log.info("   TotalDistance=" + sessionMesg.getTotalDistance());
-          log.info("   TotalElapsedTime=" + sessionMesg.getTotalElapsedTime());
-          log.info("   TotalTimerTime=" + sessionMesg.getTotalTimerTime());
-          log.info("   TotalCalories=" + sessionMesg.getTotalCalories());
-          log.info("   AvgSpeed=" + sessionMesg.getAvgSpeed());
-          log.info("   MaxSpeed=" + sessionMesg.getMaxSpeed());
-          log.info("   AvgHeartRate=" + sessionMesg.getAvgHeartRate());
-          log.info("   MaxHeartRate=" + sessionMesg.getMaxHeartRate());
-          log.info("   StartTime="
-                   + dateFormat.format(sessionMesg.getStartTime().getDate()));
-          log.info("   StartPositionLat=" + sessionMesg.getStartPositionLat());
-          log.info("   StartPositionLong=" + sessionMesg.getStartPositionLong());
-          log.info("   Type=" + sessionMesg.getEventType());
-          log.info("   Event=" + sessionMesg.getEvent());
-          log.info("-----------");
-        }
-        break;
+    private int                nbMsg   = 0;
 
-      case MesgNum.LAP:
-        LapMesg lapMsg = new LapMesg(msg);
-        addLap(lapMsg);
-        if (log.isInfoEnabled()) {
-          log.info("-->LAP");
-          if (lapMsg.getTimestamp() != null) {
-            log.info("   Timestamp="
-                     + dateFormat.format(lapMsg.getTimestamp().getDate()));
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.garmin.fit.MesgListener#onMesg(com.garmin.fit.Mesg)
+     */
+    public void onMesg(Mesg msg) {
+      SimpleDateFormat dateFormat = null;
+      if (log.isDebugEnabled() || log.isInfoEnabled()) {
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+      }
+
+      nbMsg++;
+      switch (msg.getNum()) {
+        case MesgNum.FILE_ID:
+          fileId = new FileIdMesg(msg);
+          if (log.isInfoEnabled()) {
+            log.info("FILE_ID found GarminProduct=" + fileId.getGarminProduct()
+                     + " " + fileId.getType());
+            log.info("-->FILE_ID");
+            log.info("   GarminProduct=" + fileId.getGarminProduct());
+            log.info("   Manufacturer=" + fileId.getManufacturer());
+            log.info("   Number=" + fileId.getNumber());
+            log.info("   SerialNumber=" + fileId.getSerialNumber());
+            log.info("-----------");
           }
-          log.info("   TotalDistance=" + lapMsg.getTotalDistance());
-          log.info("   TotalElapsedTime=" + lapMsg.getTotalElapsedTime());
-          log.info("   TotalTimerTime=" + lapMsg.getTotalTimerTime());
-          log.info("   TotalCalories=" + lapMsg.getTotalCalories());
-          log.info("   AvgSpeed=" + lapMsg.getAvgSpeed());
-          log.info("   MaxSpeed=" + lapMsg.getMaxSpeed());
-          log.info("   AvgHeartRate=" + lapMsg.getAvgHeartRate());
-          log.info("   MaxHeartRate=" + lapMsg.getMaxHeartRate());
-          log.info("   StartTime="
-                   + dateFormat.format(lapMsg.getStartTime().getDate()));
-          log.info("   StartPositionLat=" + lapMsg.getStartPositionLat());
-          log.info("   StartPositionLong=" + lapMsg.getStartPositionLong());
-          log.info("   Cadence=" + lapMsg.getAvgCadence());
-          log.info("   Type=" + lapMsg.getEventType());
-          log.info("   Event=" + lapMsg.getEvent());
-          log.info("-----------");
-        }
-        break;
+          break;
 
-      case MesgNum.RECORD:
-        RecordMesg record = new RecordMesg(msg);
-        addRecordMesg(record);
-        if (log.isDebugEnabled()) {
-          log.debug("RECORD "
-                    + dateFormat.format(record.getTimestamp().getDate())
-                    + " Distance=" + record.getDistance() + " HeartRate="
-                    + record.getHeartRate() + " Speed=" + record.getSpeed()
-                    + " Altitude=" + record.getAltitude() + " Lat="
-                    + record.getPositionLat() + " lon="
-                    + record.getPositionLat() + " cadence="
-                    + record.getCadence());
-        }
-        break;
+        case MesgNum.DEVICE_INFO:
+          session.deviceInfo = new DeviceInfoMesg(msg);
+          if (log.isInfoEnabled()) {
+            log.info("-->DEVICE_INFO");
+            log.info("   Product=" + session.deviceInfo.getProduct());
+            log.info("   SerialNumber=" + session.deviceInfo.getSerialNumber());
+            log.info("   HardwareVersion="
+                     + session.deviceInfo.getHardwareVersion());
+            log.info("   Manufacturer=" + session.deviceInfo.getManufacturer());
+            log.info("   SoftwareVersion="
+                     + session.deviceInfo.getSoftwareVersion());
+            log.info("-----------");
+          }
+          break;
 
-      case MesgNum.EVENT:
-        if (log.isDebugEnabled()) {
-          EventMesg event = new EventMesg(msg);
-          log.debug("EVENT " + event.getEventType());
-        }
-        break;
+        case MesgNum.SOFTWARE:
+          if (log.isInfoEnabled()) {
+            SoftwareMesg software = new SoftwareMesg(msg);
+            log.info("-->SOFTWARE");
+            log.info("   GarminProduct=" + software.getGarminProduct());
+            log.info("   Manufacturer=" + software.getManufacturer());
+            log.info("   MessageIndex=" + software.getMessageIndex());
+            log.info("   PartNumber=" + software.getPartNumber());
+            log.info("   Product=" + software.getProduct());
+            log.info("   Version=" + software.getVersion());
+            log.info("-----------");
+          }
 
-      default:
-        if (log.isDebugEnabled()) {
-          log.debug("NAME=" + msg.getName() + " num=" + msg.getNum());
-        }
+        case MesgNum.FILE_CREATOR:
+          if (log.isInfoEnabled()) {
+            FileCreatorMesg fileCreator = new FileCreatorMesg(msg);
+
+            log.info("-->FILE_CREATOR");
+            log.info("   HardwareVersion=" + fileCreator.getHardwareVersion());
+            log.info("   SoftwareVersion=" + fileCreator.getSoftwareVersion());
+            log.info("-----------");
+          }
+          break;
+
+        case MesgNum.ACTIVITY:
+          activityMsg = new ActivityMesg(msg);
+          list.add(activityMsg);
+          if (log.isInfoEnabled()) {
+            log.info("-->ACTIVITY");
+            log.info("   Timestamp="
+                     + dateFormat.format(activityMsg.getTimestamp().getDate()));
+            log.info("   LocalTimestamp=" + activityMsg.getLocalTimestamp());
+            log.info("   TotalTimerTime=" + activityMsg.getTotalTimerTime());
+            log.info("   NumSessions=" + activityMsg.getNumSessions());
+            log.info("   Type=" + activityMsg.getType());
+            log.info("   EventType=" + activityMsg.getEventType());
+            log.info("-----------");
+          }
+          break;
+
+        case MesgNum.SESSION:
+          SessionMesg sessionMesg = new SessionMesg(msg);
+          session.sessionMesg = sessionMesg;
+          if (log.isInfoEnabled()) {
+            log.info("-->SESSION");
+            log.info("   FirstLapIndex=" + sessionMesg.getFirstLapIndex());
+            log.info("   Timestamp="
+                     + dateFormat.format(sessionMesg.getTimestamp().getDate()));
+            log.info("   TotalDistance=" + sessionMesg.getTotalDistance());
+            log.info("   TotalElapsedTime=" + sessionMesg.getTotalElapsedTime());
+            log.info("   TotalTimerTime=" + sessionMesg.getTotalTimerTime());
+            log.info("   TotalCalories=" + sessionMesg.getTotalCalories());
+            log.info("   AvgSpeed=" + sessionMesg.getAvgSpeed());
+            log.info("   MaxSpeed=" + sessionMesg.getMaxSpeed());
+            log.info("   AvgHeartRate=" + sessionMesg.getAvgHeartRate());
+            log.info("   MaxHeartRate=" + sessionMesg.getMaxHeartRate());
+            log.info("   StartTime="
+                     + dateFormat.format(sessionMesg.getStartTime().getDate()));
+            log.info("   StartPositionLat=" + sessionMesg.getStartPositionLat());
+            log.info("   StartPositionLong="
+                     + sessionMesg.getStartPositionLong());
+            log.info("   Type=" + sessionMesg.getEventType());
+            log.info("   Event=" + sessionMesg.getEvent());
+            log.info("-----------");
+          }
+          break;
+
+        case MesgNum.LAP:
+          LapMesg lapMsg = new LapMesg(msg);
+          session.addLapMesg(lapMsg);
+          if (log.isInfoEnabled()) {
+            log.info("-->LAP");
+            if (lapMsg.getTimestamp() != null) {
+              log.info("   Timestamp="
+                       + dateFormat.format(lapMsg.getTimestamp().getDate()));
+            }
+            log.info("   TotalDistance=" + lapMsg.getTotalDistance());
+            log.info("   TotalElapsedTime=" + lapMsg.getTotalElapsedTime());
+            log.info("   TotalTimerTime=" + lapMsg.getTotalTimerTime());
+            log.info("   TotalCalories=" + lapMsg.getTotalCalories());
+            log.info("   AvgSpeed=" + lapMsg.getAvgSpeed());
+            log.info("   MaxSpeed=" + lapMsg.getMaxSpeed());
+            log.info("   AvgHeartRate=" + lapMsg.getAvgHeartRate());
+            log.info("   MaxHeartRate=" + lapMsg.getMaxHeartRate());
+            log.info("   StartTime="
+                     + (lapMsg.getStartTime() == null ? null : dateFormat
+                         .format(lapMsg.getStartTime().getDate())));
+            log.info("   StartPositionLat=" + lapMsg.getStartPositionLat());
+            log.info("   StartPositionLong=" + lapMsg.getStartPositionLong());
+            log.info("   Cadence=" + lapMsg.getAvgCadence());
+            log.info("   Type=" + lapMsg.getEventType());
+            log.info("   Event=" + lapMsg.getEvent());
+            log.info("-----------");
+          }
+          break;
+
+        case MesgNum.RECORD:
+          RecordMesg record = new RecordMesg(msg);
+          session.addRecordMesg(record);
+          if (log.isDebugEnabled()) {
+            log.debug("RECORD "
+                      + dateFormat.format(record.getTimestamp().getDate())
+                      + " Distance=" + record.getDistance() + " HeartRate="
+                      + record.getHeartRate() + " Speed=" + record.getSpeed()
+                      + " Altitude=" + record.getAltitude() + " Lat="
+                      + record.getPositionLat() + " lon="
+                      + record.getPositionLat() + " cadence="
+                      + record.getCadence() + " calories="
+                      + record.getCalories());
+          }
+          break;
+
+        case MesgNum.EVENT:
+          if (log.isInfoEnabled()) {
+            EventMesg event = new EventMesg(msg);
+            log.info("EVENT " + event.getEventType());
+          }
+          break;
+
+        default:
+          if (log.isInfoEnabled()) {
+            log.info("NAME=" + msg.getName() + " num=" + msg.getNum());
+          }
+      }
     }
-  }
 
-  private void addLap(LapMesg msg) {
-    session.addLapMesg(msg);
-  }
+    public void checkIsValid() throws GeoLoadException {
+      // fileID
+      if (fileId == null) {
+        log.warn("fileId est null");
+        throw new GeoLoadException("fileId est null");
+      }
+      if (fileId.getType() != com.garmin.fit.File.ACTIVITY) {
+        log.warn("Not activity file : " + fileId.getType());
+        throw new GeoLoadException("Not activity file : " + fileId.getType());
+      }
 
-  private void addSession(SessionMesg msg) {
-    session.sessionMesg = msg;
-  }
+      // 1 message Activity
+      if (activityMsg == null) {
+        log.warn("activityMsg est null");
+        throw new GeoLoadException("activityMsg est null");
+      }
 
-  private void addRecordMesg(RecordMesg msg) {
-    session.addRecordMesg(msg);
-  }
+      // 1 sessionMesg Activity
+      if (session.sessionMesg == null) {
+        log.warn("sessionMesg est null");
+        throw new GeoLoadException("sessionMesg est null");
+      }
 
-  public void checkIsValid() throws GeoLoadException {
-    // fileID
-    if (fileId == null) {
-      log.warn("fileId est null");
-      throw new GeoLoadException("fileId est null");
-    }
-    if (fileId.getType() != com.garmin.fit.File.ACTIVITY) {
-      log.warn("Not activity file : " + fileId.getType());
-      throw new GeoLoadException("Not activity file : " + fileId.getType());
-    }
-
-    // 1 message Activity
-    if (activityMsg == null) {
-      log.warn("activityMsg est null");
-      throw new GeoLoadException("activityMsg est null");
-    }
-
-    // 1 sessionMesg Activity
-    if (session.sessionMesg == null) {
-      log.warn("sessionMesg est null");
-      throw new GeoLoadException("sessionMesg est null");
+      // Au moins un lap
+      if (session.listLap.size() == 0) {
+        log.warn("pas de lap");
+        throw new GeoLoadException("pas de lap");
+      }
     }
 
-    // Au moins un lap
-    if (session.listLap.size() == 0) {
-      log.warn("pas de lap");
-      throw new GeoLoadException("pas de lap");
-    }
   }
 
   /**
@@ -378,10 +414,45 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
    */
   private class FitGeoRoute extends AbstractGeoRoute {
     private Session session;
-
+    private FitDevice device;
+    
     public FitGeoRoute(Session session) {
       this.session = session;
       initSportType();
+
+      // calories
+      if (session.sessionMesg.getTotalCalories() != null
+          && session.listLap.size() > 0
+          && session.listLap.get(0).getCalories() == 0) {
+        session.listLap.get(0).lapmsg.setTotalCalories(session.sessionMesg
+            .getTotalCalories());
+      }
+
+      // Distance null pour Garmin Forerunner Fenix
+      List<IGeoPositionWithAlt> list = getAllPoints();
+      double distance = 0;
+      ((GeoPositionWithAlt) list.get(0)).setDistanceMeters(distance);
+      for (int i = 1; i < list.size(); i++) {
+        if (!list.get(i).isValidDistance()) {
+          distance += GeoUtil.computeDistance(list.get(i - 1), list.get(i));
+          ((GeoPositionWithAlt) list.get(i)).setDistanceMeters(distance);
+        }
+      }
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see fr.turtlesport.geo.IGeoRoute#getProductDevice()
+     */
+    @Override
+    public IProductDevice getProductDevice() {
+      if (session.deviceInfo != null && device == null) {
+        device = new FitDevice(session.deviceInfo);
+        System.out.println();
+      }
+      return device;
     }
 
     public void initSportType() {
@@ -482,9 +553,13 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
      * @see fr.turtlesport.geo.IGeoRoute#getSegments()
      */
     public List<IGeoSegment> getSegments() {
-      List<IGeoSegment> res = new ArrayList<IGeoSegment>();
-      Collections.copy(res, session.listLap);
-      return res;
+      List<IGeoSegment> list = new ArrayList<IGeoSegment>();
+      if (session.listLap != null) {
+        for (Lap l : session.listLap) {
+          list.add(l);
+        }
+      }
+      return list;
     }
   }
 
@@ -494,6 +569,8 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
    */
   private class Session {
     private SessionMesg      sessionMesg;
+
+    private DeviceInfoMesg   deviceInfo;
 
     private List<Lap>        listLap    = new ArrayList<Lap>();
 
@@ -517,6 +594,33 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
     }
   }
 
+  private class FitDevice implements IProductDevice {
+    DeviceInfoMesg deviceInfo;
+
+    public FitDevice(DeviceInfoMesg deviceInfo) {
+      this.deviceInfo = deviceInfo;
+    }
+
+    @Override
+    public String displayName() {
+      return (deviceInfo.getProduct() == null) ? null : ProductDeviceUtil
+          .name(deviceInfo.getProduct());
+    }
+
+    @Override
+    public String id() {
+      return (deviceInfo.getProduct() == null) ? null : Integer
+          .toString(deviceInfo.getProduct());
+    }
+
+    @Override
+    public String softwareVersion() {
+      return (deviceInfo.getSoftwareVersion() == null) ? null : Float
+          .toString(deviceInfo.getSoftwareVersion());
+    }
+
+  }
+
   /**
    * @author Denis Apparicio
    * 
@@ -524,11 +628,17 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
   private class Lap implements IGeoSegment {
     private LapMesg                   lapmsg;
 
-    private List<IGeoPositionWithAlt> listPoints = new ArrayList<IGeoPositionWithAlt>();
+    private List<IGeoPositionWithAlt> listPoints   = new ArrayList<IGeoPositionWithAlt>();
 
     private Date                      startTime;
 
     private int                       index;
+
+    private long                      calories     = -1;
+
+    private int                       avgHeartRate = -1;
+
+    private int                       maxHeartRate = -1;
 
     public Lap(int index) {
       this.index = index;
@@ -541,10 +651,15 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
 
     public void setLapMsg(LapMesg lapmsg) {
       this.lapmsg = lapmsg;
-      this.startTime = lapmsg.getStartTime().getDate();
+      if (lapmsg.getStartTime() != null) {
+        this.startTime = lapmsg.getStartTime().getDate();
+      }
     }
 
     public void addRecord(RecordMesg msg) {
+      if (startTime == null) {
+        startTime = msg.getTimestamp().getDate();
+      }
       listPoints.add(new FitPoint(msg));
     }
 
@@ -631,7 +746,23 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
      * @see fr.turtlesport.geo.IGeoSegment#getAvgHeartRate()
      */
     public int getAvgHeartRate() {
-      return (lapmsg.getAvgHeartRate() == null) ? 0 : lapmsg.getAvgHeartRate();
+      if (avgHeartRate == -1) {
+        if (lapmsg.getAvgHeartRate() != null) {
+          avgHeartRate = lapmsg.getAvgHeartRate();
+        }
+        else {
+          int nb = 0;
+          long avg = 0;
+          for (IGeoPositionWithAlt p : listPoints) {
+            if (p.getHeartRate() != 0) {
+              nb++;
+              avg += p.getHeartRate();
+            }
+          }
+          avgHeartRate = (nb > 0) ? ((int) avg / nb) : 0;
+        }
+      }
+      return avgHeartRate;
     }
 
     /*
@@ -640,7 +771,17 @@ public class FitFile implements IGeoFile, IGeoConvertRun, MesgListener {
      * @see fr.turtlesport.geo.IGeoSegment#getMaxHeartRate()
      */
     public int getMaxHeartRate() {
-      return (lapmsg.getMaxHeartRate() == null) ? 0 : lapmsg.getMaxHeartRate();
+      if (maxHeartRate == -1) {
+        if (lapmsg.getMaxHeartRate() != null) {
+          maxHeartRate = lapmsg.getMaxHeartRate();
+        }
+        else {
+          for (IGeoPositionWithAlt p : listPoints) {
+            maxHeartRate = Math.max(p.getHeartRate(), maxHeartRate);
+          }
+        }
+      }
+      return maxHeartRate;
     }
 
     /*

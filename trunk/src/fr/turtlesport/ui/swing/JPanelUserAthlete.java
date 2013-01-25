@@ -39,6 +39,7 @@ import fr.turtlesport.ui.swing.component.JButtonPhoto;
 import fr.turtlesport.ui.swing.component.JXDatePickerLocale;
 import fr.turtlesport.ui.swing.component.PhotoEvent;
 import fr.turtlesport.ui.swing.component.PhotoListener;
+import fr.turtlesport.ui.swing.component.TextFormatterFactory;
 import fr.turtlesport.ui.swing.model.GenericModelDocListener;
 import fr.turtlesport.ui.swing.model.ModelAthlete;
 import fr.turtlesport.unit.HeightUnit;

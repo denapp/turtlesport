@@ -30,9 +30,9 @@ public class DataRunLap {
 
   private int       maxHeartRate;
 
-  private int       denivelePos     = -1;
+  private int[]     alt;
 
-  private int       deniveleNeg     = 1;
+  private int[]     altOriginal;
 
   private int       totalLap;
 
@@ -205,7 +205,7 @@ public class DataRunLap {
   public void setRealTotalTime(int realTotalTime) {
     this.realTotalTime = realTotalTime;
   }
-  
+
   /**
    * @return the totalTime
    * @throws SQLException
@@ -267,7 +267,7 @@ public class DataRunLap {
           iPauseEnd = -1;
         }
       }
-      
+
     }
     return timePause;
   }
@@ -279,8 +279,7 @@ public class DataRunLap {
    * @throws SQLException
    */
   public int computeDenivelePos() throws SQLException {
-    computeDenivele();
-    return denivelePos;
+    return computeDenivele()[0];
   }
 
   /**
@@ -290,16 +289,42 @@ public class DataRunLap {
    * @throws SQLException
    */
   public int computeDeniveleNeg() throws SQLException {
-    computeDenivele();
-    return deniveleNeg;
+    return computeDenivele()[1];
   }
 
-  private void computeDenivele() throws SQLException {
-    if (denivelePos == -1) {
-      int[] res = RunLapTableManager.getInstance().altitude(id, lapIndex);
-      denivelePos = res[0];
-      deniveleNeg = res[1];
+  /**
+   * Restitue le denivel&eacute; positif sans correction.
+   * 
+   * @return le denivel&eacute; positif sans correction.
+   * @throws SQLException
+   */
+  public int computeDenivelePosOriginal() throws SQLException {
+    return computeDeniveleOriginal()[0];
+  }
+
+  /**
+   * Restitue le denivel&eacute; positif sans correction.
+   * 
+   * @return le denivel&eacute; positif sans correction.
+   * @throws SQLException
+   */
+  public int computeDeniveleNegOriginal() throws SQLException {
+    return computeDeniveleOriginal()[1];
+  }
+
+  
+  private int[] computeDenivele() throws SQLException {
+    if (alt == null) {
+      alt = RunLapTableManager.getInstance().altitude(id, lapIndex);
     }
+    return alt;
+  }
+
+  private int[] computeDeniveleOriginal() throws SQLException {
+    if (altOriginal == null) {
+      altOriginal = RunLapTableManager.getInstance().altitudeOriginal(id, lapIndex);
+    }
+    return altOriginal;
   }
 
 }

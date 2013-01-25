@@ -93,6 +93,16 @@ public class Lap extends AbstractGeoSegment {
       distanceMeters = distance - listPoints.get(0).getDistanceMeters();
     }
   }
+  
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.IGeoSegment#getTotalPauseTime()
+   */
+  @Override
+  public long getTotalPauseTime() {
+    return 0;
+  }
 
   /*
    * (non-Javadoc)

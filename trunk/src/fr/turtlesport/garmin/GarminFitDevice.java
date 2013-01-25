@@ -17,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.geo.GeoLoadException;
@@ -28,22 +29,22 @@ import fr.turtlesport.util.OperatingSystem;
  * @author Denis Apparicio
  * 
  */
-public class GarminFitDevice implements IGarminDevice {
+public class GarminFitDevice implements IProductDevice {
   private static TurtleLogger   log      = (TurtleLogger) TurtleLogger
                                              .getLogger(GarminFitDevice.class);
 
-  private FitInfo               info;
+  private GarminDeviceInfo               info;
 
   /** Noms des repertoires TCX */
   private static final String[] DIRS_TCX = { "History" };
 
   /** Noms des repertoires FIT */
-  private static final String[] DIRS_FIT = { "Activities", "ACTIVITY" };
+  private static final String[] DIRS_FIT = { "Activities", "ACTIVITY", "Activity" };
 
   private GarminFitDevice(File dir) throws SAXException,
                                    IOException,
                                    ParserConfigurationException {
-    this.info = new FitInfo(dir);
+    this.info = new GarminDeviceInfo(dir);
   }
 
   /**
@@ -189,7 +190,7 @@ public class GarminFitDevice implements IGarminDevice {
    * 
    * @return Restitue les informations sur le device.
    */
-  public FitInfo getInfo() {
+  public GarminDeviceInfo getInfo() {
     return info;
   }
 
@@ -211,7 +212,7 @@ public class GarminFitDevice implements IGarminDevice {
       if (isGarminFitAvailable(dir)) {
         addDevice(dir, list);
       }
-      
+
       // recherche sous repertoire
       File[] dirsFit = dir.listFiles(new FileFilter() {
         public boolean accept(File pathname) {
@@ -228,7 +229,7 @@ public class GarminFitDevice implements IGarminDevice {
     }
     return list;
   }
-  
+
   private static void addDevice(File f, List<GarminFitDevice> list) {
     try {
       GarminFitDevice device = new GarminFitDevice(f);
@@ -246,14 +247,13 @@ public class GarminFitDevice implements IGarminDevice {
   private static boolean isGarminFitAvailable(File pathname) {
     if (pathname != null && pathname.isDirectory()
         && isFitorTcxSupported(pathname)) {
-      for (String s : FitInfo.GARMIN_DEVICE_NAME) {
+      for (String s : GarminDeviceInfo.GARMIN_DEVICE_NAME) {
         if (new File(pathname, s).isFile()) {
           return true;
         }
       }
     }
     return false;
-
   }
 
   /**
@@ -264,14 +264,19 @@ public class GarminFitDevice implements IGarminDevice {
 
     // Mac OS X
     if (OperatingSystem.isMacOSX()) {
+      // Ant
       File file = new File(System.getProperty("user.home"),
                            "/Library/Application Support/Garmin/Devices");
       listDir.add(file);
+
+      // Foreunner usb like Foreunner 10, 110..
+      file = new File("/Volumes/GARMIN/Garmin");
+      listDir.add(file);
+
       return listDir;
     }
-
     // Windows
-    if (OperatingSystem.isWindows()) {
+    else if (OperatingSystem.isWindows()) {
       StringBuilder st = new StringBuilder();
       String tmp = System.getenv("APPDATA");
       if (tmp != null) {
@@ -280,35 +285,34 @@ public class GarminFitDevice implements IGarminDevice {
         listDir.add(new File(st.toString()));
       }
 
-      // Ajout des Forerunner 10, 110...
+      // Ajout des Forerunner 10, 110, Garmin Fenix...
       for (File dir : File.listRoots()) {
         if (new File(dir, "GARMIN").exists()) {
           listDir.add(new File(dir, "GARMIN"));
         }
       }
     }
-
     // Linux
-    if (OperatingSystem.isLinux()) {
+    else if (OperatingSystem.isLinux()) {
       // Forerunner 10, 110..
       listDir.add(new File("/media/GARMIN"));
-      
+
       String userName = System.getProperty("user.name");
       if (userName != null) {
-        listDir.add(new File("/media/" +userName + "/GARMIN"));
-      }
+        listDir.add(new File("/media/" + userName + "/GARMIN"));
+      }      
     }
 
     return listDir;
   }
 
   private static boolean isFitorTcxSupported(File dirFit) {
-    for (String dir : DIRS_TCX) {
+    for (String dir : DIRS_FIT) {
       if (new File(dirFit, dir).isDirectory()) {
         return true;
       }
     }
-    for (String dir : DIRS_FIT) {
+    for (String dir : DIRS_TCX) {
       if (new File(dirFit, dir).isDirectory()) {
         return true;
       }

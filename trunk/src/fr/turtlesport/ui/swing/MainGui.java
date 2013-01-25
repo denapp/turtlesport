@@ -3,7 +3,6 @@ package fr.turtlesport.ui.swing;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,31 +36,26 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.border.TitledBorder;
 
 import org.jdesktop.swingx.JXCollapsiblePane;
-import org.jdesktop.swingx.JXFrame;
-import org.jdesktop.swingx.JXTaskPane;
-import org.jdesktop.swingx.JXTaskPaneContainer;
 
 import fr.turtlesport.Configuration;
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.Launcher;
 import fr.turtlesport.MacOSXTurleApp;
 import fr.turtlesport.UsbProtocolException;
 import fr.turtlesport.db.DataRun;
+import fr.turtlesport.db.DataSearchRun;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.UserTableManager;
 import fr.turtlesport.garmin.GarminDevices;
 import fr.turtlesport.garmin.GarminFitDevice;
+import fr.turtlesport.garmin.GarminGpxDevice;
 import fr.turtlesport.garmin.GarminUsbDevice;
-import fr.turtlesport.garmin.IGarminDevice;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
@@ -72,7 +66,9 @@ import fr.turtlesport.mail.Mail;
 import fr.turtlesport.mail.MessageMail;
 import fr.turtlesport.protocol.A1000RunTransferProtocol;
 import fr.turtlesport.ui.swing.action.ExportAllActionListener;
+import fr.turtlesport.ui.swing.component.JChevron;
 import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
+import fr.turtlesport.ui.swing.component.JSearchTextField;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JXSplitButton;
 import fr.turtlesport.ui.swing.component.calendar.JPanelCalendar;
@@ -209,6 +205,14 @@ public class MainGui extends JFrame implements LanguageListener {
   private JMenuItemTurtle      jMenuItemRunGoogleMap;
 
   private JMenuItemTurtle      jMenuItemRunCompare;
+
+  private JChevron             jChevron;
+
+  private JXCollapsiblePane    jxCollasiblePanelSearch;
+
+  private JPanelSearch         jPanelSearch;
+
+  private JSearchTextField     jSearchTextField;
 
   /**
    * 
@@ -363,6 +367,15 @@ public class MainGui extends JFrame implements LanguageListener {
     return currentIdUser;
   }
 
+  /**
+   * Restitue les crit&egrave;res de recherche.
+   * 
+   * @return les crit&egrave;res de recherche.
+   */
+  public DataSearchRun getDataSearch() {
+    return jPanelSearch.getDataSearch();
+  }
+
   private void setCurrentIdUser(int currentIdUser) {
     if (this.currentIdUser != currentIdUser) {
       this.currentIdUser = currentIdUser;
@@ -449,7 +462,7 @@ public class MainGui extends JFrame implements LanguageListener {
   private void initialize() {
     log.debug(">>initialize");
 
-    // on ajuste la taille car pas de menu sous mac os x
+    // on ajuste la taillaFlage car pas de menu sous mac os x
     this.setSize(1200, 767 - (OperatingSystem.isMacOSX() ? 27 : 0));
     this.setContentPane(getJContentPane());
     initJMenuBar();
@@ -553,6 +566,30 @@ public class MainGui extends JFrame implements LanguageListener {
     jMenuItemCheckUpdate.addActionListener(new CheckUpdateAction());
     jMenuItemDonate.addActionListener(new DonationAction());
 
+    jChevron.setActionUp(new AbstractAction() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        jxCollasiblePanelSearch.setCollapsed(true);
+      }
+    });
+    jChevron.setActionDown(new AbstractAction() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        jxCollasiblePanelSearch.setCollapsed(false);
+      }
+    });
+
+    final ActionListener findAction = new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        MainGui.getWindow().beforeRunnableSwing();
+        getDataSearch().setComments(jSearchTextField.getText());
+        fireHistoric();
+        MainGui.getWindow().afterRunnableSwing();
+      }
+    };
+    jSearchTextField.setFindAction(findAction);
+    jPanelSearch.setFindAction(findAction);
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
 
@@ -638,8 +675,17 @@ public class MainGui extends JFrame implements LanguageListener {
       // jToolBar.add(getJButtonCompare());
       jToolBar.add(getJButtonPreference());
       // jToolBar.add(getJButtonWorkout());
+
       jToolBar.add(Box.createHorizontalGlue());
-      jToolBar.add(new JTextField());
+      JLabel jLabelSearch = new JLabel(ImagesRepository.getImageIcon("book-open.png"));
+      jSearchTextField = new JSearchTextField(20);
+      jSearchTextField.setFont(GuiFont.FONT_PLAIN);
+      jSearchTextField.setMinimumSize(jSearchTextField.getPreferredSize());
+      jChevron = new JChevron(true);
+      jChevron.setMinimumSize(jChevron.getPreferredSize());
+      jToolBar.add(jLabelSearch);
+      jToolBar.add(jSearchTextField);
+      jToolBar.add(jChevron);
     }
     return jToolBar;
   }
@@ -1229,42 +1275,24 @@ public class MainGui extends JFrame implements LanguageListener {
           .createBevelBorder(javax.swing.border.BevelBorder.RAISED));
       jContentPane.add(getJPanelSouth(), BorderLayout.SOUTH);
       jContentPane.add(getJJToolbar(), BorderLayout.PAGE_START);
-       jContentPane.add(getJSplitPanelCenter(), BorderLayout.CENTER);
 
       // Panel search
-      JXCollapsiblePane cp = new JXCollapsiblePane();
-      cp.setLayout(new BorderLayout());
+      JPanel panel = new JPanel();
+      panel.setLayout(new BorderLayout());
+      panel.add(getJSplitPanelCenter(), BorderLayout.CENTER);
+      jContentPane.add(panel, BorderLayout.CENTER);
+      jxCollasiblePanelSearch = new JXCollapsiblePane();
+      jxCollasiblePanelSearch.setLayout(new BorderLayout());
+      jxCollasiblePanelSearch.setAnimated(false);
       try {
-        cp.add(new JPanelSearch(), BorderLayout.CENTER);
+        jPanelSearch = new JPanelSearch();
+        jxCollasiblePanelSearch.add(jPanelSearch, BorderLayout.CENTER);
       }
       catch (SQLException e) {
         e.printStackTrace();
       }
-      jContentPane.add(cp, BorderLayout.NORTH);
-
-      // Show/hide the "Controls"
-      JButton toggle = new JButton(cp.getActionMap()
-          .get(JXCollapsiblePane.TOGGLE_ACTION));
-      toggle.setText("Show/Hide Search Panel");
-
-      // JPanel panel = new JPanel();
-      // panel.setLayout(new BorderLayout());
-      // JXTaskPaneContainer taskPaneContainer = new JXTaskPaneContainer();
-      // JXTaskPane details = new
-      // JXTaskPane(ImagesRepository.getImageIcon("loupe.png"));
-      // details.setFont(GuiFont.FONT_PLAIN);
-      // details.setAnimated(true);
-      // details.setCollapsed(true);
-      // try {
-      // details.add(new JPanelSearch());
-      // }
-      // catch (SQLException e) {
-      // e.printStackTrace();
-      // }
-      // taskPaneContainer.add(details);
-      // panel.add(taskPaneContainer, BorderLayout.NORTH);
-      // panel.add(getJSplitPanelCenter(), BorderLayout.CENTER);
-      // jContentPane.add(panel, BorderLayout.CENTER);
+      jxCollasiblePanelSearch.setCollapsed(true);
+      panel.add(jxCollasiblePanelSearch, BorderLayout.NORTH);
     }
     return jContentPane;
   }
@@ -1524,7 +1552,7 @@ public class MainGui extends JFrame implements LanguageListener {
         panel = new JPanelListDateRun();
       }
       // mises a jour des dates
-      panel.fireHistoric(currentIdUser);
+      panel.fireHistoric(currentIdUser, jPanelSearch.getDataSearch());
       // mise a jour de la date selectionne
       DataRun run = ModelPointsManager.getInstance().getDataRun();
       if (run != null) {
@@ -1581,9 +1609,9 @@ public class MainGui extends JFrame implements LanguageListener {
 
         @Override
         public Object construct() {
-          IGarminDevice deviceSelected = null;
+          IProductDevice deviceSelected = null;
 
-          List<IGarminDevice> devices = GarminDevices.list();
+          List<IProductDevice> devices = GarminDevices.list();
           switch (devices.size()) {
             case 0:
               try {
@@ -1606,7 +1634,7 @@ public class MainGui extends JFrame implements LanguageListener {
                              Integer.toString(getCurrentIdUser()),
                              deviceSelected.toString());
             if (deviceSelected instanceof GarminUsbDevice) {
-              doUsbDevice();
+              doUsbDevice(deviceSelected);
             }
             else if (deviceSelected instanceof GarminFitDevice) {
               GarminFitDevice fitDevice = (GarminFitDevice) deviceSelected;
@@ -1614,6 +1642,12 @@ public class MainGui extends JFrame implements LanguageListener {
               List<File> list = fitDevice.getNewFiles();
               File[] files = new File[list.size()];
               JDialogImport.prompt(list.toArray(files));
+            }
+            else if (deviceSelected instanceof GarminGpxDevice) {
+              GarminGpxDevice gpxDevice = (GarminGpxDevice) deviceSelected;
+
+              File[] files = { gpxDevice.getCurrentFile() };
+              JDialogImport.prompt(files);
             }
           }
           return null;
@@ -1624,12 +1658,12 @@ public class MainGui extends JFrame implements LanguageListener {
           afterRunnableSwing();
         }
 
-        private IGarminDevice selectDevice(List<IGarminDevice> devices) {
+        private IProductDevice selectDevice(List<IProductDevice> devices) {
           String name = Configuration.getConfig()
               .getProperty("DeviceGPS", Integer.toString(getCurrentIdUser()));
 
-          IGarminDevice defaultDevice = devices.get(0);
-          for (IGarminDevice d : devices) {
+          IProductDevice defaultDevice = devices.get(0);
+          for (IProductDevice d : devices) {
             if (d.toString().equals(name)) {
               defaultDevice = d;
               break;
@@ -1640,9 +1674,9 @@ public class MainGui extends JFrame implements LanguageListener {
 
           final String msgChooseWatch = rb.getString("msgChooseWatch");
           final String titleChooseWatch = rb.getString("titleChooseWatch");
-          final IGarminDevice[] options = new IGarminDevice[devices.size()];
+          final IProductDevice[] options = new IProductDevice[devices.size()];
           devices.toArray(options);
-          return (IGarminDevice) JShowMessage
+          return (IProductDevice) JShowMessage
               .input(msgChooseWatch,
                      titleChooseWatch,
                      JOptionPane.INFORMATION_MESSAGE,
@@ -1650,7 +1684,7 @@ public class MainGui extends JFrame implements LanguageListener {
                      defaultDevice);
         }
 
-        private void doUsbDevice() {
+        private void doUsbDevice(IProductDevice productDevice) {
           A1000RunTransferProtocol a1000;
           try {
             a1000 = new A1000RunTransferProtocol();
@@ -1668,7 +1702,7 @@ public class MainGui extends JFrame implements LanguageListener {
                                                             false);
             dlg.setLocationRelativeTo(MainGui.getWindow());
             dlg.setVisible(true);
-            dlg.retreive(a1000);
+            dlg.retreive(a1000, productDevice);
           }
           catch (SQLException e) {
             log.error("", e);
@@ -1761,12 +1795,13 @@ public class MainGui extends JFrame implements LanguageListener {
           }
           catch (SQLException e) {
             log.error("", e);
+            afterRunnableSwing();
             ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
                 .getManager().getCurrentLang(), MainGui.class);
             JShowMessage.error(rb.getString("errorSQL"));
           }
-
-          afterRunnableSwing();
+          finally {
+          }
         }
       });
 

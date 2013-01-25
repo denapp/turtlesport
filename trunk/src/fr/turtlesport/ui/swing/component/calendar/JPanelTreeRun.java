@@ -19,7 +19,6 @@ import java.util.ResourceBundle;
 
 import javax.activation.ActivationDataFlavor;
 import javax.activation.DataHandler;
-import javax.swing.DropMode;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -40,12 +39,14 @@ import javax.swing.tree.TreePath;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableNode;
 
 import fr.turtlesport.db.DataRun;
+import fr.turtlesport.db.DataSearchRun;
 import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.lang.ILanguage;
@@ -149,7 +150,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
 
   private JMenuItemTurtle                 jMenuItemDateExportTcx;
 
-//  private MyTransferHandler               transfertHandler         = new MyTransferHandler();
+  // private MyTransferHandler transfertHandler = new MyTransferHandler();
 
   // Ressource
   private ResourceBundle                  rb;
@@ -695,9 +696,8 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
           jTreeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
           jTreeTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
-          if (OperatingSystem.isMacOSX()) {
-            jTreeTable.addHighlighter(HighlighterFactory
-                .createAlternateStriping());
+          if (!OperatingSystem.isMacOSX()) {
+            jTreeTable.addHighlighter(HighlighterFactory.createAlternateStriping());
           }
           jTreeTable
               .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
@@ -784,11 +784,12 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
    * (non-Javadoc)
    * 
    * @see
-   * fr.turtlesport.ui.swing.component.calendar.IListDateRun#fireHistoric(int)
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireHistoric
+   * (int, fr.turtlesport.db.DataSearchRun)
    */
-  public void fireHistoric(int idUser) throws SQLException {
+  public void fireHistoric(int idUser, DataSearchRun search) throws SQLException {
     model.setIdUser(idUser);
-    model.updateView(this);
+    model.updateView(this, search);
     // mis a jour des boutons date en cours
     if (MainGui.getWindow().getRightComponent() instanceof JPanelRun) {
       JPanelRun p = (JPanelRun) MainGui.getWindow().getRightComponent();
@@ -1406,9 +1407,11 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
             boolean isDel = RunTableManager.getInstance()
                 .delete(MainGui.getWindow().getCurrentIdUser(),
                         yearMonth.year,
-                        yearMonth.month);
+                        yearMonth.month,
+                        MainGui.getWindow().getDataSearch());
             if (isDel) {
-              model.updateView(JPanelTreeRun.this);
+              model.updateView(JPanelTreeRun.this, MainGui.getWindow()
+                  .getDataSearch());
             }
 
             // test si existe encore
@@ -1447,65 +1450,6 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     }
 
   }
-
-  // private class ExportAllActionListener implements ActionListener {
-  //
-  // private String ext;
-  //
-  // public ExportAllActionListener(String ext) {
-  // this.ext = ext;
-  // }
-  //
-  // /*
-  // * (non-Javadoc)
-  // *
-  // * @see
-  // *
-  // java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-  // */
-  // public void actionPerformed(ActionEvent ae) {
-  //
-  // final YearMonth yearMonth = retreiveYearMonth();
-  // if (yearMonth == null) {
-  // return;
-  // }
-  //
-  // final IGeoConvertRun cv = FactoryGeoConvertRun.getInstance(ext);
-  // final File out = JFileSaver.showSaveDialog(MainGui.getWindow(),
-  // yearMonth.toString(),
-  // cv.extension()[0],
-  // cv.description());
-  // if (out != null) {
-  // MainGui.getWindow().beforeRunnableSwing();
-  //
-  // SwingUtilities.invokeLater(new Runnable() {
-  // public void run() {
-  // try {
-  // // recuperation des run
-  // List<DataRun> runs = RunTableManager.getInstance()
-  // .retreiveDesc(MainGui.getWindow().getCurrentIdUser(),
-  // yearMonth.year,
-  // yearMonth.month);
-  // // conversion
-  // cv.convert(runs, null, out);
-  // JShowMessage.ok(rb.getString("exportOK"),
-  // rb.getString("exportTitle"));
-  // }
-  // catch (GeoConvertException e) {
-  // log.error("", e);
-  // JShowMessage.error(e.getMessage());
-  // }
-  // catch (SQLException e) {
-  // log.error("", e);
-  // JShowMessage.error(e.getMessage());
-  // }
-  // MainGui.getWindow().afterRunnableSwing();
-  // }
-  // });
-  //
-  // }
-  // }
-  // }
 
   /**
    * @author Denis Apparicio

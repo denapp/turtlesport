@@ -33,6 +33,8 @@ public class Activity {
 
   private ArrayList<Lap>      listLap;
 
+  private ActivityCreator     creator;
+
   /**
    * @param sport
    */
@@ -58,6 +60,14 @@ public class Activity {
     log.debug("<<Activity");
   }
 
+  public ActivityCreator getCreator() {
+    return creator;
+  }
+
+  public void setCreator(ActivityCreator creator) {
+    this.creator = creator;
+  }
+
   /**
    * D&eacute;termine si cette activit&eacute; est running.
    * 
@@ -80,8 +90,8 @@ public class Activity {
    * D&eacute;termine si cette activit&eacute; est autre que running et
    * v&eacute;lo.
    * 
-   * @return <code>true</code> si cette activit&eacute; est autre que running
-   *         et v&eacute;lo.
+   * @return <code>true</code> si cette activit&eacute; est autre que running et
+   *         v&eacute;lo.
    */
   public boolean isOther() {
     return (sportType == SPORT_TYPE_OTHER);
@@ -129,7 +139,7 @@ public class Activity {
     }
     listLap.add(lap);
   }
-  
+
   /**
    * Restitue la liste des tours interm&eacute;diaires.
    * 
@@ -141,7 +151,7 @@ public class Activity {
     }
     return listLap;
   }
-  
+
   /**
    * Restitue le tour interm&eacute;diaire &agrave; l'index
    * sp&eacute;cifi&eacute;.
@@ -152,7 +162,7 @@ public class Activity {
    */
   public Lap getLap(int index) {
     if (listLap == null) {
-      throw new IndexOutOfBoundsException("size =0, index="+index);      
+      throw new IndexOutOfBoundsException("size =0, index=" + index);
     }
     return listLap.get(index);
   }

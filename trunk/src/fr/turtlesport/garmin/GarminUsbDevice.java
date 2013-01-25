@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbProtocol;
 import fr.turtlesport.UsbProtocolException;
@@ -22,7 +23,7 @@ import fr.turtlesport.protocol.data.ProtocolDataType;
  * @author denisapparicio
  * 
  */
-public final class GarminUsbDevice implements IGarminDevice {
+public final class GarminUsbDevice implements IProductDevice {
   private static TurtleLogger                  log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(GarminUsbDevice.class);

@@ -19,6 +19,7 @@ import javax.swing.plaf.ComboBoxUI;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JDiagramComponent;
 import fr.turtlesport.ui.swing.component.JDiagramOneComponent;
 import fr.turtlesport.ui.swing.component.JPanelGraphOne;
@@ -34,6 +35,10 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * 
  */
 public class JDialogDiagramComponents extends JDialog {
+  private static TurtleLogger          log;
+  static {
+    log = (TurtleLogger) TurtleLogger.getLogger(JDialogDiagramComponents.class);
+  }
 
   private JPanelRunLap                 jPanelRight;
 
@@ -116,7 +121,7 @@ public class JDialogDiagramComponents extends JDialog {
     contentPane.add(getJPanelRight());
 
     setContentPane(contentPane);
-    this.setSize(880, (jPanelY4 == null) ? 690 : 740);
+    this.setSize(920, (jPanelY4 == null) ? 690 : 740);
 
     boolean isAxisXDistance = Configuration.getConfig()
         .getPropertyAsBoolean("Diagram", "isAxisXDistance", true);
@@ -145,6 +150,32 @@ public class JDialogDiagramComponents extends JDialog {
               .setAxisX(jComboBoxX.getSelectedIndex() == 0);
         }
 
+      }
+    });
+
+    // Denivele
+    jPanelRight.getJSwitchBox().addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent event) {
+      }
+    });
+
+    jPanelRight.getJSwitchBox().addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent event) {
+        try {
+          if (model != null) {
+            model.correctAltitude(JDialogDiagramComponents.this);
+            if (getJPanelRight().getJComboBoxLap().getSelectedIndex() > 0) {
+              model.updateViewLap(JDialogDiagramComponents.this,
+                                  getJPanelRight().getJComboBoxLap()
+                                      .getSelectedIndex() - 1);
+            }
+          }
+        }
+        catch (SQLException e) {
+          log.error("", e);
+        }
       }
     });
 

@@ -270,12 +270,12 @@ public final class RunTrkTableManager extends AbstractTableManager {
       st.append("SELECT * FROM ");
       st.append(getTableName());
       st.append(" WHERE id=?");
-      //st.append(" AND distance <> ?");
+      // st.append(" AND distance <> ?");
       st.append(" ORDER BY time");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       pstmt.setInt(1, idRun);
-      //pstmt.setFloat(2, 1.0e25f);
+      // pstmt.setFloat(2, 1.0e25f);
 
       DataRunTrk trk;
       ResultSet rs = pstmt.executeQuery();
@@ -481,14 +481,29 @@ public final class RunTrkTableManager extends AbstractTableManager {
   }
 
   /**
-   * Restitue les denivel&eacute;s + rt -.
+   * Restitue les denivel&eacute;s + rt - filtr&eacute;es.
    * 
    * @param idRun
    * @return
    * @throws SQLException
    */
   public int[] altitude(int idRun) throws SQLException {
-    log.debug(">>altitude idRun=" + idRun);
+    return altitude(idRun, true);
+  }
+
+  /**
+   * Restitue les denivel&eacute;s + rt - non filtr&eacute;es.
+   * 
+   * @param idRun
+   * @return
+   * @throws SQLException
+   */
+  public int[] altitudeOriginal(int idRun) throws SQLException {
+    return altitude(idRun, false);
+  }
+
+  private int[] altitude(int idRun, boolean isFilter) throws SQLException {
+    log.debug(">>altitude idRun=" + idRun + " isFilter=" + isFilter);
 
     int[] res;
 
@@ -511,7 +526,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
       pstmt.setInt(5, 0x7FFFFFFF);
 
       ResultSet rs = pstmt.executeQuery();
-      res = computeAltitude(rs);
+      res = (isFilter) ? computeAltitude(rs, 10) : computeAltitude(rs, 0);
     }
     finally {
       DatabaseManager.releaseConnection(conn);
@@ -519,6 +534,19 @@ public final class RunTrkTableManager extends AbstractTableManager {
 
     log.debug("<<altitude");
     return res;
+  }
+
+  /**
+   * Restitue les denivel&eacute;s + rt - entre deux dates non liss&eacute;es.
+   * 
+   * @param date1
+   * @param date2
+   * 
+   * @return
+   * @throws SQLException
+   */
+  public int[] altitudeOriginal(int idRun, Date date1, Date date2) throws SQLException {
+    return altitude(idRun, date1, date2, false);
   }
 
   /**
@@ -531,7 +559,11 @@ public final class RunTrkTableManager extends AbstractTableManager {
    * @throws SQLException
    */
   public int[] altitude(int idRun, Date date1, Date date2) throws SQLException {
-    log.debug(">>altitude idRun=" + idRun);
+    return altitude(idRun, date1, date2, true);
+  }
+
+  private int[] altitude(int idRun, Date date1, Date date2, boolean isFilter) throws SQLException {
+    log.debug(">>altitude idRun=" + idRun + " isFilter=" + isFilter);
     Date dateFirst;
     Date dateEnd;
     int[] res;
@@ -574,7 +606,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
       pstmt.setInt(7, 0x7FFFFFFF);
 
       ResultSet rs = pstmt.executeQuery();
-      res = computeAltitude(rs);
+      res = (isFilter) ? computeAltitude(rs, 10) : computeAltitude(rs, 0);
     }
     finally {
       DatabaseManager.releaseConnection(conn);
@@ -583,8 +615,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
     log.debug("<<altitude");
     return res;
   }
-  
-  //
+
   /**
    * Restitue le dernier point d'un run.
    * 
@@ -606,7 +637,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       pstmt.setInt(1, idRun);
- 
+
       ResultSet rs = pstmt.executeQuery();
       if (rs.next()) {
         trk = new DataRunTrk();
@@ -623,11 +654,11 @@ public final class RunTrkTableManager extends AbstractTableManager {
     finally {
       DatabaseManager.releaseConnection(conn);
     }
-    
+
     return trk;
   }
 
-  private int[] computeAltitude(ResultSet rs) throws SQLException {
+  private int[] computeAltitude(ResultSet rs, int val) throws SQLException {
     int[] res = new int[2];
 
     float altPlus = 0, altMoins = 0;
@@ -639,11 +670,11 @@ public final class RunTrkTableManager extends AbstractTableManager {
     while (rs.next()) {
       alt = rs.getFloat(1);
       tmp = alt - cur;
-      if (tmp > 0 && tmp > 10) {
+      if (tmp > 0 && tmp > val) {
         altPlus += tmp;
         cur = alt;
       }
-      else if (tmp < 0 && tmp < -10) {
+      else if (tmp < 0 && tmp < (-val)) {
         altMoins -= tmp;
         cur = alt;
       }

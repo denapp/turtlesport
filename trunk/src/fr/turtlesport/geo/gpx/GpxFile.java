@@ -21,6 +21,8 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import fr.turtlesport.IProductDevice;
+import fr.turtlesport.ProductDeviceUtil;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;
@@ -406,16 +408,24 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         log.debug("handler.nbTrkseg=" + handler.nbTrkseg);
         log.debug("handler.nbTrkpt=" + handler.nbTrkpt);
       }
+  
+      GPXDevice device = null;
+      if (handler.creator != null && ProductDeviceUtil.isKnown(handler.creator)) {
+        device = (handler.creator == null) ? null
+            : new GPXDevice(handler.creator);
+      }
 
       // construction de la reponse
       ArrayList<IGeoRoute> list = new ArrayList<IGeoRoute>();
       if (handler.listRte != null) {
         for (Rte r : handler.listRte) {
+          r.setProductDevice(device);
           list.add(r);
         }
       }
       if (handler.listTrk != null) {
         for (Trk t : handler.listTrk) {
+          t.setProductDevice(device);
           list.add(t);
         }
       }
@@ -470,7 +480,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
     log.debug(">>writeLap");
 
     // recuperation des points du tour
-    Date dateEnd = new Date(l.getStartTime().getTime() + l.getRealTotalTime() * 10);
+    Date dateEnd = new Date(l.getStartTime().getTime() + l.getRealTotalTime()
+                            * 10);
     DataRunTrk[] trks = RunTrkTableManager.getInstance()
         .getTrks(data.getId(), l.getStartTime(), dateEnd);
 
@@ -622,6 +633,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
     private int            nbTrkpt  = 0;
 
+    private String         creator;
+
     /**
      * 
      */
@@ -649,6 +662,10 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
           throw new SAXParseException("qName != gpx", (Locator) null);
         }
         checkGpx = false;
+
+        if (attrs != null) {
+          creator = attrs.getValue("creator");
+        }
       }
 
       // rte
@@ -883,6 +900,31 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         listTrk = new ArrayList<Trk>();
       }
       listTrk.add(trk);
+    }
+
+  }
+
+  private class GPXDevice implements IProductDevice {
+
+    public String creator;
+
+    public GPXDevice(String creator) {
+      this.creator = creator;
+    }
+
+    @Override
+    public String displayName() {
+      return creator;
+    }
+
+    @Override
+    public String id() {
+      return null;
+    }
+
+    @Override
+    public String softwareVersion() {
+      return null;
     }
 
   }

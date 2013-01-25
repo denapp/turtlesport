@@ -38,6 +38,7 @@ import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 import fr.turtlesport.db.DataRun;
+import fr.turtlesport.db.DataSearchRun;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
@@ -126,7 +127,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
 
   private JTableListSelectionListener listSelectionListener    = new JTableListSelectionListener();
 
-//  private MyTransferHandler           transferHandler          = new MyTransferHandler();
+  // private MyTransferHandler transferHandler = new MyTransferHandler();
 
   /**
    * Create the panel.
@@ -137,29 +138,29 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     setModel(new ModelRunTable());
   }
 
-//  /*
-//   * (non-Javadoc)
-//   * 
-//   * @see
-//   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#needDrngDrop
-//   * (boolean)
-//   */
-//  @Override
-//  public void needDrngDrop(boolean isNeeded) {
-//    if (isNeeded) {
-//      jTable.getSelectionModel()
-//          .removeListSelectionListener(listSelectionListener);
-//      jTable.setDragEnabled(true);
-//      jTable.setDropMode(DropMode.USE_SELECTION);
-//      jTable.setTransferHandler(transferHandler);
-//    }
-//    else {
-//      jTable.getSelectionModel()
-//          .addListSelectionListener(listSelectionListener);
-//      jTable.setDragEnabled(false);
-//    }
-//
-//  }
+  // /*
+  // * (non-Javadoc)
+  // *
+  // * @see
+  // * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#needDrngDrop
+  // * (boolean)
+  // */
+  // @Override
+  // public void needDrngDrop(boolean isNeeded) {
+  // if (isNeeded) {
+  // jTable.getSelectionModel()
+  // .removeListSelectionListener(listSelectionListener);
+  // jTable.setDragEnabled(true);
+  // jTable.setDropMode(DropMode.USE_SELECTION);
+  // jTable.setTransferHandler(transferHandler);
+  // }
+  // else {
+  // jTable.getSelectionModel()
+  // .addListSelectionListener(listSelectionListener);
+  // jTable.setDragEnabled(false);
+  // }
+  //
+  // }
 
   /*
    * (non-Javadoc)
@@ -246,7 +247,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     jMenuItemRunMap.setText(rb.getString("jMenuItemRunMap"));
     jMenuItemRunGoogleEarth.setText(rb.getString("jMenuItemRunGoogleEarth"));
     jMenuItemRunGoogleMap.setText(rb.getString("jMenuItemRunGoogleMap"));
-//    jMenuItemRunCompare.setText(rb.getString("jMenuItemRunCompare"));    
+    // jMenuItemRunCompare.setText(rb.getString("jMenuItemRunCompare"));
     if (jMenuItemRunEmail != null) {
       jMenuItemRunEmail.setText(rb.getString("jMenuItemRunEmail"));
     }
@@ -311,7 +312,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     getJMenuItemRunDelete().addActionListener(actionDelete);
 
     jTable.getSelectionModel().addListSelectionListener(listSelectionListener);
-    
+
     // Langue / unit
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
@@ -448,7 +449,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     }
     return jMenuItemRunGoogleMap;
   }
-  
+
   /**
    * This method initializes jMenuItemRunEmail.
    * 
@@ -604,7 +605,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
           column.setCellRenderer(tableModel.getCellRenderer(i));
         }
       }
-            
+
       jTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
       jTable.getTableHeader().setFont(GuiFont.FONT_PLAIN);
       jTable.setSortable(false);
@@ -667,11 +668,12 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
    * (non-Javadoc)
    * 
    * @see
-   * fr.turtlesport.ui.swing.component.calendar.IListDateRun#fireHistoric(int)
+   * fr.turtlesport.ui.swing.component.calendar.IListDateRunFire#fireHistoric
+   * (int, fr.turtlesport.db.DataSearchRun)
    */
-  public void fireHistoric(int idUser) throws SQLException {
+  public void fireHistoric(int idUser, DataSearchRun search) throws SQLException {
     model.setIdUser(idUser);
-    model.updateView(this);
+    model.updateView(this, search);
     // mis a jour des boutons date en cours
     if (MainGui.getWindow().getRightComponent() instanceof JPanelRun) {
       JPanelRun p = (JPanelRun) MainGui.getWindow().getRightComponent();

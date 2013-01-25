@@ -46,11 +46,15 @@ public class Wundergound {
   public static StationMeteo lookup(double latitude, double longitude) throws IOException,
                                                                       ParserConfigurationException,
                                                                       SAXException {
+    log.debug(">>lookup");
 
     StringBuilder sUrl = new StringBuilder("http://api.wunderground.com/auto/wui/geo/GeoLookupXML/index.xml?query=");
     sUrl.append(latitude);
     sUrl.append(',');
     sUrl.append(longitude);
+    
+    log.debug(sUrl.toString());
+
     URL url = new URL(sUrl.toString());
 
     HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
@@ -79,6 +83,8 @@ public class Wundergound {
         cnx.disconnect();
       }
     }
+
+    log.debug("<<lookup");
     return null;
   }
 
@@ -94,7 +100,8 @@ public class Wundergound {
                                                        ParserConfigurationException,
                                                        SAXException {
 
-    URL url = new URL("http://api.wunderground.com/auto/wui/geo/WXCurrentObXML/index.xml?query=" + station.getAirportCode());
+    URL url = new URL("http://api.wunderground.com/auto/wui/geo/WXCurrentObXML/index.xml?query="
+                      + station.getAirportCode());
     HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
 
     cnx.setConnectTimeout(3000);
@@ -113,7 +120,7 @@ public class Wundergound {
         BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream()));
         InputSource source = new InputSource(reader);
         parser.parse(source, handler);
-        
+
         return handler.getData();
       }
       finally {

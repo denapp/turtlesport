@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTurtleMapKit;
 import fr.turtlesport.ui.swing.model.ModelDialogMap;
@@ -28,17 +29,21 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * 
  */
 public class JDialogMap extends JDialog {
+  private static TurtleLogger log;
+  static {
+    log = (TurtleLogger) TurtleLogger.getLogger(JDialogMap.class);
+  }
 
-  private JTurtleMapKit  mapKit;
+  private JTurtleMapKit       mapKit;
 
-  private JLabel         jLabelTitle;
+  private JLabel              jLabelTitle;
 
-  private JPanelRunLap   jPanelRight;
+  private JPanelRunLap        jPanelRight;
 
-  private ResourceBundle rb;
+  private ResourceBundle      rb;
 
   // Model
-  private ModelDialogMap model;
+  private ModelDialogMap      model;
 
   /**
    * @param frame
@@ -130,9 +135,28 @@ public class JDialogMap extends JDialog {
     // Evenement
     getJPanelRight().getJComboBoxLap().addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (model != null && getJPanelRight().getJComboBoxLap().getSelectedIndex() > 0) {
-          model.updateViewLap(JDialogMap.this,
-                              getJPanelRight().getJComboBoxLap().getSelectedIndex() - 1);
+        if (model != null
+            && getJPanelRight().getJComboBoxLap().getSelectedIndex() > 0) {
+          model.updateViewLap(JDialogMap.this, getJPanelRight()
+              .getJComboBoxLap().getSelectedIndex() - 1);
+        }
+      }
+    });
+
+    jPanelRight.getJSwitchBox().addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent event) {
+        try {
+          if (model != null) {
+            model.correctAltitude(JDialogMap.this);
+            if (getJPanelRight().getJComboBoxLap().getSelectedIndex() > 0) {
+              model.updateViewLap(JDialogMap.this, getJPanelRight()
+                  .getJComboBoxLap().getSelectedIndex() - 1);
+            }
+          }
+        }
+        catch (SQLException e) {
+          log.error("", e);
         }
       }
     });
@@ -142,6 +166,7 @@ public class JDialogMap extends JDialog {
   public JPanelRunLap getJPanelRight() {
     if (jPanelRight == null) {
       jPanelRight = new JPanelRunLap();
+      jPanelRight.setPreferredSize(new Dimension(300, 300));
     }
     return jPanelRight;
   }

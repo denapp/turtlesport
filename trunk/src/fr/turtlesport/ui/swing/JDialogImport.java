@@ -729,7 +729,7 @@ public final class JDialogImport extends JDialog implements
           // if (r.totalTime() < 1000) {
           // continue;
           // }
-          int size = listRows.size();
+          final int size = listRows.size();
           TableRowObject rowObj = new TableRowObject(size, r, file);
           listRows.add(rowObj);
           switch (r.getSportType()) {
@@ -741,7 +741,16 @@ public final class JDialogImport extends JDialog implements
               rowObj.setActivity(IGeoRoute.SPORT_TYPE_OTHER);
               break;
           }
-          fireTableRowsInserted(size, size);
+          if (!EventQueue.isDispatchThread()) {
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                fireTableRowsInserted(size, size);
+              }
+            });
+          }
+          else {
+            fireTableRowsInserted(size, size);
+          }
           isAdd = true;
         }
       }
@@ -952,11 +961,13 @@ public final class JDialogImport extends JDialog implements
       if (!EventQueue.isDispatchThread()) {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
+            // TODO
             fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
           }
         });
       }
       else {
+        // TODO
         fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
       }
     }
@@ -965,12 +976,14 @@ public final class JDialogImport extends JDialog implements
       if (!EventQueue.isDispatchThread()) {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
-            fireTableCellUpdated(index, col);
+            // TODO
+             fireTableCellUpdated(index, col);
           }
         });
       }
       else {
-        fireTableCellUpdated(index, col);
+        // TODO
+         fireTableCellUpdated(index, col);
       }
     }
 
@@ -1394,7 +1407,7 @@ public final class JDialogImport extends JDialog implements
         int viewRow = jTable.convertRowIndexToView(row);
         route.setSportType(activity.getSportType());
         tableModel.fireTableCellUpdatedEventQueue(viewRow, 6);
-      }      
+      }
     }
 
     public void setActivity(int sportType) {
@@ -1629,6 +1642,7 @@ public final class JDialogImport extends JDialog implements
           row.setSave(isSelect);
         }
       }
+      jTable.updateUI();
       jButtonSave.setEnabled(isSelect);
     }
   }
@@ -1810,16 +1824,19 @@ public final class JDialogImport extends JDialog implements
               }
             }
           }
+
+          return isAdd;
+        }
+
+        @Override
+        public void finished() {
+          boolean isAdd = (Boolean) getValue();
           if (isAdd) {
             tableModel.fireRowsDateChanged();
             jTable.packAll();
           }
           jTable.setSortOrder(2, SortOrder.DESCENDING);
-          return null;
-        }
 
-        @Override
-        public void finished() {
           JDialogImport.this.setCursor(Cursor.getDefaultCursor());
           MainGui.getWindow().afterRunnableSwing();
           jProgressBar.setIndeterminate(false);

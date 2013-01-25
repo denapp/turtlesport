@@ -60,8 +60,6 @@ public class JPanelGraph extends JPanel implements LanguageListener,
 
   private JCheckBox           jCheckBoxFilter;
 
-  //private JCheckBox           jCheckBoxTime;
-
   private JComboboxUIlistener jComboBoxY3;
 
   private JComboboxUIlistener jComboBoxX;
@@ -90,6 +88,14 @@ public class JPanelGraph extends JPanel implements LanguageListener,
     initialize();
   }
 
+  /**
+   * @param isOn
+   */
+  public void fireCorrectAltitude(boolean isOn) {
+    jDiagram.getModel().setFilterAltitude(isOn);
+  }
+
+  
   /*
    * (non-Javadoc)
    * 
@@ -304,7 +310,6 @@ public class JPanelGraph extends JPanel implements LanguageListener,
       panelWest.add(getJCheckBox2());
       panelWest.add(getJCheckBox3());
       panelWest.add(getJComboBoxY3());
-//      panelWest.add(getJCheckBoxTime());
       panelWest.add(getJCheckBox4());
       panelWest.add(getJCheckBoxFilter());
       //panelWest.add(new JLabel("  "));
@@ -329,6 +334,7 @@ public class JPanelGraph extends JPanel implements LanguageListener,
     if (jPanelX == null) {
       jPanelX = new JPanel();
       jPanelX.setLayout(new FlowLayout(FlowLayout.RIGHT));
+      
       jPanelX.add(getJComboBoxX());
       Dimension dim = new Dimension(JDiagramComponent.WIDTH_LEFT / 2, 20);
       jPanelX.add(new Box.Filler(dim, dim, dim));
@@ -564,5 +570,5 @@ public class JPanelGraph extends JPanel implements LanguageListener,
       }
     }
   }
-
+  
 }

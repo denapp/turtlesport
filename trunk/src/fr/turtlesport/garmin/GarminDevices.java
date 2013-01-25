@@ -3,6 +3,7 @@ package fr.turtlesport.garmin;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.UsbProtocolException;
 
 /**
@@ -20,8 +21,8 @@ public class GarminDevices {
   /**
    * @return Liste les appareils garmin.
    */
-  public static List<IGarminDevice> list() {
-    List<IGarminDevice> result = new ArrayList<IGarminDevice>();
+  public static List<IProductDevice> list() {
+    List<IProductDevice> result = new ArrayList<IProductDevice>();
 
     // Garmin USB
     try {
@@ -32,8 +33,12 @@ public class GarminDevices {
 
     // Garmin FIT
     List<GarminFitDevice> fit = GarminFitDevice.getDevices();
-
     result.addAll(fit);
+    
+    // Garmin Garmin Foretrex 401
+    List<GarminGpxDevice> gpx = GarminGpxDevice.getDevices();
+    result.addAll(gpx);
+    
     return result;
   }
 }

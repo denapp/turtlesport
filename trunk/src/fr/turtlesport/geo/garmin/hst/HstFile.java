@@ -24,6 +24,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;
@@ -588,7 +589,7 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
 
       if (localName.equals("TotalTimeSeconds") && isLap) { // TotalTimeSeconds
         // Lap
-        currentLap.setTotalTimeSeconds(new Double(stBuffer.toString()));
+        currentLap.setTotalTime((long) (1000*new Double(stBuffer.toString())));
       }
       else if (localName.equals("Time") && isTrackpoint) { // Time
         // TrackPoint
@@ -800,12 +801,12 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
       setSportType(sportType);
 
       // Distance et temps totale
-      double timeTot = 0;
+      long timeTot = 0;
       for (Lap lap : run.getLaps()) {
         distanceTot += lap.getDistanceMeters();
-        timeTot += lap.getTotalTimeSeconds();
+        timeTot += lap.getTotalTime();
       }
-      initTimeTot((long) (timeTot * 1000));
+      initTimeTot(timeTot);
     }
 
     /*
@@ -885,6 +886,11 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
         }
       }
       return list;
+    }
+
+    @Override
+    public IProductDevice getProductDevice() {
+      return null;
     }
 
   }

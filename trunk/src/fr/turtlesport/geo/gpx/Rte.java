@@ -3,6 +3,7 @@ package fr.turtlesport.geo.gpx;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.geo.AbstractGeoRoute;
 import fr.turtlesport.geo.AbstractGeoSegment;
 import fr.turtlesport.geo.IGeoPositionWithAlt;
@@ -28,11 +29,22 @@ public class Rte extends AbstractGeoRoute {
 
   private boolean                isComputeDistanceDone = false;
 
+  private IProductDevice         productDevice;
+
   /**
    * 
    */
   public Rte() {
     super();
+  }
+
+  @Override
+  public IProductDevice getProductDevice() {
+    return productDevice;
+  }
+
+  public void setProductDevice(IProductDevice productDevice) {
+    this.productDevice = productDevice;
   }
 
   /*
@@ -195,7 +207,7 @@ public class Rte extends AbstractGeoRoute {
    * @author Denis Apparicio
    * 
    */
-  private class RteSegment extends AbstractGeoSegment {
+  private class RteSegment extends AbstractGpxSegment {
 
     public RteSegment() {
       super(0);
@@ -209,6 +221,7 @@ public class Rte extends AbstractGeoRoute {
     public List<IGeoPositionWithAlt> getPoints() {
       return getAllPoints();
     }
+
   }
 
 }

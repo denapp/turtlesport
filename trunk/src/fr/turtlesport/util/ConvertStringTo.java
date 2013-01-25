@@ -101,7 +101,131 @@ public final class ConvertStringTo {
     if (value == null) {
       return null;
     }
+
+    // Type Classe
+    // -----------------------------
+    // Date
+    if (clazz == Date.class) {
+      return toDate(value);
+    }
+    // Calendar
+    if (clazz == Calendar.class) {
+      return toCalendar(value);
+    }
+    // BigDecimal
+    if (clazz == BigDecimal.class) {
+      return new BigDecimal(value);
+    }
+    // BigInteger
+    if (clazz == BigInteger.class) {
+      return new BigInteger(value);
+    }
+    // Boolean
+    if (clazz == Boolean.class) {
+      return toBoolean(value);
+    }
+    // Byte
+    if (clazz == Byte.class) {
+      return Byte.valueOf(value);
+    }
+    // Character
+    if (clazz == Character.class) {
+      return toCharacter(value);
+    }
+    // Short
+    if (clazz == Short.class) {
+      return Short.valueOf(value);
+    }
+    // Integer
+    if (clazz == Integer.class) {
+      return Integer.valueOf(value);
+    }
+    // Long
+    if (clazz == Long.class) {
+      return Long.valueOf(value);
+    }
+    // Float
+    if (clazz == Float.class) {
+      return Float.valueOf(value);
+    }
+    // Double
+    if (clazz == Double.class) {
+      return Double.valueOf(value);
+    }
+
+    throw new IllegalArgumentException("clazz invalide " + clazz);
+  }
+
+  /**
+   * Convertion d'un attribut en objet.
+   * 
+   * @param field
+   *          <code>Field</code> d&eacute;crivant l'attribut.
+   * @param value
+   *          valeur de l'attribut.
+   * @return l'objet.
+   */
+  public static Object toObject(Class<?> clazz, String value, Object nullValue) {
+    if (nullValue == null) {
+      toObject(clazz, value);
+    }
     
+    if (clazz == null) {
+      throw new IllegalArgumentException("clazz est null");
+    }
+    // String
+    if (clazz == String.class) {
+      return value;
+    }
+
+    // Types primitifs
+    // -------------------------------------
+    // primitif Boolean
+    if (clazz == Boolean.TYPE) {
+      return toBoolean(value);
+    }
+    // primitif Byte
+    if (clazz == Byte.TYPE) {
+      byte bNullValue = (nullValue == null) ? -1 : (Byte) nullValue;
+      return (value == null) ? bNullValue : Byte.valueOf(value);
+    }
+    // primitif Char
+    if (clazz == Character.TYPE) {
+      if (value == null) {
+        throw new IllegalArgumentException("value est null");
+      }
+      return toCharacter(value);
+    }
+    // primitif Short
+    if (clazz == Short.TYPE) {
+      short sNullValue = (nullValue == null) ? -1 : (Short) nullValue;
+      return (value == null) ? sNullValue : Short.valueOf(value);
+    }
+    // primitif Integer
+    if (clazz == Integer.TYPE) {
+      int iNullValue = (nullValue == null) ? -1 : (Integer) nullValue;
+      return (value == null) ? iNullValue : Integer.valueOf(value);
+    }
+    // primitif Long
+    if (clazz == Long.TYPE) {
+      long lNullValue = (nullValue == null) ? -1 : (Long) nullValue;
+      return (value == null) ? lNullValue : Long.valueOf(value);
+    }
+    // primitif Float
+    if (clazz == Float.TYPE) {
+      float fNullValue = (nullValue == null) ? -1 : (Float) nullValue;
+      return (value == null) ? fNullValue : Float.valueOf(value);
+    }
+    // primitif Double
+    if (clazz == Double.TYPE) {
+      double dNullValue = (nullValue == null) ? -1 : (Double) nullValue;
+      return (value == null) ? dNullValue : Double.valueOf(value);
+    }
+
+    if (value == null) {
+      return null;
+    }
+
     // Type Classe
     // -----------------------------
     // Date
@@ -163,8 +287,8 @@ public final class ConvertStringTo {
    *          la chaine.
    * @return le <code>Boolean</code>.
    * @throws IllegalArgumentException
-   *           si <code>value</code> diff&eacute;rent de 0, 1, <code>true</code>,
-   *           <code>false</code>.
+   *           si <code>value</code> diff&eacute;rent de 0, 1, <code>true</code>
+   *           , <code>false</code>.
    */
   private static Boolean toBoolean(String value) {
     if ("0".equals(value)) {
@@ -191,7 +315,8 @@ public final class ConvertStringTo {
    *          la chaine.
    * @return le <code>Character</code>.
    * @throws IllegalArgumentException
-   *           si value est <code>null</code> ou de longueur diff&eacute;rente de 1;
+   *           si value est <code>null</code> ou de longueur diff&eacute;rente
+   *           de 1;
    */
   private static Character toCharacter(String value) {
     if (value == null || value.length() != 1) {

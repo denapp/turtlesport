@@ -18,6 +18,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import fr.turtlesport.IProductDevice;
 import fr.turtlesport.geo.AbstractGeoRoute;
 import fr.turtlesport.geo.GeoLoadException;
 import fr.turtlesport.geo.IGeoFile;
@@ -200,7 +201,7 @@ public class SuuntoFile implements IGeoFile {
       // On reordonne les laps
       if (listLap == null || listLap.size() == 0) {
         Lap lap = new Lap(listPoints.get(0).getDate(), 0);
-        for (SuuntoPoint p : listPoints ) {
+        for (SuuntoPoint p : listPoints) {
           lap.addPoint(p);
         }
       }
@@ -220,7 +221,7 @@ public class SuuntoFile implements IGeoFile {
           }
         }
       }
-      
+
       for (Lap lap : listLap) {
         lap.compute();
       }
@@ -403,6 +404,8 @@ public class SuuntoFile implements IGeoFile {
    * 
    */
   private class SuuntoGeoRoute extends AbstractGeoRoute {
+    private SuuntoDevice      device      = new SuuntoDevice();
+
     private List<IGeoSegment> listSegment = new ArrayList<IGeoSegment>();
 
     public SuuntoGeoRoute(List<Lap> laps) {
@@ -465,6 +468,30 @@ public class SuuntoFile implements IGeoFile {
     public String getName() {
       return null;
     }
+
+    @Override
+    public IProductDevice getProductDevice() {
+      return device;
+    }
+  }
+
+  private static class SuuntoDevice implements IProductDevice {
+
+    @Override
+    public String displayName() {
+      return "Suunto";
+    }
+
+    @Override
+    public String id() {
+      return null;
+    }
+
+    @Override
+    public String softwareVersion() {
+      return null;
+    }
+
   }
 
 }
