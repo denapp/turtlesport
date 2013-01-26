@@ -26,7 +26,7 @@ public class JSearchTextField extends JPanel {
 
   public JSearchTextField(int column, Icon icon) {
     super();
-    setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+    setLayout(new FlowLayout(FlowLayout.TRAILING, 0, 0));
 
     JLabel labelIcon = new JLabel(icon);
     jTextField = new JTextField(column);
@@ -46,7 +46,6 @@ public class JSearchTextField extends JPanel {
     add(jButtonSearch);
     setOpaque(false);
   }
-
 
   public JSearchTextField(Icon icon) {
     this(10, icon);
