@@ -33,8 +33,12 @@ public class JChevron extends JButton implements ActionListener {
     else {
       down();
     }
+//    setBorder(BorderFactory.createEmptyBorder());
+//    setContentAreaFilled(false);
+
     setBorder(BorderFactory.createEmptyBorder());
     setContentAreaFilled(false);
+    setBorderPainted(false);
 
     addActionListener(this);
   }

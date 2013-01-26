@@ -4,7 +4,10 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -21,10 +24,11 @@ public class JSearchTextField extends JPanel {
 
   private JButton    jButtonSearch;
 
-  public JSearchTextField(int column) {
+  public JSearchTextField(int column, Icon icon) {
     super();
-    setLayout(new FlowLayout(FlowLayout.TRAILING, 0, 0));
+    setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
 
+    JLabel labelIcon = new JLabel(icon);
     jTextField = new JTextField(column);
     jTextField.setFont(GuiFont.FONT_PLAIN);
     jTextField.setFont(GuiFont.FONT_PLAIN);
@@ -32,19 +36,20 @@ public class JSearchTextField extends JPanel {
 
     jButtonSearch = new JButton(ImagesRepository.getImageIcon("find-20x20.png"));
     jButtonSearch.setMinimumSize(jButtonSearch.getPreferredSize());
-    // jButtonSearch.setBorder(BorderFactory.createEmptyBorder());
-    // jButtonSearch.setContentAreaFilled(false);
 
-    jButtonSearch.setFocusPainted(true);
-    jButtonSearch.setBorderPainted(true);
-    jButtonSearch.setContentAreaFilled(true);
-
+    jButtonSearch.setBorder(BorderFactory.createEmptyBorder());
+    jButtonSearch.setContentAreaFilled(false);
+    jButtonSearch.setBorderPainted(false);
+    
+    add(labelIcon);
     add(jTextField);
     add(jButtonSearch);
+    setOpaque(false);
   }
 
-  public JSearchTextField() {
-    this(10);
+
+  public JSearchTextField(Icon icon) {
+    this(10, icon);
   }
 
   /**

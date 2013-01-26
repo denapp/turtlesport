@@ -12,7 +12,6 @@ import java.util.ResourceBundle;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -134,9 +133,6 @@ public class JDialogLicense extends JDialog {
    */
   private JPanel getJPanelSouth() {
     if (jPanelSouth == null) {
-      JLabel jLabel = new JLabel("� Copyright 2008-2009");
-      jLabel.setFont(GuiFont.FONT_PLAIN);
-
       jPanelSouth = new JPanel();
       jPanelSouth.setLayout(new FlowLayout(FlowLayout.RIGHT));
       jPanelSouth.add(getJButtonOK());

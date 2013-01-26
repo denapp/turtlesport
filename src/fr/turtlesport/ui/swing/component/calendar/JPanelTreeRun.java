@@ -696,7 +696,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
           jTreeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
           jTreeTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
-          if (OperatingSystem.isMacOSX() && OperatingSystem.isLinux()) {
+          if (OperatingSystem.isMacOSX()) {
             jTreeTable.addHighlighter(HighlighterFactory.createAlternateStriping());
           }
           jTreeTable

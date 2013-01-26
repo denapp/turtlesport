@@ -25,6 +25,7 @@ import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -37,6 +38,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -667,6 +669,8 @@ public class MainGui extends JFrame implements LanguageListener {
   private JToolBar getJJToolbar() {
     if (jToolBar == null) {
       jToolBar = new JToolBar();
+      jToolBar.setLayout(new BoxLayout(jToolBar, BoxLayout.X_AXIS));
+
       jToolBar.add(getJButtonRetrieve());
       jToolBar.add(getJXSplitButtonUser());
       jToolBar.add(getJButtonPrefUser());
@@ -677,15 +681,13 @@ public class MainGui extends JFrame implements LanguageListener {
       // jToolBar.add(getJButtonWorkout());
 
       jToolBar.add(Box.createHorizontalGlue());
-      JLabel jLabelSearch = new JLabel(ImagesRepository.getImageIcon("book-open.png"));
-      jSearchTextField = new JSearchTextField(20);
-      jSearchTextField.setFont(GuiFont.FONT_PLAIN);
-      jSearchTextField.setMinimumSize(jSearchTextField.getPreferredSize());
+      jSearchTextField = new JSearchTextField(20,
+                                              ImagesRepository
+                                                  .getImageIcon("book-open.png"));
       jChevron = new JChevron(true);
       jChevron.setMinimumSize(jChevron.getPreferredSize());
-      jToolBar.add(jLabelSearch);
+      jSearchTextField.add(jChevron);
       jToolBar.add(jSearchTextField);
-      jToolBar.add(jChevron);
     }
     return jToolBar;
   }

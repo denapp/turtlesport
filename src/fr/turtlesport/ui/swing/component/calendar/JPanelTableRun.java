@@ -1,7 +1,6 @@
 package fr.turtlesport.ui.swing.component.calendar;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -15,7 +14,6 @@ import java.util.ResourceBundle;
 
 import javax.activation.ActivationDataFlavor;
 import javax.activation.DataHandler;
-import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -31,11 +29,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataSearchRun;
@@ -59,6 +52,7 @@ import fr.turtlesport.ui.swing.action.GoogleMapsShowActionListener;
 import fr.turtlesport.ui.swing.action.MapMercatorActionListener;
 import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
 import fr.turtlesport.ui.swing.component.JShowMessage;
+import fr.turtlesport.ui.swing.component.JTableCustom;
 import fr.turtlesport.ui.swing.component.jtable.DateShortDayCellRenderer;
 import fr.turtlesport.ui.swing.component.jtable.DateTimeShortCellRenderer;
 import fr.turtlesport.ui.swing.model.ModelPointsManager;
@@ -68,7 +62,6 @@ import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
-import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -83,7 +76,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelTableRun.class);
   }
 
-  private JXTable                     jTable;
+  private JTableCustom                jTable;
 
   private DateShortDayCellRenderer    dateShortDayCellRenderer = new DateShortDayCellRenderer();
 
@@ -579,17 +572,10 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
     return jLabelRun;
   }
 
-  private JXTable getJTable() {
+  private JTableCustom getJTable() {
     if (jTable == null) {
       getJPopupMenu();
-      jTable = new JXTable();
-      if (OperatingSystem.isMacOSX()) {
-        jTable.addHighlighter(HighlighterFactory.createAlternateStriping());
-      }
-      jTable
-          .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
-                                               null,
-                                               Color.RED));
+      jTable = new JTableCustom();
       jTable.setModel(tableModel);
       jTable.setFont(GuiFont.FONT_PLAIN);
       jTable.setShowGrid(false);

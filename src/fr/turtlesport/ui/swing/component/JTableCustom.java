@@ -1,5 +1,6 @@
 package fr.turtlesport.ui.swing.component;
 
+import java.awt.Color;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -10,6 +11,8 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 import fr.turtlesport.util.OperatingSystem;
@@ -65,6 +68,10 @@ public class JTableCustom extends JXTable {
     if (OperatingSystem.isMacOSX()) {
       addHighlighter(HighlighterFactory.createAlternateStriping());
     }
+    addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
+                                        null,
+                                        Color.RED));
+
   }
 
   /**

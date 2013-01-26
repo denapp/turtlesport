@@ -231,7 +231,7 @@ public class JDialogAbout extends JDialog {
    */
   private JPanel getJPanelSouth() {
     if (jPanelSouth == null) {
-      JLabel jLabel = new JLabel("<html><body>Copyright &#169; 2008-2012 Turtle Sport</html></body>");
+      JLabel jLabel = new JLabel("<html><body>Copyright &#169; 2008-2013 Turtle Sport</html></body>");
       jLabel.setFont(GuiFont.FONT_PLAIN);
 
       jPanelSouth = new JPanel();
