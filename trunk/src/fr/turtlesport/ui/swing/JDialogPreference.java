@@ -166,10 +166,10 @@ public class JDialogPreference extends JDialog implements LanguageListener {
     }
     modelPrefMap.setTitle(rb.getString("modelPrefMap"));
     modelPrefProxy.setTitle(rb.getString("modelPrefProxy"));
-    
+
     jTreePref.updateUI();
   }
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -272,9 +272,11 @@ public class JDialogPreference extends JDialog implements LanguageListener {
     // retablissement des poprietes general
     String value = Configuration.getConfig().getProperty("general",
                                                          "lookandfeel");
-    SwingLookAndFeel.setLookAndFeel(value);
-    MainGui.getWindow().updateComponentTreeUI();
-
+    if (value != null) {
+      SwingLookAndFeel.setLookAndFeel(value);
+      MainGui.getWindow().updateComponentTreeUI();
+    }
+    
     value = Configuration.getConfig().getProperty("general", "language");
     LanguageManager.getManager().fireLanguageChanged(value);
 

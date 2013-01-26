@@ -1,7 +1,6 @@
 package fr.turtlesport.ui.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -46,9 +45,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jfree.chart.ChartPanel;
 
 import fr.turtlesport.Configuration;
@@ -75,6 +71,7 @@ import fr.turtlesport.ui.swing.component.JPanelGraph;
 import fr.turtlesport.ui.swing.component.JPanelMap;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JSwitchBox;
+import fr.turtlesport.ui.swing.component.JTableCustom;
 import fr.turtlesport.ui.swing.component.JTextAreaLength;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.model.ActivityComboBoxModel;
@@ -92,7 +89,6 @@ import fr.turtlesport.unit.TimeUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
-import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -142,7 +138,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JScrollPane             jPanelRunLap;
 
-  private JXTable                 jTableLap;
+  private JTableCustom            jTableLap;
 
   private TableModelLap           tableModelLap;
 
@@ -1746,16 +1742,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
     if (jTableLap == null) {
       synchronized (JPanelRun.class) {
         if (jTableLap == null) {
-          jTableLap = new JXTable();
-          if (OperatingSystem.isMacOSX()) {
-            jTableLap.addHighlighter(HighlighterFactory
-                .createAlternateStriping());
-          }
-          jTableLap
-              .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
-                                                   null,
-                                                   Color.RED));
-
+          jTableLap = new JTableCustom();
           jTableLap.setOpaque(true);
           tableModelLap = new TableModelLap();
           jTableLap.setModel(tableModelLap);

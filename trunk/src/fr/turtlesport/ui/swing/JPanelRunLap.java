@@ -155,7 +155,7 @@ public class JPanelRunLap extends JPanel {
   }
 
   private void initialize() {
-    Dimension dim = new Dimension(260, 600);
+    Dimension dim = new Dimension(280, 600);
     setPreferredSize(dim);
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     add(getJPanelRunSummary());
@@ -527,8 +527,9 @@ public class JPanelRunLap extends JPanel {
       g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
 
-      jLabelValAltitudeTot = new JLabel();
-      jLabelValAltitudeTot.setPreferredSize(new Dimension(100, 20));
+      jLabelValAltitudeTot = new JLabel("           ");
+      jLabelValAltitudeTot.setMinimumSize(new Dimension(90, 20));
+      jLabelValAltitudeTot.setPreferredSize(new Dimension(90, 20));
       jLabelValAltitudeTot.setFont(GuiFont.FONT_PLAIN);
       jLabelLibAltitudeTot.setLabelFor(jLabelValAltitudeTot);
       jPanelRunSummary.add(jLabelValAltitudeTot, g);
