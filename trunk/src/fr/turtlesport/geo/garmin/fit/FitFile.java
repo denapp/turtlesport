@@ -312,6 +312,7 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
             log.info("   StartPositionLong="
                      + sessionMesg.getStartPositionLong());
             log.info("   Type=" + sessionMesg.getEventType());
+            log.info("   AvgTemperature=" + sessionMesg.getAvgTemperature());
             log.info("   Event=" + sessionMesg.getEvent());
             log.info("-----------");
           }
@@ -358,7 +359,7 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
                       + record.getPositionLat() + " lon="
                       + record.getPositionLat() + " cadence="
                       + record.getCadence() + " calories="
-                      + record.getCalories());
+                      + record.getCalories()+ " temperature=" + record.getTemperature());
           }
           break;
 
