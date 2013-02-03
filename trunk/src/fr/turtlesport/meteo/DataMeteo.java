@@ -107,7 +107,7 @@ public class DataMeteo {
     mapIcon.put("Unknown", "32px-unknown.png");
   }
 
-  private static final String[]            IMAGES_ICON_NAMES  = { "32px-sunny.png",
+  private static final String[]            IMAGES_ICON_NAMES       = { "32px-sunny.png",
       "32px-mostlysunny.png",
       "32px-mostlycloudy.png",
       "32px-cloudy.png",
@@ -116,9 +116,9 @@ public class DataMeteo {
       "32px-snow.png",
       "32px-fog.png",
       "32px-storm.png",
-      "32px-unknown.png"                                     };
+      "32px-unknown.png"                                          };
 
-  private static final String[]            IMAGES_ICON_NAMES_SMALL  = { "18px-sunny.png",
+  private static final String[]            IMAGES_ICON_NAMES_SMALL = { "18px-sunny.png",
       "18px-mostlysunny.png",
       "18px-mostlycloudy.png",
       "18px-cloudy.png",
@@ -127,10 +127,11 @@ public class DataMeteo {
       "18px-snow.png",
       "18px-fog.png",
       "18px-storm.png",
-      "18px-unknown.png"                                     };
+      "18px-unknown.png"                                          };
 
-  private static List<ImageIcon>           listImageIcon      = new ArrayList<ImageIcon>();
-  private static List<ImageIcon>           listImageIconSmall = new ArrayList<ImageIcon>();
+  private static List<ImageIcon>           listImageIcon           = new ArrayList<ImageIcon>();
+
+  private static List<ImageIcon>           listImageIconSmall      = new ArrayList<ImageIcon>();
   static {
     for (String s : IMAGES_ICON_NAMES) {
       listImageIcon.add(new ImageIcon(DataMeteo.class.getResource(s)));
@@ -140,27 +141,27 @@ public class DataMeteo {
     }
   }
 
-  private static final String              DATE_FORMAT        = "yyyy-MM-dd HH:mm:ss";
+  private static final String              DATE_FORMAT             = "yyyy-MM-dd HH:mm:ss";
 
-  private int                              temperature        = Integer.MAX_VALUE;
+  private int                              temperature             = Integer.MAX_VALUE;
 
-  private int                              humidity           = -1;
+  private int                              humidity                = -1;
 
-  private int                              pressurehPa        = -1;
+  private int                              pressurehPa             = -1;
 
   private String                           windDirection;
 
-  private float                            windSpeedkmh       = -1;
+  private float                            windSpeedkmh            = -1;
 
   private int                              windDirectionDegree;
 
   private String                           condition;
 
-  private int                              conditionIndex     = -1;
+  private int                              conditionIndex          = -1;
 
   private Date                             date;
 
-  private float                            visibility         = -1;
+  private float                            visibility              = -1;
 
   private static List<String>              listWinDir;
   static {
@@ -205,7 +206,17 @@ public class DataMeteo {
       else {
         d.windSpeedkmh = Float.parseFloat(datas[7]);
       }
-      d.windDirectionDegree = Integer.parseInt(datas[datas.length - 2]);
+      try {
+        if (datas[datas.length - 2].trim().isEmpty()) {
+          d.windDirectionDegree = 0;
+        }
+        else {
+          d.windDirectionDegree = Integer.parseInt(datas[datas.length - 2]);
+        }
+      }
+      catch (NumberFormatException e) {
+        d.windDirectionDegree = 0;
+      }
 
       d.condition = datas[datas.length - 3];
       return d;
@@ -349,7 +360,7 @@ public class DataMeteo {
     }
     return conditionIndex;
   }
-  
+
   public void setImageIconIndex(int index) {
     conditionIndex = index;
   }
