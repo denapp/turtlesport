@@ -18,7 +18,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.util.CVSReader;
+import fr.turtlesport.util.CSVReader;
 
 /**
  * @author Denis Apparicio
@@ -46,14 +46,14 @@ public class Wundergound {
   public static StationMeteo lookup(double latitude, double longitude) throws IOException,
                                                                       ParserConfigurationException,
                                                                       SAXException {
-    log.debug(">>lookup");
+    log.info(">>lookup");
 
     StringBuilder sUrl = new StringBuilder("http://api.wunderground.com/auto/wui/geo/GeoLookupXML/index.xml?query=");
     sUrl.append(latitude);
     sUrl.append(',');
     sUrl.append(longitude);
     
-    log.debug(sUrl.toString());
+    log.info(sUrl.toString());
 
     URL url = new URL(sUrl.toString());
 
@@ -84,7 +84,7 @@ public class Wundergound {
       }
     }
 
-    log.debug("<<lookup");
+    log.info("<<lookup");
     return null;
   }
 
@@ -141,7 +141,9 @@ public class Wundergound {
    * @throws IOException
    */
   public static List<DataMeteo> history(StationMeteo station, Calendar cal) throws IOException {
-
+    if (log.isInfoEnabled()) {
+      log.info(">>history "+ station.getCity() + " : " + cal.getTime());
+    }
     List<DataMeteo> listDatas = new ArrayList<DataMeteo>();
 
     StringBuilder sUrl = new StringBuilder("http://www.wunderground.com/history/airport/");
@@ -156,7 +158,7 @@ public class Wundergound {
 
     URL url = new URL(sUrl.toString());
     if (log.isInfoEnabled()) {
-      log.info(sUrl);
+      log.info("history : " +sUrl);
     }
 
     HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
@@ -166,7 +168,7 @@ public class Wundergound {
     cnx.setDoInput(true);
     cnx.addRequestProperty("Accept",
                            "text,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-    cnx.addRequestProperty("Accept-Language", "en;q=0.6,en-us;q=0.4,sv;q=0.2");
+    cnx.addRequestProperty("Accept-Language", "en-US;q=0.6,en;q=0.4");
     cnx.addRequestProperty("Accept-Charset", "en;q=0.6,en-us;q=0.4,sv;q=0.2");
     cnx.addRequestProperty("Accept-Language", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
     cnx.addRequestProperty("User-Agent",
@@ -175,11 +177,19 @@ public class Wundergound {
     if (cnx.getResponseCode() == HttpURLConnection.HTTP_OK) {
       try {
         BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream()));
-        CVSReader cvs = new CVSReader(reader);
+        CSVReader cvs = new CSVReader(reader);
         cvs.readHeader();
 
         String[] datas;
         while ((datas = cvs.readLine()) != null) {
+          if (log.isInfoEnabled()) {
+            StringBuilder st = new StringBuilder();
+            for (String s: datas) {
+              st.append(s);
+              st.append(' ');
+            }
+            log.info(st.toString());
+          }
           DataMeteo d = DataMeteo.compute(datas);
           if (d != null) {
             listDatas.add(d);
@@ -191,8 +201,12 @@ public class Wundergound {
       }
     }
 
+    if (log.isInfoEnabled()) {
+      log.info("<<history");
+    }
     return listDatas;
   }
+  
 
   /**
    * Recu&eacute;re l'historique.
