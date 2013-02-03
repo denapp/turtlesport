@@ -13,10 +13,10 @@ import fr.turtlesport.log.TurtleLogger;
  * @author Denis Apparicio
  * 
  */
-public class CVSReader {
+public class CSVReader {
   private static TurtleLogger log;
   static {
-    log = (TurtleLogger) TurtleLogger.getLogger(CVSReader.class);
+    log = (TurtleLogger) TurtleLogger.getLogger(CSVReader.class);
   }
 
   private BufferedReader      br;
@@ -27,11 +27,11 @@ public class CVSReader {
 
   private static final String DELIMITER = ",";
 
-  public CVSReader(Reader in) {
+  public CSVReader(Reader in) {
     br = new BufferedReader(in);
   }
 
-  public CVSReader(BufferedReader in) {
+  public CSVReader(BufferedReader in) {
     br = in;
   }
 
@@ -84,11 +84,14 @@ public class CVSReader {
     if (line ==null) {
       return new String[0]; 
     }
-    line = line.replaceAll(",,", ", ,");
+    log.info("before : " +line);
+    while (line.contains(",,")) {
+      line = line.replaceAll(",,", ", ,");
+    }
     if (line.endsWith("<br />")) {
       line = line.substring(0, line.length() - 6);
     }
-    log.debug(line);
+    log.info("after  : " +line);
     
     List<String> tokens = new ArrayList<String>();
     StringTokenizer st = new StringTokenizer(line, DELIMITER);
