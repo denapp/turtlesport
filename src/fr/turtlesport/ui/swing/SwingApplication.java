@@ -137,9 +137,9 @@ public class SwingApplication {
     }
 
     splash.updateProgress(rb.getString("splashOpen"));
-    createMainGUI(Toolkit.getDefaultToolkit().getScreenSize());
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
+        createMainGUI(Toolkit.getDefaultToolkit().getScreenSize());
         SwingApplication.this.releaseSplashScreen();
         SwingApplication.this.showGUI();
       }
