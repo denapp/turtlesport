@@ -40,34 +40,34 @@ import fr.turtlesport.util.ResourceBundleUtility;
  */
 public class JPanelGraphOne extends JPanel {
 
-  private JDiagramOneComponent jDiagram;
+  private JDiagramOneComponent      jDiagram;
 
-  private JPanel               jPanelTitle;
+  private JPanel                    jPanelTitle;
 
-  private JCheckBox            jCheckBoxFilter;
+  private JCheckBox                 jCheckBoxFilter;
 
-  private JComboboxUIlistener  jComboBoxY3;
+  private JComboboxUIlistener       jComboBoxY3;
 
-  private JButton              jButtonZoomMoins;
+  private JButton                   jButtonZoomMoins;
 
-  private JButton              jButtonZoomPlus;
+  private JButton                   jButtonZoomPlus;
 
-  private Border               raisedBorder  = BorderFactory
-                                                 .createLoweredBevelBorder();
+  private Border                    raisedBorder  = BorderFactory
+                                                      .createLoweredBevelBorder();
 
-  private Border               loweredBorder = BorderFactory
-                                                 .createRaisedBevelBorder();
+  private Border                    loweredBorder = BorderFactory
+                                                      .createRaisedBevelBorder();
 
-  private JButton              jButtonReload;
+  private JButton                   jButtonReload;
 
-  private JLabel               jLabelTitle;
+  private JLabel                    jLabelTitle;
 
-  private int                  type;
+  private JDiagramOneComponent.Type type;
 
   /**
    * 
    */
-  public JPanelGraphOne(int type) {
+  public JPanelGraphOne(JDiagramOneComponent.Type type) {
     super();
     this.type = type;
     initialize();
@@ -82,22 +82,22 @@ public class JPanelGraphOne extends JPanel {
                                                           .getDefaultUnit()));
 
     switch (type) {
-      case JDiagramOneComponent.HEART:
+      case HEART:
         getJLabelTitle().setText("<html><font color=red>"
                                  + rb.getString("unitY1") + "</font></html>");
         break;
 
-      case JDiagramOneComponent.ALTITUDE:
+      case ALTITUDE:
         getJLabelTitle().setText("<html><font color=blue>"
                                  + rb.getString("unitY2") + "</font></html>");
         break;
 
-      case JDiagramOneComponent.CADENCE:
+      case CADENCE:
         getJLabelTitle().setText("<html><font color=#FF00FF>"
                                  + rb.getString("unitY4") + "</font></html>");
         break;
 
-      default:
+      case SPEED:
         getJComboBoxY3().removeAllItems();
         getJComboBoxY3().addItem(rb.getString("speed") + "("
                                  + SpeedUnit.getDefaultUnit() + ")");
@@ -108,7 +108,7 @@ public class JPanelGraphOne extends JPanel {
 
     }
 
-    if (type != JDiagramOneComponent.SPEED) {
+    if (type != JDiagramOneComponent.Type.SPEED) {
       jCheckBoxFilter.setText(rb.getString("filter"));
     }
   }
@@ -182,7 +182,7 @@ public class JPanelGraphOne extends JPanel {
       }
     });
 
-    if (type == JDiagramOneComponent.SPEED) {
+    if (type == JDiagramOneComponent.Type.SPEED) {
       jComboBoxY3.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           jDiagram.getModel().setVisibleY3(jComboBoxY3.getSelectedIndex());
@@ -215,7 +215,7 @@ public class JPanelGraphOne extends JPanel {
     if (jPanelTitle == null) {
       jPanelTitle = new JPanel();
       jPanelTitle.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 0));
-      if (type == JDiagramOneComponent.SPEED) {
+      if (type == JDiagramOneComponent.Type.SPEED) {
         jPanelTitle.add(getJComboBoxY3());
         Dimension dim = new Dimension(50, 10);
         jPanelTitle.add(new Box.Filler(dim, dim, dim));

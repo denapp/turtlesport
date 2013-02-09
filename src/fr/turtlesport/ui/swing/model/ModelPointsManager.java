@@ -73,6 +73,22 @@ public final class ModelPointsManager {
   }
 
   /**
+   * D&eacute;termine si les points ont des donn&eacute;es de temperature.
+   * 
+   * @return <code>true</code> si les points ont des donn&eacute;es de temperature,
+   *         <code>false</code> sinon.
+   */
+  public final boolean hasTemperaturePoints() {
+    if (getListTrks() != null) {
+      for (DataRunTrk p : getListTrks()) {
+        if (p.isValidTemperature()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  /**
    * Restitue la liste des geo position.
    * 
    * @return la liste des points.
@@ -378,19 +394,6 @@ public final class ModelPointsManager {
         l.changedPoint(changeEvent);
       }
     }
-  }
-
-  private DataRunTrk cloneInvalid(DataRunTrk current,
-                                  DataRunTrk trkValid,
-                                  float distance) {
-    return new DataRunTrk(current.getId(),
-                          current.getTime(),
-                          trkValid.getLongitude(),
-                          trkValid.getLatitude(),
-                          current.getHeartRate(),
-                          current.getCadence(),
-                          distance,
-                          trkValid.getAltitude());
   }
 
 }

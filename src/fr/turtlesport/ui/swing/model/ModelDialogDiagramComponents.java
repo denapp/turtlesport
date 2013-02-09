@@ -11,7 +11,6 @@ import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.JDialogDiagramComponents;
-import fr.turtlesport.ui.swing.JPanelRun;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.PaceUnit;
 import fr.turtlesport.unit.SpeedPaceUnit;

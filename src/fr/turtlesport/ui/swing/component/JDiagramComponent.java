@@ -114,6 +114,10 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
   public static final Color           COLORY4         = Color.MAGENTA;
 
+  public static final Color           COLORY5         = new Color(0x8B,
+                                                                  0x45,
+                                                                  0x00);
+
   private static final AlphaComposite AC_TRANSPARENT  = AlphaComposite
                                                           .getInstance(AlphaComposite.SRC_OVER,
                                                                        0.2f);
@@ -1402,8 +1406,8 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     }
 
     protected double getY2(int i) {
-      return (model.isFilterAltitude()) ? pointsFilter[i].getAltitude() : points.get(i)
-          .getAltitude();
+      return (model.isFilterAltitude()) ? pointsFilter[i].getAltitude()
+          : points.get(i).getAltitude();
     }
 
     protected double getY3(int i) {

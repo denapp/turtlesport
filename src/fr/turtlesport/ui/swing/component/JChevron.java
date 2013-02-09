@@ -1,5 +1,6 @@
 package fr.turtlesport.ui.swing.component;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -40,6 +41,11 @@ public class JChevron extends JButton implements ActionListener {
     setContentAreaFilled(false);
     setBorderPainted(false);
 
+    Dimension dim = new Dimension(20,20);
+    setMinimumSize(dim);
+    setPreferredSize(dim);
+    setMaximumSize(dim);
+    
     addActionListener(this);
   }
 

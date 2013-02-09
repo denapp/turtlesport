@@ -74,7 +74,8 @@ public final class RunTrkTableManager extends AbstractTableManager {
           trk.getAltitude(),
           trk.getDistance(),
           trk.getHeartRate(),
-          trk.getCadence());
+          trk.getCadence(),
+          trk.getTemperature());
 
     log.debug("<<store");
   }
@@ -110,7 +111,8 @@ public final class RunTrkTableManager extends AbstractTableManager {
           trk.isValidDistance() ? (float) trk.getDistanceMeters()
               : D304TrkPointType.INVALID_DISTANCE,
           trk.getHeartRate(),
-          trk.getCadence());
+          trk.getCadence(),
+          trk.getTemperature());
 
     log.debug("<<store");
   }
@@ -137,7 +139,8 @@ public final class RunTrkTableManager extends AbstractTableManager {
                       float altitude,
                       float distance,
                       int heartRate,
-                      int cadence) throws SQLException {
+                      int cadence,
+                      int temperature) throws SQLException {
     log.debug(">>store");
 
     boolean isInTransaction = DatabaseManager.isInTransaction();
@@ -155,7 +158,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
       StringBuilder st = new StringBuilder();
       st.append("INSERT INTO ");
       st.append(getTableName());
-      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
 
@@ -167,6 +170,12 @@ public final class RunTrkTableManager extends AbstractTableManager {
       pstmt.setFloat(6, distance);
       pstmt.setInt(7, heartRate);
       pstmt.setInt(8, cadence);
+      if (temperature == 0xff) {
+        pstmt.setNull(9, java.sql.Types.NUMERIC);
+      }
+      else {
+        pstmt.setInt(9, temperature);
+      }
       pstmt.executeUpdate();
     }
     catch (SQLException e) {
@@ -291,6 +300,10 @@ public final class RunTrkTableManager extends AbstractTableManager {
         trk.setDistance(rs.getFloat(6));
         trk.setHeartRate(rs.getInt(7));
         trk.setCadence(rs.getInt(8));
+        int value = rs.getInt(9);
+        if (!rs.wasNull()) {
+          trk.setTemperature(value);
+        }
         list.add(trk);
       }
     }
@@ -425,6 +438,11 @@ public final class RunTrkTableManager extends AbstractTableManager {
         trk.setAltitude(rs.getFloat(5));
         trk.setDistance(rs.getFloat(6));
         trk.setHeartRate(rs.getInt(7));
+        trk.setCadence(rs.getInt(8));
+        int value = rs.getInt(9);
+        if (!rs.wasNull()) {
+          trk.setTemperature(value);
+        }
         list.add(trk);
 
         if (log.isDebugEnabled()) {
@@ -649,6 +667,11 @@ public final class RunTrkTableManager extends AbstractTableManager {
         trk.setAltitude(rs.getFloat(5));
         trk.setDistance(rs.getFloat(6));
         trk.setHeartRate(rs.getInt(7));
+        trk.setCadence(rs.getInt(8));
+        int value = rs.getInt(9);
+        if (!rs.wasNull()) {
+          trk.setTemperature(value);
+        }
       }
     }
     finally {

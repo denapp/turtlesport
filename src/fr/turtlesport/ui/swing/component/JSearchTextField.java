@@ -1,5 +1,6 @@
 package fr.turtlesport.ui.swing.component;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusListener;
@@ -29,14 +30,20 @@ public class JSearchTextField extends JPanel {
     setLayout(new FlowLayout(FlowLayout.TRAILING, 0, 0));
 
     JLabel labelIcon = new JLabel(icon);
+    labelIcon.setMinimumSize(labelIcon.getPreferredSize());
+    labelIcon.setMaximumSize(labelIcon.getPreferredSize());
+    
     jTextField = new JTextField(column);
     jTextField.setFont(GuiFont.FONT_PLAIN);
     jTextField.setFont(GuiFont.FONT_PLAIN);
     jTextField.setMinimumSize(jTextField.getPreferredSize());
+    jTextField.setMaximumSize(jTextField.getPreferredSize());
 
     jButtonSearch = new JButton(ImagesRepository.getImageIcon("find-20x20.png"));
-    jButtonSearch.setMinimumSize(jButtonSearch.getPreferredSize());
-
+    Dimension dim = new Dimension(22,22);
+    jButtonSearch.setMinimumSize(dim);
+    jButtonSearch.setPreferredSize(dim);
+    jButtonSearch.setMaximumSize(dim);
     jButtonSearch.setBorder(BorderFactory.createEmptyBorder());
     jButtonSearch.setContentAreaFilled(false);
     jButtonSearch.setBorderPainted(false);

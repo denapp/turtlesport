@@ -99,7 +99,6 @@ public class WuGeoLookupHandler extends DefaultHandler2 {
   public void endElement(String uri, String localName, String qName) throws SAXException {
     if ("station".equals(localName)) {
       isStation = false;
-      listStation.add(currentStation);
       currentStation = null;
     }
     if (isCity) {
@@ -123,6 +122,7 @@ public class WuGeoLookupHandler extends DefaultHandler2 {
     if (isIcao) {
       if (stBuffer != null) {
         currentStation.setAirportCode(stBuffer.toString());
+        listStation.add(currentStation);
       }
       isIcao = false;
     }
