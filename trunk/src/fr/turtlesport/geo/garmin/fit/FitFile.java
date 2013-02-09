@@ -236,7 +236,9 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
           break;
 
         case MesgNum.DEVICE_INFO:
-          session.deviceInfo = new DeviceInfoMesg(msg);
+          if (session.deviceInfo == null) {
+            session.deviceInfo = new DeviceInfoMesg(msg);
+          }
           if (log.isInfoEnabled()) {
             log.info("-->DEVICE_INFO");
             log.info("   Product=" + session.deviceInfo.getProduct());
@@ -359,7 +361,8 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
                       + record.getPositionLat() + " lon="
                       + record.getPositionLat() + " cadence="
                       + record.getCadence() + " calories="
-                      + record.getCalories()+ " temperature=" + record.getTemperature());
+                      + record.getCalories() + " temperature="
+                      + record.getTemperature());
           }
           break;
 
@@ -414,9 +417,10 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
    * 
    */
   private class FitGeoRoute extends AbstractGeoRoute {
-    private Session session;
+    private Session   session;
+
     private FitDevice device;
-    
+
     public FitGeoRoute(Session session) {
       this.session = session;
       initSportType();
@@ -825,6 +829,10 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
 
       if (mesg.getAltitude() != null) {
         setElevation(mesg.getAltitude());
+      }
+
+      if (mesg.getTemperature() != null) {
+        setTemperature(mesg.getTemperature());
       }
     }
 

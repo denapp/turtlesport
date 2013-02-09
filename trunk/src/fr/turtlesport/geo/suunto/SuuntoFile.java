@@ -308,8 +308,8 @@ public class SuuntoFile implements IGeoFile {
         }
         // Temperature
         else if (localName.equals("Temperature")) {
-          currentSample.setTemperature(TemperatureUnit.convertToDegree(Double
-              .parseDouble(stBuffer.toString())));
+          currentSample.setTemperature((int) TemperatureUnit
+              .convertToDegree(Double.parseDouble(stBuffer.toString())));
         }
         // Distance
         else if (localName.equals("Distance")) {
@@ -336,8 +336,10 @@ public class SuuntoFile implements IGeoFile {
           Date dateLap = XmlUtil.getTime(stBuffer.toString());
 
           if (listLap.size() == 0) {
-            diffLap = (int) Math.round((dateLap.getTime() - listPoints.get(0)
-                .getDate().getTime()) / 3600000.0);
+            if (listPoints != null && listPoints.size() > 0) {
+              diffLap = (int) Math.round((dateLap.getTime() - listPoints.get(0)
+                  .getDate().getTime()) / 3600000.0);
+            }
           }
           currentLap.setStartTime(convertDate(XmlUtil.getTime(stBuffer
               .toString()), diffLap));

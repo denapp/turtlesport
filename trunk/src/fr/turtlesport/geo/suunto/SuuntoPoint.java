@@ -8,8 +8,6 @@ import fr.turtlesport.geo.GeoPositionWithAlt;
  */
 public class SuuntoPoint extends GeoPositionWithAlt {
 
-  private double temperature       = 0;
-
   private double energyConsumption = 0;
 
   public SuuntoPoint() {
@@ -31,14 +29,6 @@ public class SuuntoPoint extends GeoPositionWithAlt {
    */
   public SuuntoPoint(double latitude, double longitude) {
     super(latitude, longitude);
-  }
-
-  public double getTemperature() {
-    return temperature;
-  }
-
-  public void setTemperature(double temperature) {
-    this.temperature = temperature;
   }
 
   public double getEnergyConsumption() {

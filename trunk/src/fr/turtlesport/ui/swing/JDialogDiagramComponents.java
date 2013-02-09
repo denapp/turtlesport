@@ -15,6 +15,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.plaf.ComboBoxUI;
 
 import fr.turtlesport.Configuration;
@@ -22,6 +23,7 @@ import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JDiagramComponent;
 import fr.turtlesport.ui.swing.component.JDiagramOneComponent;
+import fr.turtlesport.ui.swing.component.JDiagramOneComponent.TablePointsModel;
 import fr.turtlesport.ui.swing.component.JPanelGraphOne;
 import fr.turtlesport.ui.swing.model.ModelDialogDiagramComponents;
 import fr.turtlesport.ui.swing.model.ModelMapkitManager;
@@ -42,13 +44,7 @@ public class JDialogDiagramComponents extends JDialog {
 
   private JPanelRunLap                 jPanelRight;
 
-  private JPanelGraphOne               jPanelY1;
-
-  private JPanelGraphOne               jPanelY2;
-
-  private JPanelGraphOne               jPanelY3;
-
-  private JPanelGraphOne               jPanelY4;
+  private JPanelGraphOne[]             jPanelTabGraph;
 
   private JPanel                       jPanelGraphs;
 
@@ -60,8 +56,6 @@ public class JDialogDiagramComponents extends JDialog {
   private JPanel                       jPanelX;
 
   private JComboboxUIlistener          jComboBoxX;
-
-  private JPanel                       jPanelGraphsCenter;
 
   public JDialogDiagramComponents(Frame owner) {
     super(owner, true);
@@ -77,14 +71,9 @@ public class JDialogDiagramComponents extends JDialog {
    */
   @Override
   public void dispose() {
-    ModelMapkitManager.getInstance().addChangeListener(jPanelY1.getJDiagram()
-        .getModel());
-    ModelMapkitManager.getInstance().addChangeListener(jPanelY2.getJDiagram()
-        .getModel());
-    ModelMapkitManager.getInstance().addChangeListener(jPanelY3.getJDiagram()
-        .getModel());
-    if (jPanelY4 != null) {
-      ModelMapkitManager.getInstance().addChangeListener(jPanelY4.getJDiagram()
+    super.dispose();
+    for (JPanelGraphOne panel : jPanelTabGraph) {
+      ModelMapkitManager.getInstance().removeChangeListener(panel.getJDiagram()
           .getModel());
     }
   }
@@ -116,12 +105,14 @@ public class JDialogDiagramComponents extends JDialog {
     setTitle(rb.getString("title"));
     JPanel contentPane = new JPanel();
     contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
+
     contentPane.add(getjPanelGraphs());
     contentPane.add(Box.createRigidArea(new Dimension(5, 0)));
     contentPane.add(getJPanelRight());
 
     setContentPane(contentPane);
-    this.setSize(920, (jPanelY4 == null) ? 690 : 740);
+
+    this.setSize(940, (jPanelTabGraph.length > 4) ? 740 : 690);
 
     boolean isAxisXDistance = Configuration.getConfig()
         .getPropertyAsBoolean("Diagram", "isAxisXDistance", true);
@@ -139,17 +130,10 @@ public class JDialogDiagramComponents extends JDialog {
     });
     jComboBoxX.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        jPanelY1.getJDiagram().getModel()
-            .setAxisX(jComboBoxX.getSelectedIndex() == 0);
-        jPanelY2.getJDiagram().getModel()
-            .setAxisX(jComboBoxX.getSelectedIndex() == 0);
-        jPanelY3.getJDiagram().getModel()
-            .setAxisX(jComboBoxX.getSelectedIndex() == 0);
-        if (jPanelY4 != null) {
-          jPanelY4.getJDiagram().getModel()
+        for (JPanelGraphOne panel : jPanelTabGraph) {
+          panel.getJDiagram().getModel()
               .setAxisX(jComboBoxX.getSelectedIndex() == 0);
         }
-
       }
     });
 
@@ -190,52 +174,62 @@ public class JDialogDiagramComponents extends JDialog {
 
   private JPanel getjPanelGraphs() {
     if (jPanelGraphs == null) {
-
-      jPanelGraphsCenter = new JPanel();
+      JPanel jPanelGraphsCenter = new JPanel();
       jPanelGraphsCenter.setLayout(new BoxLayout(jPanelGraphsCenter,
                                                  BoxLayout.Y_AXIS));
 
+      int lenTab = 3;
       boolean hasCadence = ModelPointsManager.getInstance().hasCadencePoints();
+      if (hasCadence) {
+        lenTab++;
+      }
+      boolean hasTemp = ModelPointsManager.getInstance().hasTemperaturePoints();
+      if (hasTemp) {
+        lenTab++;
+      }
 
-      jPanelY1 = new JPanelGraphOne(JDiagramOneComponent.HEART);
-      jPanelY2 = new JPanelGraphOne(JDiagramOneComponent.ALTITUDE);
-      jPanelY3 = new JPanelGraphOne(JDiagramOneComponent.SPEED);
-
-      jPanelY1.getJDiagram().addDiagram(jPanelY2.getJDiagram());
-      jPanelY1.getJDiagram().addDiagram(jPanelY3.getJDiagram());
-
-      jPanelY2.getJDiagram().addDiagram(jPanelY1.getJDiagram());
-      jPanelY2.getJDiagram().addDiagram(jPanelY3.getJDiagram());
-
-      jPanelY3.getJDiagram().addDiagram(jPanelY1.getJDiagram());
-      jPanelY3.getJDiagram().addDiagram(jPanelY2.getJDiagram());
+      int ipos = -1;
+      jPanelTabGraph = new JPanelGraphOne[lenTab];
+      jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.HEART);
+      jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.ALTITUDE);
+      jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.SPEED);
 
       if (hasCadence) {
-        jPanelY4 = new JPanelGraphOne(JDiagramOneComponent.CADENCE);
-
-        jPanelY1.getJDiagram().addDiagram(jPanelY4.getJDiagram());
-        jPanelY2.getJDiagram().addDiagram(jPanelY4.getJDiagram());
-        jPanelY3.getJDiagram().addDiagram(jPanelY4.getJDiagram());
-
-        jPanelY4.getJDiagram().addDiagram(jPanelY1.getJDiagram());
-        jPanelY4.getJDiagram().addDiagram(jPanelY2.getJDiagram());
-        jPanelY4.getJDiagram().addDiagram(jPanelY3.getJDiagram());
+        jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.CADENCE);
       }
+      if (hasTemp) {
+        jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.TEMPERATURE);
+      }
+
+      for (int i = 0; i < jPanelTabGraph.length; i++) {
+        for (int j = 0; j < jPanelTabGraph.length; j++) {
+          if (i != j) {
+            jPanelTabGraph[i].getJDiagram()
+                .addDiagram(jPanelTabGraph[j].getJDiagram());
+          }
+        }
+      }
+
       Dimension dim = new Dimension(0, 5);
-
-      jPanelGraphsCenter.add(jPanelY1);
-      jPanelGraphsCenter.add(Box.createRigidArea(dim));
-      jPanelGraphsCenter.add(jPanelY2);
-      jPanelGraphsCenter.add(Box.createRigidArea(dim));
-      jPanelGraphsCenter.add(jPanelY3);
-      if (hasCadence) {
+      for (int i = 0; i < jPanelTabGraph.length - 1; i++) {
+        jPanelGraphsCenter.add(jPanelTabGraph[i]);
         jPanelGraphsCenter.add(Box.createRigidArea(dim));
-        jPanelGraphsCenter.add(jPanelY4);
       }
+      jPanelGraphsCenter.add(jPanelTabGraph[jPanelTabGraph.length - 1]);
+
+      if (jPanelTabGraph.length > 4) {
+        Dimension dimPref = new Dimension(550, 190);
+        for (int i = 0; i < jPanelTabGraph.length; i++) {
+          jPanelTabGraph[i].setPreferredSize(dimPref);
+        }
+      }
+      JScrollPane scrollPane = new JScrollPane();
+      scrollPane.getViewport().add(jPanelGraphsCenter);
 
       jPanelGraphs = new JPanel(new BorderLayout());
-      jPanelGraphs.add(jPanelGraphsCenter, BorderLayout.CENTER);
+      jPanelGraphs.add(scrollPane, BorderLayout.CENTER);
       jPanelGraphs.add(getJPanelX(), BorderLayout.SOUTH);
+
     }
     return jPanelGraphs;
   }

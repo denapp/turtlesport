@@ -11,21 +11,23 @@ import java.util.Date;
 public class GeoPositionWithAlt extends GeoPosition implements
                                                    IGeoPositionWithAlt {
 
-  private static final SimpleDateFormat DF        = new SimpleDateFormat("dd/MM/yyyy k:mm:ss.S");
+  private static final SimpleDateFormat DF          = new SimpleDateFormat("dd/MM/yyyy k:mm:ss.S");
 
-  private boolean                       hasSensor = false;
+  private boolean                       hasSensor   = false;
 
   private double                        elevation;
 
   private Date                          date;
 
-  private int                           heartRate = 0;
+  private int                           heartRate   = 0;
 
-  private int                           cadence   = 0xFF;
+  private int                           cadence     = 0xFF;
 
   private double                        distanceMeters;
 
-  private float                         speed     = -1;
+  private float                         speed       = -1;
+
+  private int                           temperature = 0xFF;
 
   /**
    * Construit une instance de GeoPosition.
@@ -80,8 +82,26 @@ public class GeoPositionWithAlt extends GeoPosition implements
   public boolean isInvalidSpeed() {
     return speed <= -1;
   }
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.geo.IGeoPositionWithAlt#getTemperature()
+   */
+  public int getTemperature() {
+    return temperature;
+  }
+
+  /**
+   * @param temperature
+   */
+  public void setTemperature(int temperature) {
+    this.temperature = temperature;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.turtlesport.geo.IGeoPositionWithAlt#getSpeed()
    */
   @Override

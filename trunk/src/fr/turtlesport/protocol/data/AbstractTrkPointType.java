@@ -42,6 +42,9 @@ public abstract class AbstractTrkPointType extends AbstractData {
   /** /mn. */
   private int                 cadence          = 0xFF;   ;
 
+  /** Temperature. */
+  private int                 temperature;
+
   /** Determine si present. */
   private boolean             sensor           = false;
 
@@ -107,6 +110,20 @@ public abstract class AbstractTrkPointType extends AbstractData {
    */
   public void setCadence(int cadence) {
     this.cadence = cadence;
+  }
+
+  /**
+   * @return
+   */
+  public int getTemperature() {
+    return temperature;
+  }
+
+  /**
+   * @param temperature
+   */
+  public void setTemperature(int temperature) {
+    this.temperature = temperature;
   }
 
   /**

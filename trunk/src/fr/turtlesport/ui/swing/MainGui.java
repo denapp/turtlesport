@@ -38,7 +38,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -215,6 +214,8 @@ public class MainGui extends JFrame implements LanguageListener {
   private JPanelSearch         jPanelSearch;
 
   private JSearchTextField     jSearchTextField;
+  
+  private Dimension dimButton = new Dimension(35,35);
 
   /**
    * 
@@ -685,9 +686,17 @@ public class MainGui extends JFrame implements LanguageListener {
                                               ImagesRepository
                                                   .getImageIcon("book-open.png"));
       jChevron = new JChevron(true);
-      jChevron.setMinimumSize(jChevron.getPreferredSize());
       jSearchTextField.add(jChevron);
+      
+      JLabel label = new JLabel(" ");
+      Dimension dim =new Dimension(20,20);
+      label.setMaximumSize(dim);
+      label.setMinimumSize(dim);
+      label.setPreferredSize(dim);
+      jSearchTextField.add(label);
+
       jToolBar.add(jSearchTextField);
+      jToolBar.setSize(new Dimension(getSize().width - 20, 40));
     }
     return jToolBar;
   }
@@ -700,6 +709,8 @@ public class MainGui extends JFrame implements LanguageListener {
   private JButton getJButtonRetrieve() {
     if (jButtonRetreive == null) {
       jButtonRetreive = new JButton();
+      jButtonRetreive.setMaximumSize(dimButton);
+      jButtonRetreive.setMinimumSize(dimButton);
       jButtonRetreive.setIcon(ImagesMenuRepository.getImageIcon("down.png"));
       jButtonRetreive.setEnabled(true);
     }
@@ -714,6 +725,8 @@ public class MainGui extends JFrame implements LanguageListener {
   private JButton getJButtonStat() {
     if (jButtonStat == null) {
       jButtonStat = new JButton();
+      jButtonStat.setMaximumSize(dimButton);
+      jButtonStat.setMinimumSize(dimButton);
       jButtonStat.setIcon(ImagesMenuRepository.getImageIcon("stat.png"));
       jButtonStat.setEnabled(true);
     }
@@ -746,6 +759,8 @@ public class MainGui extends JFrame implements LanguageListener {
   private JButton getJButtonPreference() {
     if (jButtonPreference == null) {
       jButtonPreference = new JButton();
+      jButtonPreference.setMaximumSize(dimButton);
+      jButtonPreference.setMinimumSize(dimButton);
       jButtonPreference.setIcon(ImagesMenuRepository.getImageIcon("prefs.png"));
       jButtonRetreive.setEnabled(true);
     }
@@ -760,6 +775,8 @@ public class MainGui extends JFrame implements LanguageListener {
   private JButton getJButtonPrefUser() {
     if (jButtonPrefUser == null) {
       jButtonPrefUser = new JButton();
+      jButtonPrefUser.setMaximumSize(dimButton);
+      jButtonPrefUser.setMinimumSize(dimButton);
       jButtonPrefUser.setIcon(ImagesMenuRepository.getImageIcon("config.png"));
     }
     return jButtonPrefUser;
@@ -769,6 +786,8 @@ public class MainGui extends JFrame implements LanguageListener {
     if (jXSplitButtonUser == null) {
       jXSplitButtonUser = new JXSplitButton(ImagesMenuRepository.getImageIcon("run.png"));
       jXSplitButtonUser.setFont(GuiFont.FONT_PLAIN);
+      jXSplitButtonUser.setMaximumSize(dimButton);
+      jXSplitButtonUser.setMinimumSize(dimButton);
       setUsers();
     }
     return jXSplitButtonUser;
@@ -786,7 +805,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
     JPopupMenu jPopupMenuDropDown = new JPopupMenu();
     buttonGroupDropDown = new ButtonGroup();
-
+    
     // Ajout all user
     JCheckBoxMenuItemUser jmiUser = new JCheckBoxMenuItemUser(DataUser
         .getAllUser().getId(), DataUser.getAllUser().getFirstName());

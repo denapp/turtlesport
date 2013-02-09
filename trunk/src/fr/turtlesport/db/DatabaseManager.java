@@ -140,7 +140,7 @@ public class DatabaseManager {
     System.setProperty("derby.infolog.append", "true");
     System.setProperty("derby.language.logStatementText", "true");
     System.setProperty("derby.language.logQueryPlan", "true");
-   }
+  }
 
   /**
    * Initialisation de la database.
@@ -606,7 +606,7 @@ public class DatabaseManager {
           return;
         }
         else if (rs.getMetaData().getColumnCount() == 9) {
-          
+
           // la table existe ajout produit montre
           if (conn != null) {
             releaseConnection(conn);
@@ -674,7 +674,7 @@ public class DatabaseManager {
     st.append("location VARCHAR(100),");
     st.append("product_id VARCHAR(8),");
     st.append("product_version VARCHAR(15),");
-    st.append("product_name VARCHAR(25)");
+    st.append("product_name VARCHAR(25))");
 
     executeUpdate(st.toString());
 
@@ -936,8 +936,25 @@ public class DatabaseManager {
         st.append("(id)");
         executeUpdate(st.toString());
       }
+      ResultSet rs;
+      Connection conn = DatabaseManager.getConnection();
+      PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM "
+                                                      + TABLE_USER_ACTIVITY);
+      rs = pstmt.executeQuery();
+      if (rs.getMetaData().getColumnCount() == 8) {
+        releaseConnection(conn);
+        StringBuilder st = new StringBuilder();
+        st.append("ALTER TABLE ");
+        st.append(TABLE_RUN_TRK);
+        st.append(" ADD COLUMN temperature SMALLINT");
+        executeUpdate(st.toString());
+      }
+      else {
+        releaseConnection(conn);
+      }
       return;
     }
+
     log.info("createTableTrk");
 
     StringBuilder st = new StringBuilder();
@@ -951,7 +968,8 @@ public class DatabaseManager {
     st.append("altitude FLOAT, ");
     st.append("distance FLOAT, ");
     st.append("heart_rate SMALLINT, ");
-    st.append("cadence SMALLINT");
+    st.append("cadence SMALLINT, ");
+    st.append("temperature SMALLINT");
     st.append(')');
     executeUpdate(st.toString());
 

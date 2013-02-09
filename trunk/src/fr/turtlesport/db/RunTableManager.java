@@ -915,7 +915,8 @@ public final class RunTableManager extends AbstractTableManager {
                                                trk.getAltitude(),
                                                trk.getDistance(),
                                                trk.getHeartRate(),
-                                               trk.getCadence());
+                                               trk.getCadence(),
+                                               trk.getTemperature());
       }
     }
     catch (SQLException e) {

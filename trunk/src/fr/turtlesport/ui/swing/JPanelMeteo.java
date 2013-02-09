@@ -506,7 +506,7 @@ public class JPanelMeteo extends JXPanel implements LanguageListener,
               }
 
               // on compare avec la date du jour
-              if (DateUtil.isDayDate(dataRun.getTime())) {
+              if (currentMeteo != null && DateUtil.isDayDate(dataRun.getTime())) {
                 DataMeteo dayMeteo = Wundergound.current(station);
                 if (dayMeteo != null && dayMeteo.getDate() != null) {
                   long diff = Math.abs(currentMeteo.getDate().getTime()

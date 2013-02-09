@@ -45,6 +45,13 @@ public interface IGeoPositionWithAlt extends IGeoPosition {
   int getCadence();
 
   /**
+   * Restitue la temp&eacute;rature pour ce point.
+   * 
+   * @return la temp&eacute;rature pour ce point.
+   */
+  int getTemperature();
+
+  /**
    * D&eacute;termine si ce point est avec un cardio.
    * 
    * @return <code>true</code> si ce point est avec un cardio.
