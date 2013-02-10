@@ -939,7 +939,7 @@ public class DatabaseManager {
       ResultSet rs;
       Connection conn = DatabaseManager.getConnection();
       PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM "
-                                                      + TABLE_USER_ACTIVITY);
+                                                      + TABLE_RUN_TRK);
       rs = pstmt.executeQuery();
       if (rs.getMetaData().getColumnCount() == 8) {
         releaseConnection(conn);
