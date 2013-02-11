@@ -455,7 +455,6 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
     public IProductDevice getProductDevice() {
       if (session.deviceInfo != null && device == null) {
         device = new FitDevice(session.deviceInfo);
-        System.out.println();
       }
       return device;
     }

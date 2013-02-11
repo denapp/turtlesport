@@ -92,7 +92,6 @@ public class ModelActivity {
     final int[] result = new int[plage.length];
     for (int i = 0; i < plage.length; i++) {
       result[i] = (int) (fcm * plage[i]);
-      System.out.println(result[i]);
     }
 
     DataHeartZone data;

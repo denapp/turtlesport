@@ -961,29 +961,12 @@ public final class JDialogImport extends JDialog implements
       if (!EventQueue.isDispatchThread()) {
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
-            // TODO
             fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
           }
         });
       }
       else {
-        // TODO
         fireTableCellUpdated(jTable.convertRowIndexToView(row), col);
-      }
-    }
-
-    public void fireTableCellUpdatedEventQueue(final int index, final int col) {
-      if (!EventQueue.isDispatchThread()) {
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            // TODO
-             fireTableCellUpdated(index, col);
-          }
-        });
-      }
-      else {
-        // TODO
-         fireTableCellUpdated(index, col);
       }
     }
 
@@ -1285,7 +1268,6 @@ public final class JDialogImport extends JDialog implements
         setSave(false);
       }
       timeTot = cal.getTime();
-      tableModel.fireTableCellUpdatedEventQueue(row, 5);
     }
 
     /**
@@ -1312,7 +1294,7 @@ public final class JDialogImport extends JDialog implements
         setSave(false);
       }
 
-      tableModel.fireTableCellUpdatedEventQueue(row, 5);
+      tableModel.fireTableCellUpdatedEventQueueConvert(row, 5);
       log.debug("<<setTimeTot isValidTimeTot=" + isValidTimeTot);
     }
 
@@ -1333,7 +1315,7 @@ public final class JDialogImport extends JDialog implements
       if (!isValidDateTime) {
         setSave(false);
       }
-      tableModel.fireTableCellUpdatedEventQueue(row, 0);
+      tableModel.fireTableCellUpdatedEventQueueConvert(row, 0);
     }
 
     public Date getTimeTot() {
@@ -1393,26 +1375,10 @@ public final class JDialogImport extends JDialog implements
         return;
       }
       this.activity = activity;
-
-      if (!EventQueue.isDispatchThread()) {
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            int viewRow = jTable.convertRowIndexToView(row);
-            route.setSportType(activity.getSportType());
-            tableModel.fireTableCellUpdatedEventQueue(viewRow, 6);
-          }
-        });
-      }
-      else {
-        int viewRow = jTable.convertRowIndexToView(row);
-        route.setSportType(activity.getSportType());
-        tableModel.fireTableCellUpdatedEventQueue(viewRow, 6);
-      }
     }
 
     public void setActivity(int sportType) {
       activity = find(sportType);
-      tableModel.fireTableCellUpdatedEventQueueConvert(row, 6);
     }
 
     private AbstractDataActivity find(int sportType) {
@@ -1436,7 +1402,6 @@ public final class JDialogImport extends JDialog implements
 
     public void setDistance(double distance) {
       this.distance = DistanceUnit.formatMetersInKm(distance);
-      tableModel.fireTableCellUpdatedEventQueue(row, 4);
     }
 
     public boolean isSave() {
@@ -1464,7 +1429,7 @@ public final class JDialogImport extends JDialog implements
         jButtonSave.setEnabled(hasRuntoSave);
       }
 
-      tableModel.fireTableCellUpdatedEventQueue(row, 8);
+      tableModel.fireTableCellUpdatedEventQueueConvert(row, 8);
     }
 
     /**
@@ -1482,7 +1447,7 @@ public final class JDialogImport extends JDialog implements
         calendar.set(Calendar.MONTH, cal.get(Calendar.MONTH));
         calendar.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
       }
-      tableModel.fireTableCellUpdatedEventQueue(row, 2);
+      tableModel.fireTableCellUpdatedEventQueueConvert(row, 2);
       tableModel.fireRowsDateChanged();
     }
 
@@ -1510,7 +1475,7 @@ public final class JDialogImport extends JDialog implements
         calendar.set(Calendar.MINUTE, cal.get(Calendar.MINUTE));
         calendar.set(Calendar.SECOND, cal.get(Calendar.SECOND));
       }
-      tableModel.fireTableCellUpdatedEventQueue(row, 3);
+      tableModel.fireTableCellUpdatedEventQueueConvert(row, 3);
       tableModel.fireRowsDateChanged();
     }
 
@@ -1535,7 +1500,7 @@ public final class JDialogImport extends JDialog implements
      */
     public void setProgressValue(int progressValue) {
       this.progressValue = progressValue;
-      tableModel.fireTableCellUpdatedEventQueue(row, 1);
+      tableModel.fireTableCellUpdatedEventQueueConvert(row, 1);
     }
 
     /**
@@ -1546,7 +1511,7 @@ public final class JDialogImport extends JDialog implements
       if (progressValue >= 100) {
         progressValue = 3;
       }
-      tableModel.fireTableCellUpdatedEventQueue(row, 1);
+      tableModel.fireTableCellUpdatedEventQueueConvert(row, 1);
     }
 
     /**
@@ -1555,7 +1520,7 @@ public final class JDialogImport extends JDialog implements
     public void endProgress() {
       if (progressValue != 100) {
         progressValue = 100;
-        tableModel.fireTableCellUpdatedEventQueue(row, 1);
+        tableModel.fireTableCellUpdatedEventQueueConvert(row, 1);
       }
     }
 
