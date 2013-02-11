@@ -903,7 +903,6 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
       }
       else if (localName.equals("Name") && isActivity && isCreator) {
         currentActivity.getCreator().name = stBuffer.toString();
-        System.out.println("name="+currentActivity.getCreator().name);
       }
       else if (localName.equals("ProductID") && isActivity && isCreator) {
         currentActivity.getCreator().productID = stBuffer.toString();

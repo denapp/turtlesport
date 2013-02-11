@@ -30,7 +30,6 @@ public class WaitingGlassPane extends LockingGlassPane {
     previousGlassPane = frame.getGlassPane();
 
     busyLabel = new JXBusyLabel(new Dimension(104, 104));
-    System.out.println(busyLabel.getPreferredSize());
     this.frame = frame;
     setLayout(new BorderLayout());
 

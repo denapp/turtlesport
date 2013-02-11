@@ -3,6 +3,7 @@ package fr.turtlesport.ui.swing;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -29,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
@@ -130,7 +132,7 @@ public class JDialogProgressRun extends JDialog implements
 
   private boolean                  isAbortTransfert = false;
 
-  private IProductDevice productDevice;
+  private IProductDevice           productDevice;
 
   /**
    * @param owner
@@ -192,7 +194,8 @@ public class JDialogProgressRun extends JDialog implements
    * 
    * @param a1000
    */
-  public void retreive(A1000RunTransferProtocol a1000, IProductDevice productDevice) {
+  public void retreive(A1000RunTransferProtocol a1000,
+                       IProductDevice productDevice) {
 
     long deb;
     try {
@@ -889,25 +892,28 @@ public class JDialogProgressRun extends JDialog implements
       switch (col) {
         case 4: // Athlete
           listRun.get(row).setUser((User) value);
+          fireTableCellUpdatedEventQueueConvert(jTableRun.convertRowIndexToView(row),
+                                                col);
           break;
 
         case 5: // Activite
           listRun.get(row).setActivity((AbstractDataActivity) value);
+          fireTableCellUpdatedEventQueueConvert(jTableRun.convertRowIndexToView(row),
+                                                col);
           break;
 
         case 6: // Equipement
           listRun.get(row).setEquipement((String) value);
-          fireTableCellUpdated(jTableRun.convertRowIndexToView(row), col);
           break;
 
         case 7: // Sauvegarder
           listRun.get(row).setSave((Boolean) value);
-          fireTableCellUpdated(jTableRun.convertRowIndexToView(row), col);
           break;
 
         case 8: // Commentaires
           listRun.get(row).setComments((String) value);
-          fireTableCellUpdated(jTableRun.convertRowIndexToView(row), col);
+          fireTableCellUpdatedEventQueueConvert(jTableRun.convertRowIndexToView(row),
+                                                col);
           break;
 
         default:
@@ -915,18 +921,41 @@ public class JDialogProgressRun extends JDialog implements
       }
     }
 
+    public void fireTableCellUpdatedEventQueueConvert(final int row,
+                                                      final int col) {
+      if (!EventQueue.isDispatchThread()) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            fireTableCellUpdated(jTableRun.convertRowIndexToView(row), col);
+          }
+        });
+      }
+      else {
+        fireTableCellUpdated(jTableRun.convertRowIndexToView(row), col);
+      }
+    }
+
     /**
      * Ajout d'une course.
      */
     public void addTransfertCourse(AbstractRunType runType) {
-      int size = listRun.size();
+      final int size = listRun.size();
 
       TableRowObject rowObj = new TableRowObject(size, runType);
       listRun.add(rowObj);
 
+      if (!EventQueue.isDispatchThread()) {
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            fireTableRowsInserted(size, size);
+          }
+        });
+      }
+      else {
+        fireTableRowsInserted(size, size);
+      }
       rowObj.setActivity(runType.getSportType());
 
-      fireTableRowsInserted(size, size);
       if (size == 0) {
         jTableRun.packAll();
       }
@@ -1016,7 +1045,7 @@ public class JDialogProgressRun extends JDialog implements
    * 
    */
   private class TableRowObject {
-    private AbstractRunType           runType;
+    private AbstractRunType        runType;
 
     private int                    row;
 
@@ -1113,22 +1142,18 @@ public class JDialogProgressRun extends JDialog implements
       return activity;
     }
 
-    public void setActivity(AbstractDataActivity activity) {
+    public void setActivity(final AbstractDataActivity activity) {
+      if (activity == null) {
+        return;
+      }
       if (this.activity != null && this.activity.equals(activity)) {
         return;
       }
       this.activity = activity;
-
-      int viewRow = jTableRun.convertRowIndexToView(row);
-      runType.setSportType(activity.getSportType());
-
-      tableModelRun.fireTableCellUpdated(viewRow, 4);
     }
 
     public void setActivity(int sportType) {
       activity = find(sportType);
-      int viewRow = jTableRun.convertRowIndexToView(row);
-      tableModelRun.fireTableCellUpdated(viewRow, 4);
     }
 
     private AbstractDataActivity find(int sportType) {
@@ -1193,7 +1218,8 @@ public class JDialogProgressRun extends JDialog implements
           jButtonSave.setEnabled(hasRuntoSave);
         }
       }
-      tableModelRun.fireTableCellUpdated(row, 6);
+      tableModelRun.fireTableCellUpdatedEventQueueConvert(jTableRun
+          .convertRowIndexToView(row), 7);
     }
 
     /**
@@ -1226,8 +1252,8 @@ public class JDialogProgressRun extends JDialog implements
       }
       this.date = dfDate.format(date);
       this.time = dfTime.format(date);
-      tableModelRun.fireTableCellUpdated(row, 1);
-      tableModelRun.fireTableCellUpdated(row, 2);
+      tableModelRun.fireTableCellUpdatedEventQueueConvert(row, 1);
+      tableModelRun.fireTableCellUpdatedEventQueueConvert(row, 2);
     }
 
     /**
@@ -1242,7 +1268,7 @@ public class JDialogProgressRun extends JDialog implements
      */
     public void setProgressValue(int progressValue) {
       this.progressValue = progressValue;
-      tableModelRun.fireTableCellUpdated(row, 0);
+      tableModelRun.fireTableCellUpdatedEventQueueConvert(row, 0);
     }
 
     /**
@@ -1253,7 +1279,7 @@ public class JDialogProgressRun extends JDialog implements
       if (progressValue >= 100) {
         progressValue = 3;
       }
-      tableModelRun.fireTableCellUpdated(row, 0);
+      tableModelRun.fireTableCellUpdatedEventQueueConvert(row, 0);
     }
 
     /**
@@ -1262,7 +1288,7 @@ public class JDialogProgressRun extends JDialog implements
     public void endProgress() {
       if (progressValue != 100) {
         progressValue = 100;
-        tableModelRun.fireTableCellUpdated(row, 0);
+        tableModelRun.fireTableCellUpdatedEventQueueConvert(row, 0);
       }
     }
   }
@@ -1371,7 +1397,9 @@ public class JDialogProgressRun extends JDialog implements
           // Sauvegarde des run
           try {
             long deb = System.currentTimeMillis();
-            RunTableManager.getInstance().store(a1000, JDialogProgressRun.this, productDevice);
+            RunTableManager.getInstance().store(a1000,
+                                                JDialogProgressRun.this,
+                                                productDevice);
             log.warn("Temps pour sauvegarder " + a1000.getListRunTypeSize()
                      + " run (ms) --> " + (System.currentTimeMillis() - deb));
           }
