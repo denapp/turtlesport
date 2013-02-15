@@ -3,8 +3,10 @@ package fr.turtlesport.garmin;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jfree.util.Log;
+
 import fr.turtlesport.IProductDevice;
-import fr.turtlesport.UsbProtocolException;
+import fr.turtlesport.log.TurtleLogger;
 
 /**
  * Liste les montres garmins reconnues.
@@ -13,7 +15,11 @@ import fr.turtlesport.UsbProtocolException;
  * 
  */
 public class GarminDevices {
- 
+  private static TurtleLogger  log;
+  static {
+    log = (TurtleLogger) TurtleLogger.getLogger(GarminDevices.class);
+  }
+
 
   private GarminDevices() {
   }
@@ -28,7 +34,8 @@ public class GarminDevices {
     try {
       result.add(GarminUsbDevice.init());
     }
-    catch (UsbProtocolException e) {
+    catch (Throwable e) {
+      log.error("",e);
     }
 
     // Garmin FIT
