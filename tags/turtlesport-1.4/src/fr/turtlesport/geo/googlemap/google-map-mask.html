@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<meta name="author" content="turtlesport"/>
+<link href="http://turtlesport.sourceforge.net/css/PageDonTel.css" rel="stylesheet" type="text/css" />
+
+<title>Turtle Sport</title>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+<script type="text/javascript">
+
+  function initialize() {
+#MAP_BOUNDS#    var cornerBounds = new google.maps.LatLngBounds (new google.maps.LatLng({0}, {1}), new google.maps.LatLng({2}, {3}));
+  
+    var myOptions = {
+      zoom: 3,
+      center: cornerBounds.getCenter(),
+      scaleControl: true,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      streetViewControl: true
+    };
+
+    var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+    map.fitBounds(cornerBounds);
+    
+#MARKER_END#   var pEnd = new google.maps.LatLng({0}, {1});
+   var iconEnd = new google.maps.MarkerImage("http://maps.google.com/mapfiles/dd-end.png");
+   var markerEnd = new google.maps.Marker({
+        position: pEnd, 
+        icon : iconEnd,
+        map: map,
+        title:"Stop",
+        zIndex: 1
+    });   
+
+#MARKER_START#   var pStart = new google.maps.LatLng({0}, {1});
+   var iconStart = new google.maps.MarkerImage("http://maps.google.com/mapfiles/dd-start.png");
+   var markerStart = new google.maps.Marker({
+        position: pStart, 
+        icon : iconStart,
+        map: map,        
+        title:"Start",
+        zIndex : 1
+    });
+    
+    var flightPlanCoordinates = [
+#MAP_COORDINATE#        new google.maps.LatLng({0}, {1})
+    ];
+    var flightPath = new google.maps.Polyline({
+      path: flightPlanCoordinates,
+      strokeColor: "#FF0000",
+      strokeOpacity: 1.0,
+      strokeWeight: 2,
+      zIndex: 0
+    });
+
+   flightPath.setMap(map);
+      
+  }
+</script>
+</head>
+<body onload="initialize()">
+
+<div id="contenu">
+<div id="header">
+<div id="logo">
+   <a href="http://turtlesport.sourceforge.net">
+     <img src="http://turtlesport.sourceforge.net/images/logo_TurtleSport.jpg" alt="logo_TurtleSport" />
+    </a>
+</div>
+</div>
+<div id="image_principale">
+</div>
+
+<table width="820" border="0"  align="center" cellpadding="5" cellspacing="0">
+<tr class="centrePage">
+   <td valign="top" width="270">
+         <table style="font-family: Verdana, Helvetica, sans-serif; font-size: 12px; color: black;">
+#DAY#            <tr><td halign="left" colspan="2"><b>{0}&nbsp;&nbsp;{1}</b></td></tr>
+           <tr><td colspan="2" height="1" class="VertF"></td></tr> 
+#LOCALISATION#           <tr><td colspan="2"><i>{0}</i></td></tr>
+#DISTANCE#            <tr><td halign="left">{0}</td><td>{1}</td></tr>
+#TIME_TOT#           <tr><td halign="left">{0}</td><td>{1}</td></tr>
+#TIME_MOVING#        <tr><td halign="left">{0}</td><td>{1}</td></tr>
+#TIME_PAUSE#         <tr><td halign="left">{0}</td><td>{1}</td></tr>
+#AVG_ALL#           <tr><td halign="left">{0}</td><td>{1}</td></tr>
+#AVG_SPEED#           <tr><td halign="left">{0}</td><td>{1}</td></tr>
+#CALORIES#           <tr><td halign="left">{0}</td><td>{1}</td></tr>
+#CARDIO#           <tr><td halign="left"><font color="red">&hearts;</font>&nbsp;{0}</td><td>{1}/{2}/{3}</td></tr>
+#ACTIVITY#          <tr><td halign="left">{0}</td><td>{1}</td></tr>
+#BEGIN_TABLE_LAP#
+#LAP_TITLE#         <tr><td halign="left" colspan="2"><br><b>{0}</b></td></tr>
+          <tr><td colspan="2" height="1" class="VertF"></td></tr> 
+           <tr><td colspan="2" halign="left">
+              <table border="0" cellpadding="0" cellspacing="5" style="font-family: Verdana,Helvetica,sans-serif; font-size: 12px; color: black;">
+#LAP_HEAD#                 <tr><th halign="center" style="font-style: italic; font-weight: normal;">{0}<br>&nbsp;</th><th halign="center" style="font-style: italic; font-weight: normal;">{1}<br><small>({2})</small></th></th><th halign="center" style="font-style: italic; font-weight: normal;">{3}<br><small>({4})</small></th><th halign="center" style="font-style: italic; font-weight: normal;">{5}<br><small>({6})</small></th></tr>
+#LAP_BODY#                 <tbody><tr><td style="text-align: right;">{0}</td><td style="text-align: right;">{1}</td><td style="text-align: right;">{2}</td><td style="text-align: right;">{3}</td></tr>
+              </tbody></table>
+           </td></tr>
+#END_TABLE_LAP#
+          </table>
+    </td>
+    <td valign="top"><br><div id="map_canvas" align="center" style="width: 550px; height: 500px;"></div></td>
+</tr>  
+</table>
+
+<div id="footer">
+<div id="twitter_footer"><a href="https://twitter.com/turtlesport" target="_blank"><img src="http://turtlesport.sourceforge.net/images/logo_twitter.jpg" alt="Logo_Twitter" /></a></div>
+	</div>
+
+
+</div>
+
+</body>
+</html>
