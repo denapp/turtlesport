@@ -1,0 +1,11 @@
+%packager         Denis Apparicio
+%author               Turtle Sport team
+%_topdir               /tmp/turtlesport_dist/RPMBUILD
+%_tmppath             %{_topdir}/tmp
+%_builddir              %{_tmppath}
+%_rpmtopdir           %{_topdir}/turtlesport
+%_sourcedir            %{_rpmtopdir}
+%_specdir               %{_topdir}/SPECS
+%_rpmdir                %{_topdir}/RPMS
+%_srcrpmdir            %{_topdir}/SRPMS
+%_rpmfilename        %%{NAME}-%%{VERSION}-%%{RELEASE}.all.rpm
