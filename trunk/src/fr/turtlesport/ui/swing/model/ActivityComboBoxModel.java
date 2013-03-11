@@ -6,6 +6,7 @@ import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 
 import fr.turtlesport.db.AbstractDataActivity;
+import fr.turtlesport.db.DataActivityNull;
 import fr.turtlesport.db.DataActivityOther;
 import fr.turtlesport.db.UserActivityTableManager;
 import fr.turtlesport.log.TurtleLogger;
@@ -20,6 +21,22 @@ public class ActivityComboBoxModel extends DefaultComboBoxModel {
     log = (TurtleLogger) TurtleLogger.getLogger(ActivityComboBoxModel.class);
   }
 
+  public ActivityComboBoxModel(DataActivityNull data) {
+    super();
+
+    try {
+      addElement(data);
+      List<AbstractDataActivity> list = UserActivityTableManager.getInstance()
+          .retreive();
+      for (AbstractDataActivity d : list) {
+        addElement(d);
+      }
+    }
+    catch (SQLException e) {
+      log.error("", e);
+    }
+  }
+  
   public ActivityComboBoxModel() {
     super();
 
