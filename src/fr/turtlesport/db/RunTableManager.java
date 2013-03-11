@@ -63,6 +63,59 @@ public final class RunTableManager extends AbstractTableManager {
   }
 
   /**
+   * Compte le nombre de run.
+   * 
+   * @param idUser
+   * @return le nombre de run.
+   */
+  public int count(int idUser, int sportType) throws SQLException {
+    if (log.isInfoEnabled()) {
+      log.info(">>count idUser=" + idUser + " sportType=" + sportType);
+    }
+
+    int tot = 0;
+    Connection conn = DatabaseManager.getConnection();
+
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT COUNT(DISTINCT id) FROM ");
+      st.append(getTableName());
+      if (DataUser.isAllUser(idUser)) {
+        if (sportType != -1) {
+          st.append(" WHERE sport_type=?");
+        }
+      }
+      else {
+        st.append(" WHERE id_user=?");
+        if (sportType != -1) {
+          st.append(" AND sport_type=?");
+        }
+      }
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(++index, idUser);
+      }
+      if (sportType != -1) {
+        pstmt.setInt(++index, sportType);
+      }
+      ResultSet rs = pstmt.executeQuery();
+      if (rs.next()) {
+        tot = rs.getInt(1);
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      log.info("<<count");
+    }
+    return tot;
+  }
+  
+  /**
    * Recuperation des run d'un utilisateur.
    * 
    * @param idUser
@@ -506,10 +559,8 @@ public final class RunTableManager extends AbstractTableManager {
                      equipement,
                      null,
                      (device == null) ? null : device.id(),
-                     (device == null) ? null : device
-                         .softwareVersion(),
-                     (device == null) ? null : device
-                         .displayName());
+                     (device == null) ? null : device.softwareVersion(),
+                     (device == null) ? null : device.displayName());
 
           hashLap.put(runType.getTrackIndex(), id);
         }
@@ -1152,7 +1203,7 @@ public final class RunTableManager extends AbstractTableManager {
       if (productDisplayName != null && productDisplayName.length() > 25) {
         sProductDisplayName = productDisplayName.substring(0, 24);
       }
-      
+
       // Insertion de la course.
       StringBuilder st = new StringBuilder();
       st.append("INSERT INTO ");
@@ -1906,6 +1957,73 @@ public final class RunTableManager extends AbstractTableManager {
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       if (!DataUser.isAllUser(idUser)) {
         pstmt.setInt(1, idUser);
+      }
+
+      ResultSet rs = pstmt.executeQuery();
+      while (rs.next()) {
+        DataRun dataRun = new DataRun();
+        dataRun.setId(rs.getInt("id"));
+        dataRun.setSportType(rs.getInt("sport_type"));
+        dataRun.setProgramType(rs.getInt("program_type"));
+        dataRun.setMultisport(rs.getInt("multisport"));
+        dataRun.setTime(rs.getTimestamp("start_time"));
+        dataRun.setComments(rs.getString("comments"));
+        dataRun.setEquipement(rs.getString("equipement"));
+        dataRun.setLocation(rs.getString("location"));
+        dataRun.setProductId(rs.getString("product_id"));
+        dataRun.setProductVersion(rs.getString("product_version"));
+        dataRun.setProductName(rs.getString("product_name"));
+        listRun.add(dataRun);
+        log.debug("id" + dataRun.getId() + " " + rs.getString("location"));
+      }
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isInfoEnabled()) {
+      long delay = System.currentTimeMillis() - startTime;
+      log.info("<<retreive  idUser=" + idUser + " delay=" + delay + "ms");
+    }
+    return listRun;
+  }
+
+  /**
+   * Recuperation des run d'un utilisateur.
+   * 
+   * @param idUser
+   * @param date
+   * 
+   * @return
+   * @throws SQLException
+   */
+  public List<DataRun> retreive(int idUser, int sportType) throws SQLException {
+    if (sportType == -1) {
+      return retreive(idUser);
+    }
+
+    if (log.isInfoEnabled()) {
+      log.info(">>retreive  idUser=" + idUser + " sportType=" + sportType);
+    }
+    List<DataRun> listRun = new ArrayList<DataRun>();
+
+    long startTime = System.currentTimeMillis();
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT * FROM ");
+      st.append(getTableName());
+      st.append(" WHERE SPORT_TYPE=?");
+      if (!DataUser.isAllUser(idUser)) {
+        st.append(" AND id_user=?");
+      }
+      st.append(" ORDER BY start_time ASC");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, sportType);
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(2, idUser);
       }
 
       ResultSet rs = pstmt.executeQuery();

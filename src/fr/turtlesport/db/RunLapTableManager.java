@@ -137,10 +137,10 @@ public final class RunLapTableManager extends AbstractTableManager {
         DataRunTrk trk = RunTrkTableManager.getInstance().getLastTrk(idRun);
         if (trk != null && trk.getTime() != null) {
           long time = trk.getTime().getTime()
-        	           - res[list.size() - 1].getStartTime().getTime();
-          res[list.size() - 1].setRealTotalTime((int) time / 10); 	
+                      - res[list.size() - 1].getStartTime().getTime();
+          res[list.size() - 1].setRealTotalTime((int) time / 10);
         }
-       
+
       }
 
     }
@@ -198,8 +198,8 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     if (log.isDebugEnabled()) {
-      log.debug("TotalTime="+ lap.getTotalTime());
-      log.debug("TotalPauseTime="+ lap.getTotalPauseTime());
+      log.debug("TotalTime=" + lap.getTotalTime());
+      log.debug("TotalPauseTime=" + lap.getTotalPauseTime());
     }
 
     store(id,
@@ -318,11 +318,11 @@ public final class RunLapTableManager extends AbstractTableManager {
       if (!RunTableManager.getInstance().exist(id)) {
         throw new SQLException("id non trouve.");
       }
-      
+
       if (calories < 0) {
         calories = 0;
       }
-      
+
       StringBuilder st = new StringBuilder();
       st.append("INSERT INTO ");
       st.append(getTableName());
@@ -688,7 +688,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return la distance totale.
    * @throws SQLException
    */
-  public List<DataStatYear> distanceByYear(int idUser) throws SQLException {
+  public List<DataStatYear> distanceByYear(int idUser, int sportType) throws SQLException {
     log.info(">>distanceByYear");
 
     List<DataStatYear> res = new ArrayList<DataStatYear>();
@@ -698,12 +698,16 @@ public final class RunLapTableManager extends AbstractTableManager {
       StringBuilder st = new StringBuilder();
       if (DataUser.isAllUser(idUser)) {
         st.append("SELECT ");
-        st.append("Year(start_time) AS THE_YEAR,");
-        st.append("SUM(total_dist),");
-        st.append("COUNT(DISTINCT id) ");
+        st.append("Year(LAP.start_time) AS THE_YEAR,");
+        st.append("SUM(LAP.total_dist),");
+        st.append("COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
-        st.append(getTableName());
-        st.append(" GROUP BY Year(start_time)");
+        st.append(getTableName() + " LAP ");
+        if (sportType != -1) {
+          st.append(", " + DatabaseManager.TABLE_RUN + " RUN ");
+          st.append("WHERE RUN.SPORT_TYPE=? AND RUN.ID = LAP.ID ");
+        }
+        st.append("GROUP BY Year(LAP.start_time)");
       }
       else {
         st.append("SELECT ");
@@ -713,14 +717,21 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
-        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append("WHERE LAP.ID=RUN.ID ");
         st.append(" AND RUN.id_user=?");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=? AND RUN.ID = LAP.ID");
+        }
         st.append(" GROUP BY Year(LAP.start_time)");
       }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
       if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
+        pstmt.setInt(++index, idUser);
+      }
+      if (sportType != -1) {
+        pstmt.setInt(++index, sportType);
       }
       ResultSet rs = pstmt.executeQuery();
 
@@ -801,7 +812,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return la distance totale.
    * @throws SQLException
    */
-  public List<DataStatYearMonth> distanceByMonth(int idUser) throws SQLException {
+  public List<DataStatYearMonth> distanceByMonth(int idUser, int sportType) throws SQLException {
     log.info(">>distanceByMonth");
 
     List<DataStatYearMonth> res = new ArrayList<DataStatYearMonth>();
@@ -817,7 +828,10 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
-        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append("WHERE LAP.ID=RUN.ID");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
         st.append(" ORDER BY THE_YEAR, THE_MONTH");
       }
@@ -830,17 +844,25 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
-        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append("WHERE LAP.ID=RUN.ID");
         st.append(" AND RUN.id_user=?");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
         st.append(" ORDER BY THE_YEAR, THE_MONTH");
       }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
       if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
+        ++index;
+        pstmt.setInt(index, idUser);
       }
-
+      if (sportType != -1) {
+        ++index;
+        pstmt.setInt(index, sportType);
+      }
       ResultSet rs = pstmt.executeQuery();
       while (rs.next()) {
         res.add(new DataStatYearMonth(rs.getInt(1), rs.getInt(2), rs
@@ -938,7 +960,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return les stats par semaine.
    * @throws SQLException
    */
-  public List<DataStatYearWeek> statByWeek(int idUser) throws SQLException {
+  public List<DataStatYearWeek> statByWeek(int idUser, int sportType) throws SQLException {
     log.info(">>statByWeek");
 
     List<DataStatYearWeek> res = new ArrayList<DataStatYearWeek>();
@@ -959,13 +981,16 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" APP.yearWeek(LAP.start_time) AS THE_YEAR,");
         st.append(" APP.week(LAP.start_time) AS THE_WEEK,");
         st.append(" LAP.total_dist AS THE_TOT_DIST,");
-        st.append(" CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end AS THE_TOT_TIME,");   
-        //st.append(" LAP.total_time AS THE_TOT_TIME,");
+        st.append(" CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end AS THE_TOT_TIME,");
+        // st.append(" LAP.total_time AS THE_TOT_TIME,");
         st.append(" LAP.id AS THE_ID");
         st.append(" FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
         st.append("WHERE LAP.ID = RUN.ID");
+        if (sportType != -1) {
+          st.append(" AND SPORT_TYPE=?");
+        }
         st.append(" ) tt ");
         st.append(" GROUP BY THE_YEAR, THE_WEEK");
         st.append(" ORDER  BY THE_YEAR, THE_WEEK");
@@ -982,22 +1007,29 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" APP.yearWeek(LAP.start_time) AS THE_YEAR,");
         st.append(" APP.week(LAP.start_time) AS THE_WEEK,");
         st.append(" LAP.total_dist AS THE_TOT_DIST,");
-//        st.append(" LAP.total_time AS THE_TOT_TIME,");
-        st.append(" CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end AS THE_TOT_TIME,");   
+        // st.append(" LAP.total_time AS THE_TOT_TIME,");
+        st.append(" CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end AS THE_TOT_TIME,");
         st.append(" LAP.id AS THE_ID");
         st.append(" FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
         st.append("WHERE LAP.ID = RUN.ID ");
         st.append(" AND RUN.id_user=?");
+        if (sportType != -1) {
+          st.append(" AND SPORT_TYPE=?");
+        }
         st.append(" ) tt ");
         st.append(" GROUP BY THE_YEAR, THE_WEEK");
         st.append(" ORDER  BY THE_YEAR, THE_WEEK");
       }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
       if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
+        pstmt.setInt(++index, idUser);
+      }
+      if (sportType != -1) {
+        pstmt.setInt(++index, sportType);
       }
       ResultSet rs = pstmt.executeQuery();
 
@@ -1027,7 +1059,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return les stats par jour de la semaine.
    * @throws SQLException
    */
-  public DataStat[] statByDayOfWeek(int idUser) throws SQLException {
+  public DataStat[] statByDayOfWeek(int idUser, int sportType) throws SQLException {
     log.info(">>statByDayOfWeek");
 
     DataStat[] res = new DataStat[7];
@@ -1053,6 +1085,9 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
         st.append("WHERE LAP.ID = RUN.ID");
+        if (sportType != -1) {
+          st.append(" AND SPORT_TYPE=?");
+        }
         st.append(" ) tt ");
         st.append(" GROUP BY THE_DAY");
         st.append(" ORDER BY THE_DAY");
@@ -1074,14 +1109,21 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
         st.append("WHERE LAP.ID = RUN.ID ");
         st.append(" AND RUN.id_user=?");
+        if (sportType != -1) {
+          st.append(" AND SPORT_TYPE=?");
+        }
         st.append(" ) tt ");
         st.append(" GROUP BY THE_DAY");
         st.append(" ORDER BY THE_DAY");
       }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
       if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
+        pstmt.setInt(++index, idUser);
+      }
+      if (sportType != -1) {
+        pstmt.setInt(++index, sportType);
       }
 
       ResultSet rs = pstmt.executeQuery();
@@ -1107,7 +1149,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return les stats par mois.
    * @throws SQLException
    */
-  public List<DataStatYearMonth> statByMonth(int idUser) throws SQLException {
+  public List<DataStatYearMonth> statByMonth(int idUser, int sportType) throws SQLException {
     log.info(">>statByMonth");
 
     List<DataStatYearMonth> res = new ArrayList<DataStatYearMonth>();
@@ -1120,12 +1162,15 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" Year(LAP.start_time) AS THE_YEAR,");
         st.append(" Month(LAP.start_time) AS THE_MONTH,");
         st.append(" SUM(LAP.total_dist) AS TOT_DIST, ");
-        st.append(" SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");   
+        st.append(" SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");
         st.append("COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
-        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append("WHERE LAP.ID = RUN.ID");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
         st.append(" ORDER  BY THE_YEAR, THE_MONTH");
       }
@@ -1134,20 +1179,27 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" Year(LAP.start_time) AS THE_YEAR,");
         st.append(" Month(LAP.start_time) AS THE_MONTH,");
         st.append(" SUM(LAP.total_dist) AS TOT_DIST, ");
-        st.append(" SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");   
+        st.append(" SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");
         st.append("COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
         st.append("WHERE LAP.ID = RUN.ID ");
         st.append(" AND RUN.id_user=?");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" GROUP BY Year(LAP.start_time), Month(LAP.start_time)");
         st.append(" ORDER  BY THE_YEAR, THE_MONTH");
       }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
       if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
+        pstmt.setInt(++index, idUser);
+      }
+      if (sportType != -1) {
+        pstmt.setInt(++index, sportType);
       }
 
       ResultSet rs = pstmt.executeQuery();
@@ -1172,7 +1224,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return les stats par an.
    * @throws SQLException
    */
-  public List<DataStatYear> statByYear(int idUser) throws SQLException {
+  public List<DataStatYear> statByYear(int idUser, int sportType) throws SQLException {
     log.info(">>statByYear");
 
     List<DataStatYear> res = new ArrayList<DataStatYear>();
@@ -1184,31 +1236,41 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append("SELECT ");
         st.append("Year(LAP.start_time) AS THE_YEAR,");
         st.append("SUM(LAP.total_dist),");
-        st.append("SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");   
+        st.append("SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");
         st.append("COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
         st.append("WHERE LAP.ID = RUN.ID ");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" GROUP BY Year(LAP.start_time)");
       }
       else {
         st.append("SELECT ");
         st.append("Year(LAP.start_time) AS THE_YEAR,");
         st.append("SUM(LAP.total_dist),");
-        st.append("SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");   
+        st.append("SUM(CASE WHEN LAP.total_moving_time > 0 then LAP.total_moving_time else LAP.total_time end),");
         st.append("COUNT(DISTINCT LAP.id) ");
         st.append("FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
         st.append("WHERE LAP.ID = RUN.ID ");
         st.append(" AND RUN.id_user=?");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" GROUP BY Year(LAP.start_time)");
       }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
       if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
+        pstmt.setInt(++index, idUser);
+      }
+      if (sportType != -1) {
+        pstmt.setInt(++index, sportType);
       }
       ResultSet rs = pstmt.executeQuery();
 
@@ -1229,60 +1291,13 @@ public final class RunLapTableManager extends AbstractTableManager {
   }
 
   /**
-   * Compte le nombre de run.
-   * 
-   * @param idUser
-   * @return le nombre de run.
-   */
-  public int count(int idUser) throws SQLException {
-    if (log.isInfoEnabled()) {
-      log.debug(">>count=" + idUser);
-    }
-
-    int tot = 0;
-    Connection conn = DatabaseManager.getConnection();
-
-    try {
-      StringBuilder st = new StringBuilder();
-      if (DataUser.isAllUser(idUser)) {
-        st.append("SELECT COUNT(DISTINCT id) FROM ");
-        st.append(getTableName());
-      }
-      else {
-        st.append("SELECT COUNT(DISTINCT LAP.id) FROM ");
-        st.append(getTableName() + " LAP, ");
-        st.append(RunTableManager.getInstance().getTableName() + " RUN ");
-        st.append("WHERE LAP.ID = RUN.ID ");
-        st.append(" AND RUN.id_user=?");
-      }
-
-      PreparedStatement pstmt = conn.prepareStatement(st.toString());
-      if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
-      }
-      ResultSet rs = pstmt.executeQuery();
-      if (rs.next()) {
-        tot = rs.getInt(1);
-      }
-    }
-    finally {
-      DatabaseManager.releaseConnection(conn);
-    }
-
-    if (log.isInfoEnabled()) {
-      log.info("<<count tot=" + tot);
-    }
-    return tot;
-  }
-
-  /**
-   * Restitue la distance totale par mois.
+   * Restitue les informations de statistiques.
    * 
    * @param idRun
    * @return la distance totale.
    * @throws SQLException
    */
-  public DataStatTot total() throws SQLException {
+  public DataStatTot total(int idUser, int sportType) throws SQLException {
     log.info(">>total");
 
     DataStatTot tot = null;
@@ -1296,11 +1311,28 @@ public final class RunLapTableManager extends AbstractTableManager {
       st.append(" SUM(total_dist), ");
       st.append(" SUM(total_time) ");
       st.append("FROM ");
-      st.append(getTableName());
+      st.append(getTableName() + " LAP, ");
+      st.append(RunTableManager.getInstance().getTableName() + " RUN ");
+      if (!DataUser.isAllUser(idUser) || sportType != -1) {
+        st.append("WHERE LAP.ID = RUN.ID");
+      }
+      if (!DataUser.isAllUser(idUser)) {
+        st.append(" AND id_user=?");
+      }
+      if (sportType != -1) {
+        st.append(" AND sport_type=?");
+      }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
-      ResultSet rs = pstmt.executeQuery();
+      int index = 0;
+      if (!DataUser.isAllUser(idUser)) {
+        pstmt.setInt(++index, idUser);
+      }
+      if (sportType != -1) {
+        pstmt.setInt(++index, sportType);
+      }
 
+      ResultSet rs = pstmt.executeQuery();
       if (rs.next()) {
         tot = new DataStatTot(rs.getInt(1), rs.getFloat(2), rs.getInt(3));
       }
@@ -1324,7 +1356,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return la distance totale.
    * @throws SQLException
    */
-  public List<DataStatYearWeek> distanceByWeek(int idUser) throws SQLException {
+  public List<DataStatYearWeek> distanceByWeek(int idUser, int sportType) throws SQLException {
     log.info(">>distanceByWeek");
 
     List<DataStatYearWeek> res = new ArrayList<DataStatYearWeek>();
@@ -1348,7 +1380,10 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(" FROM ");
         st.append(getTableName() + " LAP, ");
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
-        st.append("WHERE LAP.ID = RUN.ID ");
+        st.append("WHERE LAP.ID=RUN.ID");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" ) tt ");
         st.append(" GROUP BY THE_YEAR, THE_WEEK");
         st.append(" ORDER  BY THE_YEAR, THE_WEEK");
@@ -1370,14 +1405,21 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
         st.append("WHERE LAP.ID = RUN.ID ");
         st.append(" AND RUN.id_user=?");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" ) tt ");
         st.append(" GROUP BY THE_YEAR, THE_WEEK");
-        st.append(" ORDER  BY THE_YEAR, THE_WEEK");
+        st.append(" ORDER BY THE_YEAR, THE_WEEK");
       }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
       if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
+        pstmt.setInt(++index, idUser);
+      }
+      if (sportType != -1) {
+        pstmt.setInt(++index, sportType);
       }
       ResultSet rs = pstmt.executeQuery();
 
@@ -1488,7 +1530,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return la distance totale.
    * @throws SQLException
    */
-  public DataStat[] distanceByDayOfWeek(int idUser) throws SQLException {
+  public DataStat[] distanceByDayOfWeek(int idUser, int sportType) throws SQLException {
     log.info(">>distanceByDayOfWeek");
 
     DataStat[] res = new DataStat[7];
@@ -1505,11 +1547,17 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append("COUNT(DISTINCT id) ");
         st.append("FROM ");
         st.append("(SELECT");
-        st.append(" APP.dayOfWeek(start_time) AS THE_DAY,");
-        st.append(" total_dist,");
-        st.append(" id");
+        st.append(" APP.dayOfWeek(LAP.start_time) AS THE_DAY,");
+        st.append(" LAP.total_dist,");
+        st.append(" LAP.id");
         st.append(" FROM ");
-        st.append(getTableName());
+        st.append(getTableName() + " LAP");
+        if (sportType != -1) {
+          st.append(", " + RunTableManager.getInstance().getTableName()
+                    + " RUN ");
+          st.append("WHERE LAP.ID = RUN.ID");
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" ) tt ");
         st.append(" GROUP BY THE_DAY");
         st.append(" ORDER BY THE_DAY");
@@ -1529,14 +1577,21 @@ public final class RunLapTableManager extends AbstractTableManager {
         st.append(RunTableManager.getInstance().getTableName() + " RUN ");
         st.append("WHERE LAP.ID = RUN.ID ");
         st.append(" AND RUN.id_user=?");
+        if (sportType != -1) {
+          st.append(" AND RUN.SPORT_TYPE=?");
+        }
         st.append(" ) tt ");
         st.append(" GROUP BY THE_DAY");
         st.append(" ORDER BY THE_DAY");
       }
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      int index = 0;
       if (!DataUser.isAllUser(idUser)) {
-        pstmt.setInt(1, idUser);
+        pstmt.setInt(++index, idUser);
+      }
+      if (sportType != -1) {
+        pstmt.setInt(++index, sportType);
       }
 
       ResultSet rs = pstmt.executeQuery();
@@ -1673,7 +1728,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @throws SQLException
    */
   public int[] altitude(int idRun, int lapIndex) throws SQLException {
-    return  altitude(idRun, lapIndex, true);
+    return altitude(idRun, lapIndex, true);
   }
 
   /**
@@ -1684,8 +1739,8 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @throws SQLException
    */
   public int[] altitudeOriginal(int idRun, int lapIndex) throws SQLException {
-    return  altitude(idRun, lapIndex, false);
-   }
+    return altitude(idRun, lapIndex, false);
+  }
 
   private int[] altitude(int idRun, int lapIndex, boolean isFilter) throws SQLException {
     int[] res = new int[2];
@@ -1712,9 +1767,12 @@ public final class RunLapTableManager extends AbstractTableManager {
         cal.add(Calendar.MILLISECOND, totTime * 10);
         Date dateEnd = cal.getTime();
 
-        res = isFilter?RunTrkTableManager.getInstance()
-            .altitude(idRun, dateDeb, dateEnd):RunTrkTableManager.getInstance()
-            .altitudeOriginal(idRun, dateDeb, dateEnd);
+        res = isFilter ? RunTrkTableManager.getInstance().altitude(idRun,
+                                                                   dateDeb,
+                                                                   dateEnd)
+            : RunTrkTableManager.getInstance().altitudeOriginal(idRun,
+                                                                dateDeb,
+                                                                dateEnd);
       }
       else {
         res[0] = 0;
