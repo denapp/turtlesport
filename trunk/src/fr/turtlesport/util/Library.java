@@ -114,10 +114,7 @@ public final class Library {
   private static void loadMacosx(Class<?> clazz, String libname) {
     log.debug(">>loadMacosx " + libname);
 
-    String libNameOS = System.mapLibraryName(libname);
-    if (libNameOS.endsWith(".dylib")) {
-      libNameOS = libname.substring(0, libname.length() - 6) + ".jnilib";  
-    }
+    String libNameOS = "lib" + libname + ".jnilib";  
     
     try {
       // recuperation du path complet de la librairie.
