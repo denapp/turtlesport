@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="turtlesport" default="jarApp" basedir=".">
+
+	<!-- set global properties for this build -->
+	<property name="Name" value="turtlesport" />
+	<property name="version" value="1.5" />
+	<property name="src" location="${basedir}/src" />
+	<property name="test" location="${basedir}/test" />
+	<property name="srcccommonUsbCom" location="${basedir}/c/usbcom/srccommon" />
+	<property name="srcMailWin" location="${basedir}/c/mailWin/src" />
+	<property name="srcLaunchWinApp" location="${basedir}/c/launchWinApp/src" />
+	<property name="srcRegistry" location="${basedir}/c/registryWin/src" />
+	<property name="dest" location="${basedir}/classes" />
+	<property name="destTest" location="${basedir}/classesTest" />
+	<property name="lib" location="${basedir}/lib" />
+	<property name="ant" location="${basedir}/ant" />
+	<property name="exe" location="${basedir}/exe" />
+	<property name="build.javadocs" location="docs/api" />
+	<property name="packages" value="fr.turtlesport.*" />
+	<property name="release" location="${basedir}/release" />
+	<property name="jarApp" value="${Name}.jar" />
+	<property name="dirBundle" location="${exe}/macosx/turlesport" />
+	<property name="dirBundlejre" location="${exe}/macosx/turlesportjre" />
+	<property name="rootdir" value='/tmp/turtlesport_dist' />
+	<property name="rpmbuilddir" value="${rootdir}/RPMBUILD" />
+	<property name="rpmdistdir" value="${rpmbuilddir}/BUILDROOT/turtlesport-${version}-1.noarch" />
+	<property name="packaging" value="${basedir}/packaging" />
+	<property name="macosx.javahome.dir" location="/Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home" />
+	
+	<target name="init">
+		<tstamp />
+		<mkdir dir="${dest}" />
+		<mkdir dir="${destTest}" />
+		<mkdir dir="${exe}" />
+		<mkdir dir="${exe}/win" />
+		<mkdir dir="${exe}/linux" />
+		<mkdir dir="${exe}/macosx" />
+		<mkdir dir="${dirBundle}" />
+		<mkdir dir="${dirBundlejre}" />
+		<mkdir dir="${release}" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${dest}" />
+	</target>
+
+	<!-- classpath -->
+	<path id="app.classpath">
+		<fileset dir="${lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<path id="ant.classpath">
+		<fileset dir="${ant}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<!-- task jarbundler pour Mac OS X -->
+	<taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler">
+		<classpath>
+			<path refid="ant.classpath" />
+		</classpath>
+	</taskdef>
+	<!-- task xjc -->
+	<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
+		<classpath>
+			<path refid="ant.classpath" />
+		</classpath>
+	</taskdef>
+
+	<!-- task  Linux desktop entry-->
+	<taskdef name="desktopLinuxEntry" classname="com.googlecode.ant_deb_task.DesktopEntry">
+		<classpath>
+			<path refid="ant.classpath" />
+		</classpath>
+	</taskdef>
+	<!-- Creates an deb package-->
+	<taskdef name="deb" classname="com.googlecode.ant_deb_task.Deb">
+		<classpath>
+			<path refid="ant.classpath" />
+		</classpath>
+	</taskdef>
+
+	<!--  ================================================================== -->
+	<!--   Utilisation                                                       -->
+	<!--  ================================================================== -->
+	<target name="usage">
+		<echo message="${Name} : Build instructions" />
+		<echo message="-------------------------------------------------------------" />
+		<echo message="available targets are:" />
+		<echo message="make --> compilation du projet" />
+		<echo message="remake --> Nettoyage et compilation du projet" />
+		<echo message="jar -->construction de l'archive Java" />
+		<echo message="javadocs --> création de de la documentation des api" />
+		<echo message="-------------------------------------------------------------" />
+	</target>
+
+	<!--  ================================================================== -->
+	<!--   Compilation du projet                                             -->
+	<!--  ================================================================== -->
+	<target name="make" depends="init">
+		<copy todir="${dest}">
+			<fileset dir="${src}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javac compiler="javac1.6" srcdir="${src}" destdir="${dest}" debug="yes" deprecation="on" encoding="ISO-8859-1">
+			<compilerarg value="-Xlint:unchecked" />
+			<classpath>
+				<path refid="app.classpath" />
+			</classpath>
+		</javac>
+		<!--
+		<javac compiler="javac1.5" srcdir="${test}" destdir="${destTest}" debug="yes" deprecation="on" encoding="ISO-8859-1">
+			<compilerarg value="-Xlint:unchecked" />
+			<classpath>
+				<path refid="app.classpath" />
+				<pathelement path="${dest}" />
+			</classpath>
+		</javac>
+		-->
+	</target>
+
+	<!--  ================================================================== -->
+	<!--   Nettoyage et compilation du projet                                -->
+	<!--  ================================================================== -->
+	<target name="remake" depends="clean,make" />
+
+	<!--  ================================================================== -->
+	<!--   JNI                                                               -->
+	<!--  ================================================================== -->
+	<target name="jniUsbcom" depends="make">
+		<javah destdir="${srcccommonUsbCom}" force="yes" verbose="true">
+			<class name="fr.turtlesport.UsbProtocol" />
+			<classpath>
+				<pathelement location="${dest}" />
+			</classpath>
+		</javah>
+	</target>
+	<target name="jniRegistryWin32" depends="make">
+		<javah destdir="${srcRegistry}" force="yes" verbose="true">
+			<class name="fr.turtlesport.reg.RegistryWin" />
+			<classpath>
+				<pathelement location="${dest}" />
+			</classpath>
+		</javah>
+	</target>
+	<target name="jniWinMail" depends="make">
+		<javah destdir="${srcMailWin}" force="yes" verbose="true">
+			<class name="fr.turtlesport.mail.windows.MailClientWinOutlook" />
+			<classpath>
+				<pathelement location="${dest}" />
+			</classpath>
+		</javah>
+	</target>
+	<target name="jniLaunchWinApp" depends="make">
+		<javah destdir="${srcLaunchWinApp}" force="yes" verbose="true">
+			<class name="fr.turtlesport.util.LaunchWinApp" />
+			<classpath>
+				<pathelement location="${dest}" />
+			</classpath>
+		</javah>
+	</target>
+
+	<!--  ================================================================== -->
+	<!--   Archive jarApp                                                                                                                                               -->
+	<!--  ================================================================== -->
+	<target name="jarApp" depends="remake">
+		<delete file="${exe}/${jarApp}" />
+		<jar destfile="${exe}/${jarApp}" basedir="${dest}">
+			<manifest>
+				<attribute name="Main-Class" value="fr.turtlesport.Launcher" />
+				<attribute name="Class-Path" value="fit.jar swingx.jar swingx-ws.jar log4j.jar derby.jar jcommon.jar jfreechart.jar" />
+				<section name="common">
+					<attribute name="Specification-Title" value="${Name}" />
+					<attribute name="Specification-Version" value="${version}" />
+				</section>
+			</manifest>
+		</jar>
+		<copy file="${exe}/${jarApp}" todir="${exe}/win" overwrite="yes" />
+		<copy file="${exe}/${jarApp}" todir="${exe}/linux" overwrite="yes" />
+		<copy file="${exe}/${jarApp}" todir="${exe}/macosx" overwrite="yes" />
+		<delete file="${exe}/${jarApp}" />
+	</target>
+
+	<!--  ================================================================== -->
+	<!--   Bundle jarApp macosx                                              -->
+	<!--  ================================================================== -->
+	<target name="xjcTcx">
+		<xjc schema="${src}/fr/turtlesport/geo/garmin/tcx/TrainingCenterDatabasev2.xsd" destdir="${src}" />
+	</target>
+
+	<!--  ================================================================== -->
+	<!--   Bundle jarApp macosx                                              -->
+	<!--  ================================================================== -->
+	<target name="jarAppBundle2">
+	  <!-- task oracle -->
+	  <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask">
+	     <classpath>
+		    <path refid="ant.classpath" />
+	     </classpath>
+    </taskdef>
+	    
+		<delete dir="${dirBundle}" />
+		<mkdir dir="${dirBundle}" />
+		<bundleapp 
+   		    outputdirectory="${dirBundle}" 
+		    name="TurtleSport" 
+		    displayname="TurtleSport" 
+		    identifier="fr.turtlesport.Launcher"
+		    icon="${exe}/macosx/turtleIcon.icns"
+            shortversion="1.0"
+		    copyright="2013 Turtle Sport"
+		    applicationCategory="public.app-category.developer-tools"
+	        mainclassname="fr/turtlesport/Launcher">
+			<!-- Classpath -->
+	        <classpath dir="${exe}/macosx/">
+                 <include name="turtlesport.jar"/>
+                 <include name="fit.jar"/>
+	             <include name="jcommon.jar"/>
+	             <include name="jfreechart.jar"/>
+	             <include name="swingx.jar"/>
+                 <include name="swingx-ws.jar"/>
+	             <include name="derby.jar"/>
+                 <include name="log4j.jar"/>
+                 <include name="log4J.xml"/>
+	    		 <include name="libturtleUsbjni.jnilib" />
+  	        </classpath>	  	    
+			<!-- Adjust the look and feel and behavior -->
+			<option value="-Dapple.laf.useScreenMenuBar=true" />
+			<option value="-Dapple.awt.brushMetal=true" />
+			<option value="-Dapple.awt.showGrowBox=false" />
+		      <option value="-Dcom.apple.macos.use-file-dialog-packages=true"/>
+		      <option value="-Dcom.apple.macos.useScreenMenuBar=true"/>
+		      <option value="-Dcom.apple.mrj.application.apple.menu.about.name=${bundle.name}"/>
+		      <option value="-Dcom.apple.smallTabs=true"/>
+	        <option value="-Xmx1024M"/>
+		</bundleapp>
+
+		<!-- avec jre -->
+		<delete dir="${dirBundlejre}" />
+		<mkdir dir="${dirBundlejre}" />
+		<bundleapp 
+   		    outputdirectory="${dirBundlejre}" 
+		    name="TurtleSport" 
+		    displayname="TurtleSport" 
+		    identifier="fr.turtlesport.Launcher"
+		    icon="${exe}/macosx/turtleIcon.icns"
+            shortversion="1.0"
+		    copyright="2013 Turtle Sport"
+		    applicationCategory="public.app-category.developer-tools"
+	        mainclassname="fr/turtlesport/Launcher">
+			<!-- Classpath -->
+	        <classpath dir="${exe}/macosx/">
+                 <include name="turtlesport.jar"/>
+                 <include name="fit.jar"/>
+	             <include name="jcommon.jar"/>
+	             <include name="jfreechart.jar"/>
+	             <include name="swingx.jar"/>
+                 <include name="swingx-ws.jar"/>
+	             <include name="derby.jar"/>
+                 <include name="log4j.jar"/>
+                 <include name="log4J.xml"/>
+	    		 <include name="libturtleUsbjni.jnilib" />
+  	        </classpath>
+			<!-- runtime -->
+	        <runtime dir="${macosx.javahome.dir}"/>
+	  	    
+			<!-- Adjust the look and feel and behavior -->
+			<option value="-Dapple.laf.useScreenMenuBar=true" />
+			<option value="-Dapple.awt.brushMetal=true" />
+			<option value="-Dapple.awt.showGrowBox=false" />
+		      <option value="-Dcom.apple.macos.use-file-dialog-packages=true"/>
+		      <option value="-Dcom.apple.macos.useScreenMenuBar=true"/>
+		      <option value="-Dcom.apple.mrj.application.apple.menu.about.name=${bundle.name}"/>
+		      <option value="-Dcom.apple.smallTabs=true"/>
+	        <option value="-Xmx1024M"/>
+		</bundleapp>
+	</target>
+	<target name="jarAppBundle">
+		<delete dir="${dirBundle}" />
+		<mkdir dir="${dirBundle}" />
+		<jarbundler dir="${dirBundle}" name="TurtleSport" mainclass="fr.turtlesport.Launcher" jar="${exe}/macosx/${jarApp}" build="${version}" version="${version}" workingdirectory="$APP_PACKAGE" infostring="Turtle Sport" jvmversion="1.5+" vmoptions="-Xmx256m" shortname="Turtle Sport" verbose="true" icon="${exe}/macosx/turtleIcon.icns" showplist="true">
+			<!-- Adjust the look and feel and behavior -->
+			<javaproperty name="apple.laf.useScreenMenuBar" value="true" />
+			<javaproperty name="apple.awt.brushMetal" value="true" />
+			<javaproperty name="apple.awt.showGrowBox" value="false" />
+		</jarbundler>
+
+		<!-- copy des jars -->
+		<copy file="${exe}/macosx/fit.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/jcommon.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/jfreechart.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/swingx.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/swingx-ws.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/derby.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/log4j.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/log4J.xml" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
+		<copy file="${exe}/macosx/libturtleUsbjni.jnilib" tofile="${dirBundle}/TurtleSport.app/Contents/Resources/Java/libturtleUsbjni.jnilib" />
+	</target>
+
+
+	<!--  ============================================================== -->
+	<!--   Creation de de la documentation des API                       -->
+	<!--  ============================================================== -->
+	<target name="javadocs">
+		<mkdir dir="${build.javadocs}" />
+		<javadoc packagenames="${packages}" sourcepath="${src}" destdir="${build.javadocs}" author="false" version="true" use="true" protected="yes" windowtitle="GIE SESAM VITALE - SIC v${version} API Spécification">
+			<doctitle>
+				<![CDATA[Turtle Sport, v ${version}<br>API Sp&eacute;cification]]></doctitle>
+			<header>
+				<![CDATA[<b>Turtle Sport</b>
+			<br>
+				<font size=-1>USB v${version}</font>]]></header>
+			<classpath>
+				<path refid="app.classpath" />
+			</classpath>
+		</javadoc>
+	</target>
+
+	<!--  ============================================================== -->
+	<!--   Release                                                       -->
+	<!--  ============================================================== -->
+	<!-- Launch4j -->
+	<target name="launch4j">
+		<property name="launch4j.dir" location="C://Program Files//launch4j" />
+		<taskdef name="launch4j" classname="net.sf.launch4j.ant.Launch4jTask" classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />
+		<delete file="${exe}/win/turtlesport.exe" />
+		<delete file="${exe}/win/turtlesport.exe" />
+		<launch4j configFile="${exe}/win/launch4J/installerLaunch4j.xml" />
+	</target>
+	<!-- Win : Création du setup avec Inno Setup -->
+	<target name="SetupWin">
+		<exec executable="C:\Program Files\Inno Setup 5\ISCC.exe">
+			<arg value="${exe}\win\InnoSetup\turtleSport.iss" />
+		</exec>
+	</target>
+
+	<target name="release" depends="init, releaseLinux, releaseWin, releaseSource" />
+	<target name="releaseMacosx">
+		<delete file="${release}/${Name}-macosx-${version}.dmg" />
+		<exec executable="hdiutil">
+			<arg value="create" />
+			<arg value="-srcfolder" />
+			<arg value="${dirBundle}" />
+			<arg value="${release}/${Name}-macosx-${version}.dmg" />
+		</exec>
+		<exec executable="hdiutil">
+			<arg value="verify" />
+			<arg value="${release}/${Name}-macosx-${version}.dmg" />
+		</exec>
+		<!--  jre -->
+		<delete file="${release}/${Name}-jre-macosx-${version}.dmg" />
+		<exec executable="hdiutil">
+			<arg value="create" />
+			<arg value="-srcfolder" />
+			<arg value="${dirBundlejre}" />
+			<arg value="${release}/${Name}-jre-macosx-${version}.dmg" />
+		</exec>
+		<exec executable="hdiutil">
+			<arg value="verify" />
+			<arg value="${release}/${Name}-jre-macosx-${version}.dmg" />
+		</exec>
+	</target>
+
+	<!-- Linux -->
+	<target name="releaseLinux" depends="packagingLinuxTar, desktopLinuxTurtle, packagingLinuxDeb, packagingLinuxRmp" />
+
+	<!-- Desktop Linux Turtle -->
+	<target name="desktopLinuxTurtle">
+		<desktopLinuxEntry toFile="${exe}/linux/turtlesport.desktop" name="Turtle Sport" genericname="Turtle Sport Garmin logbook" icon="/usr/share/turtlesport/turtlesport.xpm" exec="turtlesport" categories="Education;" type="Application" comment="Turtle Sport Garmin logbook" />
+	</target>
+
+	<!-- Creates a Ubuntu/Debian package -->
+	<target name="packagingLinuxTar">
+		<!-- create tar -->
+		<delete file="${release}/${Name}-linux-${version}.tar" />
+		<tar destfile="${release}/${Name}-linux-${version}.tar">
+			<tarfileset dir="${exe}/linux" username="root" group="root" mode="755">
+			</tarfileset>
+		</tar>
+	</target>
+
+	<!-- Creates a Ubuntu/Debian package -->
+	<target name="packagingLinuxDeb">
+		<deb todir="${release}" package="turtlesport" section="utils" depends=" sun-java6-jre | openjdk-6-jre | sun-java7-jre | openjdk-7-jre" postinst="${packaging}/linux/debian/postinst">
+			<version upstream="${version}" />
+			<maintainer name="Denis Apparicio" email="turtlesport@sourceforge.net" />
+			<description synopsis="Turtle Sport">Turtle Sport garmin logbook.</description>
+			<tarfileset dir="${exe}/linux" prefix="usr/share/turtlesport" username="root" group="root" filemode="755">
+				<exclude name="**/turtlesport" />
+				<exclude name="**/turtleSport.png" />
+				<exclude name="**/turtlesport125.png" />
+				<exclude name="**/turtlesport.desktop" />
+				<exclude name="**/51-garmin.rules" />
+			</tarfileset>
+			<tarfileset dir="${exe}/linux" prefix="usr/share/pixmaps" username="root" group="root">
+				<include name="**/turtlesport125.png" />
+			</tarfileset>
+			<tarfileset dir="${exe}/linux" prefix="usr/bin" username="root" group="root" filemode="755">
+				<include name="turtlesport" />
+			</tarfileset>
+			<tarfileset dir="${exe}/linux" prefix="usr/share/applications" username="root" group="root">
+				<include name="turtlesport.desktop" />
+			</tarfileset>
+			<!--
+			<tarfileset dir="${exe}/linux" prefix="etc/udev/rules.d" username="root" group="root" filemode="644">
+					<include name="51-garmin.rules" />
+			</tarfileset>
+			-->
+		</deb>
+	</target>
+
+	<!-- Creates a rpm package -->
+	<target name="packagingLinuxRmp">
+		<echo message='Prepare files to build RPM package' />
+
+		<delete dir="${rootdir}" />
+		<!-- Create structure-->
+		<mkdir dir='${rootdir}' />
+		<mkdir dir='${rpmbuilddir}' />
+		<mkdir dir='${rpmbuilddir}/tmp' />
+		<mkdir dir='${rpmbuilddir}/SRMPS' />
+		<mkdir dir='${rpmbuilddir}/RPMS' />
+		<mkdir dir='${rpmbuilddir}/SPECS' />
+		<mkdir dir='${rpmbuilddir}/BUILD' />
+		<mkdir dir='${rpmdistdir}' />
+		<mkdir dir='${rpmdistdir}/usr/bin' />
+		<mkdir dir='${rpmdistdir}/usr/share/turtlesport/' />
+		<mkdir dir='${rpmdistdir}/usr/share/pixmaps' />
+
+		<!-- Copy files -->
+		<copy todir='${rpmbuilddir}/SPECS'>
+			<fileset file='${packaging}/linux/rpm/turtlesport.spec' />
+		</copy>
+		<copy todir='${rpmdistdir}/usr/bin'>
+			<fileset file='${exe}/linux/turtlesport' />
+		</copy>
+		<copy todir='${rpmdistdir}/usr/share/turtlesport'>
+			<fileset dir="${exe}/linux/">
+				<exclude name="**/turtlesport" />
+				<exclude name="**/turtleSport.png" />
+				<exclude name="**/turtlesport125.png" />
+			</fileset>
+		</copy>
+		<copy todir='${rpmdistdir}/usr/share/applications'>
+			<fileset file='${packaging}/linux/turtlesport.desktop' />
+		</copy>
+		<copy todir='${rpmdistdir}/usr/share/pixmaps'>
+			<fileset file='${exe}/linux/turtlesport125.png' />
+		</copy>
+		<!-- rights-->
+		<chmod file="${rpmdistdir}/usr/bin/turtlesport" perm="ugo+rx" />
+
+		<!-- all -->
+		<copy file='${packaging}/linux/rpm/.rpmmacros' toFile='${user.home}/.rpmmacros' overwrite='yes' />
+		<replace dir='${rpmbuilddir}/SPECS' value='${version}'>
+			<include name='turtlesport.spec' />
+			<replacetoken>VERSION_REPLACED_BY_ANT</replacetoken>
+		</replace>
+		<rpm failOnError='true' specFile='turtlesport.spec' topDir='${rpmbuilddir}' cleanBuildDir='yes' removeSpec='no' command='-bb -vv --target noarch' />
+		<copy file="${rpmbuilddir}/RPMS/turtlesport-${version}-1.all.rpm" todir="${release}" overwrite="true" />
+	</target>
+
+	<target name="releaseWin" depends="launch4j,SetupWin">
+		<delete file="${release}/${Name}-win-${version}.zip" />
+		<zip destfile="${release}/${Name}-win-${version}.zip" basedir="${exe}/win" excludes="InnoSetup/**, launch4J/**" />
+		<copy file="${exe}\win\InnoSetup\Output\${Name}-win-${version}.exe" todir="${release}/" overwrite="yes" />
+	</target>
+	<target name="releaseSource">
+		<delete file="${release}/${Name}-source-${version}.zip" />
+		<zip destfile="${release}/${Name}-source-${version}.zip" basedir="${src}" />
+	</target>
+
+</project>
+
