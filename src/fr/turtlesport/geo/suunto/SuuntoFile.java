@@ -83,9 +83,9 @@ public class SuuntoFile implements IGeoFile {
       handler = new SuuntoHandler();
       parser.parse(in, handler);
 
-      if (log.isDebugEnabled()) {
-        log.debug("nb points=" + handler.listPoints.size());
-        log.debug("nb lap=" + handler.listLap.size());
+      if (log.isInfoEnabled()) {
+        log.info("nb points=" + handler.listPoints.size());
+        log.info("nb lap=" + handler.listLap.size());
       }
 
       // construction de la reponse
@@ -148,12 +148,8 @@ public class SuuntoFile implements IGeoFile {
 
     @Override
     public void endDocument() throws SAXException {
-      if (log.isInfoEnabled()) {
-        log.info(">>endDocument");
-      }
-
-      if (listLap.size() < 1) {
-        return;
+      if (log.isDebugEnabled()) {
+        log.debug(">>endDocument");
       }
 
       // filtre des geopositions
@@ -204,12 +200,20 @@ public class SuuntoFile implements IGeoFile {
         for (SuuntoPoint p : listPoints) {
           lap.addPoint(p);
         }
+        if (listLap == null) {
+          listLap = new ArrayList<Lap>();
+        }
+        listLap.add(lap);
       }
       else {
         int i = 0;
         for (Lap lap : listLap) {
           long timeDeb = lap.getStartTime().getTime();
           long timeEnd = timeDeb + lap.getTotalTime();
+          if (log.isInfoEnabled()) {
+            log.info("timeDeb=" + timeDeb);
+            log.info("timeEnd=" + timeEnd);
+          }
           for (; i < len; i++) {
             long time = listPoints.get(i).getDate().getTime();
             if (time <= timeEnd) {
@@ -224,10 +228,14 @@ public class SuuntoFile implements IGeoFile {
 
       for (Lap lap : listLap) {
         lap.compute();
+        if (log.isInfoEnabled()) {
+          log.info("TotalTime=" + lap.getTotalTime());
+          log.info("distance=" + lap.distance());
+        }
       }
 
-      if (log.isInfoEnabled()) {
-        log.info("<<endDocument");
+      if (log.isDebugEnabled()) {
+        log.debug("<<endDocument");
       }
     }
 
@@ -241,11 +249,13 @@ public class SuuntoFile implements IGeoFile {
                              String localName,
                              String qName,
                              Attributes attrs) throws SAXParseException {
-      log.debug(">>startElement uri=" + uri + " localName=" + localName
-                + " qName=" + localName);
+      if (log.isDebugEnabled()) {
+        log.debug(">>startElement uri=" + uri + " localName=" + localName
+                  + " qName=" + localName);
+      }
 
-      // sample
-      if (localName.equals("sample")) {
+      // sample (suivant les versions Sample ou sample
+      if (localName.equals("sample") || localName.equals("Sample")) {
         currentSample = new SuuntoPoint();
         isSample = true;
       }
@@ -255,7 +265,9 @@ public class SuuntoFile implements IGeoFile {
         isLap = true;
       }
 
-      log.debug("<<startElement");
+      if (log.isDebugEnabled()) {
+        log.debug("<<startElement");
+      }
     }
 
     /*
@@ -265,21 +277,25 @@ public class SuuntoFile implements IGeoFile {
      * java.lang.String, java.lang.String)
      */
     public void endElement(String uri, String localName, String qName) {
-      log.debug(">>endElement uri=" + uri + " localName=" + localName
-                + " qName=" + qName);
+      if (log.isDebugEnabled()) {
+        log.debug(">>endElement uri=" + uri + " localName=" + localName
+                  + " qName=" + qName);
+      }
 
-      if (localName.equals("sample")) {
+      if (localName.equals("sample") || localName.equals("Sample")) {
         isSample = false;
         listPoints.add(currentSample);
       }
       if (localName.equals("Lap")) {
         isLap = false;
-        listLap.add(currentLap);
+        if (currentLap.getTotalTimeSeconds() > 0) {
+          listLap.add(currentLap);
+        }
       }
 
       // Balises filles sample
       // -----------------------
-      if (isSample) {
+      if (isSample && stBuffer != null) {
         // HR
         if (localName.equals("HR")) {
           currentSample.setHeartRate((int) (0.5 + 60 * Float.valueOf(stBuffer
@@ -374,7 +390,9 @@ public class SuuntoFile implements IGeoFile {
      */
     public void characters(char[] ch, int start, int length) {
       String st = new String(ch, start, length).trim();
-      log.debug(">>characters " + st);
+      if (log.isDebugEnabled()) {
+        log.debug(">>characters " + st);
+      }
 
       if (st.length() > 0) {
         if (stBuffer == null) {
@@ -385,7 +403,9 @@ public class SuuntoFile implements IGeoFile {
         }
       }
 
-      log.debug("<<characters");
+      if (log.isDebugEnabled()) {
+        log.debug("<<characters");
+      }
     }
 
     private Date convertDate(Date dateLap, int diff) {
