@@ -14,6 +14,7 @@ import java.util.ResourceBundle;
 
 import javax.activation.ActivationDataFlavor;
 import javax.activation.DataHandler;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -53,8 +54,7 @@ import fr.turtlesport.ui.swing.action.MapMercatorActionListener;
 import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTableCustom;
-import fr.turtlesport.ui.swing.component.jtable.DateShortDayCellRenderer;
-import fr.turtlesport.ui.swing.component.jtable.DateTimeShortCellRenderer;
+import fr.turtlesport.ui.swing.component.jtable.DateShortDayTimeShortCellRenderer;
 import fr.turtlesport.ui.swing.model.ModelPointsManager;
 import fr.turtlesport.ui.swing.model.ModelRun;
 import fr.turtlesport.ui.swing.model.ModelRunTable;
@@ -71,54 +71,54 @@ import fr.turtlesport.util.ResourceBundleUtility;
 public class JPanelTableRun extends JPanel implements IListDateRunFire,
                                           LanguageListener, UnitListener {
 
-  private static TurtleLogger         log;
+  private static TurtleLogger               log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelTableRun.class);
   }
 
-  private JTableCustom                jTable;
+  private JTableCustom                      jTable;
 
-  private DateShortDayCellRenderer    dateShortDayCellRenderer = new DateShortDayCellRenderer();
+  private DateShortDayTimeShortCellRenderer dateCellRenderer      = new DateShortDayTimeShortCellRenderer();
 
   // model
-  private ModelRunTable               model;
+  private ModelRunTable                     model;
 
-  private TableModelRun               tableModel;
+  private TableModelRun                     tableModel;
 
-  private JLabel                      jLabelRun;
+  private JLabel                            jLabelRun;
 
-  private JPopupMenu                  jPopupMenu;
+  private JPopupMenu                        jPopupMenu;
 
-  private JMenuItemTurtle             jMenuItemRunDetail;
+  private JMenuItemTurtle                   jMenuItemRunDetail;
 
-  private JMenuItemTurtle             jMenuItemRunDetailGps;
+  private JMenuItemTurtle                   jMenuItemRunDetailGps;
 
-  private JMenuItemTurtle             jMenuItemRunMap;
+  private JMenuItemTurtle                   jMenuItemRunMap;
 
-  private JMenuItemTurtle             jMenuItemRunGoogleEarth;
+  private JMenuItemTurtle                   jMenuItemRunGoogleEarth;
 
-  private JMenuItemTurtle             jMenuItemRunEmail;
+  private JMenuItemTurtle                   jMenuItemRunEmail;
 
-  private JMenuItemTurtle             jMenuItemRunDelete;
+  private JMenuItemTurtle                   jMenuItemRunDelete;
 
-  private JMenuItemTurtle             jMenuItemRunExportGoogleEarth;
+  private JMenuItemTurtle                   jMenuItemRunExportGoogleEarth;
 
-  private JMenu                       jMenuRunExport;
+  private JMenu                             jMenuRunExport;
 
-  private JMenuItemTurtle             jMenuItemRunExportGpx;
+  private JMenuItemTurtle                   jMenuItemRunExportGpx;
 
-  private JMenuItemTurtle             jMenuItemRunExportTcx;
+  private JMenuItemTurtle                   jMenuItemRunExportTcx;
 
-  private JMenuItemTurtle             jMenuItemRunExportHst;
+  private JMenuItemTurtle                   jMenuItemRunExportHst;
 
-  private JMenuItemTurtle             jMenuItemRunGoogleMap;
+  private JMenuItemTurtle                   jMenuItemRunGoogleMap;
 
-  private JMenuItemTurtle             jMenuItemRunCompare;
+  private JMenuItemTurtle                   jMenuItemRunCompare;
 
   // Ressource
-  private ResourceBundle              rb;
+  private ResourceBundle                    rb;
 
-  private JTableListSelectionListener listSelectionListener    = new JTableListSelectionListener();
+  private JTableListSelectionListener       listSelectionListener = new JTableListSelectionListener();
 
   // private MyTransferHandler transferHandler = new MyTransferHandler();
 
@@ -224,7 +224,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
    */
   private void performedLanguage(ILanguage lang) {
     // table
-    dateShortDayCellRenderer.setLocale(lang.getLocale());
+    dateCellRenderer.setLocale(lang.getLocale());
     rb = ResourceBundleUtility.getBundle(lang, JPanelCalendar.class);
 
     tableModel.columnNames[1] = rb.getString("Date");
@@ -593,6 +593,7 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
       }
 
       jTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+      // jTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       jTable.getTableHeader().setFont(GuiFont.FONT_PLAIN);
       jTable.setSortable(false);
       jTable.packAll();
@@ -608,6 +609,18 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
    * ()
    */
   public void fireSportChanged(Date date, int sportType) {
+    if (date == null || tableModel == null || tableModel.listRows == null) {
+      return;
+    }
+    
+    for (int i = 0; i < tableModel.getRowCount(); i++) {
+      if (tableModel.listRows.get(i).getTime().equals(date)) {
+        tableModel.listRows.get(i).setSportType(sportType);
+        tableModel.fireTableCellUpdated(i, 0);
+        break;
+      }
+    }
+
   }
 
   /*
@@ -745,12 +758,12 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
    * 
    */
   private class TableModelRun extends AbstractTableModel {
-
+    
     private String[]         columnNames   = { "",
                                                "Date",
                                                DistanceUnit.getDefaultUnit() };
 
-    private final Class<?>[] columnClasses = { Date.class,
+    private final Class<?>[] columnClasses = { ImageIcon.class,
                                                Date.class,
                                                String.class };
 
@@ -838,10 +851,11 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
      */
     public Object getValueAt(int row, int column) {
       switch (column) {
-        case 0: // jour
+        case 0:
+          return listRows.get(row).getSportTypeIcon();
         case 1: // Date
           return listRows.get(row).getTime();
-        case 2: // Date
+        case 2: // Distance
           try {
             return DistanceUnit.format(listRows.get(row)
                 .getComputeDistanceTot() / 1000.0);
@@ -853,13 +867,12 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
           return "";
       }
     }
+    
 
     public TableCellRenderer getCellRenderer(int column) {
       switch (column) {
-        case 0: // Short days
-          return dateShortDayCellRenderer;
-        case 1: // Date heure
-          return new DateTimeShortCellRenderer();
+        case 1: // Short days
+          return dateCellRenderer;
         default:
           return null;
       }
@@ -867,8 +880,8 @@ public class JPanelTableRun extends JPanel implements IListDateRunFire,
 
     public boolean hasRenderer(int column) {
       switch (column) {
-        case 0:
         case 1:
+        case 2:
           return true;
         default:
           return false;

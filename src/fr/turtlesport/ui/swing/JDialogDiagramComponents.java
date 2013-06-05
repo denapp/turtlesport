@@ -23,7 +23,6 @@ import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JDiagramComponent;
 import fr.turtlesport.ui.swing.component.JDiagramOneComponent;
-import fr.turtlesport.ui.swing.component.JDiagramOneComponent.TablePointsModel;
 import fr.turtlesport.ui.swing.component.JPanelGraphOne;
 import fr.turtlesport.ui.swing.model.ModelDialogDiagramComponents;
 import fr.turtlesport.ui.swing.model.ModelMapkitManager;

@@ -19,7 +19,6 @@ import java.util.ResourceBundle;
 
 import javax.activation.ActivationDataFlavor;
 import javax.activation.DataHandler;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -39,7 +38,6 @@ import javax.swing.tree.TreePath;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
@@ -697,7 +695,8 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
           jTreeTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
           if (OperatingSystem.isMacOSX()) {
-            jTreeTable.addHighlighter(HighlighterFactory.createAlternateStriping());
+            jTreeTable.addHighlighter(HighlighterFactory
+                .createAlternateStriping());
           }
           jTreeTable
               .addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW,
@@ -1019,7 +1018,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
     private String[]      columnNames = { "Date", DistanceUnit.getDefaultUnit() };
 
     private List<DataRun> listRun;
-
+    
     public TableModelRun() {
       super();
     }
@@ -1198,17 +1197,6 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
   }
 
   private class MyTreeCellRenderer extends DefaultTreeCellRenderer {
-    // icon from
-    // http://www.iconarchive.com/show/points-of-interest-icons-by-icons-land/Bicycle-Green-2-icon.html
-    // http://www.google.fr/imgres?q=icon+run&hl=fr&client=firefox-a&hs=CD8&sa=X&rls=org.mozilla:fr:official&biw=1280&bih=630&tbm=isch&tbnid=v0kwS2eax6suMM:&imgrefurl=http://www.start-run-grow.com/&docid=QDAjNw5-PYBR-M&w=38&h=36&ei=MNxETtCIHMW88gPgq7mdBg&zoom=1&iact=hc&vpx=207&vpy=200&dur=271&hovh=36&hovw=38&tx=85&ty=24&page=8&tbnh=36&tbnw=38&start=132&ndsp=18&ved=1t:429,r:6,s:132
-    private ImageIcon iconRun         = new ImageIcon(getClass()
-                                          .getResource("run2.png"));
-
-    private ImageIcon iconBicycle     = new ImageIcon(getClass()
-                                          .getResource("bicycle2.png"));
-
-    private ImageIcon iconTransparent = new ImageIcon(getClass()
-                                          .getResource("16px-transparent.png"));
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree,
@@ -1238,15 +1226,7 @@ public class JPanelTreeRun extends JPanel implements IListDateRunFire,
           String date = LanguageManager.getManager().getCurrentLang()
               .getDateTimeShortWithoutYearFormatter().format(run.getTime());
           setText(date);
-          if (run.isSportRunning()) {
-            setIcon(iconRun);
-          }
-          else if (run.isSportBike()) {
-            setIcon(iconBicycle);
-          }
-          else {
-            setIcon(iconTransparent);
-          }
+          setIcon(run.getSportTypeIcon());
         }
       }
 

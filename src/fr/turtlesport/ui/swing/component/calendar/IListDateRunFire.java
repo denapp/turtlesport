@@ -20,7 +20,7 @@ public interface IListDateRunFire {
    *          la nouvelle activit&eacute;.
    */
   public void fireSportChanged(Date date, int sportType);
-
+  
   /**
    * Notifie aucune date selectionn&eacute;e.
    * 

@@ -4,7 +4,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
+import javax.swing.ImageIcon;
+
 import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.ui.swing.img.activity.ImagesActivityRepository;
 import fr.turtlesport.unit.DistanceUnit;
 
 /**
@@ -16,7 +19,7 @@ public class DataRun {
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(DataRun.class);
   }
-
+  
   private String              unit;
 
   private int                 id;
@@ -177,6 +180,20 @@ public class DataRun {
     return null;
   }
 
+  
+  /**
+   * @return L'icone du sport.
+   */
+  public ImageIcon getSportTypeIcon() {
+    try {
+      String iconName = UserActivityTableManager.getInstance().retreiveIcon(getSportType());
+      return ImagesActivityRepository.getImageIconSmall(iconName);
+    }
+    catch(Throwable e) {
+      log.error("", e);
+      return ImagesActivityRepository.getImageIconSmallTransparent();
+    }
+  }
   /**
    * @return
    */

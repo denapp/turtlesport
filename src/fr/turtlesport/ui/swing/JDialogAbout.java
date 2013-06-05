@@ -82,7 +82,7 @@ public class JDialogAbout extends JDialog {
    */
   private void initialize() {
     this.setContentPane(getJContentPane());
-    this.setSize(490, 470);
+    this.setSize(550, 550);
     this.setResizable(true);
     this.setTitle(rb.getString("title"));
     jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());

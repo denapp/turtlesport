@@ -61,6 +61,7 @@ import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.ui.swing.component.JComboBoxActivity;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.model.ActivityComboBoxModel;
@@ -127,7 +128,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
 
   private JComboBox             jComboxBoxCriter2;
 
-  private JComboBox             jComboxBoxCriter3;
+  private JComboBoxActivity     jComboxBoxCriter3;
 
   private TitledBorder          borderPanelSelect;
 
@@ -200,7 +201,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
   private void updateSummaryDist() throws SQLException {
     DataStatTot dt = RunLapTableManager.getInstance()
         .total(idUser, modelActivities.getSportType());
-    
+
     runTot = new DataRunTot();
     runTot.distanceTot = dt.getDistanceTot();
     runTot.timeTot = dt.getTimeTot();
@@ -1219,7 +1220,7 @@ public class JPanelStat extends JPanel implements LanguageListener,
       jLabelLibActivity = new JLabel();
       jLabelLibActivity.setFont(GuiFont.FONT_PLAIN);
 
-      jComboxBoxCriter3 = new JComboBox(modelActivities);
+      jComboxBoxCriter3 = new JComboBoxActivity(modelActivities);
       jComboxBoxCriter3.setFont(GuiFont.FONT_PLAIN);
 
       jPanelSelectChart.add(label);

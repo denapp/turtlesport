@@ -243,6 +243,7 @@ public class ModelDialogDiagramComponents {
                  + Integer.toString(alt[1]));
 
     // Categorie
+    view.getJPanelRight().getJLabelValActivity().setIcon(dataRun.getSportTypeIcon());
     view.getJPanelRight().getJLabelValActivity()
         .setText(dataRun.getLibelleSportType());
 

@@ -3,6 +3,7 @@ package fr.turtlesport.db;
 import java.util.ResourceBundle;
 
 import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.ui.swing.img.activity.ImagesActivityRepository;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -47,6 +48,14 @@ public class DataActivityOther extends AbstractDataActivity {
    */
   @Override
   public void setSportType(int sportType) {
+  }
+
+  @Override
+  public String getIconName() {
+    if (super.getIconName() == null) {
+      return ImagesActivityRepository.IMAGE_SPORT_OTHER;
+    }
+    return super.getIconName();
   }
 
 }

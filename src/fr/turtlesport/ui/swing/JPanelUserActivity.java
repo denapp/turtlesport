@@ -1,6 +1,7 @@
 package fr.turtlesport.ui.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -15,11 +16,14 @@ import java.util.ResourceBundle;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
@@ -38,6 +42,7 @@ import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JTextFieldLength;
 import fr.turtlesport.ui.swing.component.TextFormatterFactory;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
+import fr.turtlesport.ui.swing.img.activity.ImagesActivityRepository;
 import fr.turtlesport.ui.swing.model.GenericModelDocListener;
 import fr.turtlesport.ui.swing.model.ModelActivity;
 import fr.turtlesport.ui.swing.model.SpeedModelDocListener;
@@ -155,7 +160,11 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
 
   private JCheckBox                           jCheckBoxDefaultActivity;
 
-  private JButton                             jButtonCalculate;                             ;
+  private JComboBoxIconActivity               jComboBoxIconActivity;
+
+  private JButton                             jButtonCalculate;
+
+  private ActionListener                      actionListenerIconActivity;
 
   // Formatter
   public static final DefaultFormatterFactory TIME_FORMATTER_FACTORY  = TextFormatterFactory
@@ -262,6 +271,13 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
     try {
       removeEvents();
 
+      actionListenerIconActivity = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          data.setIconName(jComboBoxIconActivity.getSelectedIconName());
+        }
+      };
+      jComboBoxIconActivity.addActionListener(actionListenerIconActivity);
+
       actionListenerHeart = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           model.setUnitHeart(JPanelUserActivity.this);
@@ -302,6 +318,7 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
       firePerformedZoneSpeed(data.getSpeedZones()[0]);
       jComboBoxZoneHeart.setSelectedIndex(0);
       jComboBoxZoneSpeed.setSelectedIndex(0);
+      jComboBoxIconActivity.setSelectedIcon(data.getIconName());
     }
     catch (NoSuchMethodException e) {
       log.error("", e);
@@ -322,11 +339,13 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
     jComboBoxZoneSpeed.removeItemListener(comboBoxItemListenerZoneSpeed);
     jRadioButtonBpm.removeActionListener(actionListenerHeart);
     jRadioButtonPourFcMax.removeActionListener(actionListenerHeart);
+    jComboBoxIconActivity.removeActionListener(actionListenerIconActivity);
 
     docLstMaxHeartRate = null;
     comboBoxItemListenerZoneHeart = null;
     comboBoxItemListenerZoneSpeed = null;
     actionListenerHeart = null;
+    actionListenerIconActivity = null;
   }
 
   /**
@@ -468,7 +487,7 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
                                    (String) cb.getSelectedItem());
       }
     });
-    
+
     jButtonCalculate.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         model.calculateHeartZones(JPanelUserActivity.this);
@@ -490,6 +509,7 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
       jPanelNorth.add(jLabelMaxHeartRate);
       jPanelNorth.add(getJTextFieldMaxHeartRate());
       jPanelNorth.add(getJCheckBoxDefaultActivity());
+      jPanelNorth.add(getJComboBoxIconActivity());
     }
     return jPanelNorth;
   }
@@ -522,6 +542,14 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
       jCheckBoxDefaultActivity.setFont(GuiFont.FONT_PLAIN);
     }
     return jCheckBoxDefaultActivity;
+  }
+
+  public JComboBoxIconActivity getJComboBoxIconActivity() {
+    if (jComboBoxIconActivity == null) {
+      jComboBoxIconActivity = new JComboBoxIconActivity();
+      jComboBoxIconActivity.setFont(GuiFont.FONT_PLAIN);
+    }
+    return jComboBoxIconActivity;
   }
 
   /**
@@ -607,7 +635,7 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
       g.anchor = GridBagConstraints.WEST;
       g.gridwidth = GridBagConstraints.REMAINDER;
       jPanelZoneHeart.add(getJRadioButtonPourFcMax(), g);
-      
+
       jButtonCalculate = new JButton();
       jButtonCalculate.setFont(GuiFont.FONT_PLAIN);
       g = new GridBagConstraints();
@@ -935,4 +963,44 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
     return jTextFieldMaxHeartRate;
   }
 
+  /**
+   * @author Denis Apparicio
+   * 
+   */
+  public class JComboBoxIconActivity extends JComboBox {
+
+    public JComboBoxIconActivity() {
+      super(ImagesActivityRepository.getImageIcons());
+      setRenderer(new ComboBoxRenderer());
+    }
+
+    /**
+     * @return Restitue le nom de l'icone selection&eacute;e.
+     */
+    public String getSelectedIconName() {
+      return (getSelectedIndex() == -1) ? null : ImagesActivityRepository
+          .getImageName(getSelectedIndex());
+    }
+
+    private class ComboBoxRenderer extends DefaultListCellRenderer {
+
+      @Override
+      public Component getListCellRendererComponent(JList list,
+                                                    Object value,
+                                                    int index,
+                                                    boolean isSelected,
+                                                    boolean cellHasFocus) {
+
+        ImageIcon icon = (ImageIcon) value;
+        setIcon(icon);
+
+        return this;
+      }
+
+    }
+
+    public void setSelectedIcon(String iconName) {
+      setSelectedIndex(ImagesActivityRepository.getImageIndex(iconName));
+    }
+  }
 } // @jve:decl-index=0:visual-constraint="10,10"

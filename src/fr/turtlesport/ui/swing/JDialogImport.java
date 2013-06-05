@@ -47,6 +47,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
 import org.xml.sax.SAXParseException;
 
 import fr.turtlesport.Configuration;
@@ -65,6 +66,7 @@ import fr.turtlesport.geo.GeoLoadException;
 import fr.turtlesport.geo.IGeoRoute;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.ui.swing.component.ComboBoxActivityRenderer;
 import fr.turtlesport.ui.swing.component.JFileChooserOS;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTableCustom;
@@ -792,7 +794,10 @@ public final class JDialogImport extends JDialog implements
         case 6: // Activites
           return new ComboBoxCellRenderer(users);
         case 7: // Activites
-          return new ComboBoxCellRenderer(activities);
+          ComboBoxCellRenderer renderer = new ComboBoxCellRenderer(activities);
+          renderer.setRenderer(new ComboBoxActivityRenderer());
+          return renderer;
+//          return new ComboBoxCellRenderer(activities);
         case 8: // Equipement
           return new ComboBoxCellRenderer(equipements);
         default:
@@ -1041,8 +1046,9 @@ public final class JDialogImport extends JDialog implements
           return new DefaultCellEditor(comboUsers);
         case 7: // Activite
           final JComboBox comboAct = new JComboBox(activities);
+          comboAct.setRenderer(new ComboBoxActivityRenderer());
           comboAct.setFont(GuiFont.FONT_PLAIN);
-          return new DefaultCellEditor(comboAct);
+          return new ComboBoxCellEditor(comboAct);
         case 8: // Equipement
           final JComboBox comboEqu = new JComboBox(equipements);
           comboEqu.setFont(GuiFont.FONT_PLAIN);
@@ -1919,6 +1925,7 @@ public final class JDialogImport extends JDialog implements
       }
 
     }
+    
   }
 
 }

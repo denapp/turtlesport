@@ -10,6 +10,7 @@ import java.net.URI;
 import javax.imageio.ImageIO;
 
 import org.jdesktop.swingx.mapviewer.TileCache;
+import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.FileUtil;
@@ -33,14 +34,14 @@ public class DiskTitleCache extends TileCache {
   /** Taille courante du cache */
   private long                          currentSize;
 
-  private OpenStreetMapTileProviderInfo tileProviderInfo;
+  private TileFactoryInfo tileProviderInfo;
 
   /**
    * @param dirCache
    * @param tileProviderInfo
    */
   protected DiskTitleCache(File dirCache,
-                           OpenStreetMapTileProviderInfo tileProviderInfo) {
+                           TileFactoryInfo tileProviderInfo) {
     this.tileProviderInfo = tileProviderInfo;
     this.dirCache = dirCache;
     if (!dirCache.exists()) {
@@ -58,7 +59,7 @@ public class DiskTitleCache extends TileCache {
   /**
    * @return
    */
-  public OpenStreetMapTileProviderInfo getTileProviderInfo() {
+  public TileFactoryInfo getTileProviderInfo() {
     return tileProviderInfo;
   }
 

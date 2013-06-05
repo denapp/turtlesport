@@ -465,7 +465,7 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
 
   private void writeBegin(BufferedWriter writer) throws IOException {
     writer
-        .write("<TrainingCenterDatabase xmlns=\"http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd\">");
+        .write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><TrainingCenterDatabase xmlns=\"http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd\">");
   }
 
   private void writeln(BufferedWriter writer) throws IOException {
@@ -538,14 +538,17 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
         writer.write("<HeartRateBpm xsi:type=\"HeartRateInBeatsPerMinute_t\">");
         writer.write("<Value>" + point.getHeartRate() + "</Value>");
         writer.write("</HeartRateBpm>");
-        writer.write("<SensorState>Present</SensorState>");
-      }
-      else {
-        writer.write("<SensorState>Absent</SensorState>");
       }
       // Cadence
       if (point.isValidCadence()) {
         writer.write("<Cadence>" + point.getCadence() + "</Cadence>");
+      }
+      // Sensor
+      if (point.getHeartRate() > 0) {
+        writer.write("<SensorState>Present</SensorState>");
+      }
+      else {
+        writer.write("<SensorState>Absent</SensorState>");
       }
     }
 

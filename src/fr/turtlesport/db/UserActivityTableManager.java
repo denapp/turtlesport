@@ -174,7 +174,7 @@ public final class UserActivityTableManager extends AbstractTableManager {
       st = new StringBuilder();
       st.append("INSERT INTO ");
       st.append(getTableName());
-      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
 
@@ -194,6 +194,7 @@ public final class UserActivityTableManager extends AbstractTableManager {
         pstmt.setString(10, null);
         pstmt.setString(11, data.getName());
         pstmt.setInt(12, convertToSmallInt(data.isDefaultActivity()));
+        pstmt.setString(13, data.getIconName());
         pstmt.executeUpdate();
       }
 
@@ -328,6 +329,45 @@ public final class UserActivityTableManager extends AbstractTableManager {
   }
 
   /**
+   * Recup&eacute;ration de l'icone d'une activit&eacute;.
+   * 
+   * @throws SQLException
+   */
+  public String retreiveIcon(int sportType) throws SQLException {
+    if (log.isDebugEnabled()) {
+      log.debug(">>retreiveIcon sportType=" + sportType);
+    }
+    String icon = null;
+
+    Connection conn = DatabaseManager.getConnection();
+    try {
+      // recuperation infos generales
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT icon FROM ");
+      st.append(getTableName());
+      st.append(" WHERE sport_type = ?");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, sportType);
+      ResultSet rs = pstmt.executeQuery();
+
+      if (rs.next()) {
+        icon = rs.getString(1);
+      }
+      pstmt.close();
+      rs.close();
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    if (log.isDebugEnabled()) {
+      log.debug("<<retreive");
+    }
+    return icon;
+  }
+
+  /**
    * Recup&eacute;ration d'une activit&eacute;.
    * 
    * @throws SQLException
@@ -342,7 +382,7 @@ public final class UserActivityTableManager extends AbstractTableManager {
 
       // recuperation infos generales
       StringBuilder st = new StringBuilder();
-      st.append("SELECT sport_type, max_heart_rate FROM ");
+      st.append("SELECT sport_type, max_heart_rate, icon FROM ");
       st.append(getTableName());
       st.append(" WHERE sport_type = ?");
 
@@ -353,6 +393,7 @@ public final class UserActivityTableManager extends AbstractTableManager {
         try {
           dataActivity = FactoryDataActivity.getInstance(rs.getInt(1));
           dataActivity.setMaxHeartRate(rs.getInt(2));
+          dataActivity.setIconName(rs.getString(3));
         }
         catch (IllegalArgumentException e) {
           log.error("sport type invalide", e);
@@ -470,9 +511,10 @@ public final class UserActivityTableManager extends AbstractTableManager {
     ResultSet rs1 = null;
     try {
       // recuperation infos generales
-      pstmt1 = conn.prepareStatement("SELECT DISTINCT(sport_type), "
-                                     + "max_heart_rate, default_sport, name "
-                                     + "FROM " + getTableName());
+      pstmt1 = conn
+          .prepareStatement("SELECT DISTINCT(sport_type), "
+                            + "max_heart_rate, default_sport, name, icon FROM "
+                            + getTableName());
       rs1 = pstmt1.executeQuery();
 
       while (rs1.next()) {
@@ -480,6 +522,7 @@ public final class UserActivityTableManager extends AbstractTableManager {
         dataActivity.setMaxHeartRate(rs1.getInt(2));
         dataActivity.setDefault(convertToBoolean(rs1.getInt(3)));
         dataActivity.setName(rs1.getString(4));
+        dataActivity.setIconName(rs1.getString(5));
         listActivity.add(dataActivity);
 
         // recuperations des zones cardiaques.
