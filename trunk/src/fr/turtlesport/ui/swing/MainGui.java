@@ -466,7 +466,7 @@ public class MainGui extends JFrame implements LanguageListener {
     log.debug(">>initialize");
 
     // on ajuste la taillaFlage car pas de menu sous mac os x
-    this.setSize(1200, 767 - (OperatingSystem.isMacOSX() ? 27 : 0));
+    this.setSize(1210, 767 - (OperatingSystem.isMacOSX() ? 27 : 0));
     this.setContentPane(getJContentPane());
     initJMenuBar();
 
@@ -2093,7 +2093,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
   private void updateDividerLocation() {
     // jSplitPaneCenter.setDividerLocation(204);
-    jSplitPaneCenter.setDividerLocation(230);
+    jSplitPaneCenter.setDividerLocation(240);
   }
 
   /**

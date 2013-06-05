@@ -29,6 +29,8 @@ public abstract class AbstractDataActivity implements
 
   private String          name;
 
+  private String          iconName;
+
   /**
    * Construit une activit&eacute.
    */
@@ -186,6 +188,22 @@ public abstract class AbstractDataActivity implements
    */
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * @return Restitue le nom de l'icone
+   */
+  public String getIconName() {
+    return iconName;
+  }
+
+  /**
+   * Valorise le nom de l'icone
+   * 
+   * @param iconName
+   */
+  public void setIconName(String iconName) {
+    this.iconName = iconName;
   }
 
   /*

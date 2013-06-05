@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.jdesktop.swingx.mapviewer.AbstractTileFactory;
 import org.jdesktop.swingx.mapviewer.TileFactory;
+import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.util.Location;
@@ -28,7 +29,7 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
   private static HashMap<String, DiskTitleCache> hashDiskCache = new HashMap<String, DiskTitleCache>();
   static {
     File dir;
-    OpenStreetMapTileProviderInfo tileProviderInfo;
+    TileFactoryInfo tileProviderInfo;
 
     // mapnik
     tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile.openstreetmap.org",
@@ -72,6 +73,31 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     hashDiskCache.put(tileProviderInfo.getName(),
                       new DiskTitleCache(dir, tileProviderInfo));
 
+    // IGN
+    String ign = "http://gpp3-wxs.ign.fr/tyujsdxmzox31ituc2uw0qwl/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX=#zoom#&TILEROW=#y#&TILECOL=#x#&extParamId=aHR0cDovL3d3dy5nZW9wb3J0YWlsLmdvdXYuZnIvYWNjdWVpbA==";
+    tileProviderInfo = new IGNMapTileProviderInfo(ign, "IGN");
+    dir = new File(dirCache, tileProviderInfo.getName());
+    hashDiskCache.put(tileProviderInfo.getName(),
+                      new DiskTitleCache(dir, tileProviderInfo));
+
+    // VirtualEarth Hubrid
+    tileProviderInfo = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP, "VirtualEarth Map");
+    dir = new File(dirCache, tileProviderInfo.getName());
+    hashDiskCache.put(tileProviderInfo.getName(),
+                      new DiskTitleCache(dir, tileProviderInfo));
+
+    // VirtualEarth Map
+    tileProviderInfo = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.SATELLITE, "VirtualEarth Satellite");
+    dir = new File(dirCache, tileProviderInfo.getName());
+    hashDiskCache.put(tileProviderInfo.getName(),
+                      new DiskTitleCache(dir, tileProviderInfo));
+
+    // VirtualEarth
+    tileProviderInfo = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.HYBRID, "VirtualEarth Hybrid");
+    dir = new File(dirCache, tileProviderInfo.getName());
+    hashDiskCache.put(tileProviderInfo.getName(),
+                      new DiskTitleCache(dir, tileProviderInfo));
+
     // MapQuest-OSM
     // tileProviderInfo = new
     // OpenStreetMapTileProviderInfo("http://otile1.mqcdn.com/tiles/1.0.0/osm",
@@ -101,7 +127,11 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
         "cyclemap",
         "MapQuest",
         "Transport",
-        "Landscape"};
+        "Landscape",
+        "IGN",
+        "VirtualEarth Map",
+        "VirtualEarth Satellite",
+        "VirtualEarth Hybrid"};
     return names;
   }
 
@@ -109,7 +139,7 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
    * @param url
    * @param name
    */
-  private OpenStreetMapTileFactory(OpenStreetMapTileProviderInfo tileProviderInfo) {
+  private OpenStreetMapTileFactory(TileFactoryInfo tileProviderInfo) {
     super(tileProviderInfo);
     setTileCache(hashDiskCache.get(tileProviderInfo.getName()));
   }

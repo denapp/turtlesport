@@ -1218,8 +1218,7 @@ public class DatabaseManager {
         PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM "
                                                         + TABLE_USER_ACTIVITY);
         rs = pstmt.executeQuery();
-
-        if (rs.getMetaData().getColumnCount() != 12) {
+        if (rs.getMetaData().getColumnCount() < 12) {
           // table existe dans une ancienne version ( < à 0.1.13)
           while (rs.next()) {
             if (listData == null) {
@@ -1241,6 +1240,17 @@ public class DatabaseManager {
           releaseConnection(conn);
           conn = null;
           executeUpdate("DROP TABLE " + TABLE_USER_ACTIVITY);
+        }
+        else if (rs.getMetaData().getColumnCount() < 13) {
+           // table existe dans une ancienne version ( <  1.6)
+          releaseConnection(conn);
+          conn = null;
+          StringBuilder st = new StringBuilder();
+          st.append("ALTER TABLE ");
+          st.append(TABLE_USER_ACTIVITY);
+          st.append(" ADD COLUMN icon VARCHAR(50)");
+          executeUpdate(st.toString());
+          return;
         }
         else {
           // la table existe
@@ -1271,7 +1281,8 @@ public class DatabaseManager {
     st.append("high_speed FLOAT,");
     st.append("unit VARCHAR(10),");
     st.append("name VARCHAR(100),");
-    st.append("default_sport SMALLINT");
+    st.append("default_sport SMALLINT, ");
+    st.append("icon VARCHAR(50)");
     st.append(')');
 
     executeUpdate(st.toString());

@@ -238,7 +238,8 @@ public class ModelDialogMap {
     // Altitude.
     correctAltitude(view);
     
-    // Categorie
+    // Activite
+    view.getJPanelRight().getJLabelValActivity().setIcon(dataRun.getSportTypeIcon());
     view.getJPanelRight().getJLabelValActivity()
         .setText(dataRun.getLibelleSportType());
 

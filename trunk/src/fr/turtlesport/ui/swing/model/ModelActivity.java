@@ -73,6 +73,9 @@ public class ModelActivity {
     // mis a jour sport par defaut
     view.getJCheckBoxDefaultActivity()
         .setSelected(dataActivity.isDefaultActivity());
+    
+    // mis a jour de l'icone
+    view.getJComboBoxIconActivity().setSelectedIcon(dataActivity.getIconName());
 
     log.debug("<<updateView");
   }

@@ -66,6 +66,7 @@ import fr.turtlesport.ui.swing.action.GoogleEarthShowActionListener;
 import fr.turtlesport.ui.swing.action.GoogleMapsShowActionListener;
 import fr.turtlesport.ui.swing.action.MapMercatorActionListener;
 import fr.turtlesport.ui.swing.component.JButtonCustom;
+import fr.turtlesport.ui.swing.component.JComboBoxActivity;
 import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
 import fr.turtlesport.ui.swing.component.JPanelGraph;
 import fr.turtlesport.ui.swing.component.JPanelMap;
@@ -154,7 +155,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JLabel                  jLabelLibActivity;
 
-  private JComboBox               jComboBoxActivity;
+  private JComboBoxActivity       jComboBoxActivity;
 
   private JLabel                  jLabelLibEquipment;
 
@@ -1288,7 +1289,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
       modelActivities = new ActivityComboBoxModel();
-      jComboBoxActivity = new JComboBox(modelActivities);
+      jComboBoxActivity = new JComboBoxActivity(modelActivities);
       jComboBoxActivity.setFont(GuiFont.FONT_PLAIN);
       jLabelLibActivity.setLabelFor(jComboBoxActivity);
       jPanelRunSummary.add(jComboBoxActivity, g);

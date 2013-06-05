@@ -3,6 +3,7 @@ package fr.turtlesport.db;
 import java.util.ResourceBundle;
 
 import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.ui.swing.img.activity.ImagesActivityRepository;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -48,5 +49,13 @@ public class DataActivityRun extends AbstractDataActivity {
     ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
         .getManager().getCurrentLang(), getClass());
     return rb.getString("name");
+  }
+  
+  @Override
+  public String getIconName() {
+    if (super.getIconName() == null) {
+      return ImagesActivityRepository.IMAGE_SPORT_RUN;
+    }
+    return super.getIconName();
   }
 }
