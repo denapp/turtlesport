@@ -15,7 +15,7 @@ public class OpenStreetMapTileProviderInfo extends TileFactoryInfo {
         .getLogger(OpenStreetMapTileProviderInfo.class);
   }
 
-  private static final int    TOP_ZOOM_LEVEL = 17;
+  private static final int    TOP_ZOOM_LEVEL = 19;
 
   protected OpenStreetMapTileProviderInfo(String url, String name) {
     super(name, 1, TOP_ZOOM_LEVEL - 2, TOP_ZOOM_LEVEL, 256, true, true, // tile

@@ -214,8 +214,8 @@ public class MainGui extends JFrame implements LanguageListener {
   private JPanelSearch         jPanelSearch;
 
   private JSearchTextField     jSearchTextField;
-  
-  private Dimension dimButton = new Dimension(35,35);
+
+  private Dimension            dimButton     = new Dimension(35, 35);
 
   /**
    * 
@@ -687,9 +687,9 @@ public class MainGui extends JFrame implements LanguageListener {
                                                   .getImageIcon("book-open.png"));
       jChevron = new JChevron(true);
       jSearchTextField.add(jChevron);
-      
+
       JLabel label = new JLabel(" ");
-      Dimension dim =new Dimension(20,20);
+      Dimension dim = new Dimension(20, 20);
       label.setMaximumSize(dim);
       label.setMinimumSize(dim);
       label.setPreferredSize(dim);
@@ -805,7 +805,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
     JPopupMenu jPopupMenuDropDown = new JPopupMenu();
     buttonGroupDropDown = new ButtonGroup();
-    
+
     // Ajout all user
     JCheckBoxMenuItemUser jmiUser = new JCheckBoxMenuItemUser(DataUser
         .getAllUser().getId(), DataUser.getAllUser().getFirstName());
@@ -1823,6 +1823,7 @@ public class MainGui extends JFrame implements LanguageListener {
           }
           finally {
           }
+          afterRunnableSwing();
         }
       });
 
@@ -2092,8 +2093,7 @@ public class MainGui extends JFrame implements LanguageListener {
   }
 
   private void updateDividerLocation() {
-    // jSplitPaneCenter.setDividerLocation(204);
-    jSplitPaneCenter.setDividerLocation(240);
+    jSplitPaneCenter.setDividerLocation(250);
   }
 
   /**

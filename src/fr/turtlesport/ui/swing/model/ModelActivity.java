@@ -3,6 +3,9 @@ package fr.turtlesport.ui.swing.model;
 import javax.swing.JFormattedTextField;
 
 import fr.turtlesport.db.AbstractDataActivity;
+import fr.turtlesport.db.DataActivityBike;
+import fr.turtlesport.db.DataActivityOther;
+import fr.turtlesport.db.DataActivityRun;
 import fr.turtlesport.db.DataHeartZone;
 import fr.turtlesport.db.DataSpeedZone;
 import fr.turtlesport.log.TurtleLogger;
@@ -73,9 +76,17 @@ public class ModelActivity {
     // mis a jour sport par defaut
     view.getJCheckBoxDefaultActivity()
         .setSelected(dataActivity.isDefaultActivity());
-    
+
     // mis a jour de l'icone
     view.getJComboBoxIconActivity().setSelectedIcon(dataActivity.getIconName());
+    if (dataActivity instanceof DataActivityRun
+        || dataActivity instanceof DataActivityBike
+        || dataActivity instanceof DataActivityOther) {
+      view.getJComboBoxIconActivity().setEnabled(false);
+    }
+    else {
+      view.getJComboBoxIconActivity().setEnabled(true);
+    }
 
     log.debug("<<updateView");
   }
@@ -100,8 +111,10 @@ public class ModelActivity {
     DataHeartZone data;
     for (int i = 0; i < dataActivity.getHeartZones().length; i++) {
       data = dataActivity.getHeartZones()[i];
-      data.setLowHeartRate(isFcMax ? convertHeartToPourcentage(result[i]):result[i]);
-      data.setHighHeartRate(isFcMax ? convertHeartToPourcentage(result[i+1]):result[i+1]);
+      data.setLowHeartRate(isFcMax ? convertHeartToPourcentage(result[i])
+          : result[i]);
+      data.setHighHeartRate(isFcMax ? convertHeartToPourcentage(result[i + 1])
+          : result[i + 1]);
     }
 
     int index = view.getJComboBoxZoneHeart().getSelectedIndex();
@@ -195,7 +208,7 @@ public class ModelActivity {
         }
       }
     }
-    
+
     if (isFcMax) {
       for (DataHeartZone data : dataActivity.getHeartZones()) {
         data.setLowHeartRate(convertHeartToPourcentage(data.getLowHeartRate()));
@@ -338,7 +351,7 @@ public class ModelActivity {
   private int convertHeartToPourcentage(int value) {
     int maxHeartRate = (dataActivity.getMaxHeartRate() <= 0) ? 1 : dataActivity
         .getMaxHeartRate();
-    return (int) (value*100 / maxHeartRate);
+    return (int) (value * 100 / maxHeartRate);
   }
 
   private int convertPourcentageToHeart(int pourc) {

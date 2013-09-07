@@ -15,18 +15,18 @@ import fr.turtlesport.log.TurtleLogger;
  * 
  */
 public final class ImagesActivityRepository {
-  private static TurtleLogger   log;
+  private static TurtleLogger           log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(ImagesActivityRepository.class);
   }
 
-  public static final String    IMAGE_SPORT_RUN   = "run_jogging.png";
+  public static final String            IMAGE_SPORT_RUN   = "run_jogging.png";
 
-  public static final String    IMAGE_SPORT_BIKE  = "cycling.png";
+  public static final String            IMAGE_SPORT_BIKE  = "cycling.png";
 
-  public static final String    IMAGE_SPORT_OTHER = "blank.png";
+  public static final String            IMAGE_SPORT_OTHER = "blank.png";
 
-  private static final String[] NAMES             = { IMAGE_SPORT_OTHER,
+  private static final String[]         NAMES             = { IMAGE_SPORT_OTHER,
       IMAGE_SPORT_BIKE,
       "cycling_downhill.png",
       "cycling_sprint.png",
@@ -75,25 +75,33 @@ public final class ImagesActivityRepository {
       "sledge_summer.png",
       "surfpaddle.png",
       "rowboat.png",
-      "climbing.png"                             };
+      "climbing.png"                                     };
 
-   private static Map<String, ImageIcon> mapSmallIcons = new HashMap<String, ImageIcon>();
-   static {
-     for (String iconName : NAMES) {
-       String name = iconName.substring(0, iconName.lastIndexOf('.')) + "16.png";
-       mapSmallIcons.put(iconName, getImageIcon(name));
-     }
-   }
-   
+  private static Map<String, ImageIcon> mapSmallIcons     = new HashMap<String, ImageIcon>();
+  static {
+    for (String iconName : NAMES) {
+      String name = iconName.substring(0, iconName.lastIndexOf('.')) + "16.png";
+      mapSmallIcons.put(iconName, getImageIcon(name));
+    }
+  }
+
+  public static final ImageIcon         ICON_SMALL_RUN    = getImageIconSmall(IMAGE_SPORT_RUN);
+
+  public static final ImageIcon         ICON_SMALL_BIKE   = getImageIconSmall(IMAGE_SPORT_BIKE);
+
+  public static final ImageIcon         ICON_SMALL_OTHER  = getImageIconSmall(IMAGE_SPORT_OTHER);
+
+  public static final ImageIcon         ICON_RUN          = getImageIcon(IMAGE_SPORT_RUN);
+
+  public static final ImageIcon         ICON_BIKE         = getImageIcon(IMAGE_SPORT_BIKE);
+
+  public static final ImageIcon         ICON_OTHER        = getImageIcon(IMAGE_SPORT_OTHER);
+
   /**
    * 
    */
   private ImagesActivityRepository() {
     super();
-  }
-
-  public static String getImageRun() {
-    return "run_fast.png";
   }
 
   public static String getImageName(int index) {
@@ -132,21 +140,24 @@ public final class ImagesActivityRepository {
 
   /**
    * Restitue l'image icone de taille petite
-   * @param iconName nom de l'icone
+   * 
+   * @param iconName
+   *          nom de l'icone
    * @return
    */
   public static ImageIcon getImageIconSmall(String iconName) {
     return mapSmallIcons.get(iconName);
   }
-  
+
   /**
    * Restitue l'image icone de taille petite transparente.
+   * 
    * @return
    */
   public static ImageIcon getImageIconSmallTransparent() {
-    return  mapSmallIcons.get("blank16.png");
+    return mapSmallIcons.get("blank16.png");
   }
-  
+
   /**
    * Restitue une image.
    * 
@@ -163,6 +174,5 @@ public final class ImagesActivityRepository {
     }
     return null;
   }
-
 
 }

@@ -109,8 +109,6 @@ public class JDialogMap extends JDialog {
       return;
     }
 
-//    view.pack();
-//    view.setSize(920, 690);
     view.setSize(920, 690);
     view.setLocationRelativeTo(MainGui.getWindow());
     view.setVisible(true);

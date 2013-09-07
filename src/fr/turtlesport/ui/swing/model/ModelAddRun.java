@@ -68,17 +68,17 @@ public class ModelAddRun {
     data.setEquipement((String) view.getModelEquipements().getSelectedItem());
     data.setComments(view.getJTextFieldNotes().getText());
 
-    // log.error("data.getIdUser()=" + data.getIdUser());
-    // log.error("data.getStartTime()=" + data.getStartTime());
-    // log.error("data.getDistanceTot()=" + data.getDistanceTot());
-    // log.error("data.getTimeTot()=" + data.getTimeTot());
-    // log.error("data.getSportType()=" + data.getSportType());
-    // log.error("data.getEquipement()=" + data.getEquipement());
-    // log.error("data.getComments()=" + data.getComments());
+    if (data.getAvgRate() != -1 && data.getMaxRate() != -1
+        && data.getMaxRate() < data.getAvgRate()) {
+      int tmp = data.getMaxRate();
+      data.setMaxRate(data.getAvgRate());
+      data.setAvgRate(tmp);
+    }
+    data.getMeteo().setDate(cal.getTime());
 
     // sauvegarde des equipements
     RunTableManager.getInstance().store(data);
-   
+
     log.info("<<save");
   }
 
@@ -96,10 +96,36 @@ public class ModelAddRun {
     }
 
     // Distance
-    data.setDistanceTot(DistanceUnit.convert(data.getUnit(), newUnit, data
-        .getDistanceTot()));
+    data.setDistanceTot(DistanceUnit.convert(data.getUnit(),
+                                             newUnit,
+                                             data.getDistanceTot()));
     data.setUnit(newUnit);
     view.getJTextFieldDistTot().setValue(data.getDistanceTot());
     view.getJComboBoxDistanceUnits().setSelectedItem(data.getUnit());
+  }
+
+  /**
+   * Sauvegarde dela localisation.
+   */
+  public void saveLocation(JDialogAddRun view) throws SQLException {
+    if (data == null) {
+      return;
+    }
+
+    String oldLocation = data.getLocation();
+    if (oldLocation == null) {
+      oldLocation = "";
+    }
+
+    String newLocation = (String) view.getModelLocation().getSelectedItem();
+    newLocation = (newLocation == null) ? "" : newLocation.trim();
+
+    if (!newLocation.equals(oldLocation)) {
+      data.setLocation(newLocation);
+      if (!view.getModelLocation().contains(newLocation)) {
+        view.getModelLocation().addElement(newLocation);
+        view.getModelLocation().setSelectedItem(newLocation);
+      }
+    }
   }
 }

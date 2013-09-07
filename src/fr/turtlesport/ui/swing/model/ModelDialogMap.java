@@ -7,7 +7,6 @@ import fr.turtlesport.ProductDeviceUtil;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.RunLapTableManager;
-import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.JDialogMap;
@@ -226,9 +225,9 @@ public class ModelDialogMap {
         .setText(Integer.toString(value));
 
     // frequence moyenne/max/min.
-    int avg = RunLapTableManager.getInstance().heartAvg(dataRun.getId());
-    int min = RunTrkTableManager.getInstance().heartMin(dataRun.getId());
-    int max = RunLapTableManager.getInstance().heartMax(dataRun.getId());
+    int avg = dataRun.computeAvgRate();
+    int min = dataRun.computeMinRate();
+    int max = dataRun.computeMaxRate();
 
     view.getJPanelRight()
         .getJLabelValHeartTot()

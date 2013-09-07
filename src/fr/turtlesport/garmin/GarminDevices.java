@@ -3,8 +3,6 @@ package fr.turtlesport.garmin;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jfree.util.Log;
-
 import fr.turtlesport.IProductDevice;
 import fr.turtlesport.log.TurtleLogger;
 

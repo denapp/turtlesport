@@ -224,9 +224,9 @@ public class ModelDialogDiagramComponents {
         .setText(Integer.toString(value));
 
     // frequence moyenne/max/min.
-    int avg = RunLapTableManager.getInstance().heartAvg(dataRun.getId());
-    int min = RunTrkTableManager.getInstance().heartMin(dataRun.getId());
-    int max = RunLapTableManager.getInstance().heartMax(dataRun.getId());
+    int avg = dataRun.computeAvgRate();
+    int min = dataRun.computeMinRate();
+    int max = dataRun.computeMaxRate();
 
     view.getJPanelRight()
         .getJLabelValHeartTot()

@@ -96,7 +96,7 @@ public class JPanelMap extends JPanel implements  UnitListener {
 
   }
 
-  private JTurtleMapKit getJMapKit() {
+  public JTurtleMapKit getJMapKit() {
     if (jMapKit == null) {
       jMapKit = new JTurtleMapKit(true);
     }

@@ -14,6 +14,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.RepaintManager;
 
 import fr.turtlesport.Configuration;
+import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.filter.SavitzkyGolay;
@@ -142,9 +144,6 @@ public class JDiagramOneComponent extends JPanel {
       case TEMPERATURE:
         colorY = JDiagramComponent.COLORY5;
         break;
-
-      default:
-        throw new IllegalArgumentException();
     }
 
     this.type = type;
@@ -182,6 +181,8 @@ public class JDiagramOneComponent extends JPanel {
 
     addMouseListener(new MyMouseListener());
     addMouseWheelListener(new MyMouseWheelListener());
+
+    ModelMapkitManager.getInstance().addChangeListener(model);
 
     performedLanguage(LanguageManager.getManager().getCurrentLang());
   }
@@ -707,7 +708,8 @@ public class JDiagramOneComponent extends JPanel {
                                                              1);
 
       initialize();
-      fireChangedAllPoints(ModelPointsManager.getInstance().getListTrks());
+      fireChangedAllPoints(ModelPointsManager.getInstance().getDataRun(),
+                           ModelPointsManager.getInstance().getListTrks());
     }
 
     public void setFilter(boolean isFilter) {
@@ -768,7 +770,8 @@ public class JDiagramOneComponent extends JPanel {
       JDiagramOneComponent.this.addMouseMotionListener(mouseMotionListener);
 
       setMouseX(0);
-      fireChangedAllPoints(e.getListTrks());
+      fireChangedAllPoints(ModelPointsManager.getInstance().getDataRun(),
+                           e.getListTrks());
     }
 
     /*
@@ -805,17 +808,25 @@ public class JDiagramOneComponent extends JPanel {
      * turtlesport.ui.swing.component.ChangePointsEvent)
      */
     public void changedPoint(ChangePointsEvent e) {
-      /*
-       * if (e.hasPoints() && model != null) { int index =
-       * e.getTrkIndexCurrentPoint(); if (e.isCurrentLastPoint()) { mouseX =
-       * computeRelativeX(model.getGridXMax()); revalidate(); repaint(); } else
-       * { mouseX = computeRelativeX(model.getX(index));
-       * 
-       * currentTime = getTime(index); currentDistance = getX(index); currentY1
-       * = getY(index);
-       * 
-       * tabMouseY = computeRelativeY(currentY1); revalidate(); repaint(); } }
-       */
+      if (e.hasPoints() && model != null) {
+        int index = e.getTrkIndexCurrentPoint();
+        if (e.isCurrentLastPoint()) {
+          mouseX = computeRelativeX(model.getGridXMax());
+          revalidate();
+          repaint();
+        }
+        else {
+          mouseX = computeRelativeX(model.getX(index));
+
+          currentTime = getTime(index);
+          currentDistance = getX(index);
+          currentY1 = getY(index);
+
+          tabMouseY = computeRelativeY(currentY1);
+          revalidate();
+          repaint();
+        }
+      }
     }
 
     /*
@@ -988,7 +999,8 @@ public class JDiagramOneComponent extends JPanel {
      * 
      * @param points
      */
-    private void fireChangedAllPoints(List<DataRunTrk> newPoints) {
+    private void fireChangedAllPoints(DataRun dataRun,
+                                      List<DataRunTrk> newPoints) {
       intervalX1 = -1;
       intervalX2 = -1;
       pointsFilter = null;
@@ -1030,7 +1042,7 @@ public class JDiagramOneComponent extends JPanel {
           }
         }
       }
-
+      
       for (DataRunTrk p : newPoints) {
         boolean isClone = false;
         if (p.getTime().before(pPrev.getTime())) {
@@ -1047,23 +1059,6 @@ public class JDiagramOneComponent extends JPanel {
         }
 
         switch (type) {
-          case HEART:
-            if (p.getHeartRate() < gridY[0]) {
-              if (!isClone) {
-                p = (DataRunTrk) p.clone();
-              }
-              p.setHeartRate((int) gridY[0]);
-            }
-            else if (p.getHeartRate() > gridY[gridY.length - 1]) {
-              if (!isClone) {
-                p = (DataRunTrk) p.clone();
-              }
-              p.setHeartRate((int) gridY[gridY.length - 1]);
-            }
-            if (p.getHeartRate() > maxY) {
-              maxY = p.getHeartRate();
-            }
-            break;
           case ALTITUDE:
             if (!p.isValidAltitude()) {
               if (!isClone) {
@@ -1095,7 +1090,6 @@ public class JDiagramOneComponent extends JPanel {
               }
             }
             break;
-
           case CADENCE:
             if (!p.isValidCadence()) {
               if (!isClone) {
@@ -1110,54 +1104,78 @@ public class JDiagramOneComponent extends JPanel {
               minY = p.getCadence();
             }
             break;
+          default:
+            break;
+
         }
         pPrev = p;
         points.add(p);
       }// fin for
 
-      if (type == Type.SPEED) {
-        computeSpeedPace();
-        for (DataRunTrk p : newPoints) {
-          if (p.getSpeed() > maxYSpeed) {
-            maxYSpeed = p.getSpeed();
+      switch (type) {
+        case HEART:
+          try {
+            minY = dataRun.computeMinRate();
           }
-          if (p.getSpeed() < minYSpeed) {
-            minYSpeed = p.getSpeed();
+          catch (SQLException e) {
+            minY = 30;
           }
-          if (p.getPace() > maxYPace) {
-            maxYPace = p.getPace();
+          try {
+            maxY = dataRun.computeMaxRate();
           }
-          if (p.getPace() < minYPace) {
-            minYPace = p.getPace();
+          catch (SQLException e) {
+            maxY = 220;
           }
-        }
+          double tmp = maxY;
+          maxY = Math.round(maxY / 10) * 10;
+          maxY += (tmp > maxY) ? 10 : 0;
+          tmp = minY;
+          minY = Math.round(minY / 10) * 10;
+          minY += (tmp < minY) ? -10 : 0;
+          break;
+        case SPEED:
+          computeSpeedPace();
+          for (DataRunTrk p : newPoints) {
+            if (p.getSpeed() > maxYSpeed) {
+              maxYSpeed = p.getSpeed();
+            }
+            if (p.getSpeed() < minYSpeed) {
+              minYSpeed = p.getSpeed();
+            }
+            if (p.getPace() > maxYPace) {
+              maxYPace = p.getPace();
+            }
+            if (p.getPace() < minYPace) {
+              minYPace = p.getPace();
+            }
+          }
+          break;
+        case CADENCE:
+          tmp = maxY;
+          maxY = Math.round(maxY / 10) * 10;
+          maxY += (tmp > maxY) ? 10 : 0;
+
+          tmp = minY;
+          minY = Math.round(minY / 10) * 10;
+          minY += (tmp < minY) ? -10 : 0;
+          break;
+        case ALTITUDE:
+          if (minY < 0) {
+            minY = 0;
+          }
+          if (maxY < 0) {
+            maxY = 0;
+            minY = 0;
+          }
+          minY = (minY - minY % 10);
+          maxY = (maxY - maxY % 10) + 10;
+          if ((maxY - minY) < 10) {
+            maxY += 10;
+          }
+          break;
+        default:
+          break;
       }
-
-      if (type == Type.CADENCE) {
-        double tmp = maxY;
-        maxY = Math.round(maxY / 10) * 10;
-        maxY += (tmp > maxY) ? 10 : 0;
-
-        tmp = minY;
-        minY = Math.round(minY / 10) * 10;
-        minY += (tmp < minY) ? -10 : 0;
-      }
-
-      if (type == Type.ALTITUDE) {
-        if (minY < 0) {
-          minY = 0;
-        }
-        if (maxY < 0) {
-          maxY = 0;
-          minY = 0;
-        }
-        minY = (minY - minY % 10);
-        maxY = (maxY - maxY % 10) + 10;
-        if ((maxY - minY) < 10) {
-          maxY += 10;
-        }
-      }
-
       // Axe des x (distance en metre)
       double max = maxX / 1000.0;
       gridXDistance[0] = 0;
@@ -1172,30 +1190,36 @@ public class JDiagramOneComponent extends JPanel {
         gridXTime[i] = (maxTime * 1.0) * i / (gridXDistance.length - 1);
       }
 
-      if (type == Type.ALTITUDE || type == Type.CADENCE
-          || type == Type.TEMPERATURE) {
-        for (int i = 0; i < gridY.length; i++) {
-          gridY[i] = (int) (minY + (maxY - minY) * i / (gridY.length - 1));
-        }
-      }
-      else if (type == Type.SPEED) {
-        minYSpeed = Math.floor(minYSpeed);
-        maxYSpeed = Math.floor(maxYSpeed) + 1;
-        minYPace = Math.floor(minYPace);
-        maxYPace = Math.floor(maxYPace) + 1;
-        gridYSpeed = new double[gridY.length];
-        gridYPace = new double[gridY.length];
-        for (int i = 0; i < gridYSpeed.length; i++) {
-          gridYSpeed[i] = (minYSpeed + (maxYSpeed - minYSpeed) * i
-                                       / (gridYSpeed.length - 1));
-          gridYPace[i] = (minYPace + (maxYPace - minYPace) * i
-                                     / (gridYPace.length - 1));
-        }
+      switch(type) {
+        case ALTITUDE:
+        case  CADENCE:
+        case TEMPERATURE:
+        case HEART:
+          for (int i = 0; i < gridY.length; i++) {
+            gridY[i] = (int) (minY + (maxY - minY) * i / (gridY.length - 1));
+          }
+          break;
+        case SPEED:
+        case PACE:
+          minYSpeed = Math.floor(minYSpeed);
+          maxYSpeed = Math.floor(maxYSpeed) + 1;
+          minYPace = Math.floor(minYPace);
+          maxYPace = Math.floor(maxYPace) + 1;
+          gridYSpeed = new double[gridY.length];
+          gridYPace = new double[gridY.length];
+          for (int i = 0; i < gridYSpeed.length; i++) {
+            gridYSpeed[i] = (minYSpeed + (maxYSpeed - minYSpeed) * i
+                                         / (gridYSpeed.length - 1));
+            gridYPace[i] = (minYPace + (maxYPace - minYPace) * i
+                                       / (gridYPace.length - 1));
+          }
 
-        minY = isVisibleSpeed() ? minYSpeed : minYPace;
-        maxY = isVisibleSpeed() ? maxYSpeed : maxYPace;
-        gridY = isVisibleSpeed() ? gridYSpeed : gridYPace;
+          minY = isVisibleSpeed() ? minYSpeed : minYPace;
+          maxY = isVisibleSpeed() ? maxYSpeed : maxYPace;
+          gridY = isVisibleSpeed() ? gridYSpeed : gridYPace;
+          break;        
       }
+
       // max zoom
       currentZoom = 0;
       maxZoom = (int) (Math.log(max) / Math.log(2));

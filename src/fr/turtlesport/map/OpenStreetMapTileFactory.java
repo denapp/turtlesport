@@ -1,9 +1,12 @@
 package fr.turtlesport.map;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.jdesktop.swingx.mapviewer.AbstractTileFactory;
+import org.jdesktop.swingx.mapviewer.TileCache;
 import org.jdesktop.swingx.mapviewer.TileFactory;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 
@@ -17,86 +20,54 @@ import fr.turtlesport.util.Location;
 public final class OpenStreetMapTileFactory extends AbstractTileFactory
                                                                        implements
                                                                        TileFactoryExtended {
-  // "http://tile.openstreetmap.org", mapnik
-  // "http://tah.openstreetmap.org/Tiles/tile",osma
-  // "http://andy.sandbox.cloudmade.com/tiles/cycle" cyclemap
-  // "http://data.giub.uni-bonn.de/openrouteservice" openrouteservice
 
-  private static File                            dirCache      = new File(Location
-                                                                              .userLocation(),
-                                                                          "openstreetmap");
+  private static File                       dirCache      = new File(Location.userLocation(),
+                                                                     "openstreetmap");
 
-  private static HashMap<String, DiskTitleCache> hashDiskCache = new HashMap<String, DiskTitleCache>();
+  private static HashMap<String, TileCache> hashDiskCache = new HashMap<String, TileCache>();
+
+  private static String[]                   names;
   static {
-    File dir;
-    TileFactoryInfo tileProviderInfo;
+    List<String> list = new ArrayList<String>();
+
+    // mercator
+    list.add(TurtleEmptyTileFactory.NAME);
 
     // mapnik
-    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile.openstreetmap.org",
-                                                         "mapnik");
-    dir = new File(dirCache, tileProviderInfo.getName());
-    hashDiskCache.put(tileProviderInfo.getName(),
-                      new DiskTitleCache(dir, tileProviderInfo));
-
-    // osma plus valide
-    // tileProviderInfo = new
-    // OpenStreetMapTileProviderInfo("http://tah.openstreetmap.org/Tiles/tile",
-    // "osma");
-    // dir = new File(dirCache, tileProviderInfo.getName());
-    // hashDiskCache.put(tileProviderInfo.getName(),
-    // new DiskTitleCache(dir, tileProviderInfo));
-
+    addMap(list,
+           new OpenStreetMapTileProviderInfo("http://tile.openstreetmap.org",
+                                             "mapnik"));
     // opencyclemap
-    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile.opencyclemap.org/cycle",
-                                                         "cyclemap");
-    dir = new File(dirCache, tileProviderInfo.getName());
-    hashDiskCache.put(tileProviderInfo.getName(),
-                      new DiskTitleCache(dir, tileProviderInfo));
+    addMap(list,
+           new OpenStreetMapTileProviderInfo("http://tile.opencyclemap.org/cycle",
+                                             "cyclemap"));
     // MapQuest
-    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://otile1.mqcdn.com/tiles/1.0.0/osm",
-                                                         "MapQuest");
-    dir = new File(dirCache, tileProviderInfo.getName());
-    hashDiskCache.put(tileProviderInfo.getName(),
-                      new DiskTitleCache(dir, tileProviderInfo));
-
+    addMap(list,
+           new OpenStreetMapTileProviderInfo("http://otile1.mqcdn.com/tiles/1.0.0/osm",
+                                             "MapQuest"));
     // Transport
-    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile2.opencyclemap.org/transport",
-                                                         "Transport");
-    dir = new File(dirCache, tileProviderInfo.getName());
-    hashDiskCache.put(tileProviderInfo.getName(),
-                      new DiskTitleCache(dir, tileProviderInfo));
-
+    addMap(list,
+           new OpenStreetMapTileProviderInfo("http://tile2.opencyclemap.org/transport",
+                                             "Transport"));
     // Landscape
-    tileProviderInfo = new OpenStreetMapTileProviderInfo("http://tile3.opencyclemap.org/landscape",
-                                                         "Landscape");
-    dir = new File(dirCache, tileProviderInfo.getName());
-    hashDiskCache.put(tileProviderInfo.getName(),
-                      new DiskTitleCache(dir, tileProviderInfo));
-
+    addMap(list,
+           new OpenStreetMapTileProviderInfo("http://tile3.opencyclemap.org/landscape",
+                                             "Landscape"));
     // IGN
-    String ign = "http://gpp3-wxs.ign.fr/tyujsdxmzox31ituc2uw0qwl/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX=#zoom#&TILEROW=#y#&TILECOL=#x#&extParamId=aHR0cDovL3d3dy5nZW9wb3J0YWlsLmdvdXYuZnIvYWNjdWVpbA==";
-    tileProviderInfo = new IGNMapTileProviderInfo(ign, "IGN");
-    dir = new File(dirCache, tileProviderInfo.getName());
-    hashDiskCache.put(tileProviderInfo.getName(),
-                      new DiskTitleCache(dir, tileProviderInfo));
-
-    // VirtualEarth Hubrid
-    tileProviderInfo = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP, "VirtualEarth Map");
-    dir = new File(dirCache, tileProviderInfo.getName());
-    hashDiskCache.put(tileProviderInfo.getName(),
-                      new DiskTitleCache(dir, tileProviderInfo));
+    addMap(list, new IGNMapTileProviderInfo("ign"));
 
     // VirtualEarth Map
-    tileProviderInfo = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.SATELLITE, "VirtualEarth Satellite");
-    dir = new File(dirCache, tileProviderInfo.getName());
-    hashDiskCache.put(tileProviderInfo.getName(),
-                      new DiskTitleCache(dir, tileProviderInfo));
-
-    // VirtualEarth
-    tileProviderInfo = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.HYBRID, "VirtualEarth Hybrid");
-    dir = new File(dirCache, tileProviderInfo.getName());
-    hashDiskCache.put(tileProviderInfo.getName(),
-                      new DiskTitleCache(dir, tileProviderInfo));
+    addMap(list,
+           new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP,
+                                           "VirtualEarth Map"));
+    // VirtualEarth Satellite
+    addMap(list,
+           new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.SATELLITE,
+                                           "VirtualEarth Satellite"));
+    // VirtualEarth Hybrid
+    addMap(list,
+           new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.HYBRID,
+                                           "VirtualEarth Hybrid"));
 
     // MapQuest-OSM
     // tileProviderInfo = new
@@ -114,6 +85,15 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
     // hashDiskCache.put(tileProviderInfo.getName(),
     // new DiskTitleCache(dir, tileProviderInfo));
 
+    names = new String[list.size()];
+    list.toArray(names);
+  }
+
+  private static void addMap(List<String> list, TileFactoryInfo tileProviderInfo) {
+    File dir = new File(dirCache, tileProviderInfo.getName());
+    hashDiskCache.put(tileProviderInfo.getName(),
+                      new DiskTitleCache(dir, tileProviderInfo));
+    list.add(tileProviderInfo.getName());
   }
 
   /**
@@ -122,16 +102,6 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
    * @return les noms des maps
    */
   public static String[] getTileNames() {
-    String[] names = { TurtleEmptyTileFactory.NAME,
-        "mapnik",
-        "cyclemap",
-        "MapQuest",
-        "Transport",
-        "Landscape",
-        "IGN",
-        "VirtualEarth Map",
-        "VirtualEarth Satellite",
-        "VirtualEarth Hybrid"};
     return names;
   }
 
@@ -168,13 +138,16 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
    * @return
    */
   public static TileFactory getTileFactory(String name) {
-    DiskTitleCache cache = hashDiskCache.get(name);
+    TileCache cache = hashDiskCache.get(name);
     TileFactory tileFactory;
     if (cache == null) {
       tileFactory = new TurtleEmptyTileFactory();
     }
+    else if (cache instanceof DiskTitleCache) {
+      tileFactory = new OpenStreetMapTileFactory(((DiskTitleCache) cache).getTileProviderInfo());
+    }
     else {
-      tileFactory = new OpenStreetMapTileFactory(cache.getTileProviderInfo());
+      tileFactory = new OpenStreetMapTileFactory(((TitleCacheExt) cache).getTileProviderInfo());
     }
 
     Configuration.getConfig().addProperty("map",
@@ -251,9 +224,9 @@ public final class OpenStreetMapTileFactory extends AbstractTileFactory
   public static long cacheSize() {
     long length = 0;
     for (String key : getTileNames()) {
-      DiskTitleCache cache = hashDiskCache.get(key);
-      if (cache != null) {
-        length += cache.length();
+      TileCache cache = hashDiskCache.get(key);
+      if (cache != null && cache instanceof DiskTitleCache) {
+        length += ((DiskTitleCache)cache).length();
       }
     }
     return length;

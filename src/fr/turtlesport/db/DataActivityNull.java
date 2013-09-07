@@ -1,6 +1,5 @@
 package fr.turtlesport.db;
 
-import fr.turtlesport.ui.swing.img.activity.ImagesActivityRepository;
 
 
 /**
@@ -45,11 +44,4 @@ public class DataActivityNull extends AbstractDataActivity {
   public void setSportType(int sportType) {
   }
   
-  @Override
-  public String getIconName() {
-    if (super.getIconName() == null) {
-      return ImagesActivityRepository.IMAGE_SPORT_OTHER;
-    }
-    return super.getIconName();
-  }
 }

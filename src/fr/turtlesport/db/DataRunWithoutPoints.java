@@ -3,6 +3,7 @@ package fr.turtlesport.db;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import fr.turtlesport.meteo.DataMeteo;
 import fr.turtlesport.unit.DistanceUnit;
 
 /**
@@ -25,6 +26,16 @@ public class DataRunWithoutPoints {
   private double    distanceTot = 0;
 
   private int       timeTot     = 0;
+
+  private int       calories    = -1;
+
+  private int       maxRate     = -1;
+
+  private int       avgRate     = -1;
+
+  private String    location;
+
+  private DataMeteo meteo       = new DataMeteo(new Date());
 
   /** Identifiant de l'utilisateur du run. */
   private int       idUser      = -1;
@@ -189,4 +200,77 @@ public class DataRunWithoutPoints {
   public void setDistanceTot(double distanceTot) {
     this.distanceTot = distanceTot;
   }
+
+  /**
+   * @return Le nombre de calories
+   */
+  public int getCalories() {
+    return calories;
+  }
+
+  /**
+   * Valorise le nombre de calories
+   * 
+   * @param calories
+   *          le nombre de calories.
+   */
+  public void setCalories(int calories) {
+    this.calories = calories;
+  }
+
+  /**
+   * @return Restitue la fc max.
+   */
+  public int getMaxRate() {
+    return maxRate;
+  }
+
+  /**
+   * Valorise la fc max.
+   * 
+   * @param maxRate
+   *          la fc max.
+   */
+  public void setMaxRate(int maxRate) {
+    this.maxRate = maxRate;
+  }
+
+  /**
+   * @return Restitue la fc moyenne.
+   */
+  public int getAvgRate() {
+    return avgRate;
+  }
+
+  /**
+   * Valorise la fc moy.
+   * 
+   * @param avgRate
+   */
+  public void setAvgRate(int avgRate) {
+    this.avgRate = avgRate;
+  }
+
+  /**
+   * @return
+   */
+  public String getLocation() {
+    return location;
+  }
+
+  /**
+   * @param location
+   */
+  public void setLocation(String location) {
+    this.location = location;
+  }
+
+  public DataMeteo getMeteo() {
+    return meteo;
+  }
+
+  public void setMeteo(DataMeteo meteo) {
+    this.meteo = meteo;
+  }
+
 }

@@ -88,7 +88,7 @@ public class JTurtleMapKit extends JXPanel {
 
   private BufferedImage           imgStart;
 
-  private int                     widthImg;
+  private BufferedImage           imgPoint;
 
   // model
   private MapKitChangeMapListener mapListener;
@@ -99,21 +99,17 @@ public class JTurtleMapKit extends JXPanel {
 
   private boolean                 isSmallFlag    = false;
 
+  private Color                   COLOR_TRACE    = Color.RED;
+
   /**
    * 
    */
   public JTurtleMapKit(boolean isSmallFlag) {
     this.isSmallFlag = isSmallFlag;
     initialize();
-    if (isSmallFlag) {
-      imgStop = ImagesRepository.getImage("flag_red12.png");
-      imgStart = ImagesRepository.getImage("flag_green12.png");
-    }
-    else {
-      imgStop = ImagesRepository.getImage("flag_red24.png");
-      imgStart = ImagesRepository.getImage("flag_green24.png");
-    }
-    widthImg = imgStop.getWidth();
+    imgStop = ImagesRepository.getImage("marker-end.png");
+    imgStart = ImagesRepository.getImage("marker-start.png");
+    imgPoint = ImagesRepository.getImage("marker-blue.png");
 
     mapListener = new MapKitChangeMapListener();
     ModelMapkitManager.getInstance().addChangeListener(mapListener);
@@ -124,11 +120,13 @@ public class JTurtleMapKit extends JXPanel {
     // mis a jour du bouton
     mapListener.setTileMenu(tileFactory);
     mainMap.setTileFactory(tileFactory);
+
+    OpenStreetMapTileFactory.setDefaultTileFactory(tileFactory);
     mainMap.setZoom(tileFactory.getInfo().getDefaultZoomLevel());
     mainMap.setCenterPosition(new GeoPosition(0, 0));
     mainMap.setRestrictOutsidePanning(true);
   }
-  
+
   /**
    * @return the mapListener
    */
@@ -394,11 +392,6 @@ public class JTurtleMapKit extends JXPanel {
    * @author Denis Apparicio
    * 
    */
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
   public class JCheckBoxMenuItemMap extends JCheckBoxMenuItem implements
                                                              ActionListener {
     private TileFactory tileFactory;
@@ -472,6 +465,7 @@ public class JTurtleMapKit extends JXPanel {
         jMediaMapKit.getModel().setTimeTot("");
         return;
       }
+
       // Timetot
       try {
         jMediaMapKit
@@ -483,45 +477,17 @@ public class JTurtleMapKit extends JXPanel {
         jMediaMapKit.getModel().setTimeTot("");
       }
 
-       jMediaMapKit.getModel().setMaximum(e.getListGeo().size());
-       mainMap.setZoom(mainMap.getTileFactory().getInfo().getMinimumZoomLevel());
-      // HashSet<org.jdesktop.swingx.mapviewer.GeoPosition> hashGeoMap = new
-      // HashSet<org.jdesktop.swingx.mapviewer.GeoPosition>();
-      // List<GeoPositionMapKit> listGeoMap = e.getListGeo();
-      // org.jdesktop.swingx.mapviewer.GeoPosition gp;
-      // for (GeoPositionMapKit g : e.getListGeo()) {
-      // hashGeoMap.add(g);
-      // }
-      //
-      // mainMap.calculateZoomFrom(hashGeoMap);
-
-      // // Ajout des drapeaux
-      // Point2D p = mainMap.getTileFactory().geoToPixel(listGeoMap.get(0),
-      // mainMap.getZoom());
-      // p.setLocation(p.getX(), p.getY() - widthImg);
-      // gp = mainMap.getTileFactory().pixelToGeo(p, mainMap.getZoom());
-      // hashGeoMap.add(gp);
-      //
-      // p = mainMap.getTileFactory()
-      // .geoToPixel(listGeoMap.get(listGeoMap.size() - 1), mainMap.getZoom());
-      // p.setLocation(p.getX(), p.getY() - widthImg);
-      // gp = mainMap.getTileFactory().pixelToGeo(p, mainMap.getZoom());
-      // hashGeoMap.add(gp);
-
-      // // re-calculate
-      // mainMap.calculateZoomFrom(hashGeoMap);
-      //
-      // setOriginalZoom(mainMap.getZoom());
-      // setOriginalPosition(mainMap.getCenterPosition());
+      jMediaMapKit.getModel().setMaximum(e.getListGeo().size());
+      mainMap.setZoom(mainMap.getTileFactory().getInfo().getMinimumZoomLevel());
 
       List<GeoPositionMapKit> listGeoMap = e.getListGeo();
       List<GeoPosition> positions = new ArrayList<GeoPosition>();
       for (GeoPositionMapKit g : e.getListGeo()) {
         positions.add(g);
       }
-      mainMap.setupZoomAndCenterPosition(positions);
-      
-      
+      setOriginalZoom(mainMap.setupZoomAndCenterPosition(positions));
+      setOriginalPosition(mainMap.getCenterPosition());
+
       final GeoPositionMapKit[] tab = new GeoPositionMapKit[listGeoMap.size()];
       listGeoMap.toArray(tab);
 
@@ -532,7 +498,7 @@ public class JTurtleMapKit extends JXPanel {
           // convert from viewport to world bitmap
           Rectangle rect = map.getViewportBounds();
           g2.translate(-rect.x, -rect.y);
-          g2.setColor(Color.BLUE);
+          g2.setColor(COLOR_TRACE);
 
           int deb = -1;
           int end = -1;
@@ -544,6 +510,7 @@ public class JTurtleMapKit extends JXPanel {
           int current = ModelMapkitManager.getInstance()
               .getMapIndexCurrentPoint();
           GeoPosition geoCurrentPoint = null;
+          g2.setColor(COLOR_TRACE);
           for (int i = 0; i < tab.length - 1; i++) {
             if (current != -1 && current == tab[i].getIndex()) {
               geoCurrentPoint = tab[i];
@@ -566,8 +533,9 @@ public class JTurtleMapKit extends JXPanel {
             g2.draw(line);
             line.setLine(p1.getX(), p1.getY() + 2, p2.getX(), p2.getY() + 2);
             g2.draw(line);
-            line.setLine(p1.getX(), p1.getY() - 1, p2.getX(), p2.getY() - 1);
-            g2.draw(line);
+//            line.setLine(p1.getX(), p1.getY() - 1, p2.getX(), p2.getY() - 1);
+//            g2.draw(line);
+            g2.fillRect((int) p2.getX() - 1, (int) p2.getY() -1, 3, 3);
           }
 
           if (ModelPointsManager.getInstance().getGeoPositionLapDeb() != null
@@ -583,7 +551,7 @@ public class JTurtleMapKit extends JXPanel {
                                                            map.getZoom());
               Point2D p2 = map.getTileFactory().geoToPixel(tab[i + 1],
                                                            map.getZoom());
-              g2.setColor(Color.YELLOW);
+              g2.setColor(Color.yellow);
               Line2D line = new Line2D.Double();
               line.setLine(p1, p2);
               g2.draw(line);
@@ -593,33 +561,39 @@ public class JTurtleMapKit extends JXPanel {
               g2.draw(line);
               line.setLine(p1.getX(), p1.getY() - 1, p2.getX(), p2.getY() - 1);
               g2.draw(line);
+             
             }
           }
 
           // start
           Point2D p = map.getTileFactory().geoToPixel(tab[0], map.getZoom());
           g2.drawImage(imgStart,
-                       (int) p.getX(),
-                       (int) p.getY() - widthImg,
-                       widthImg,
-                       widthImg,
+                       (int) (p.getX() - (imgStart.getWidth() / 2)),
+                       (int) (p.getY() - imgStart.getHeight()),
+                       imgStart.getWidth(),
+                       imgStart.getHeight(),
                        null);
+
           // stop
           p = map.getTileFactory().geoToPixel(tab[tab.length - 1],
                                               map.getZoom());
           g2.drawImage(imgStop,
-                       (int) p.getX(),
-                       (int) p.getY() - widthImg,
-                       widthImg,
-                       widthImg,
+                       (int) (p.getX() - (imgStop.getWidth() / 2)),
+                       (int) (p.getY() - imgStop.getHeight()),
+                       imgStop.getWidth(),
+                       imgStop.getHeight(),
                        null);
 
           // currentPoint
           p = null;
-          if (geoCurrentPoint != null) {
+          if (geoCurrentPoint != null && geoCurrentPoint != tab[0]) {
             p = map.getTileFactory().geoToPixel(geoCurrentPoint, map.getZoom());
-            g2.setColor(Color.RED);
-            g2.fillOval((int) p.getX() - 3, (int) p.getY() - 3, 6, 6);
+            g2.drawImage(imgPoint,
+                         (int) (p.getX() - (imgPoint.getWidth() / 2)),
+                         (int) (p.getY() - imgPoint.getHeight()),
+                         imgPoint.getWidth(),
+                         imgPoint.getHeight(),
+                         null);
           }
           g.dispose();
         }

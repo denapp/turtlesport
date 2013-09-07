@@ -865,7 +865,7 @@ public final class RunTableManager extends AbstractTableManager {
                  startTime,
                  data.getComments(),
                  data.getEquipement(),
-                 null,
+                 data.getLocation(),
                  null,
                  null,
                  null);
@@ -879,9 +879,13 @@ public final class RunTableManager extends AbstractTableManager {
                                              data.getTimeTot(),
                                              (float) data.getDistanceTot(),
                                              0,
-                                             0,
-                                             0,
-                                             0);
+                                             data.getCalories()==-1?0:data.getCalories(),
+                                             data.getAvgRate()==-1?0:data.getAvgRate(),
+                                             data.getMaxRate()==-1?0:data.getMaxRate());
+      
+      // Meteo
+      //------------------
+      MeteoTableManager.getInstance().store(data.getMeteo(), id);
     }
     catch (SQLException e) {
       log.error("", e);
@@ -1160,12 +1164,12 @@ public final class RunTableManager extends AbstractTableManager {
    * @param programType
    * @param multisport
    * @param startTime
-   * @param time
-   * @param distance
    * @param comments
+   * @param equipement
    * @param location
    * @param productID
    * @param productVersion
+   * @param productDisplayName
    * @return
    * @throws SQLException
    */

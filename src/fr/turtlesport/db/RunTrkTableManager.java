@@ -480,8 +480,7 @@ public final class RunTrkTableManager extends AbstractTableManager {
       StringBuilder st = new StringBuilder();
       st.append(" SELECT heart_rate FROM ");
       st.append(getTableName());
-      st.append(" WHERE id=? AND heart_rate > 40");
-
+      st.append(" WHERE id=? AND heart_rate > 30");
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
       pstmt.setInt(1, idRun);
 

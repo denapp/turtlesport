@@ -29,6 +29,7 @@ public class JTurtleMapViewer extends JXMapViewer {
     toolkit = getToolkit();
     setDoubleBuffered(true);
     setIgnoreRepaint(true);
+    setPanEnabled(true);
   }
 
   /**
@@ -38,12 +39,13 @@ public class JTurtleMapViewer extends JXMapViewer {
    * 
    * @param positions
    *          list of positions of the route
+   * @return le zoom centr&eacute;e.
    */
-  public void setupZoomAndCenterPosition(List<GeoPosition> positions) {
+  public int setupZoomAndCenterPosition(List<GeoPosition> positions) {
     if (positions == null || positions.size() < 2) {
-      return;
+      return 1;
     }
-    
+
     // calculate and set center position of the track
     Rectangle2D gpRectangle = createGeoPositionRectangle(positions);
     GeoPosition gpCenter = new GeoPosition(gpRectangle.getCenterX(),
@@ -89,7 +91,8 @@ public class JTurtleMapViewer extends JXMapViewer {
       // viewer dimensions
       fullTrackVisible = trackPixelWidth < mapKitWidth
                          && trackPixelHeight < mapKitHeight;
-    }    
+    }
+    return currentZoom;
   }
 
   /**

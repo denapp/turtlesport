@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.List;
@@ -29,6 +30,7 @@ import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 
 import fr.turtlesport.Configuration;
+import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.filter.SavitzkyGolay;
@@ -1000,7 +1002,9 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
     private double           maxX1;
 
-    private double           maxY1;
+    private int              minY1;
+
+    private int              maxY1;
 
     private int[]            gridY1                 = { 50,
                                                         75,
@@ -1399,25 +1403,51 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     }
 
     protected double getY1(int i) {
-      if (model.isFilter()) {
-        return pointsFilter[i].getHeartRate();
+      int value = (model.isFilter()) ? pointsFilter[i].getHeartRate() : points
+          .get(i).getHeartRate();
+      if (value < getGridY1Min()) {
+        return getGridY1Min();
       }
-      return points.get(i).getHeartRate();
+      if (value > getGridY1Max()) {
+        return getGridY1Max();
+      }
+      return value;
     }
 
     protected double getY2(int i) {
-      return (model.isFilterAltitude()) ? pointsFilter[i].getAltitude()
+      float value = (model.isFilterAltitude()) ? pointsFilter[i].getAltitude()
           : points.get(i).getAltitude();
+      if (value < getGridY2Min()) {
+        return getGridY2Min();
+      }
+      if (value > getGridY2Max()) {
+        return getGridY2Max();
+      }
+      return value;
     }
 
     protected double getY3(int i) {
-      return isVisibleSpeed() ? points.get(i).getSpeed() : points.get(i)
-          .getPace();
+      double value = isVisibleSpeed() ? points.get(i).getSpeed() : points
+          .get(i).getPace();
+      if (value < getGridY3Min()) {
+        return getGridY3Min();
+      }
+      if (value > getGridY3Max()) {
+        return getGridY3Max();
+      }
+      return value;
     }
 
     protected double getY4(int i) {
-      return (model.isFilter()) ? pointsFilter[i].getCadence() : points.get(i)
-          .getCadence();
+      int value = (model.isFilter()) ? pointsFilter[i].getCadence() : points
+          .get(i).getCadence();
+      if (value < getGridY4Min()) {
+        return getGridY4Min();
+      }
+      if (value > getGridY4Max()) {
+        return getGridY4Max();
+      }
+      return value;
     }
 
     protected int[] getGridY1() {
@@ -1527,157 +1557,187 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       gridY3Speed = null;
 
       if (points == null || points.size() == 0) {
+        minY1 = 50;
+        maxY1 = 220;
+        // Axe des y courbe 1
+        gridY1 = new int[gridY1.length];
+        for (int i = 0; i < gridY1.length; i++) {
+          gridY1[i] = (int) (minY1 + (maxY1 - minY1) * i / (gridY1.length - 1));
+        }
         initialize();
         revalidate();
         repaint();
         return;
       }
 
-      if (points != null) {
-        indexX1 = 0;
-        indexX2 = points.size();
+      DataRun dataRun = ModelPointsManager.getInstance().getDataRun();
 
-        minX1 = Double.MAX_VALUE;
-        maxX1 = 0;
-        maxY1 = 0;
-        minY2 = Double.MAX_VALUE;
-        maxY2 = 0;
-        minY3Speed = Double.MAX_VALUE;
-        maxY3Speed = 0;
-        minY3Pace = Double.MAX_VALUE;
-        maxY3Pace = 0;
-        minY4 = Double.MAX_VALUE;
-        maxY4 = 0;
+      indexX1 = 0;
+      indexX2 = points.size();
 
-        computeSpeedPace();
+      minX1 = Double.MAX_VALUE;
+      maxX1 = 0;
+      if (ModelPointsManager.getInstance().hasHeartPoints()) {
+        try {
+          minY1 = dataRun.computeMinRate();
+        }
+        catch (SQLException e) {
+          minY1 = 30;
+        }
+        try {
+          maxY1 = dataRun.computeMaxRate();
+        }
+        catch (SQLException e) {
+          maxY1 = 220;
+        }
+      }
 
-        // recuperation des points
-        DataRunTrk pPrev = points.get(0);
-        for (DataRunTrk p : points) {
-          if (p.getTime().before(pPrev.getTime())) {
-            p.setTime(pPrev.getTime());
-          }
-          pPrev = p;
+      minY2 = Double.MAX_VALUE;
+      maxY2 = 0;
+      minY3Speed = Double.MAX_VALUE;
+      maxY3Speed = 0;
+      minY3Pace = Double.MAX_VALUE;
+      maxY3Pace = 0;
+      minY4 = Double.MAX_VALUE;
+      maxY4 = 0;
+      double tmp;
+      computeSpeedPace();
 
-          if (p.getHeartRate() < gridY1[0]) {
-            p.setHeartRate(gridY1[0]);
-          }
-          else if (p.getHeartRate() > gridY1[gridY1.length - 1]) {
-            p.setHeartRate(gridY1[gridY1.length - 1]);
-          }
-          if (p.getDistance() < minX1) {
-            minX1 = p.getDistance();
-          }
-          if (p.getDistance() > maxX1) {
-            maxX1 = p.getDistance();
-          }
-          if (p.getHeartRate() > maxY1) {
-            maxY1 = p.getHeartRate();
-          }
-          if (!p.isValidAltitude()) {
-            p.setAltitude(0);
-          }
+      // recuperation des points
+      DataRunTrk pPrev = points.get(0);
+      for (DataRunTrk p : points) {
+        if (p.getTime().before(pPrev.getTime())) {
+          p.setTime(pPrev.getTime());
+        }
+        pPrev = p;
+        if (p.getDistance() < minX1) {
+          minX1 = p.getDistance();
+        }
+        if (p.getDistance() > maxX1) {
+          maxX1 = p.getDistance();
+        }
+        if (p.isValidAltitude()) {
           if (p.getAltitude() > maxY2) {
             maxY2 = p.getAltitude();
           }
           if (p.getAltitude() < minY2) {
             minY2 = p.getAltitude();
           }
-          if (!p.isValidCadence()) {
-            p.setCadence(0);
-          }
-          if (p.getCadence() > maxY4) {
-            maxY4 = p.getCadence();
-          }
-          if (p.getCadence() < minY4) {
-            minY4 = p.getCadence();
-          }
-          if (p.getSpeed() > maxY3Speed) {
-            maxY3Speed = p.getSpeed();
-          }
-          if (p.getSpeed() < minY3Speed) {
-            minY3Speed = p.getSpeed();
-          }
-          if (p.getPace() > maxY3Pace) {
-            maxY3Pace = p.getPace();
-          }
-          if (p.getPace() < minY3Pace) {
-            minY3Pace = p.getPace();
-          }
         }
+        if (p.getCadence() > maxY4) {
+          maxY4 = p.getCadence();
+        }
+        if (p.getCadence() < minY4) {
+          minY4 = p.getCadence();
+        }
+        if (p.getSpeed() > maxY3Speed) {
+          maxY3Speed = p.getSpeed();
+        }
+        if (p.getSpeed() < minY3Speed) {
+          minY3Speed = p.getSpeed();
+        }
+        if (p.getPace() > maxY3Pace) {
+          maxY3Pace = p.getPace();
+        }
+        if (p.getPace() < minY3Pace) {
+          minY3Pace = p.getPace();
+        }
+      }
+      if (ModelPointsManager.getInstance().hasHeartPoints()) {
+        if (minY1 < 30) {
+          minY1 = 30;
+        }
+        tmp = maxY1;
+        maxY1 = Math.round(maxY1 / 10) * 10;
+        maxY1 += (tmp > maxY1) ? 10 : 0;
+        tmp = minY1;
+        minY1 = Math.round(minY1 / 10) * 10;
+        minY1 += (tmp < minY1) ? -10 : 0;
+      }
+      else {
+        minY1 = 50;
+        maxY1 = 220;
+        for (DataRunTrk p : points) {
+          p.setHeartRate(0);
+        }
+      }
 
-        if (minY2 < 0) {
-          minY2 = 0;
-        }
-        if (maxY2 < 0) {
-          maxY2 = 0;
-          minY2 = 0;
-        }
-        minY2 = (minY2 - minY2 % 10);
-        maxY2 = (maxY2 - maxY2 % 10) + 10;
-        if ((maxY2 - minY2) < 10) {
-          maxY2 += 10;
-        }
+      if (minY2 < 0) {
+        minY2 = 0;
+      }
+      if (maxY2 < 0) {
+        maxY2 = 0;
+        minY2 = 0;
+      }
+      minY2 = (minY2 - minY2 % 10);
+      maxY2 = (maxY2 - maxY2 % 10) + 10;
+      if ((maxY2 - minY2) < 10) {
+        maxY2 += 10;
+      }
 
-        double tmp = maxY4;
-        maxY4 = Math.round(maxY4 / 10) * 10;
-        maxY4 += (tmp > maxY4) ? 10 : 0;
+      tmp = maxY4;
+      maxY4 = Math.round(maxY4 / 10) * 10;
+      maxY4 += (tmp > maxY4) ? 10 : 0;
+      tmp = minY4;
+      minY4 = Math.round(minY4 / 10) * 10;
+      minY4 += (tmp < minY4) ? -10 : 0;
+      if (minY4 == 0 && maxY4 == 0) {
+        maxY4 = 140;
+      }
 
-        tmp = minY4;
-        minY4 = Math.round(minY4 / 10) * 10;
-        minY4 += (tmp < minY4) ? -10 : 0;
-        if (minY4 == 0 && maxY4 == 0) {
-          maxY4 = 140;
-        }
+      // Axe des x (distance en metre)
+      double max = maxX1 / 1000.0;
+      gridXDistance[0] = 0;
+      for (int i = 1; i < gridXDistance.length; i++) {
+        gridXDistance[i] = (max * 1.0) * i / (gridXDistance.length - 1);
+      }
+      // Axe des x (temps)
+      gridXTime[0] = 0;
+      double maxTime = points.get(points.size() - 1).getTime().getTime()
+                       - points.get(0).getTime().getTime();
+      for (int i = 1; i < gridXDistance.length; i++) {
+        gridXTime[i] = (maxTime * 1.0) * i / (gridXDistance.length - 1);
+      }
 
-        // Axe des x (distance en metre)
-        double max = maxX1 / 1000.0;
-        gridXDistance[0] = 0;
-        for (int i = 1; i < gridXDistance.length; i++) {
-          gridXDistance[i] = (max * 1.0) * i / (gridXDistance.length - 1);
-        }
-        // Axe des x (temps)
-        gridXTime[0] = 0;
-        double maxTime = points.get(points.size() - 1).getTime().getTime()
-                         - points.get(0).getTime().getTime();
-        for (int i = 1; i < gridXDistance.length; i++) {
-          gridXTime[i] = (maxTime * 1.0) * i / (gridXDistance.length - 1);
-        }
+      // Axe des y courbe 1
+      gridY1 = new int[gridY1.length];
+      for (int i = 0; i < gridY1.length; i++) {
+        gridY1[i] = (int) (minY1 + (maxY1 - minY1) * i / (gridY1.length - 1));
+      }
 
-        // Axe des y courbe 2
-        gridY2 = new int[gridY1.length];
-        for (int i = 0; i < gridY2.length; i++) {
-          gridY2[i] = (int) (minY2 + (maxY2 - minY2) * i / (gridY2.length - 1));
-        }
+      // Axe des y courbe 2
+      gridY2 = new int[gridY1.length];
+      for (int i = 0; i < gridY2.length; i++) {
+        gridY2[i] = (int) (minY2 + (maxY2 - minY2) * i / (gridY2.length - 1));
+      }
 
-        // Axe des y courbe 4
-        gridY4 = new int[gridY1.length];
-        for (int i = 0; i < gridY4.length; i++) {
-          gridY4[i] = (int) (minY4 + (maxY4 - minY4) * i / (gridY4.length - 1));
-        }
+      // Axe des y courbe 4
+      gridY4 = new int[gridY1.length];
+      for (int i = 0; i < gridY4.length; i++) {
+        gridY4[i] = (int) (minY4 + (maxY4 - minY4) * i / (gridY4.length - 1));
+      }
 
-        // Axe des y courbe 3
-        minY3Speed = Math.floor(minY3Speed);
-        maxY3Speed = Math.floor(maxY3Speed) + 1;
-        minY3Pace = Math.floor(minY3Pace);
-        maxY3Pace = Math.floor(maxY3Pace) + 1;
-        gridY3Speed = new double[gridY1.length];
-        gridY3Pace = new double[gridY1.length];
-        for (int i = 0; i < gridY3Speed.length; i++) {
-          gridY3Speed[i] = (minY3Speed + (maxY3Speed - minY3Speed) * i
-                                         / (gridY3Speed.length - 1));
-          gridY3Pace[i] = (minY3Pace + (maxY3Pace - minY3Pace) * i
-                                       / (gridY3Pace.length - 1));
-        }
+      // Axe des y courbe 3
+      minY3Speed = Math.floor(minY3Speed);
+      maxY3Speed = Math.floor(maxY3Speed) + 1;
+      minY3Pace = Math.floor(minY3Pace);
+      maxY3Pace = Math.floor(maxY3Pace) + 1;
+      gridY3Speed = new double[gridY1.length];
+      gridY3Pace = new double[gridY1.length];
+      for (int i = 0; i < gridY3Speed.length; i++) {
+        gridY3Speed[i] = (minY3Speed + (maxY3Speed - minY3Speed) * i
+                                       / (gridY3Speed.length - 1));
+        gridY3Pace[i] = (minY3Pace + (maxY3Pace - minY3Pace) * i
+                                     / (gridY3Pace.length - 1));
+      }
 
-        // max zoom
-        currentZoom = 0;
-        maxZoom = (int) (Math.log(max) / Math.log(2));
+      // max zoom
+      currentZoom = 0;
+      maxZoom = (int) (Math.log(max) / Math.log(2));
 
-        // filtre
-        if (model.isFilter() || model.isFilterAltitude()) {
-          applyFilterSavitzyGolay();
-        }
+      // filtre
+      if (model.isFilter() || model.isFilterAltitude()) {
+        applyFilterSavitzyGolay();
       }
 
       revalidate();

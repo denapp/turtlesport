@@ -16,18 +16,20 @@ public class IGNMapTileProviderInfo extends TileFactoryInfo {
 
   private static final int    TOP_ZOOM_LEVEL = 19;
 
-  protected IGNMapTileProviderInfo(String url, String name) {
-    super(name, 1, TOP_ZOOM_LEVEL - 2, TOP_ZOOM_LEVEL, 256, true, true, // tile
-        // size
-        // is 256
-        // and x/y
-        // orientation
-        // is normal
-        url,
-        "x",
-        "y",
-        "z");
+  private static final String BASE_URL       = "http://gpp3-wxs.ign.fr/tyujsdxmzox31ituc2uw0qwl/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX=#zoom#&TILEROW=#y#&TILECOL=#x#&extParamId=aHR0cDovL3d3dy5nZW9wb3J0YWlsLmdvdXYuZnIvYWNjdWVpbA==";
 
+  protected IGNMapTileProviderInfo(String name) {
+    super(name,
+          1,
+          TOP_ZOOM_LEVEL - 2,
+          TOP_ZOOM_LEVEL,
+          256,
+          false,
+          false,
+          null,
+          null,
+          null,
+          null);
   }
 
   /*
@@ -42,7 +44,7 @@ public class IGNMapTileProviderInfo extends TileFactoryInfo {
     }
     zoom = TOP_ZOOM_LEVEL - zoom;
 
-    String url = baseURL.replaceFirst("#zoom#", "" + zoom)
+    String url = BASE_URL.replaceFirst("#zoom#", "" + zoom)
         .replaceFirst("#x#", "" + x).replaceFirst("#y#", "" + y);
     System.out.println(url);
     if (log.isDebugEnabled()) {

@@ -661,10 +661,14 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
     }
 
     public void addRecord(RecordMesg msg) {
-      if (startTime == null) {
+      if (startTime == null && msg.getTimestamp() != null) {
         startTime = msg.getTimestamp().getDate();
       }
-      listPoints.add(new FitPoint(msg));
+      try {
+        listPoints.add(new FitPoint(msg));
+      }
+      catch (IllegalArgumentException e) {
+      }
     }
 
     /*
@@ -812,6 +816,10 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
         setLongitude(mesg.getPositionLong() * CONST_CONVERT);
       }
 
+      if (mesg.getTimestamp() == null
+          || mesg.getTimestamp().getTimestamp() == null) {
+        throw new IllegalArgumentException();
+      }
       setDate(mesg.getTimestamp().getDate());
 
       if (mesg.getHeartRate() != null) {

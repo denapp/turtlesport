@@ -78,8 +78,8 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JPanelStat extends JPanel implements LanguageListener,
-                                      UnitListener, UserListener {
+public class JPanelStat extends JPanelRight implements LanguageListener,
+                                           UnitListener, UserListener {
   private static TurtleLogger   log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelStat.class);
@@ -939,7 +939,6 @@ public class JPanelStat extends JPanel implements LanguageListener,
    * @return void
    */
   private void initialize() {
-    this.setSize(660, 597);
     this.setLayout(new BorderLayout(10, 10));
     // this.add(getJPanelSummary(), BorderLayout.NORTH);
     this.add(getJPanelCenter(), BorderLayout.CENTER);

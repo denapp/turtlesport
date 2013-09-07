@@ -63,9 +63,34 @@ public final class ModelPointsManager {
    */
   public final boolean hasCadencePoints() {
     if (getListTrks() != null) {
+      int nbPoints = 0;
       for (DataRunTrk p : getListTrks()) {
         if (p.isValidCadence()) {
-          return true;
+          nbPoints++;
+          if (nbPoints > 2) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * D&eacute;termine si les points ont des donn&eacute;es cardio.
+   * 
+   * @return <code>true</code> si les points ont des donn&eacute;es cardio,
+   *         <code>false</code> sinon.
+   */
+  public final boolean hasHeartPoints() {
+    if (getListTrks() != null) {      
+      int nbPoints = 0;
+      for (DataRunTrk p : getListTrks()) {
+        if (p.getHeartRate() > 0) {
+          nbPoints++;
+          if (nbPoints > 2) {
+            return true;
+          }
         }
       }
     }
@@ -75,19 +100,24 @@ public final class ModelPointsManager {
   /**
    * D&eacute;termine si les points ont des donn&eacute;es de temperature.
    * 
-   * @return <code>true</code> si les points ont des donn&eacute;es de temperature,
-   *         <code>false</code> sinon.
+   * @return <code>true</code> si les points ont des donn&eacute;es de
+   *         temperature, <code>false</code> sinon.
    */
   public final boolean hasTemperaturePoints() {
     if (getListTrks() != null) {
+      int nbPoints = 0;
       for (DataRunTrk p : getListTrks()) {
         if (p.isValidTemperature()) {
-          return true;
+          nbPoints++;
+          if (nbPoints > 2) {
+            return true;
+          }
         }
       }
     }
     return false;
   }
+
   /**
    * Restitue la liste des geo position.
    * 

@@ -60,7 +60,7 @@ public class JDialogRunDetail extends JDialog {
 
   private JLabel               jLabelLibUnit;
 
-  private JTableCustom               jTable;
+  private JTableCustom         jTable;
 
   private JScrollPane          jPanelTable;
 
@@ -404,10 +404,12 @@ public class JDialogRunDetail extends JDialog {
                                                   data.getTotalTime());
 
         case 5: // Frequence cardiaque moy.
-          return data.getAvgHeartRate();
+          return (data.getAvgHeartRate() <= 0) ? "-" : Integer.toString(data
+              .getAvgHeartRate());
 
         case 6: // Frequence cardiaque max.
-          return data.getMaxHeartRate();
+          return (data.getMaxHeartRate() <= 0) ? "-" : Integer.toString(data
+              .getMaxHeartRate());
 
         default:
           return "";

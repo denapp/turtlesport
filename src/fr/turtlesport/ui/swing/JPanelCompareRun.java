@@ -28,7 +28,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import fr.turtlesport.db.DataRun;
-import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
@@ -311,12 +310,9 @@ public class JPanelCompareRun extends JPanel {
 
           case 6: // Frequence cardiaque moy.
             // frequence moyenne/max/min.
-            int avg = RunLapTableManager.getInstance()
-                .heartAvg(dataRun.getId());
-            int min = RunTrkTableManager.getInstance()
-                .heartMin(dataRun.getId());
-            int max = RunLapTableManager.getInstance()
-                .heartMax(dataRun.getId());
+            int avg = dataRun.computeAvgRate();
+            int min = dataRun.computeMinRate();
+            int max = dataRun.computeMaxRate();
 
             return Integer.toString(avg) + " / " + Integer.toString(min)
                    + " / " + Integer.toString(max);

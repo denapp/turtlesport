@@ -11,7 +11,6 @@ import java.awt.event.ItemListener;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
@@ -50,6 +49,7 @@ import fr.turtlesport.unit.TemperatureUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
+import fr.turtlesport.util.ResourceBundleExt;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -238,17 +238,17 @@ public class JPanelSearch extends JPanel implements LanguageListener,
   };
 
   private void performedLanguage(ILanguage lang) {
-    ResourceBundle rb = ResourceBundleUtility.getBundle(lang, CommonLang.class);
+    ResourceBundleExt rb = ResourceBundleUtility.getBundle(lang, CommonLang.class);
 
     jButtonClear.setText(rb.getString("Clear"));
-    jLabelDistance.setText(rb.getString("Distance"));
-    jLabelDuration.setText(rb.getString("Duration"));
-    jLabelLibEquipment.setText(rb.getString("Equipment"));
-    jLabelLibLocation.setText(rb.getString("Location"));
-    jLabelLibPeriod.setText(rb.getString("Period"));
-    jLabelLibActivity.setText(rb.getString("Activity"));
-    jLabelLibMeteo.setText(rb.getString("Meteo"));
-    jLabelLibTemperature.setText(rb.getString("Temperature"));
+    jLabelDistance.setText(rb.getStringLib("Distance"));
+    jLabelDuration.setText(rb.getStringLib("Duration"));
+    jLabelLibEquipment.setText(rb.getStringLib("Equipment"));
+    jLabelLibLocation.setText(rb.getStringLib("Location"));
+    jLabelLibPeriod.setText(rb.getStringLib("Period"));
+    jLabelLibActivity.setText(rb.getStringLib("Activity"));
+    jLabelLibMeteo.setText(rb.getStringLib("Meteo"));
+    jLabelLibTemperature.setText(rb.getStringLib("Temperature"));
     // on remet a jour le date formatter.
     jXDatePickerMax.setLanguage(lang);
     jXDatePickerMin.setLanguage(lang);

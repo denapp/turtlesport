@@ -53,10 +53,7 @@ public class DataActivityBike extends AbstractDataActivity {
   
   @Override
   public String getIconName() {
-    if (super.getIconName() == null) {
-      return ImagesActivityRepository.IMAGE_SPORT_BIKE;
-    }
-    return super.getIconName();
+    return ImagesActivityRepository.IMAGE_SPORT_BIKE;
   }
 
 }

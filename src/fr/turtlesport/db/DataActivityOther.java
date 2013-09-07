@@ -52,10 +52,7 @@ public class DataActivityOther extends AbstractDataActivity {
 
   @Override
   public String getIconName() {
-    if (super.getIconName() == null) {
-      return ImagesActivityRepository.IMAGE_SPORT_OTHER;
-    }
-    return super.getIconName();
+    return ImagesActivityRepository.IMAGE_SPORT_OTHER;
   }
 
 }

@@ -299,8 +299,7 @@ public class JDialogRunSendEmail extends JDialog {
           }
           else if (line.contains("%HEART_AVG%")) {
             // frequence moyenne
-            int value = RunLapTableManager.getInstance()
-                .heartAvg(dataRun.getId());
+            int value = dataRun.computeAvgRate();
             if (value > 0) {
               writer.write(line.replaceFirst("%HEART_AVG%",
                                              Integer.toString(value)));
@@ -309,8 +308,7 @@ public class JDialogRunSendEmail extends JDialog {
           }
           else if (line.contains("%HEART_MAX%")) {
             // frequence max.
-            int value = RunLapTableManager.getInstance()
-                .heartMax(dataRun.getId());
+            int value = dataRun.computeMaxRate();
             if (value > 0) {
               writer.write(line.replaceFirst("%HEART_MAX%",
                                              Integer.toString(value)));
@@ -319,8 +317,7 @@ public class JDialogRunSendEmail extends JDialog {
           }
           else if (line.contains("%HEART_MIN%")) {
             // frequence min.
-            int value = RunTrkTableManager.getInstance()
-                .heartMin(dataRun.getId());
+            int value = dataRun.computeMinRate();
             if (value > 0) {
               writer.write(line.replaceFirst("%HEART_MIN%",
                                              Integer.toString(value)));

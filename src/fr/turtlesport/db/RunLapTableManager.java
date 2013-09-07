@@ -1308,8 +1308,8 @@ public final class RunLapTableManager extends AbstractTableManager {
 
       st.append("SELECT");
       st.append(" SUM(CAST(calories AS INTEGER)) AS CALORIES, ");
-      st.append(" SUM(total_dist), ");
-      st.append(" SUM(total_time) ");
+      st.append(" SUM(CAST(total_dist AS DOUBLE)), ");
+      st.append(" SUM(CAST(total_time AS DOUBLE)) ");
       st.append("FROM ");
       st.append(getTableName() + " LAP, ");
       st.append(RunTableManager.getInstance().getTableName() + " RUN ");
@@ -1334,7 +1334,7 @@ public final class RunLapTableManager extends AbstractTableManager {
 
       ResultSet rs = pstmt.executeQuery();
       if (rs.next()) {
-        tot = new DataStatTot(rs.getInt(1), rs.getFloat(2), rs.getInt(3));
+        tot = new DataStatTot(rs.getInt(1), rs.getDouble(2), (int) rs.getDouble(3));
       }
       else {
         tot = new DataStatTot(0, 0, 0);

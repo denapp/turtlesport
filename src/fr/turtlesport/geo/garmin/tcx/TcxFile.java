@@ -882,7 +882,12 @@ public class TcxFile implements IGeoFile, IGeoConvertRun {
         // Lap
         currentLap.setIntensity(stBuffer.toString());
       }
-      else if (localName.equals("Cadence")) {// Cadence
+      else if (localName.equals("Cadence") || localName.equals("RunCadence")) {// Cadence ou
+      // <TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2"
+      // CadenceSensor="Footpod">
+      // <Speed>1.5860001</Speed>
+      // <RunCadence>60</RunCadence>
+      // </TPX>
         if (isTrackpoint) {
           // TrackPoint
           currentTrackPoint.setCadence(new Integer(stBuffer.toString()));
