@@ -182,12 +182,29 @@ public class DataRun {
 
   
   /**
-   * @return L'icone du sport.
+   * @return l'icone du sport.
    */
   public ImageIcon getSportTypeIcon() {
     try {
+      if (isSportRunning()) {
+        return ImagesActivityRepository.ICON_SMALL_RUN;
+      }
+      if (isSportBike()) {
+        return ImagesActivityRepository.ICON_SMALL_BIKE;
+      }
+      if (isSportRealOther()) {
+        return ImagesActivityRepository.ICON_SMALL_OTHER;
+      }
       String iconName = UserActivityTableManager.getInstance().retreiveIcon(getSportType());
-      return ImagesActivityRepository.getImageIconSmall(iconName);
+      if (iconName == null) {
+        return ImagesActivityRepository.ICON_SMALL_OTHER;
+      }
+      
+      ImageIcon icon = ImagesActivityRepository.getImageIconSmall(iconName);
+      if (icon == null) {
+        return ImagesActivityRepository.ICON_SMALL_OTHER;
+      }
+      return icon;
     }
     catch(Throwable e) {
       log.error("", e);

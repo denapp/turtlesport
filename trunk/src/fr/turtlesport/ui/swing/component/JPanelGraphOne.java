@@ -98,6 +98,7 @@ public class JPanelGraphOne extends JPanel {
         break;
 
       case SPEED:
+      case PACE:
         getJComboBoxY3().removeAllItems();
         getJComboBoxY3().addItem(rb.getString("speed") + "("
                                  + SpeedUnit.getDefaultUnit() + ")");
@@ -105,6 +106,9 @@ public class JPanelGraphOne extends JPanel {
                                  + PaceUnit.getDefaultUnit() + ")");
         jComboBoxY3.setSelectedIndex(jDiagram.getModel().isVisibleSpeed() ? 0
             : 1);
+        
+      case TEMPERATURE:
+        break;
 
     }
 

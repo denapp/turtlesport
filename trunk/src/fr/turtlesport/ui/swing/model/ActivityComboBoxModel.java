@@ -36,7 +36,7 @@ public class ActivityComboBoxModel extends DefaultComboBoxModel {
       log.error("", e);
     }
   }
-  
+
   public ActivityComboBoxModel() {
     super();
 
@@ -70,11 +70,46 @@ public class ActivityComboBoxModel extends DefaultComboBoxModel {
     }
   }
 
+  public void setDefaultSelectedItem() {
+    for (int i = 0; i < getSize(); i++) {
+      AbstractDataActivity d = (AbstractDataActivity) getElementAt(i);
+      if (d.isDefaultActivity()) {
+        setSelectedItem(d);
+        return;
+      }
+    }
+  }
+
   public int getSportType() {
     Object obj = getSelectedItem();
     if (obj instanceof String || obj == null) {
       return DataActivityOther.SPORT_TYPE;
     }
     return ((AbstractDataActivity) obj).getSportType();
+  }
+
+  @Override
+  public void addElement(Object element) {
+    insertElementAt(element, 0);
+  }
+
+  @Override
+  public void insertElementAt(Object element, int index) {
+    int size = getSize();
+
+    if (!(element instanceof String)) {
+      AbstractDataActivity el = (AbstractDataActivity) element;
+      for (index = 0; index < size; index++) {
+        AbstractDataActivity o = (AbstractDataActivity) getElementAt(index);
+        if (o.compareTo(el) > 0) {
+          break;
+        }
+      }
+    }
+    super.insertElementAt(element, index);
+    // Select an element when it is added to the beginning of the model
+    if (index == 0 && element != null) {
+      setSelectedItem(element);
+    }
   }
 }

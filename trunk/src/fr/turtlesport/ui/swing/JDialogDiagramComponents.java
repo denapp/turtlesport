@@ -177,7 +177,11 @@ public class JDialogDiagramComponents extends JDialog {
       jPanelGraphsCenter.setLayout(new BoxLayout(jPanelGraphsCenter,
                                                  BoxLayout.Y_AXIS));
 
-      int lenTab = 3;
+      int lenTab = 2;
+      boolean hasHeart = ModelPointsManager.getInstance().hasHeartPoints();
+      if (hasHeart) {
+        lenTab++;
+      }
       boolean hasCadence = ModelPointsManager.getInstance().hasCadencePoints();
       if (hasCadence) {
         lenTab++;
@@ -189,10 +193,11 @@ public class JDialogDiagramComponents extends JDialog {
 
       int ipos = -1;
       jPanelTabGraph = new JPanelGraphOne[lenTab];
-      jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.HEART);
+      if (hasHeart) {
+        jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.HEART);
+      }
       jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.ALTITUDE);
       jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.SPEED);
-
       if (hasCadence) {
         jPanelTabGraph[++ipos] = new JPanelGraphOne(JDiagramOneComponent.Type.CADENCE);
       }

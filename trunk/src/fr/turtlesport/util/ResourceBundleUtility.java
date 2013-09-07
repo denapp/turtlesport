@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
 
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.log.TurtleLogger;
@@ -35,7 +33,7 @@ public final class ResourceBundleUtility {
    * @return
    * @throws IOException
    */
-  public static ResourceBundle getBundle(ILanguage lang, Class<?> clazz) {
+  public static ResourceBundleExt getBundle(ILanguage lang, Class<?> clazz) {
     if (lang == null) {
       throw new IllegalArgumentException("lang");
     }
@@ -68,7 +66,7 @@ public final class ResourceBundleUtility {
       }
 
       InputStreamReader reader = new InputStreamReader(in, lang.getEncoding());
-      return new PropertyResourceBundle(reader);
+      return new ResourceBundleExt(reader);
     }
     catch (IOException e) {
       throw new MissingResourceException("Impossible de trouver la resource de nom "
@@ -99,9 +97,9 @@ public final class ResourceBundleUtility {
    * @return
    * @throws IOException
    */
-  public static ResourceBundle getBundle(String baseName,
-                                         ILanguage lang,
-                                         Class<?> clazz) {
+  public static ResourceBundleExt getBundle(String baseName,
+                                             ILanguage lang,
+                                             Class<?> clazz) {
     if (lang == null) {
       throw new IllegalArgumentException("lang");
     }
@@ -119,9 +117,9 @@ public final class ResourceBundleUtility {
    * @return
    * @throws IOException
    */
-  public static ResourceBundle getBundle(String baseName,
-                                         Locale locale,
-                                         Class<?> clazz) {
+  public static ResourceBundleExt getBundle(String baseName,
+                                             Locale locale,
+                                             Class<?> clazz) {
     if (baseName == null || "".equals(baseName)) {
       throw new IllegalArgumentException("baseName");
     }
@@ -146,7 +144,7 @@ public final class ResourceBundleUtility {
     InputStream in = null;
     try {
       in = clazz.getResourceAsStream(st.toString());
-      return new PropertyResourceBundle(in);
+      return new ResourceBundleExt(in);
     }
     catch (IOException e) {
       log.error("", e);

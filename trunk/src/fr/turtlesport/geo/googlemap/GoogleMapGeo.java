@@ -430,10 +430,10 @@ public class GoogleMapGeo implements IGeoConvertRun {
                       ResourceBundle rb,
                       BufferedWriter writer,
                       String line) throws IOException, SQLException {
-    int avg = RunLapTableManager.getInstance().heartAvg(dataRun.getId());
+    int avg = dataRun.computeAvgRate();
     if (avg > 0) {
-      int min = RunTrkTableManager.getInstance().heartMin(dataRun.getId());
-      int max = RunLapTableManager.getInstance().heartMax(dataRun.getId());
+      int min = dataRun.computeMinRate();
+      int max = dataRun.computeMaxRate();
       line = line.substring(CARDIO.length());
       writer.write(MessageFormat.format(line,
                                         rb.getString("CARDIO"),

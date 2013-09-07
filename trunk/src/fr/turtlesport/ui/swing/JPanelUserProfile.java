@@ -63,7 +63,7 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author denis
  * 
  */
-public class JPanelUserProfile extends JPanel implements LanguageListener,
+public class JPanelUserProfile extends JPanelRight implements LanguageListener,
                                              UnitListener {
   private static TurtleLogger           log;
   static {
@@ -240,7 +240,6 @@ public class JPanelUserProfile extends JPanel implements LanguageListener,
    * @return void
    */
   private void initialize() {
-    this.setSize(660, 597);
     this.setLayout(new BorderLayout(0, 0));
     this.add(getJPanelCenter(), BorderLayout.CENTER);
     this.add(getJPanelButtons(), BorderLayout.SOUTH);

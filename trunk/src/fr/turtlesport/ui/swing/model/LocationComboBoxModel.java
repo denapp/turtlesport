@@ -8,6 +8,7 @@ import javax.swing.DefaultComboBoxModel;
 import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.MainGui;
+import fr.turtlesport.util.StringIgnoreCaseComparator;
 
 /**
  * @author Denis Apparicio
@@ -19,7 +20,8 @@ public class LocationComboBoxModel extends DefaultComboBoxModel {
     log = (TurtleLogger) TurtleLogger.getLogger(LocationComboBoxModel.class);
   }
 
-  
+  private StringIgnoreCaseComparator          comparator = new StringIgnoreCaseComparator();
+
   public LocationComboBoxModel() {
     super();
     fill();
@@ -54,4 +56,28 @@ public class LocationComboBoxModel extends DefaultComboBoxModel {
     }
     return false;
   }
+
+  @Override
+  public void addElement(Object element) {
+    insertElementAt(element, 0);
+  }
+
+  @Override
+  public void insertElementAt(Object element, int index) {
+    int size = getSize();
+
+    for (index = 0; index < size; index++) {
+      String o = (String) getElementAt(index);
+      if (comparator.compare(o, (String) element) > 0) {
+        break;
+      }
+    }
+
+    super.insertElementAt(element, index);
+    // Select an element when it is added to the beginning of the model
+    if (index == 0 && element != null) {
+      setSelectedItem(element);
+    }
+  }
+
 }

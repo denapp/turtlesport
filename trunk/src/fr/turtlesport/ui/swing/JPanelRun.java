@@ -28,6 +28,7 @@ import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -96,8 +97,8 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JPanelRun extends JPanel implements LanguageListener,
-                                     UnitListener, UserListener {
+public class JPanelRun extends JPanelRight implements LanguageListener,
+                                          UnitListener, UserListener {
   private static TurtleLogger     log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JPanelRun.class);
@@ -143,7 +144,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private TableModelLap           tableModelLap;
 
-  private JScrollPane             jPanelGraph;
+//  private JScrollPane             jPanelGraph;
 
   private JPanelGraph             jDiagram;
 
@@ -199,7 +200,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private JMenuItemTurtle         jMenuItemRunExportHst;
 
-  private JPanel                  jPanelCenter;
+//  private JPanel                  jPanelCenter;
 
   private JPanel                  jPanelEast;
 
@@ -270,6 +271,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   private LocationComboBoxModel   modelLocations;
 
+  private JSplitPane              jSplitPaneCenter;
+
   /**
    * This is the default constructor.
    */
@@ -285,10 +288,13 @@ public class JPanelRun extends JPanel implements LanguageListener,
    * @see fr.turtlesport.ui.swing.UserListener#userSelect(int)
    */
   public void userSelect(int idUser) throws SQLException {
+    Object oldLocation = modelLocations.getSelectedItem();
+    modelLocations.fill();
     if (!DataUser.isAllUser(idUser)) {
       model.updateView(this, (Date) null);
     }
     else {
+      modelLocations.setSelectedItem(oldLocation);
       model.updateViewButtons(this);
     }
   }
@@ -301,7 +307,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
   }
 
   /**
-   * Si les dates changesnt, les boutons suivant et pr&eacute;c&eacute;dent
+   * Si les dates changent, les boutons suivant et pr&eacute;c&eacute;dent
    * peuvent changer.
    * 
    * @throws SQLException
@@ -372,6 +378,11 @@ public class JPanelRun extends JPanel implements LanguageListener,
 
   public LocationComboBoxModel getModelLocation() {
     return modelLocations;
+  }
+
+  public void setModelLocation(LocationComboBoxModel modelLocations) {
+    this.modelLocations = modelLocations;
+    jComboBoxLocation.setModel(modelLocations);
   }
 
   public JTextArea getJTextFieldNotes() {
@@ -536,12 +547,18 @@ public class JPanelRun extends JPanel implements LanguageListener,
    * @return void
    */
   private void initialize() {
-    this.setSize(660, 597);
     this.setLayout(new BorderLayout(5, 0));
     this.setOpaque(true);
     this.add(getJPopupMenu());
-    this.add(getJPanelCenter(), BorderLayout.CENTER);
-    this.add(getJPanelEast(), BorderLayout.EAST);
+    JSplitPane jSplitPaneHorizontal = new JSplitPane();
+    jSplitPaneHorizontal.setOpaque(false);
+    jSplitPaneHorizontal.setOneTouchExpandable(true);
+    jSplitPaneHorizontal.setLeftComponent(getJSplitPanelCenter());
+    jSplitPaneHorizontal.setRightComponent(getJPanelEast());
+    jSplitPaneHorizontal.setResizeWeight(1);
+    this.add(jSplitPaneHorizontal, BorderLayout.CENTER);
+    // this.add(getJSplitPanelCenter(), BorderLayout.CENTER);
+    // this.add(getJPanelEast(), BorderLayout.EAST);
 
     setBorder(BorderFactory.createTitledBorder(""));
 
@@ -1011,7 +1028,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
                              null);
       jTabbedPaneRace.addTab("Speed", getJPanelChartSpeed());
       jTabbedPaneRace.addTab("Meteo", getJPanelMeteo());
-      jTabbedPaneRace.setPreferredSize(new Dimension(200, 370));
+      jTabbedPaneRace.setPreferredSize(new Dimension(200, 400));
+      jTabbedPaneRace.setMinimumSize(new Dimension(0, 0));
     }
     return jTabbedPaneRace;
   }
@@ -1045,7 +1063,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
       g.anchor = GridBagConstraints.WEST;
       g.fill = GridBagConstraints.VERTICAL;
       g.gridwidth = GridBagConstraints.REMAINDER;
-      g.insets = insets;
+      g.insets = new Insets(10, 5, 5, 5);
       jLabelValDateTime = new JLabel();
       jLabelValDateTime.setFont(GuiFont.FONT_ITALIC);
       jLabelValDateTime.setHorizontalAlignment(SwingConstants.TRAILING);
@@ -1528,6 +1546,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
   private JPanel getJPanelButtons() {
     if (jPanelButtons == null) {
       jPanelButtons = new JPanel();
+      jPanelButtons.setMinimumSize(new Dimension(0,0));
       jPanelButtons.setLayout(new FlowLayout(FlowLayout.RIGHT));
       jPanelButtons.add(getJPanelNav());
 
@@ -1652,22 +1671,38 @@ public class JPanelRun extends JPanel implements LanguageListener,
   }
 
   /**
-   * This method initializes jPanelRunLap.
+   * This method initializes jPanelCenter.
    * 
    * @return javax.swing.JPanel
    */
-  private JPanel getJPanelCenter() {
-    if (jPanelCenter == null) {
-      jPanelCenter = new JPanel();
-      jPanelCenter.setOpaque(true);
-      jPanelCenter.setLayout(new BoxLayout(jPanelCenter, BoxLayout.Y_AXIS));
-      // jPanelCenter.add(getJPanelRunLap());
-      jPanelCenter.add(getJPanelMap());
-      jPanelCenter.add(Box.createRigidArea(new Dimension(0, 10)));
-      jPanelCenter.add(getJDiagram());
+  public JSplitPane getJSplitPanelCenter() {
+    if (jSplitPaneCenter == null) {
+      jSplitPaneCenter = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+      jSplitPaneCenter.setMinimumSize(new Dimension(0, 0));
+      jSplitPaneCenter.setOpaque(false);
+      jSplitPaneCenter.setOneTouchExpandable(true);
+      jSplitPaneCenter.setTopComponent(getJPanelMap());
+      jSplitPaneCenter.setBottomComponent(getJDiagram());
     }
-    return jPanelCenter;
+    return jSplitPaneCenter;
   }
+
+//  /**
+//   * This method initializes jPanelRunLap.
+//   * 
+//   * @return javax.swing.JPanel
+//   */
+//  private JPanel getJPanelCenter() {
+//    if (jPanelCenter == null) {
+//      jPanelCenter = new JPanel();
+//      jPanelCenter.setOpaque(true);
+//      jPanelCenter.setLayout(new BoxLayout(jPanelCenter, BoxLayout.Y_AXIS));
+//      jPanelCenter.add(getJPanelMap());
+//      jPanelCenter.add(Box.createRigidArea(new Dimension(0, 10)));
+//      jPanelCenter.add(getJDiagram());
+//    }
+//    return jPanelCenter;
+//  }
 
   /**
    * This method initializes jPanelRunLap.
@@ -1679,6 +1714,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
       jPanelEastCenter = new JPanel();
       jPanelEastCenter.setLayout(new BoxLayout(jPanelEastCenter,
                                                BoxLayout.Y_AXIS));
+      
+      jPanelEastCenter.setPreferredSize(new Dimension(325, 597));      
       jPanelEastCenter.add(getJPanelButtons());
       jPanelEastCenter.add(getJTabbedPaneRace());
       jPanelEastCenter.add(getJPanelRunLap());
@@ -1703,9 +1740,10 @@ public class JPanelRun extends JPanel implements LanguageListener,
        * GuiFont.FONT_PLAIN, null));
        */
       // Dimension dim = new Dimension(270, 270);
-      Dimension dim = new Dimension(600, 400);
+      Dimension dim = new Dimension(570, 400);
       jPanelMap.setPreferredSize(dim);
       jPanelMap.setMinimumSize(dim);
+     // jPanelMap.setMinimumSize(new Dimension(0,0));
     }
     return jPanelMap;
   }
@@ -1719,7 +1757,6 @@ public class JPanelRun extends JPanel implements LanguageListener,
     if (jPanelRunLap == null) {
       jPanelRunLap = new JScrollPane();
       jPanelRunLap.setOpaque(true);
-
       borderPanelRunLap = BorderFactory
           .createTitledBorder(null,
                               "Temps intermediaire",
@@ -1729,7 +1766,8 @@ public class JPanelRun extends JPanel implements LanguageListener,
                               null);
       jPanelRunLap.setBorder(borderPanelRunLap);
       jPanelRunLap.setViewportView(getJTableLap());
-      jPanelRunLap.setPreferredSize(new Dimension(200, 300));
+      jPanelRunLap.setPreferredSize(new Dimension(200, 270));
+      jPanelRunLap.setMinimumSize(new Dimension(0, 0));
     }
     return jPanelRunLap;
   }
@@ -1780,20 +1818,20 @@ public class JPanelRun extends JPanel implements LanguageListener,
     return jTableLap;
   }
 
-  /**
-   * This method initializes jPanelRunLap.
-   * 
-   * @return javax.swing.JPanel
-   */
-  public JScrollPane getJPanelGraph() {
-    if (jPanelGraph == null) {
-      jPanelGraph = new JScrollPane();
-      jPanelGraph.setViewportView(getJDiagram());
-      jPanelGraph.setFont(GuiFont.FONT_PLAIN);
-      jPanelGraph.setPreferredSize(new Dimension(600, 360));
-    }
-    return jPanelGraph;
-  }
+//  /**
+//   * This method initializes jPanelRunLap.
+//   * 
+//   * @return javax.swing.JPanel
+//   */
+//  public JScrollPane getJPanelGraph() {
+//    if (jPanelGraph == null) {
+//      jPanelGraph = new JScrollPane();
+//      jPanelGraph.setViewportView(getJDiagram());
+//      jPanelGraph.setFont(GuiFont.FONT_PLAIN);
+//      jPanelGraph.setPreferredSize(new Dimension(600, 360));
+//    }
+//    return jPanelGraph;
+//  }
 
   /**
    * @return
@@ -1801,7 +1839,7 @@ public class JPanelRun extends JPanel implements LanguageListener,
   public JPanelGraph getJDiagram() {
     if (jDiagram == null) {
       jDiagram = new JPanelGraph();
-      jDiagram.setPreferredSize(new Dimension(600, 360));
+      jDiagram.setPreferredSize(new Dimension(570, 360));
       jDiagram
           .setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
     }

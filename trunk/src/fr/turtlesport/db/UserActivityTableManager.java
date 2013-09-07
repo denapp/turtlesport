@@ -135,6 +135,7 @@ public final class UserActivityTableManager extends AbstractTableManager {
     for (AbstractDataActivity a : list) {
       storeOrUpdate(a);
     }
+    
   }
 
   /**
@@ -166,7 +167,7 @@ public final class UserActivityTableManager extends AbstractTableManager {
           int val = rs.getInt(1);
           if (val > 2) {
             // 0,1,2 sont reserves pour velo, bike autre sport
-            sportType = val;
+            sportType = val+1;
           }
         }
         data.setSportType(sportType);

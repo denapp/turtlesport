@@ -446,7 +446,7 @@ public class DataRunTrk implements Cloneable {
         listTrks.get(0).setSpeed(listTrks.get(1).getSpeed());
       }
     }
-
+    
     return listTrks;
   }
 

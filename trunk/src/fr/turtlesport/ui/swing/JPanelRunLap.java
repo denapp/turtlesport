@@ -19,7 +19,6 @@ import javax.swing.border.TitledBorder;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.lang.LanguageManager;
-import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JSwitchBox;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.util.ResourceBundleUtility;
@@ -29,11 +28,6 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * 
  */
 public class JPanelRunLap extends JPanel {
-  private static TurtleLogger log;
-  static {
-    log = (TurtleLogger) TurtleLogger.getLogger(JPanelRunLap.class);
-  }
-
   private ResourceBundle      rb;
 
   private JPanel              jPanelRunLap;

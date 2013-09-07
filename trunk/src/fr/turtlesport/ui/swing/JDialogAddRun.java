@@ -2,7 +2,9 @@ package fr.turtlesport.ui.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -13,38 +15,52 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import javax.swing.AbstractSpinnerModel;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import org.jdesktop.swingx.JXDatePicker;
 
-import fr.turtlesport.db.AbstractDataActivity;
-import fr.turtlesport.db.DataActivityOther;
+import fr.turtlesport.CommonLang;
 import fr.turtlesport.db.EquipementTableManager;
-import fr.turtlesport.db.UserActivityTableManager;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.meteo.DataMeteo;
+import fr.turtlesport.ui.swing.component.JComboBoxActivity;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTextAreaLength;
 import fr.turtlesport.ui.swing.component.JTextFieldTime;
 import fr.turtlesport.ui.swing.component.JXDatePickerLocale;
+import fr.turtlesport.ui.swing.component.JXSplitButton;
 import fr.turtlesport.ui.swing.component.TextFormatterFactory;
-import fr.turtlesport.ui.swing.model.GenericModelDocListener;
+import fr.turtlesport.ui.swing.img.ImagesRepository;
+import fr.turtlesport.ui.swing.model.ActivityComboBoxModel;
+import fr.turtlesport.ui.swing.model.GenericPropertyChangeListener;
+import fr.turtlesport.ui.swing.model.LocationComboBoxModel;
 import fr.turtlesport.ui.swing.model.ModelAddRun;
 import fr.turtlesport.unit.DistanceUnit;
+import fr.turtlesport.unit.TemperatureUnit;
+import fr.turtlesport.util.ResourceBundleExt;
 import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
@@ -67,7 +83,7 @@ public class JDialogAddRun extends JDialog {
 
   private JLabel                  jLabelLibActivity;
 
-  private JComboBox               jComboBoxActivity;
+  private JComboBoxActivity       jComboBoxActivity;
 
   private JLabel                  jLabelLibEquipment;
 
@@ -97,12 +113,38 @@ public class JDialogAddRun extends JDialog {
 
   private JTextFieldTime          jTextFieldTimeTot;
 
+  private JLabel                  jLabelLibHeart;
+
+  private JLabel                  jLabelLibCalories;
+
+  private JFormattedTextField     jTextFieldCalories;
+
+  private JFormattedTextField     jTextFieldHeartAvg;
+
+  private JFormattedTextField     jTextFieldHeartMax;
+
+  private JLabel                  jLabelLibLocation;
+
+  private JComboBox               jComboBoxLocation;
+
+  private JLabel                  jLabelLibMeteo;
+
+  private JXSplitButton           jxSplitButtonImgMeteo;
+
+  private JLabel                  jLabelTemperature;
+
+  private JSpinner                spinner;
+
   /** Model */
   private ActivityComboBoxModel   modelActivities;
 
   private EquipementComboBoxModel modelEquipements;
 
+  private LocationComboBoxModel   modelLocations;
+
   private ModelAddRun             model = new ModelAddRun();
+
+  private TemperatureSpinnerModel spinnerModel;
 
   private JDialogAddRun(Frame owner) throws SQLException {
     super(owner, true);
@@ -120,7 +162,6 @@ public class JDialogAddRun extends JDialog {
   public static void prompt() throws SQLException {
     JDialogAddRun dlg = new JDialogAddRun(MainGui.getWindow());
     dlg.setLocationRelativeTo(MainGui.getWindow());
-    dlg.pack();
     dlg.setVisible(true);
   }
 
@@ -136,26 +177,39 @@ public class JDialogAddRun extends JDialog {
     return modelEquipements;
   }
 
+  public LocationComboBoxModel getModelLocation() {
+    return modelLocations;
+  }
+
   /**
    * This method initializes this
    * 
    * @return void
    */
   private void initialize() {
-    this.setSize(500, 400);
+    this.setSize(400, 520);
     this.setContentPane(getJContentPane());
 
-    ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+    ResourceBundleExt rb = ResourceBundleUtility.getBundle(LanguageManager
         .getManager().getCurrentLang(), getClass());
     this.setTitle(rb.getString("title"));
     jLabelLibDate.setText(rb.getString("jLabelLibDate"));
-    jLabelLibDistTot.setText(rb.getString("jLabelLibDistTot"));
-    jLabelLibTimeTot.setText(rb.getString("jLabelLibTimeTot"));
-    jLabelLibActivity.setText(rb.getString("jLabelLibActivity"));
-    jLabelLibEquipment.setText(rb.getString("jLabelLibEquipment"));
-    jLabelLibNotes.setText(rb.getString("jLabelLibNotes"));
-    jButtonCancel.setText(LanguageManager.getManager().getCurrentLang().cancel());
     jButtonSave.setText(rb.getString("jButtonSave"));
+
+    rb = ResourceBundleUtility.getBundle(LanguageManager.getManager()
+        .getCurrentLang(), CommonLang.class);
+    jLabelLibDistTot.setText(rb.getStringLib("Distance"));
+    jLabelLibTimeTot.setText(rb.getStringLib("Time"));
+    jLabelLibActivity.setText(rb.getStringLib("Activity"));
+    jLabelLibEquipment.setText(rb.getStringLib("Equipment"));
+    jLabelLibNotes.setText(rb.getStringLib("Notes"));
+    jLabelLibCalories.setText(rb.getStringLib("Calories"));
+    jLabelLibHeart.setText(rb.getStringLib("AverageMax"));
+    jLabelLibLocation.setText(rb.getStringLib("Location"));
+    jLabelLibMeteo.setText(rb.getStringLib("Meteo"));
+
+    jButtonCancel.setText(LanguageManager.getManager().getCurrentLang()
+        .cancel());
 
     // evenements
     jButtonCancel.addActionListener(new CancelActionListener());
@@ -164,25 +218,60 @@ public class JDialogAddRun extends JDialog {
     jComboBoxDistanceUnits.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         JComboBox cb = (JComboBox) e.getSource();
-        model
-            .setUnitDistance(JDialogAddRun.this, (String) cb.getSelectedItem());
+        model.setUnitDistance(JDialogAddRun.this, (String) cb.getSelectedItem());
       }
     });
+    jComboBoxLocation.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        try {
+          model.saveLocation(JDialogAddRun.this);
+        }
+        catch (SQLException e) {
+          log.error("", e);
+        }
+      }
+    });
+
     try {
-      GenericModelDocListener doc = new GenericModelDocListener(jTextFieldDistTot,
-                                                                model.getData(),
-                                                                "setDistanceTot",
-                                                                Double.TYPE);
-      jTextFieldDistTot.getDocument().addDocumentListener(doc);
+      // Distance
+      GenericPropertyChangeListener lstDist = new GenericPropertyChangeListener(jTextFieldDistTot,
+                                                                                model
+                                                                                    .getData(),
+                                                                                "setDistanceTot",
+                                                                                Double.TYPE);
+      jTextFieldDistTot.addPropertyChangeListener(lstDist);
+
+      // Calories
+      GenericPropertyChangeListener lstCalories = new GenericPropertyChangeListener(jTextFieldCalories,
+                                                                                    model
+                                                                                        .getData(),
+                                                                                    "setCalories",
+                                                                                    Integer.TYPE);
+      jTextFieldCalories.addPropertyChangeListener("value", lstCalories);
+
+      // Fc
+      GenericPropertyChangeListener lstFcMax = new GenericPropertyChangeListener(jTextFieldHeartMax,
+                                                                                 model
+                                                                                     .getData(),
+                                                                                 "setMaxRate",
+                                                                                 Integer.TYPE);
+      jTextFieldHeartMax.addPropertyChangeListener("value", lstFcMax);
+      GenericPropertyChangeListener lstFcAvg = new GenericPropertyChangeListener(jTextFieldHeartAvg,
+                                                                                 model
+                                                                                     .getData(),
+                                                                                 "setAvgRate",
+                                                                                 Integer.TYPE);
+      jTextFieldHeartAvg.addPropertyChangeListener("value", lstFcAvg);
     }
     catch (NoSuchMethodException e) {
       log.error("", e);
     }
-    
+
     setDefaultCloseOperation(JDialogImport.DISPOSE_ON_CLOSE);
 
     // mis a jour des valeurs
     jTextFieldDistTot.setValue(10);
+    jTextFieldCalories.setValue(800);
     jXDatePicker.getMonthView().setUpperBound(Calendar.getInstance().getTime());
     jXDatePicker.setDate(GregorianCalendar.getInstance().getTime());
   }
@@ -215,10 +304,10 @@ public class JDialogAddRun extends JDialog {
       jPanelSummary.setLayout(new GridBagLayout());
       Insets insets = new Insets(0, 0, 5, 10);
 
+      // Date
       GridBagConstraints g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
       g.insets = insets;
       jLabelLibDate = new JLabel();
       jLabelLibDate.setFont(GuiFont.FONT_PLAIN);
@@ -226,24 +315,23 @@ public class JDialogAddRun extends JDialog {
       jPanelSummary.add(jLabelLibDate, g);
       g = new GridBagConstraints();
       g.weightx = 0.0;
-      g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
+      g.anchor = GridBagConstraints.WEST;
       g.insets = insets;
       jLabelLibDate.setLabelFor(getJDatePicker());
       jPanelSummary.add(getJDatePicker(), g);
       g = new GridBagConstraints();
       g.weightx = 1.0;
       g.anchor = GridBagConstraints.WEST;
-      g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
       jLabelLibDate.setLabelFor(getJDatePicker());
       jPanelSummary.add(getJTextFieldTime(), g);
 
+      // Distance
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
+      g.fill = GridBagConstraints.HORIZONTAL;
       g.insets = insets;
       jLabelLibDistTot = new JLabel();
       jLabelLibDistTot.setFont(GuiFont.FONT_PLAIN);
@@ -251,43 +339,82 @@ public class JDialogAddRun extends JDialog {
       jPanelSummary.add(jLabelLibDistTot, g);
       g = new GridBagConstraints();
       g.weightx = 0.0;
-      g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
-      g.insets = insets;
-
-      jLabelLibDistTot.setLabelFor(getJTextFieldDistTot());
-      jPanelSummary.add(getJTextFieldDistTot(), g);
-      g = new GridBagConstraints();
-      g.weightx = 0.0;
-      g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
-      g.insets = insets;
       g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.HORIZONTAL;
       g.gridwidth = GridBagConstraints.REMAINDER;
-      jPanelSummary.add(getJComboBoxDistanceUnits(), g);
+      g.insets = insets;
+      JPanel panelDist = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+      jLabelLibDistTot.setLabelFor(panelDist);
+      panelDist.add(getJTextFieldDistTot());
+      panelDist.add(getJComboBoxDistanceUnits());
+      jPanelSummary.add(panelDist, g);
 
+      // Temps
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
+      g.fill = GridBagConstraints.HORIZONTAL;
       g.insets = insets;
       jLabelLibTimeTot = new JLabel();
       jLabelLibTimeTot.setFont(GuiFont.FONT_PLAIN);
       jLabelLibTimeTot.setHorizontalAlignment(SwingConstants.TRAILING);
       jPanelSummary.add(jLabelLibTimeTot, g);
       g = new GridBagConstraints();
-      g.weightx = 1.0;
+      g.weightx = 0.0;
       g.anchor = GridBagConstraints.WEST;
-      g.fill = GridBagConstraints.BOTH;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
       jLabelLibTimeTot.setLabelFor(getJTextFieldTimeTot());
       jPanelSummary.add(getJTextFieldTimeTot(), g);
 
+      // Calories
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
+      g.fill = GridBagConstraints.HORIZONTAL;
+      g.insets = insets;
+      jLabelLibCalories = new JLabel();
+      jLabelLibCalories.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibCalories.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelSummary.add(jLabelLibCalories, g);
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      jLabelLibCalories.setLabelFor(getJTextFieldCalories());
+      jPanelSummary.add(jTextFieldCalories, g);
+
+      // FC
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.HORIZONTAL;
+      g.insets = insets;
+      jLabelLibHeart = new JLabel();
+      jLabelLibHeart.setIcon(ImagesRepository.getImageIcon("heart.gif"));
+      jLabelLibHeart.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibHeart.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelSummary.add(jLabelLibHeart, g);
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      JPanel panelHeart = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+      panelHeart.add(getJTextFieldHeartMoy());
+      JLabel jLabelSpace = new JLabel("/");
+      jLabelSpace.setFont(GuiFont.FONT_PLAIN);
+      panelHeart.add(jLabelSpace);
+      panelHeart.add(getJTextFieldHeartMax());
+      jLabelLibHeart.setLabelFor(panelHeart);
+      jPanelSummary.add(panelHeart, g);
+
+      // Activity
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.HORIZONTAL;
       g.insets = insets;
       jLabelLibActivity = new JLabel();
       jLabelLibActivity.setFont(GuiFont.FONT_PLAIN);
@@ -296,19 +423,20 @@ public class JDialogAddRun extends JDialog {
       g = new GridBagConstraints();
       g.weightx = 1.0;
       g.anchor = GridBagConstraints.WEST;
-      g.fill = GridBagConstraints.BOTH;
+      g.fill = GridBagConstraints.HORIZONTAL;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
-      jComboBoxActivity = new JComboBox(modelActivities);
+      jComboBoxActivity = new JComboBoxActivity(modelActivities);
       modelActivities.setDefaultSelectedItem();
       jComboBoxActivity.setFont(GuiFont.FONT_PLAIN);
       jLabelLibActivity.setLabelFor(jComboBoxActivity);
       jPanelSummary.add(jComboBoxActivity, g);
 
+      // Equipements
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
+      g.fill = GridBagConstraints.HORIZONTAL;
       g.insets = insets;
       jLabelLibEquipment = new JLabel();
       jLabelLibEquipment.setFont(GuiFont.FONT_PLAIN);
@@ -317,21 +445,77 @@ public class JDialogAddRun extends JDialog {
       g = new GridBagConstraints();
       g.weightx = 1.0;
       g.anchor = GridBagConstraints.WEST;
-      g.fill = GridBagConstraints.BOTH;
+      g.fill = GridBagConstraints.HORIZONTAL;
       g.gridwidth = GridBagConstraints.REMAINDER;
       g.insets = insets;
-
       jComboBoxEquipment = new JComboBox(modelEquipements);
       modelEquipements.setDefaultSelectedItem();
-
       jComboBoxEquipment.setFont(GuiFont.FONT_PLAIN);
       jLabelLibEquipment.setLabelFor(jComboBoxEquipment);
       jPanelSummary.add(jComboBoxEquipment, g);
 
+      // Location
       g = new GridBagConstraints();
       g.weightx = 0.0;
       g.anchor = GridBagConstraints.EAST;
-      g.fill = GridBagConstraints.BOTH;
+      g.fill = GridBagConstraints.HORIZONTAL;
+      g.insets = insets;
+      jLabelLibLocation = new JLabel();
+      jLabelLibLocation.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibLocation.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelSummary.add(jLabelLibLocation, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.HORIZONTAL;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      modelLocations = new LocationComboBoxModel();
+      jComboBoxLocation = new JComboBox(modelLocations);
+      jComboBoxLocation.setEditable(true);
+      jComboBoxLocation.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibLocation.setLabelFor(jComboBoxLocation);
+      jPanelSummary.add(jComboBoxLocation, g);
+
+      // Meteo
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.HORIZONTAL;
+      g.insets = insets;
+      jLabelLibMeteo = new JLabel();
+      jLabelLibMeteo.setFont(GuiFont.FONT_PLAIN);
+      jLabelLibMeteo.setHorizontalAlignment(SwingConstants.TRAILING);
+      jPanelSummary.add(jLabelLibMeteo, g);
+      g = new GridBagConstraints();
+      g.weightx = 1.0;
+      g.anchor = GridBagConstraints.WEST;
+      g.fill = GridBagConstraints.HORIZONTAL;
+      g.gridwidth = GridBagConstraints.REMAINDER;
+      g.insets = insets;
+      JPanel panelMeteo = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+      panelMeteo.add(getJXSplitButtonImgMeteo());
+      Dimension dimFiller = new Dimension(10, 5);
+      panelMeteo.add(new Box.Filler(dimFiller, dimFiller, dimFiller));
+      jLabelTemperature = new JLabel("15 " + TemperatureUnit.getDefaultUnit());
+      jLabelTemperature.setHorizontalAlignment(SwingConstants.LEFT);
+      jLabelTemperature.setFont(new Font("SansSerif", Font.BOLD, 16));
+      jLabelTemperature.setBorder(BorderFactory.createTitledBorder(""));
+      spinner = new JSpinner();
+      spinner.setEditor(jLabelTemperature);
+      spinnerModel = new TemperatureSpinnerModel();
+      spinner.setModel(spinnerModel);
+      Dimension dim = new Dimension(105, 35);
+      spinner.setPreferredSize(dim);
+      spinner.setMinimumSize(dim);
+      panelMeteo.add(spinner);
+      jPanelSummary.add(panelMeteo, g);
+
+      // Notes
+      g = new GridBagConstraints();
+      g.weightx = 0.0;
+      g.anchor = GridBagConstraints.EAST;
+      g.fill = GridBagConstraints.HORIZONTAL;
       g.insets = insets;
       jLabelLibNotes = new JLabel("Notes :");
       jLabelLibNotes.setFont(GuiFont.FONT_PLAIN);
@@ -358,8 +542,50 @@ public class JDialogAddRun extends JDialog {
       jTextFieldDistTot.setFont(GuiFont.FONT_PLAIN);
       jTextFieldDistTot.setFormatterFactory(TextFormatterFactory
           .createNumber(5, 2));
+      Dimension dim = new Dimension(63, 24);
+      jTextFieldDistTot.setPreferredSize(dim);
+      jTextFieldDistTot.setMaximumSize(dim);
     }
     return jTextFieldDistTot;
+  }
+
+  public JFormattedTextField getJTextFieldCalories() {
+    if (jTextFieldCalories == null) {
+      jTextFieldCalories = new JFormattedTextField();
+      jTextFieldCalories.setFont(GuiFont.FONT_PLAIN);
+      jTextFieldCalories.setFormatterFactory(TextFormatterFactory
+          .createNumberBlankAllowed(4));
+      Dimension dim = new Dimension(63, 24);
+      jTextFieldCalories.setPreferredSize(dim);
+      jTextFieldCalories.setMaximumSize(dim);
+    }
+    return jTextFieldCalories;
+  }
+
+  public JFormattedTextField getJTextFieldHeartMoy() {
+    if (jTextFieldHeartAvg == null) {
+      jTextFieldHeartAvg = new JFormattedTextField();
+      jTextFieldHeartAvg.setFont(GuiFont.FONT_PLAIN);
+      jTextFieldHeartAvg.setFormatterFactory(TextFormatterFactory
+          .createNumberBlankAllowed(3));
+      Dimension dim = new Dimension(50, 24);
+      jTextFieldHeartAvg.setPreferredSize(dim);
+      jTextFieldHeartAvg.setMaximumSize(dim);
+    }
+    return jTextFieldHeartAvg;
+  }
+
+  public JFormattedTextField getJTextFieldHeartMax() {
+    if (jTextFieldHeartMax == null) {
+      jTextFieldHeartMax = new JFormattedTextField();
+      jTextFieldHeartMax.setFont(GuiFont.FONT_PLAIN);
+      jTextFieldHeartMax.setFormatterFactory(TextFormatterFactory
+          .createNumberBlankAllowed(3));
+      Dimension dim = new Dimension(50, 24);
+      jTextFieldHeartMax.setPreferredSize(dim);
+      jTextFieldHeartMax.setMaximumSize(dim);
+    }
+    return jTextFieldHeartMax;
   }
 
   /**
@@ -464,6 +690,31 @@ public class JDialogAddRun extends JDialog {
     return jPanelButton;
   }
 
+  private JXSplitButton getJXSplitButtonImgMeteo() {
+    if (jxSplitButtonImgMeteo == null) {
+      List<ImageIcon> listIcon = DataMeteo.getIcons();
+      HashMap<String, ImageIcon> map = new HashMap<String, ImageIcon>();
+      String[] values = new String[listIcon.size()];
+
+      JPopupMenu popupMenu = new JPopupMenu();
+      ButtonGroup buttonGroupDropDown = new ButtonGroup();
+      for (int i = 0; i < listIcon.size(); i++) {
+        values[i] = Integer.toString(i);
+        map.put(values[i], listIcon.get(i));
+
+        JMenuItemMeteo mi = new JMenuItemMeteo(listIcon.get(i), i);
+        buttonGroupDropDown.add(mi);
+        popupMenu.add(mi);
+      }
+
+      jxSplitButtonImgMeteo = new JXSplitButton(null, null, popupMenu);
+      jxSplitButtonImgMeteo.setSelectedIndex(0);
+      model.getData().getMeteo().setImageIconIndex(0);
+      jxSplitButtonImgMeteo.setFont(new Font("SansSerif", Font.PLAIN, 0));
+    }
+    return jxSplitButtonImgMeteo;
+  }
+
   /**
    * This method initializes jButton
    * 
@@ -489,52 +740,6 @@ public class JDialogAddRun extends JDialog {
       jButtonSave.setFont(GuiFont.FONT_PLAIN);
     }
     return jButtonSave;
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  public class ActivityComboBoxModel extends DefaultComboBoxModel {
-    private AbstractDataActivity defaultActivity;
-
-    public ActivityComboBoxModel() throws SQLException {
-      super();
-
-      List<AbstractDataActivity> list = UserActivityTableManager.getInstance()
-          .retreive();
-      for (AbstractDataActivity d : list) {
-        if (d.isDefaultActivity()) {
-          defaultActivity = d;
-        }
-        addElement(d);
-      }
-    }
-
-    public void setDefaultSelectedItem() {
-      if (defaultActivity != null) {
-        setSelectedItem(defaultActivity);
-      }
-    }
-
-    public void setSelectedActivity(int sportType) {
-      for (int i = 1; i < getSize(); i++) {
-        AbstractDataActivity d = (AbstractDataActivity) getElementAt(i);
-        if (d.getSportType() == sportType) {
-          setSelectedItem(d);
-          return;
-        }
-      }
-      setSelectedItem("");
-    }
-
-    public int getSportType() {
-      Object obj = getSelectedItem();
-      if (obj instanceof String) {
-        return DataActivityOther.SPORT_TYPE;
-      }
-      return ((AbstractDataActivity) obj).getSportType();
-    }
   }
 
   /**
@@ -614,8 +819,8 @@ public class JDialogAddRun extends JDialog {
 
         @Override
         public void finished() {
-//          jButtonCancel.setEnabled(true);
-//          JDialogAddRun.this.setCursor(Cursor.getDefaultCursor());
+          // jButtonCancel.setEnabled(true);
+          // JDialogAddRun.this.setCursor(Cursor.getDefaultCursor());
           MainGui.getWindow().afterRunnableSwing();
           dispose();
         }
@@ -628,13 +833,12 @@ public class JDialogAddRun extends JDialog {
         error("errorDistanceTot");
         return false;
       }
-
       return true;
     }
 
     private void error(String msg) {
       ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-          .getManager().getCurrentLang(), getClass());
+          .getManager().getCurrentLang(), JDialogAddRun.class);
       JShowMessage.error(JDialogAddRun.this, rb.getString(msg));
     }
   }
@@ -654,4 +858,102 @@ public class JDialogAddRun extends JDialog {
       dispose();
     }
   }
+
+  /**
+   * @author Denis Apparicio
+   * 
+   */
+  private class JMenuItemMeteo extends JMenuItem implements ActionListener {
+    int index;
+
+    public JMenuItemMeteo(ImageIcon imageIcon, int index) {
+      super(imageIcon);
+      this.index = index;
+      addActionListener(JMenuItemMeteo.this);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      jxSplitButtonImgMeteo.setSelectedIndex(index);
+      JDialogAddRun.this.model.getData().getMeteo().setImageIconIndex(index);
+    }
+  };
+
+  /**
+   * @author Denis Apparicio
+   * 
+   */
+  private class TemperatureSpinnerModel extends AbstractSpinnerModel {
+    int    maxDegree     = 54;
+
+    int    minDegree     = -49;
+
+    int    maxFahrenheit = (int) TemperatureUnit.convertToFahrenheit(maxDegree);
+
+    int    minFahrenheit = (int) TemperatureUnit.convertToFahrenheit(minDegree);
+
+    int    value = 15;
+
+    int    max           = maxDegree;
+
+    int    min           = minDegree;
+
+    String sValue;
+
+    public TemperatureSpinnerModel() {
+      if (TemperatureUnit.isFahrenheit(TemperatureUnit.getDefaultUnit())) {
+        max = maxFahrenheit;
+        min = minFahrenheit;
+        value = (int) TemperatureUnit.convertToFahrenheit(15);
+      }
+      model.getData().getMeteo().setTemperature(value);  
+    }
+
+    public Object getValue() {
+      return sValue;
+    }
+
+    public void setValue(Object value) {
+      this.sValue = (String) value;
+      retrieveIntValue();
+    }
+
+    public Object getNextValue() {
+      if (value > max) {
+        return null;
+      }
+      value++;
+      sValue = Integer.toString(value) + " " + TemperatureUnit.getDefaultUnit();
+      jLabelTemperature.setText(sValue);
+      updateTemperature();
+      return sValue;
+    }
+
+    public Object getPreviousValue() {
+      if (value < min) {
+        return null;
+      }
+      value--;
+      sValue = Integer.toString(value) + " " + TemperatureUnit.getDefaultUnit();
+      jLabelTemperature.setText(sValue);
+      updateTemperature();
+      return sValue;
+    }
+
+    private int retrieveIntValue() {
+      String s = sValue.substring(0, sValue.indexOf(' '));
+      value = (s.length() == 1 && s.charAt(0) == '-') ? 0 : Integer.parseInt(s);
+      updateTemperature();
+      return value;
+    }
+
+    private void updateTemperature() {
+      model
+          .getData()
+          .getMeteo()
+          .setTemperature((TemperatureUnit.isDefaultUnitDegree()) ? value
+              : (int) Math.rint(TemperatureUnit.convertToDegree(value)));
+    }
+
+  }
+
 }

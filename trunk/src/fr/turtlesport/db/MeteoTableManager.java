@@ -125,17 +125,29 @@ public class MeteoTableManager extends AbstractTableManager {
    * 
    * @param meteo
    * @param run
-   *          un utilisateur.
+   *          run.
    * @throws SQLException
    */
   public void store(DataMeteo meteo, DataRun run) throws SQLException {
+    store(meteo, run.getId());
+  }
+
+  /**
+   * Enregistre les donn&eacute;es meteo du run..
+   * 
+   * @param meteo
+   * @param id
+   *          id run.
+   * @throws SQLException
+   */
+  public void store(DataMeteo meteo, int id) throws SQLException {
     log.debug(">>store");
 
-    if (meteo == null || run == null) {
+    if (meteo == null) {
       throw new IllegalArgumentException();
     }
 
-    delete(run.getId());
+    delete(id);
 
     Connection conn = DatabaseManager.getConnection();
 
@@ -155,7 +167,7 @@ public class MeteoTableManager extends AbstractTableManager {
       st.append(" VALUES(?, ?, ?,?, ?, ?, ?, ?, ?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
-      pstmt.setInt(1, run.getId());
+      pstmt.setInt(1, id);
 
       pstmt.setTimestamp(2, (meteo.getDate() == null) ? null
           : new java.sql.Timestamp(meteo.getDate().getTime()));
@@ -169,7 +181,6 @@ public class MeteoTableManager extends AbstractTableManager {
 
       pstmt.executeUpdate();
       pstmt.close();
-
     }
     finally {
       DatabaseManager.releaseConnection(conn);
@@ -209,23 +220,18 @@ public class MeteoTableManager extends AbstractTableManager {
   /**
    * Update de la condition
    * 
-   * @param dataRun
+   * @param id
+   *          id run
    * @param condition
    * @throws SQLException
    */
-  public void updateCondition(DataRun dataRun, int condition) throws SQLException {
-    log.debug(">>update dataRun  condition");
-
-    if (dataRun == null) {
-      return;
-    }
+  public void updateCondition(int id, int condition) throws SQLException {
+    log.debug(">>update dataRun condition");
 
     // Debut de tansaction
     DatabaseManager.beginTransaction();
 
     try {
-      int id = dataRun.getId();
-
       // update du run
       StringBuilder st = new StringBuilder();
       st.append("UPDATE ");
@@ -265,22 +271,32 @@ public class MeteoTableManager extends AbstractTableManager {
    * Update de la condition
    * 
    * @param dataRun
-   * @param temperature
+   * @param condition
    * @throws SQLException
    */
-  public void updateTemperature(DataRun dataRun, int temperature) throws SQLException {
-    log.debug(">>update dataRun temperature");
+  public void updateCondition(DataRun dataRun, int condition) throws SQLException {
+    log.debug(">>update dataRun  condition");
 
     if (dataRun == null) {
       return;
     }
+    updateCondition(dataRun.getId(), condition);
 
-    // Debut de tansaction
-    DatabaseManager.beginTransaction();
+    log.debug("<<update");
+  }
+
+  /**
+   * Update de la condition
+   * 
+   * @param id
+   *          id run
+   * @param temperature
+   * @throws SQLException
+   */
+  public void updateTemperature(int id, int temperature) throws SQLException {
+    log.debug(">>update dataRun temperature");
 
     try {
-      int id = dataRun.getId();
-
       // update du run
       StringBuilder st = new StringBuilder();
       st.append("UPDATE ");
@@ -312,6 +328,25 @@ public class MeteoTableManager extends AbstractTableManager {
     // ok -> commit
     DatabaseManager.commitTransaction();
     DatabaseManager.getConnection().close();
+
+    log.debug("<<update");
+  }
+
+  /**
+   * Update de la condition
+   * 
+   * @param dataRun
+   * @param temperature
+   * @throws SQLException
+   */
+  public void updateTemperature(DataRun dataRun, int temperature) throws SQLException {
+    log.debug(">>update dataRun temperature");
+
+    if (dataRun == null) {
+      return;
+    }
+
+    updateTemperature(dataRun.getId(), temperature);
 
     log.debug("<<update");
   }

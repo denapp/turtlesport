@@ -1,5 +1,6 @@
 package fr.turtlesport.db;
 
+import fr.turtlesport.ui.swing.img.activity.ImagesActivityRepository;
 import fr.turtlesport.unit.SpeedPaceUnit;
 
 /**
@@ -55,7 +56,7 @@ public abstract class AbstractDataActivity implements
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   public int compareTo(AbstractDataActivity o) {
-    return getName().compareTo(o.getName());
+    return getName().toLowerCase().compareTo(o.getName().toLowerCase());
   }
 
   /**
@@ -177,7 +178,7 @@ public abstract class AbstractDataActivity implements
    * @return le nom de l activit&eacute;
    */
   public String getName() {
-    return name;
+    return name==null?"":name;
   }
 
   /**
@@ -194,7 +195,7 @@ public abstract class AbstractDataActivity implements
    * @return Restitue le nom de l'icone
    */
   public String getIconName() {
-    return iconName;
+    return iconName==null?ImagesActivityRepository.IMAGE_SPORT_OTHER:iconName;
   }
 
   /**

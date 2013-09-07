@@ -30,7 +30,6 @@ import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.db.DataSpeedZone;
 import fr.turtlesport.db.RunLapTableManager;
 import fr.turtlesport.db.RunTableManager;
-import fr.turtlesport.db.RunTrkTableManager;
 import fr.turtlesport.db.UserActivityTableManager;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
@@ -365,13 +364,14 @@ public class ModelRun {
     view.getJLabelValCalories().setText(Integer.toString(value));
 
     // frequence moyenne/max/min.
-    int avg = RunLapTableManager.getInstance().heartAvg(dataRun.getId());
-    int min = RunTrkTableManager.getInstance().heartMin(dataRun.getId());
-    int max = RunLapTableManager.getInstance().heartMax(dataRun.getId());
+    int avg = dataRun.computeAvgRate();
+    int min = dataRun.computeMinRate();
+    int max = dataRun.computeMaxRate();
 
-    view.getJLabelValHeart().setText(Integer.toString(avg) + " / "
-                                     + Integer.toString(min) + " / "
-                                     + Integer.toString(max));
+    String sAvg = (avg <= 0) ? "-" : Integer.toString(avg);
+    String sMin = (min <= 0) ? "-" : Integer.toString(min);
+    String sMax = (max <= 0) ? "-" : Integer.toString(max);
+    view.getJLabelValHeart().setText(sAvg + " / " + sMin + " / " + sMax);
 
     // Altitude.
     correctAltitude(view);
@@ -393,6 +393,7 @@ public class ModelRun {
         : dataRun.getComments());
 
     // Location
+    view.setModelLocation(new LocationComboBoxModel());
     view.getModelLocation().setSelectedLocation(dataRun.getLocation());
 
     // Product
