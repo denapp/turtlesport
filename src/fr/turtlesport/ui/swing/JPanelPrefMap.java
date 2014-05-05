@@ -10,7 +10,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ResourceBundle;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -22,7 +21,7 @@ import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
-import fr.turtlesport.map.OpenStreetMapTileFactory;
+import fr.turtlesport.map.AllMapsFactory;
 import fr.turtlesport.ui.swing.component.PanelPrefListener;
 import fr.turtlesport.util.BrowserUtil;
 import fr.turtlesport.util.ResourceBundleUtility;
@@ -54,7 +53,7 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
 
   private JXHyperlink     jxHyperlinklicence;
 
-  private JLabel jLabelLicence;
+  private JLabel          jLabelLicence;
 
   /**
    * 
@@ -119,7 +118,6 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
     borderLayout.setHgap(5);
     borderLayout.setVgap(5);
     this.setLayout(borderLayout);
-    this.setSize(534, 218);
     this.add(getJPanelTitle(), BorderLayout.NORTH);
     this.add(getJPanelCenter(), BorderLayout.CENTER);
     this.add(getJPanelSouth(), BorderLayout.SOUTH);
@@ -136,7 +134,7 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             // Efface le cache disque
-            OpenStreetMapTileFactory.cleanCache();
+            AllMapsFactory.getInstance().cleanCache();
             jLabelValCacheSize.setText(cacheSize());
             MainGui.getWindow().afterRunnableSwing();
           }
@@ -195,10 +193,10 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
     if (jPanelSouth == null) {
       jLabelOpenStreeetMap = new JLabel();
       jLabelOpenStreeetMap.setFont(GuiFont.FONT_PLAIN);
-      //jLabelOpenStreeetMap
-      //    .setText("<html><body>Data/Maps Copyright &#169; 2012</body></html>");
+      // jLabelOpenStreeetMap
+      // .setText("<html><body>Data/Maps Copyright &#169; 2012</body></html>");
       jLabelOpenStreeetMap
-      .setText("<html><body>Data/Maps by MapQuest, OpenStreetMap &#169; </body></html>");
+          .setText("<html><body>Data/Maps by MapQuest, OpenStreetMap &#169; </body></html>");
 
       jxHyperlinkOpenStreetMap = new JXHyperlink();
       jxHyperlinkOpenStreetMap.setText("OpenStreetMap Contributors");
@@ -232,7 +230,7 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
       FlowLayout flowLayout = new FlowLayout();
       flowLayout.setAlignment(FlowLayout.LEFT);
       jPanelSouth.setLayout(flowLayout);
-      //jPanelSouth.setLayout(new BoxLayout(jPanelSouth, BoxLayout.Y_AXIS));
+      // jPanelSouth.setLayout(new BoxLayout(jPanelSouth, BoxLayout.Y_AXIS));
       jPanelSouth.setAlignmentY(TOP_ALIGNMENT);
       jPanelSouth.add(jLabelOpenStreeetMap, null);
       jPanelSouth.add(jxHyperlinkOpenStreetMap, null);
@@ -258,7 +256,7 @@ public class JPanelPrefMap extends JPanel implements LanguageListener,
   private String cacheSize() {
     String value;
 
-    long length = OpenStreetMapTileFactory.cacheSize();
+    long length = AllMapsFactory.getInstance().cacheSize();
     if (length == 0) {
       value = "0 o";
     }

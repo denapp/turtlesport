@@ -25,6 +25,7 @@ public final class LanguageManager {
   /** Les languages. */
   private static final ILanguage[]          ILANGUAGES = { LanguageFr
           .getInstance(),
+//      LanguageUs.getInstance(),
       LanguageEn.getInstance(),
       LanguageSv.getInstance(),
       LanguageEs.getInstance(),
@@ -33,7 +34,7 @@ public final class LanguageManager {
       LanguageHu.getInstance(),
       LanguageIt.getInstance(),
       LanguageNl.getInstance(),
-      LanguagePt.getInstance()};
+      LanguagePt.getInstance()                        };
 
   private static HashMap<String, ILanguage> mapLang;
 
@@ -135,15 +136,15 @@ public final class LanguageManager {
    *          le langage.
    */
   public void fireLanguageChanged(ILanguage lang) {
-      this.currentLang = lang;
-      LanguageEvent e = new LanguageEvent(lang);
-      for (LanguageListener l : listeners) {
-        l.languageChanged(e);
-      }
-      // composant
-      JComponent.setDefaultLocale(lang.getLocale());
-      Locale.setDefault(lang.getLocale());
-      UIManager.put("OptionPane.cancelButtonText", lang.cancel());
+    this.currentLang = lang;
+    LanguageEvent e = new LanguageEvent(lang);
+    for (LanguageListener l : listeners) {
+      l.languageChanged(e);
+    }
+    // composant
+    JComponent.setDefaultLocale(lang.getLocale());
+    Locale.setDefault(lang.getLocale());
+    UIManager.put("OptionPane.cancelButtonText", lang.cancel());
   }
 
   /**

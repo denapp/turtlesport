@@ -39,6 +39,7 @@ public final class Update {
         public void run() {
           try {
             needUpdateFirst = false;
+            
             String version = currentVersion();
             if (isNewVersion(version)) {
               String iniVersion = Configuration.getConfig()
@@ -114,8 +115,7 @@ public final class Update {
     cnx.setDoInput(true);
 
     if (cnx.getResponseCode() == HttpURLConnection.HTTP_OK) {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(cnx
-          .getInputStream()));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream()));
       version = reader.readLine();
       reader.close();
     }
@@ -124,6 +124,13 @@ public final class Update {
   }
 
   private static boolean isNewVersion(String version) {
-    return (version != null) ? !Version.VERSION.equals(version) : false;
+    try {
+      float fVersion = Float.parseFloat(Version.VERSION);
+      float fNetVersion = Float.parseFloat(version);
+      return (fVersion >  fNetVersion);
+    }
+    catch (Throwable e) {
+      return false;
+    }
   }
 }

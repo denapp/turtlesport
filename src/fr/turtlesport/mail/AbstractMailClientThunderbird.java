@@ -39,6 +39,15 @@ public abstract class AbstractMailClientThunderbird implements IMailClient {
   /*
    * (non-Javadoc)
    * 
+   * @see fr.turtlesport.mail.IMailClient#getName()
+   */
+  public String getName() {
+    return "Thunderbird";
+  }
+  
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.turtlesport.mail.IMailClient#getIcon()
    */
   public ImageIcon getIcon() {

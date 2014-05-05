@@ -1,8 +1,10 @@
 package fr.turtlesport.unit;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import fr.turtlesport.Configuration;
+import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.unit.event.Unit;
 
 /**
@@ -10,9 +12,15 @@ import fr.turtlesport.unit.event.Unit;
  * 
  */
 public final class SpeedPaceUnit extends Unit {
-  private static final DecimalFormat DF_SPEED_1 = new DecimalFormat("##0.##");
+  private static DecimalFormat       DF_SPEED_1 = new DecimalFormat("##0.##");
 
   private static final DecimalFormat DF_SPEED_2 = new DecimalFormat("00.00");
+
+  static {
+    DF_SPEED_1 = (DecimalFormat) NumberFormat.getNumberInstance(LanguageManager
+        .getManager().getLocale());
+    DF_SPEED_1.applyPattern("##0.##");
+  }
 
   private static final String[]      UNITS      = { "km/h",
       "mn/km",

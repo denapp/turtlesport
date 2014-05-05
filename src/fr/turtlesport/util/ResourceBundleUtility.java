@@ -52,10 +52,6 @@ public final class ResourceBundleUtility {
     st.append(baseName);
     st.append('_');
     st.append(locale.getLanguage());
-    if (locale.getCountry() != null && !"".equals(locale.getCountry())) {
-      st.append('_');
-      st.append(locale.getCountry());
-    }
     st.append(".properties");
 
     InputStream in = null;
@@ -73,6 +69,10 @@ public final class ResourceBundleUtility {
                                              + baseName + ", locale " + locale,
                                          baseName + "_" + locale,
                                          "");
+    }
+    catch(RuntimeException e) {
+      log.error("ressource non trouve : " + clazz + " " + st.toString());
+      throw e;
     }
     finally {
       try {

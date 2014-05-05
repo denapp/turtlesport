@@ -5,12 +5,9 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import javax.imageio.ImageIO;
 
 /**
  * 
@@ -32,11 +29,8 @@ public class SwingUtil {
                                               BufferedImage.TYPE_INT_RGB);
     Graphics2D g2 = myImage.createGraphics();
     component.paint(g2);
-
-    OutputStream out = new FileOutputStream(file);
-    JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-    encoder.encode(myImage);
-    out.close();
+    
+    ImageIO.write(myImage, "jpg", file);
   }
 
 }

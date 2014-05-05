@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.imageio.ImageIO;
 
@@ -20,35 +22,35 @@ import fr.turtlesport.util.FileUtil;
  * 
  */
 public class DiskTitleCache extends TileCache {
-  private static TurtleLogger           log;
+  private static TurtleLogger log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(DiskTitleCache.class);
   }
 
   /** * Repertoire du cache. */
-  private File                          dirCache;
+  private File                dirCache;
 
   /** Max age du cache en jour. */
-  private int                           maxAge = 10;
+  private int                 maxAge = 10;
 
   /** Taille courante du cache */
-  private long                          currentSize;
+  private long                currentSize;
 
-  private TileFactoryInfo tileProviderInfo;
+  private TileFactoryInfo     tileProviderInfo;
 
   /**
    * @param dirCache
    * @param tileProviderInfo
    */
-  protected DiskTitleCache(File dirCache,
-                           TileFactoryInfo tileProviderInfo) {
+  public DiskTitleCache(File dirCache, TileFactoryInfo tileProviderInfo) {
     this.tileProviderInfo = tileProviderInfo;
     this.dirCache = dirCache;
     if (!dirCache.exists()) {
+      System.out.println(dirCache.getAbsolutePath());
       dirCache.mkdir();
     }
     cleanCache();
-
+    
     if (log.isInfoEnabled()) {
       currentSize = FileUtil.dirLength(dirCache);
       log.error("currentSize=" + currentSize / 1024.0 / 1024.0 + " mo");
@@ -112,7 +114,9 @@ public class DiskTitleCache extends TileCache {
     // Restitue l'image.
     if (exist(file)) {
       try {
-        log.info("get Cache image: " + file.getPath());
+        if (log.isInfoEnabled()) {
+          log.info("get Cache image: " + file.getPath());
+        }
         return ImageIO.read(file);
       }
       catch (IOException e) {
@@ -128,7 +132,7 @@ public class DiskTitleCache extends TileCache {
    * (non-Javadoc)
    * 
    * @see org.jdesktop.swingx.mapviewer.TileCache#put(java.net.URI, byte[],
-   *      java.awt.image.BufferedImage)
+   * java.awt.image.BufferedImage)
    */
   @Override
   public void put(URI uri, byte[] bimg, BufferedImage img) {
@@ -166,12 +170,42 @@ public class DiskTitleCache extends TileCache {
    *          l'url.
    * @return la cl&eacute;.
    */
-  private String makeKey(URI uri) {
+  // private String makeKey(URI uri) {
+  // if (uri == null) {
+  // return null;
+  // }
+  // String q = uri.getPath();
+  // return q.replace('/', '_');
+  // }
+  protected String makeKey(URI uri) {
     if (uri == null) {
       return null;
     }
     String q = uri.getPath();
-    return q.replace('/', '_');
+    if (uri.getQuery() != null) {
+      q += uri.getQuery();
+    }
+    try {
+      MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+      String rep = byteArrayToHexStr(messageDigest.digest(q.getBytes()));
+      return rep;
+    }
+    catch (NoSuchAlgorithmException e) {
+    }
+
+    return null;
+  }
+
+  private String byteArrayToHexStr(byte[] data) {
+    char[] chars = new char[data.length * 2];
+    for (int i = 0; i < data.length; i++) {
+      byte current = data[i];
+      int hi = (current & 0xF0) >> 4;
+      int lo = current & 0x0F;
+      chars[2 * i] = (char) (hi < 10 ? ('0' + hi) : ('A' + hi - 10));
+      chars[2 * i + 1] = (char) (lo < 10 ? ('0' + lo) : ('A' + lo - 10));
+    }
+    return new String(chars);
   }
 
   /**

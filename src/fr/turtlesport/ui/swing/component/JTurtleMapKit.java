@@ -35,14 +35,15 @@ import javax.swing.border.EtchedBorder;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
-import org.jdesktop.swingx.mapviewer.TileFactory;
 import org.jdesktop.swingx.painter.Painter;
 
-import fr.turtlesport.map.OpenStreetMapTileFactory;
-import fr.turtlesport.map.TileFactoryExtended;
+import fr.turtlesport.map.AbstractTileFactoryExtended;
+import fr.turtlesport.map.AllMapsFactory;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.img.diagram.ImagesDiagramRepository;
+import fr.turtlesport.ui.swing.model.AddDeleteMapEvent;
+import fr.turtlesport.ui.swing.model.AddDeleteMapListener;
 import fr.turtlesport.ui.swing.model.ChangeMapEvent;
 import fr.turtlesport.ui.swing.model.ChangeMapListener;
 import fr.turtlesport.ui.swing.model.ChangePointsEvent;
@@ -56,50 +57,55 @@ import fr.turtlesport.util.GeoUtil;
  * 
  */
 public class JTurtleMapKit extends JXPanel {
-  private int                     originalZoom   = -1;
 
-  private GeoPosition             originalPosition;
+  /** Localisation par defaut PARIS */
+  private static final GeoPosition DEFAULT_GEO    = new GeoPosition(48.856638,
+                                                                    2.352241);
 
-  private JButtonCustom           jButtonZoomPlus;
+  private int                      originalZoom   = -1;
 
-  private JButtonCustom           jButtonZoomMoins;
+  private GeoPosition              originalPosition;
 
-  private JButtonCustom           jButtonResize;
+  private JButtonCustom            jButtonZoomPlus;
 
-  private Dimension               dimButton      = new Dimension(20, 20);
+  private JButtonCustom            jButtonZoomMoins;
 
-  private JTurtleMapViewer        mainMap;
+  private JButtonCustom            jButtonResize;
 
-  private JPanel                  jPanelButton;
+  private Dimension                dimButton      = new Dimension(20, 20);
 
-  private JXSplitButton           jXSplitButtonMap;
+  private JTurtleMapViewer         mainMap;
 
-  private ButtonGroup             buttonGroupDropDown;
+  private JPanel                   jPanelButton;
 
-  private ImageIcon               iconConnect    = ImagesDiagramRepository
-                                                     .getImageIcon("map.png");
+  private JXSplitButton            jXSplitButtonMap;
 
-  private ImageIcon               iconDisconnect = ImagesDiagramRepository
-                                                     .getImageIcon("map-off.png");
+  private ButtonGroup              buttonGroupDropDown;
 
-  private JMediaMapKit            jMediaMapKit;
+  private ImageIcon                iconConnect    = ImagesDiagramRepository
+                                                      .getImageIcon("map.png");
 
-  private BufferedImage           imgStop;
+  private ImageIcon                iconDisconnect = ImagesDiagramRepository
+                                                      .getImageIcon("map-off.png");
 
-  private BufferedImage           imgStart;
+  private JMediaMapKit             jMediaMapKit;
 
-  private BufferedImage           imgPoint;
+  private BufferedImage            imgStop;
+
+  private BufferedImage            imgStart;
+
+  private BufferedImage            imgPoint;
 
   // model
-  private MapKitChangeMapListener mapListener;
+  private MapKitChangeMapListener  mapListener;
 
   // private ModelMapkitManager model;
 
-  private GeoMouseMotionListener  geoMouseMotionListener;
+  private GeoMouseMotionListener   geoMouseMotionListener;
 
-  private boolean                 isSmallFlag    = false;
+  private boolean                  isSmallFlag    = false;
 
-  private Color                   COLOR_TRACE    = Color.RED;
+  private Color                    COLOR_TRACE    = Color.RED;
 
   /**
    * 
@@ -113,17 +119,19 @@ public class JTurtleMapKit extends JXPanel {
 
     mapListener = new MapKitChangeMapListener();
     ModelMapkitManager.getInstance().addChangeListener(mapListener);
+    ModelMapkitManager.getInstance().addAddDeleteMapListener(mapListener);
 
     // recuperation tilefactory par defaut
-    TileFactory tileFactory = OpenStreetMapTileFactory.getDefaultTileFactory();
+    AbstractTileFactoryExtended tileFactory = AllMapsFactory.getInstance()
+        .getDefaultTileFactory();
 
     // mis a jour du bouton
     mapListener.setTileMenu(tileFactory);
     mainMap.setTileFactory(tileFactory);
 
-    OpenStreetMapTileFactory.setDefaultTileFactory(tileFactory);
+    AllMapsFactory.getInstance().setDefaultTileFactory(tileFactory);
     mainMap.setZoom(tileFactory.getInfo().getDefaultZoomLevel());
-    mainMap.setCenterPosition(new GeoPosition(0, 0));
+    mainMap.setCenterPosition(new GeoPosition(48.856638, 2.352241));
     mainMap.setRestrictOutsidePanning(true);
   }
 
@@ -330,7 +338,7 @@ public class JTurtleMapKit extends JXPanel {
       buttonGroupDropDown = new ButtonGroup();
       JPopupMenu popmenu = new JPopupMenu();
 
-      for (String s : OpenStreetMapTileFactory.getTileNames()) {
+      for (String s : AllMapsFactory.getInstance().getTileNames()) {
         JCheckBoxMenuItemMap mi = new JCheckBoxMenuItemMap(s);
         buttonGroupDropDown.add(mi);
         popmenu.add(mi);
@@ -394,7 +402,7 @@ public class JTurtleMapKit extends JXPanel {
    */
   public class JCheckBoxMenuItemMap extends JCheckBoxMenuItem implements
                                                              ActionListener {
-    private TileFactory tileFactory;
+    private AbstractTileFactoryExtended tileFactory;
 
     public JCheckBoxMenuItemMap(String text) {
       super(text);
@@ -405,10 +413,10 @@ public class JTurtleMapKit extends JXPanel {
     /**
      * @return
      */
-    public TileFactory getTileFactory() {
+    public AbstractTileFactoryExtended getTileFactory() {
       if (tileFactory == null) {
         synchronized (JCheckBoxMenuItemMap.class) {
-          tileFactory = OpenStreetMapTileFactory.getTileFactory(getText());
+          tileFactory = AllMapsFactory.getInstance().getTileFactory(getText());
         }
       }
       return tileFactory;
@@ -444,7 +452,8 @@ public class JTurtleMapKit extends JXPanel {
    * @author Denis Apparicio
    * 
    */
-  private class MapKitChangeMapListener implements ChangeMapListener {
+  private class MapKitChangeMapListener implements ChangeMapListener,
+                                       AddDeleteMapListener {
 
     public MapKitChangeMapListener() {
       super();
@@ -460,7 +469,7 @@ public class JTurtleMapKit extends JXPanel {
     public void changedAllPoints(ChangePointsEvent e) {
       if (!e.hasPoints()) {
         mainMap.setZoom(1);
-        mainMap.setCenterPosition(new GeoPosition(0, 0));
+        mainMap.setCenterPosition(DEFAULT_GEO);
         jMediaMapKit.getModel().setMaximum(0);
         jMediaMapKit.getModel().setTimeTot("");
         return;
@@ -533,9 +542,9 @@ public class JTurtleMapKit extends JXPanel {
             g2.draw(line);
             line.setLine(p1.getX(), p1.getY() + 2, p2.getX(), p2.getY() + 2);
             g2.draw(line);
-//            line.setLine(p1.getX(), p1.getY() - 1, p2.getX(), p2.getY() - 1);
-//            g2.draw(line);
-            g2.fillRect((int) p2.getX() - 1, (int) p2.getY() -1, 3, 3);
+            // line.setLine(p1.getX(), p1.getY() - 1, p2.getX(), p2.getY() - 1);
+            // g2.draw(line);
+            g2.fillRect((int) p2.getX() - 1, (int) p2.getY() - 1, 3, 3);
           }
 
           if (ModelPointsManager.getInstance().getGeoPositionLapDeb() != null
@@ -561,7 +570,7 @@ public class JTurtleMapKit extends JXPanel {
               g2.draw(line);
               line.setLine(p1.getX(), p1.getY() - 1, p2.getX(), p2.getY() - 1);
               g2.draw(line);
-             
+
             }
           }
 
@@ -665,9 +674,9 @@ public class JTurtleMapKit extends JXPanel {
       int zoom = mainMap.getZoom();
       GeoPosition geo = mainMap.getCenterPosition();
 
-      TileFactory tile = e.getMapTileFactory();
+      AbstractTileFactoryExtended tile = e.getMapTileFactory();
       mainMap.setTileFactory(tile);
-      OpenStreetMapTileFactory.setDefaultTileFactory(tile);
+      AllMapsFactory.getInstance().setDefaultTileFactory(tile);
 
       mainMap.setZoom(zoom);
       mainMap.setCenterPosition(geo);
@@ -676,8 +685,55 @@ public class JTurtleMapKit extends JXPanel {
       setTileMenu(tile);
     }
 
-    protected void setTileMenu(TileFactory tile) {
-      final String name = ((TileFactoryExtended) tile).getName();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * fr.turtlesport.ui.swing.model.AddDeleteMapListener#deleteMap(fr.turtlesport
+     * .ui.swing.model.AddDeleteMapEvent)
+     */
+    @Override
+    public void deleteMap(AddDeleteMapEvent event) {
+      AbstractButton button = null;
+      Enumeration<AbstractButton> e = buttonGroupDropDown.getElements();
+      while (e.hasMoreElements()) {
+        AbstractButton tmp = e.nextElement();
+        if (tmp.getText().equals(event.getMapName())) {
+          button = tmp;
+          break;
+        }
+      }
+      if (button != null) {
+        boolean isSelected = button.isSelected();
+        buttonGroupDropDown.remove(button);
+        jXSplitButtonMap.getDropDownMenu().remove(button);
+        if (isSelected) {
+          Enumeration<AbstractButton> e1 = buttonGroupDropDown.getElements();
+          e1.nextElement();
+          JCheckBoxMenuItemMap val = (JCheckBoxMenuItemMap) e1.nextElement();
+          buttonGroupDropDown.setSelected(val.getModel(), true);
+          val.setSelected(true);
+          val.doClick();
+        }
+      }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * fr.turtlesport.ui.swing.model.AddDeleteMapListener#addMap(fr.turtlesport
+     * .ui.swing.model.AddDeleteMapEvent)
+     */
+    @Override
+    public void addMap(AddDeleteMapEvent e) {
+      JCheckBoxMenuItemMap mi = new JCheckBoxMenuItemMap(e.getMapName());
+      buttonGroupDropDown.add(mi);
+      jXSplitButtonMap.getDropDownMenu().add(mi);
+    }
+
+    protected void setTileMenu(AbstractTileFactoryExtended tile) {
+      final String name = tile.getName();
       Enumeration<AbstractButton> e = buttonGroupDropDown.getElements();
       while (e.hasMoreElements()) {
         AbstractButton b = e.nextElement();
@@ -691,8 +747,7 @@ public class JTurtleMapKit extends JXPanel {
         }
       }
 
-      ImageIcon newIcon = ((TileFactoryExtended) tile).isConnected() ? iconConnect
-          : iconDisconnect;
+      ImageIcon newIcon = tile.isConnected() ? iconConnect : iconDisconnect;
       if (newIcon != jXSplitButtonMap.getIcon()) {
         jXSplitButtonMap.setIcon(newIcon);
       }

@@ -5,7 +5,6 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Enumeration;
 import java.util.ResourceBundle;
 
 import javax.swing.JButton;
@@ -24,6 +23,7 @@ import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.mail.Mail;
+import fr.turtlesport.map.MapConfiguration;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.model.ModelPref;
 import fr.turtlesport.unit.event.UnitManager;
@@ -62,6 +62,8 @@ public class JDialogPreference extends JDialog implements LanguageListener {
   private ModelPref      modelPrefGoogleEarth;
 
   private ModelPref      modelPrefMap;
+
+  private ModelPref      modelPrefMapProvider;
 
   private ModelPref      modelPrefProxy;
 
@@ -165,6 +167,7 @@ public class JDialogPreference extends JDialog implements LanguageListener {
       modelPrefMail.setTitle(rb.getString("modelPrefMail"));
     }
     modelPrefMap.setTitle(rb.getString("modelPrefMap"));
+    modelPrefMapProvider.setTitle(rb.getString("modelPrefMapProvider"));
     modelPrefProxy.setTitle(rb.getString("modelPrefProxy"));
 
     jTreePref.updateUI();
@@ -191,22 +194,22 @@ public class JDialogPreference extends JDialog implements LanguageListener {
    * @return void
    */
   private void initialize() {
-    this.setSize(670, 510);
+    this.setSize(750, 580);
     this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     this.setTitle("Preferences");
     this.setContentPane(getJContentPane());
 
     // Mis a jour de l'arbre
     modelPrefGen = new ModelPref("GeneralqsfdQSFQSf", JPanelPrefGen.class);
-    DefaultMutableTreeNode node = jTreePref.addObject(modelPrefGen);
+    DefaultMutableTreeNode nodeGen = jTreePref.addObject(modelPrefGen);
 
     modelPrefUnit = new ModelPref("UnitesfqsfqSFQSffqsfqSF",
                                   JPanelPrefUnits.class);
-    jTreePref.addObject(node, modelPrefUnit);
+    jTreePref.addObject(nodeGen, modelPrefUnit);
 
     modelPrefTracks = new ModelPref("UnitesfqsfqSFQSffqsfqSF",
                                     JPanelPrefTracks.class);
-    jTreePref.addObject(node, modelPrefTracks);
+    jTreePref.addObject(nodeGen, modelPrefTracks);
 
     if (GoogleEarthFactory.getDefault().isConfigurable()) {
       modelPrefGoogleEarth = new ModelPref("Google EarthFQSfqSF",
@@ -223,8 +226,10 @@ public class JDialogPreference extends JDialog implements LanguageListener {
     jTreePref.addObject(modelPrefProxy);
 
     modelPrefMap = new ModelPref("MapqsfqSFQSfqSFQF", JPanelPrefMap.class);
-    jTreePref.addObject(modelPrefMap);
-
+    DefaultMutableTreeNode nodeMap = jTreePref.addObject(modelPrefMap);
+    modelPrefMapProvider = new ModelPref("MapqsfqSFQSfqSFQF", JPanelPrefMapProvider.class);
+    jTreePref.addObject(nodeMap, modelPrefMapProvider);
+    
     jTreePref.setSelectionRow(0);
 
     // Evenements
@@ -248,6 +253,7 @@ public class JDialogPreference extends JDialog implements LanguageListener {
             model.changeView();
           }
           Configuration.getConfig().commitTransaction();
+          MapConfiguration.getConfig().commitTransaction();
         }
         catch (ConfigurationException ce) {
           JShowMessage.error(JDialogPreference.this, rb.getString("errorSave"));
@@ -258,6 +264,7 @@ public class JDialogPreference extends JDialog implements LanguageListener {
 
     // Debut transaction
     Configuration.getConfig().beginTransaction();
+    MapConfiguration.getConfig().beginTransaction();
 
     LanguageManager.getManager().addLanguageListener(this);
     performedLanguage(LanguageManager.getManager().getCurrentLang());
@@ -268,6 +275,7 @@ public class JDialogPreference extends JDialog implements LanguageListener {
 
     // rollback
     Configuration.getConfig().rollbackTransaction();
+    MapConfiguration.getConfig().rollbackTransaction();
 
     // retablissement des poprietes general
     String value = Configuration.getConfig().getProperty("general",

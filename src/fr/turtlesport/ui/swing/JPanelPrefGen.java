@@ -31,7 +31,7 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JPanelPrefGen extends JPanel implements LanguageListener,
+public class JPanelPrefGen extends JPanelPref implements LanguageListener,
                                          PanelPrefListener {
 
   // ui
@@ -112,7 +112,6 @@ public class JPanelPrefGen extends JPanel implements LanguageListener,
     borderLayout.setHgap(5);
     borderLayout.setVgap(5);
     this.setLayout(borderLayout);
-    this.setSize(417, 218);
     this.add(getJPanelTitle(), BorderLayout.NORTH);
     this.add(getJPanelCenter(), BorderLayout.CENTER);
 
