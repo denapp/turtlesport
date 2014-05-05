@@ -26,7 +26,7 @@
 	<property name="rpmdistdir" value="${rpmbuilddir}/BUILDROOT/turtlesport-${version}-1.noarch" />
 	<property name="packaging" value="${basedir}/packaging" />
 	<property name="macosx.javahome.dir" location="/Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home" />
-	
+
 	<target name="init">
 		<tstamp />
 		<mkdir dir="${dest}" />
@@ -185,97 +185,85 @@
 	</target>
 
 	<!--  ================================================================== -->
-	<!--   Bundle jarApp macosx                                              -->
+	<!--       xsd                                                           -->
 	<!--  ================================================================== -->
 	<target name="xjcTcx">
 		<xjc schema="${src}/fr/turtlesport/geo/garmin/tcx/TrainingCenterDatabasev2.xsd" destdir="${src}" />
+	</target>
+	<target name="xjcMap">
+		<xjc schema="${src}/fr/turtlesport/map/map11.xsd" package="fr.turtlesport.map"
+			   destdir="${src}"
+			   binding="${src}/fr/turtlesport/map/bindings.xml"
+			   extension="true"/>
 	</target>
 
 	<!--  ================================================================== -->
 	<!--   Bundle jarApp macosx                                              -->
 	<!--  ================================================================== -->
 	<target name="jarAppBundle2">
-	  <!-- task oracle -->
-	  <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask">
-	     <classpath>
-		    <path refid="ant.classpath" />
-	     </classpath>
-    </taskdef>
-	    
+		<!-- task oracle -->
+		<taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask">
+			<classpath>
+				<path refid="ant.classpath" />
+			</classpath>
+		</taskdef>
+
 		<delete dir="${dirBundle}" />
 		<mkdir dir="${dirBundle}" />
-		<bundleapp 
-   		    outputdirectory="${dirBundle}" 
-		    name="TurtleSport" 
-		    displayname="TurtleSport" 
-		    identifier="fr.turtlesport.Launcher"
-		    icon="${exe}/macosx/turtleIcon.icns"
-            shortversion="1.0"
-		    copyright="2013 Turtle Sport"
-		    applicationCategory="public.app-category.developer-tools"
-	        mainclassname="fr/turtlesport/Launcher">
+		<bundleapp outputdirectory="${dirBundle}" name="TurtleSport" displayname="TurtleSport" identifier="fr.turtlesport.Launcher" icon="${exe}/macosx/turtleIcon.icns" shortversion="1.0" copyright="2013 Turtle Sport" applicationCategory="public.app-category.developer-tools" mainclassname="fr/turtlesport/Launcher">
 			<!-- Classpath -->
-	        <classpath dir="${exe}/macosx/">
-                 <include name="turtlesport.jar"/>
-                 <include name="fit.jar"/>
-	             <include name="jcommon.jar"/>
-	             <include name="jfreechart.jar"/>
-	             <include name="swingx.jar"/>
-                 <include name="swingx-ws.jar"/>
-	             <include name="derby.jar"/>
-                 <include name="log4j.jar"/>
-                 <include name="log4J.xml"/>
-	    		 <include name="libturtleUsbjni.jnilib" />
-  	        </classpath>	  	    
+			<classpath dir="${exe}/macosx/">
+				<include name="turtlesport.jar" />
+				<include name="fit.jar" />
+				<include name="jcommon.jar" />
+				<include name="jfreechart.jar" />
+				<include name="swingx.jar" />
+				<include name="swingx-ws.jar" />
+				<include name="derby.jar" />
+				<include name="log4j.jar" />
+				<include name="log4J.xml" />
+				<include name="libturtleUsbjni.jnilib" />
+			</classpath>
 			<!-- Adjust the look and feel and behavior -->
 			<option value="-Dapple.laf.useScreenMenuBar=true" />
 			<option value="-Dapple.awt.brushMetal=true" />
 			<option value="-Dapple.awt.showGrowBox=false" />
-		      <option value="-Dcom.apple.macos.use-file-dialog-packages=true"/>
-		      <option value="-Dcom.apple.macos.useScreenMenuBar=true"/>
-		      <option value="-Dcom.apple.mrj.application.apple.menu.about.name=${bundle.name}"/>
-		      <option value="-Dcom.apple.smallTabs=true"/>
-	        <option value="-Xmx1024M"/>
+			<option value="-Dcom.apple.macos.use-file-dialog-packages=true" />
+			<option value="-Dcom.apple.macos.useScreenMenuBar=true" />
+			<option value="-Dcom.apple.mrj.application.apple.menu.about.name=${bundle.name}" />
+			<option value="-Dcom.apple.smallTabs=true" />
+			<option value="-Xmx1024M" />
 		</bundleapp>
 
 		<!-- avec jre -->
 		<delete dir="${dirBundlejre}" />
 		<mkdir dir="${dirBundlejre}" />
-		<bundleapp 
-   		    outputdirectory="${dirBundlejre}" 
-		    name="TurtleSport" 
-		    displayname="TurtleSport" 
-		    identifier="fr.turtlesport.Launcher"
-		    icon="${exe}/macosx/turtleIcon.icns"
-            shortversion="1.0"
-		    copyright="2013 Turtle Sport"
-		    applicationCategory="public.app-category.developer-tools"
-	        mainclassname="fr/turtlesport/Launcher">
+		<bundleapp outputdirectory="${dirBundlejre}" name="TurtleSport" displayname="TurtleSport" identifier="fr.turtlesport.Launcher" icon="${exe}/macosx/turtleIcon.icns" shortversion="1.0" copyright="2013 Turtle Sport" applicationCategory="public.app-category.developer-tools" mainclassname="fr/turtlesport/Launcher">
 			<!-- Classpath -->
-	        <classpath dir="${exe}/macosx/">
-                 <include name="turtlesport.jar"/>
-                 <include name="fit.jar"/>
-	             <include name="jcommon.jar"/>
-	             <include name="jfreechart.jar"/>
-	             <include name="swingx.jar"/>
-                 <include name="swingx-ws.jar"/>
-	             <include name="derby.jar"/>
-                 <include name="log4j.jar"/>
-                 <include name="log4J.xml"/>
-	    		 <include name="libturtleUsbjni.jnilib" />
-  	        </classpath>
+			<classpath dir="${exe}/macosx/">
+				<include name="turtlesport.jar" />
+				<include name="fit.jar" />
+				<include name="jcommon.jar" />
+				<include name="jfreechart.jar" />
+				<include name="swingx.jar" />
+				<include name="swingx-ws.jar" />
+				<include name="derby.jar" />
+				<include name="log4j.jar" />
+				<include name="log4J.xml" />
+				<include name="libturtleUsbjni.jnilib" />
+			</classpath>
 			<!-- runtime -->
-	        <runtime dir="${macosx.javahome.dir}"/>
-	  	    
+			<runtime dir="${macosx.javahome.dir}" />
+
 			<!-- Adjust the look and feel and behavior -->
 			<option value="-Dapple.laf.useScreenMenuBar=true" />
 			<option value="-Dapple.awt.brushMetal=true" />
 			<option value="-Dapple.awt.showGrowBox=false" />
-		      <option value="-Dcom.apple.macos.use-file-dialog-packages=true"/>
-		      <option value="-Dcom.apple.macos.useScreenMenuBar=true"/>
-		      <option value="-Dcom.apple.mrj.application.apple.menu.about.name=${bundle.name}"/>
-		      <option value="-Dcom.apple.smallTabs=true"/>
-	        <option value="-Xmx1024M"/>
+			<option value="-Dcom.apple.macos.use-file-dialog-packages=true" />
+			<option value="-Dcom.apple.macos.useScreenMenuBar=true" />
+			<option value="-Dcom.apple.mrj.application.apple.menu.about.name=${bundle.name}" />
+			<option value="-Dcom.apple.smallTabs=true" />
+			<option value="-Xmx1024M" />
 		</bundleapp>
 	</target>
 	<target name="jarAppBundle">
@@ -384,7 +372,7 @@
 
 	<!-- Creates a Ubuntu/Debian package -->
 	<target name="packagingLinuxDeb">
-		<deb todir="${release}" package="turtlesport" section="utils" depends=" sun-java6-jre | openjdk-6-jre | sun-java7-jre | openjdk-7-jre" postinst="${packaging}/linux/debian/postinst">
+		<deb todir="${release}" package="turtlesport" section="utils" depends="sun-java6-jre | openjdk-6-jre | sun-java7-jre | openjdk-7-jre" postinst="${packaging}/linux/debian/postinst">
 			<version upstream="${version}" />
 			<maintainer name="Denis Apparicio" email="turtlesport@sourceforge.net" />
 			<description synopsis="Turtle Sport">Turtle Sport garmin logbook.</description>
