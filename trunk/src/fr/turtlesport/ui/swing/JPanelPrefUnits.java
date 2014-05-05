@@ -25,7 +25,7 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
+public class JPanelPrefUnits extends JPanelPref implements PanelPrefListener {
 
   private JPanelPrefTitle jPanelTitle;
 
@@ -82,7 +82,6 @@ public class JPanelPrefUnits extends JPanel implements PanelPrefListener {
     borderLayout.setHgap(5);
     borderLayout.setVgap(5);
     this.setLayout(borderLayout);
-    this.setSize(417, 218);
     this.add(getJPanelTitle(), BorderLayout.NORTH);
     this.add(getJPanelCenter(), BorderLayout.CENTER);
 

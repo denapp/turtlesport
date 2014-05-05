@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://turtlesport.sourceforge.net/xsd/map/1/0" targetNamespace="http://turtlesport.sourceforge.net/xsd/map/1/0"
+	elementFormDefault="qualified">
+
+	<xsd:element name="maps" type="mapsType" />
+
+	<xsd:complexType name="mapsType">
+		<xsd:sequence>
+			<xsd:element name="map" type="mapType" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+
+		<xsd:attribute name="version" type="xsd:string" use="required"
+			fixed="1.0" />
+	</xsd:complexType>
+
+	<xsd:complexType name="mapType">
+		<xsd:sequence>
+			<xsd:element name="name" type="xsd:string" />
+			<xsd:element name="url" type="xsd:string" />
+			<xsd:element name="zoomMin" type="xsd:int" />
+			<xsd:element name="zoomMax" type="xsd:int" />
+			<xsd:element name="x" type="xsd:string" minOccurs="0" />
+		</xsd:sequence>
+		<xsd:attribute name="editable" type="xsd:boolean" use="required"/>
+	</xsd:complexType>
+</xsd:schema>

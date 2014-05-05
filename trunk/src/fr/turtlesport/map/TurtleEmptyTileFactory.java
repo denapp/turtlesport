@@ -8,7 +8,6 @@ import java.net.URI;
 
 import javax.swing.JPanel;
 
-import org.jdesktop.swingx.mapviewer.AbstractTileFactory;
 import org.jdesktop.swingx.mapviewer.Tile;
 import org.jdesktop.swingx.mapviewer.TileCache;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
@@ -17,8 +16,7 @@ import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
  * @author Denis Apparicio
  * 
  */
-public class TurtleEmptyTileFactory extends AbstractTileFactory implements
-                                                               TileFactoryExtended {
+public class TurtleEmptyTileFactory extends AbstractTileFactoryExtended {
 
   /** The empty tile image. */
   private BufferedImage      emptyTile;
@@ -68,6 +66,16 @@ public class TurtleEmptyTileFactory extends AbstractTileFactory implements
   /*
    * (non-Javadoc)
    * 
+   * @see fr.turtlesport.map.AbstractTileFactoryExtended#getBaseURL()
+   */
+  @Override
+  public String getBaseURL() {
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.turtlesport.map.TileFactoryName#getName()
    */
   public String getName() {
@@ -106,8 +114,9 @@ public class TurtleEmptyTileFactory extends AbstractTileFactory implements
   /*
    * (non-Javadoc)
    * 
-   * @see org.jdesktop.swingx.mapviewer.TileFactory#startLoading(org.jdesktop.swingx
-   *      .mapviewer.Tile)
+   * @see
+   * org.jdesktop.swingx.mapviewer.TileFactory#startLoading(org.jdesktop.swingx
+   * .mapviewer.Tile)
    */
   @Override
   protected void startLoading(Tile tile) {
@@ -142,12 +151,22 @@ public class TurtleEmptyTileFactory extends AbstractTileFactory implements
      * (non-Javadoc)
      * 
      * @see org.jdesktop.swingx.mapviewer.TileCache#put(java.net.URI, byte[],
-     *      java.awt.image.BufferedImage)
+     * java.awt.image.BufferedImage)
      */
     @Override
     public void put(URI uri, byte[] bytes, BufferedImage img) {
     }
 
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.map.AbstractTileFactoryExtended#isEditable()
+   */
+  @Override
+  public boolean isEditable() {
+    return false;
   }
 
 }

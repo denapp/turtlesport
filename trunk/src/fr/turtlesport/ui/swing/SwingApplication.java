@@ -20,6 +20,7 @@ import fr.turtlesport.update.Update;
 import fr.turtlesport.util.Location;
 import fr.turtlesport.util.LocationException;
 import fr.turtlesport.util.ResourceBundleUtility;
+import fr.turtlesport.util.SystemProperties;
 import fr.turtlesport.util.ThreadUtil;
 
 /**
@@ -43,6 +44,9 @@ public class SwingApplication {
     ResourceBundle rb;
 
     try {
+      // Initaialisation des proprietes
+      SystemProperties.configure();
+      
       // Initialisation des localisations
       Location.initialize();
 

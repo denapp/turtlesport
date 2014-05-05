@@ -33,7 +33,7 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JPanelPrefGoogleEarth extends JPanel implements LanguageListener,
+public class JPanelPrefGoogleEarth extends JPanelPref implements LanguageListener,
                                                  PanelPrefListener {
   private static TurtleLogger log;
   static {
@@ -117,7 +117,6 @@ public class JPanelPrefGoogleEarth extends JPanel implements LanguageListener,
     borderLayout.setHgap(5);
     borderLayout.setVgap(5);
     this.setLayout(borderLayout);
-    this.setSize(534, 218);
     this.add(getJPanelTitle(), BorderLayout.NORTH);
     this.add(getJPanelCenter(), BorderLayout.CENTER);
 

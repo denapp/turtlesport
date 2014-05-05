@@ -23,15 +23,6 @@ public class MailClientWinThunderbird extends AbstractMailClientThunderbird {
       throw new IllegalAccessError();
     }
   }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.mail.IMailClient#getName()
-   */
-  public String getName() {
-    return "Thunderbird";
-  }
   
   /*
    * (non-Javadoc)
@@ -102,7 +93,7 @@ public class MailClientWinThunderbird extends AbstractMailClientThunderbird {
     }
 
     String command = RegistryWin.localMachine()
-        .get("Software\\Clients\\Mail\\\thunderbird.exe\\shell\\Open\\command",
+        .get("Software\\Clients\\Mail\\thunderbird.exe\\shell\\Open\\command",
              null);
     if (command != null) {
       command = command.replace('\"', ' ');

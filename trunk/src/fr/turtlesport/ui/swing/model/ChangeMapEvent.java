@@ -2,8 +2,7 @@ package fr.turtlesport.ui.swing.model;
 
 import javax.swing.event.ChangeEvent;
 
-import org.jdesktop.swingx.mapviewer.TileFactory;
-
+import fr.turtlesport.map.AbstractTileFactoryExtended;
 import fr.turtlesport.ui.swing.component.GeoPositionMapKit;
 
 /**
@@ -51,7 +50,7 @@ public class ChangeMapEvent extends ChangeEvent {
    * 
    * @return la map.
    */
-  public TileFactory getMapTileFactory() {
+  public AbstractTileFactoryExtended getMapTileFactory() {
     return ((ModelMapkitManager) getSource()).getMapTileFactory();
   }
 

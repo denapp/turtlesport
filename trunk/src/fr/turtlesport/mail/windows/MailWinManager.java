@@ -32,10 +32,11 @@ public final class MailWinManager implements IMailManager {
    * @see fr.turtlesport.mail.IMailManager#getMailClients()
    */
   public IMailClient[] getMailClients() {
-    IMailClient[] mailClients = new IMailClient[2];
+    IMailClient[] mailClients = new IMailClient[3];
 
     mailClients[0] = new MailClientWinOutlook();
     mailClients[1] = new MailClientWinThunderbird();
+    mailClients[2] = new MailClientWinEvolution();
 
     return mailClients;
   }

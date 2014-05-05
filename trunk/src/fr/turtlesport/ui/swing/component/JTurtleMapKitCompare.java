@@ -20,7 +20,6 @@ import java.awt.image.BufferedImage;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.AbstractButton;
@@ -42,8 +41,8 @@ import org.jdesktop.swingx.painter.Painter;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.db.RunTrkTableManager;
-import fr.turtlesport.map.OpenStreetMapTileFactory;
-import fr.turtlesport.map.TileFactoryExtended;
+import fr.turtlesport.map.AbstractTileFactoryExtended;
+import fr.turtlesport.map.AllMapsFactory;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.img.diagram.ImagesDiagramRepository;
@@ -112,7 +111,7 @@ public class JTurtleMapKitCompare extends JXPanel {
     mapListener = new MapKitChangeMapListener();
 
     // recuperation tilefactory par defaut
-    TileFactory tileFactory = OpenStreetMapTileFactory.getDefaultTileFactory();
+    TileFactory tileFactory = AllMapsFactory.getInstance().getDefaultTileFactory();
 
     // mis a jour du bouton
     mapListener.setTileMenu(tileFactory);
@@ -321,7 +320,7 @@ public class JTurtleMapKitCompare extends JXPanel {
       buttonGroupDropDown = new ButtonGroup();
       JPopupMenu popmenu = new JPopupMenu();
 
-      for (String s : OpenStreetMapTileFactory.getTileNames()) {
+      for (String s : AllMapsFactory.getInstance().getTileNames()) {
         JCheckBoxMenuItemMap mi = new JCheckBoxMenuItemMap(s);
         buttonGroupDropDown.add(mi);
         popmenu.add(mi);
@@ -390,7 +389,7 @@ public class JTurtleMapKitCompare extends JXPanel {
    */
   public class JCheckBoxMenuItemMap extends JCheckBoxMenuItem implements
                                                              ActionListener {
-    private TileFactory tileFactory;
+    private AbstractTileFactoryExtended tileFactory;
 
     public JCheckBoxMenuItemMap(String text) {
       super(text);
@@ -401,10 +400,10 @@ public class JTurtleMapKitCompare extends JXPanel {
     /**
      * @return
      */
-    public TileFactory getTileFactory() {
+    public AbstractTileFactoryExtended getTileFactory() {
       if (tileFactory == null) {
         synchronized (JCheckBoxMenuItemMap.class) {
-          tileFactory = OpenStreetMapTileFactory.getTileFactory(getText());
+          tileFactory = AllMapsFactory.getInstance().getTileFactory(getText());
         }
       }
       return tileFactory;
@@ -673,9 +672,9 @@ public class JTurtleMapKitCompare extends JXPanel {
       int zoom = mainMap.getZoom();
       GeoPosition geo = mainMap.getCenterPosition();
 
-      TileFactory tile = e.getMapTileFactory();
+      AbstractTileFactoryExtended tile = e.getMapTileFactory();
       mainMap.setTileFactory(tile);
-      OpenStreetMapTileFactory.setDefaultTileFactory(tile);
+      AllMapsFactory.getInstance().setDefaultTileFactory(tile);
 
       mainMap.setZoom(zoom);
       mainMap.setCenterPosition(geo);
@@ -685,25 +684,25 @@ public class JTurtleMapKitCompare extends JXPanel {
     }
 
     protected void setTileMenu(TileFactory tile) {
-      final String name = ((TileFactoryExtended) tile).getName();
-      Enumeration<AbstractButton> e = buttonGroupDropDown.getElements();
-      while (e.hasMoreElements()) {
-        AbstractButton b = e.nextElement();
-        if (b instanceof JCheckBoxMenuItemMap) {
-          JCheckBoxMenuItemMap val = (JCheckBoxMenuItemMap) b;
-          if (val.getText().equals(name)) {
-            buttonGroupDropDown.setSelected(val.getModel(), true);
-            val.setSelected(true);
-            break;
-          }
-        }
-      }
-
-      ImageIcon newIcon = ((TileFactoryExtended) tile).isConnected() ? iconConnect
-          : iconDisconnect;
-      if (newIcon != jXSplitButtonMap.getIcon()) {
-        jXSplitButtonMap.setIcon(newIcon);
-      }
+//      final String name = ((TileFactoryExtended) tile).getName();
+//      Enumeration<AbstractButton> e = buttonGroupDropDown.getElements();
+//      while (e.hasMoreElements()) {
+//        AbstractButton b = e.nextElement();
+//        if (b instanceof JCheckBoxMenuItemMap) {
+//          JCheckBoxMenuItemMap val = (JCheckBoxMenuItemMap) b;
+//          if (val.getText().equals(name)) {
+//            buttonGroupDropDown.setSelected(val.getModel(), true);
+//            val.setSelected(true);
+//            break;
+//          }
+//        }
+//      }
+//
+//      ImageIcon newIcon = ((TileFactoryExtended) tile).isConnected() ? iconConnect
+//          : iconDisconnect;
+//      if (newIcon != jXSplitButtonMap.getIcon()) {
+//        jXSplitButtonMap.setIcon(newIcon);
+//      }
     }
 
   }

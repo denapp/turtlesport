@@ -3,8 +3,8 @@ package fr.turtlesport.ui.swing.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jdesktop.swingx.mapviewer.TileFactory;
-
+import fr.turtlesport.map.AbstractTileFactoryExtended;
+import fr.turtlesport.map.DataMap;
 import fr.turtlesport.ui.swing.component.GeoPositionMapKit;
 import fr.turtlesport.unit.TimeUnit;
 
@@ -12,20 +12,22 @@ import fr.turtlesport.unit.TimeUnit;
  * @author Denis Apparicio
  * 
  */
-public class ModelMapkitManager {
+public class ModelMapkitManager implements ChangePointsListener {
   protected transient ChangeMapEvent    changeEvent;
 
   protected transient ChangePointsEvent changePointsEvent;
 
-  protected List<ChangeMapListener>     listenerList = new ArrayList<ChangeMapListener>();
+  protected List<ChangeMapListener>     listenerChangeMapList    = new ArrayList<ChangeMapListener>();
 
-  private int                           speed        = 1;
+  protected List<AddDeleteMapListener>  listenerAddDeleteMapList = new ArrayList<AddDeleteMapListener>();
 
-  private boolean                       isRunning    = false;
+  private int                           speed                    = 1;
 
-  private TileFactory                   tileFactory;
+  private boolean                       isRunning                = false;
 
-  private static ModelMapkitManager     singleton    = new ModelMapkitManager();
+  private AbstractTileFactoryExtended   tileFactory;
+
+  private static ModelMapkitManager     singleton                = new ModelMapkitManager();
 
   /**
    * 
@@ -33,6 +35,21 @@ public class ModelMapkitManager {
   public ModelMapkitManager() {
     super();
     changeEvent = new ChangeMapEvent(this);
+    ModelPointsManager.getInstance().addChangeListener(this);
+  }
+
+  @Override
+  public void changedPoint(ChangePointsEvent e) {
+  }
+
+  @Override
+  public void changedLap(ChangePointsEvent e) {
+  }
+
+  @Override
+  public void changedAllPoints(ChangePointsEvent changeEvent) {
+    // changement de map
+    isRunning = false;
   }
 
   /**
@@ -185,7 +202,7 @@ public class ModelMapkitManager {
    * @param tileFactory
    *          la map.
    */
-  public void setMapTileFactory(TileFactory tileFactory) {
+  public void setMapTileFactory(AbstractTileFactoryExtended tileFactory) {
     if (tileFactory != null && !tileFactory.equals(this.tileFactory)) {
       this.tileFactory = tileFactory;
     }
@@ -193,11 +210,31 @@ public class ModelMapkitManager {
   }
 
   /**
+   * Ajoute une map.
+   * 
+   * @param tileFactory
+   *          la map.
+   */
+  public void addMapTileFactory(DataMap map) {
+    fireAddMapChanged(map);
+  }
+
+  /**
+   * Ajoute une map.
+   * 
+   * @param tileFactory
+   *          la map.
+   */
+  public void removeMapTileFactory(DataMap map) {
+    fireRemoveMapChanged(map);
+  }
+
+  /**
    * Restitue la map.
    * 
    * @return la map.
    */
-  public TileFactory getMapTileFactory() {
+  public AbstractTileFactoryExtended getMapTileFactory() {
     return tileFactory;
   }
 
@@ -208,10 +245,22 @@ public class ModelMapkitManager {
    *          le <code>ChangeMapListener</code> &agrave; ajouter.
    */
   public void addChangeListener(ChangeMapListener l) {
-    if (!listenerList.contains(l)) {
-      listenerList.add(l);
+    if (!listenerChangeMapList.contains(l)) {
+      listenerChangeMapList.add(l);
       ModelPointsManager.getInstance().addChangeListener(l);
       l.changedSpeed(changeEvent);
+    }
+  }
+
+  /**
+   * Ajoute un <code>ChangeMapListener</code>.
+   * 
+   * @param l
+   *          le <code>ChangeMapListener</code> &agrave; ajouter.
+   */
+  public void addAddDeleteMapListener(AddDeleteMapListener l) {
+    if (!listenerAddDeleteMapList.contains(l)) {
+      listenerAddDeleteMapList.add(l);
     }
   }
 
@@ -222,7 +271,7 @@ public class ModelMapkitManager {
    *          le <code>ChangePointsListener</code> &agrave; supprimer.
    */
   public void removeAllChangeListener() {
-    Object[] objs = listenerList.toArray();
+    Object[] objs = listenerChangeMapList.toArray();
     if (objs != null) {
       for (Object o : objs) {
         removeChangeListener((ChangeMapListener) o);
@@ -237,7 +286,17 @@ public class ModelMapkitManager {
    *          le <code>ChangeMapListener</code> &agrave; supprimer.
    */
   public void removeChangeListener(ChangeMapListener l) {
-    listenerList.remove(l);
+    listenerChangeMapList.remove(l);
+  }
+
+  /**
+   * Supprime le <code>ChangeMapListener</code>.
+   * 
+   * @param l
+   *          le <code>AddDeleteMapListener</code> &agrave; supprimer.
+   */
+  public void removAddDeleteMapListener(AddDeleteMapListener l) {
+    listenerAddDeleteMapList.remove(l);
   }
 
   /**
@@ -245,7 +304,7 @@ public class ModelMapkitManager {
    * 
    */
   protected void firePlayChanged() {
-    for (ChangeMapListener l : listenerList) {
+    for (ChangeMapListener l : listenerChangeMapList) {
       l.changedPlay(changeEvent);
     }
   }
@@ -255,7 +314,7 @@ public class ModelMapkitManager {
    * 
    */
   protected void fireSpeedChanged() {
-    for (ChangeMapListener l : listenerList) {
+    for (ChangeMapListener l : listenerChangeMapList) {
       l.changedSpeed(changeEvent);
     }
   }
@@ -265,10 +324,31 @@ public class ModelMapkitManager {
    * 
    */
   protected void fireMapChanged() {
-    if (hasPoints()) {
-      for (ChangeMapListener l : listenerList) {
-        l.changedMap(changeEvent);
-      }
+    for (ChangeMapListener l : listenerChangeMapList) {
+      l.changedMap(changeEvent);
     }
   }
+
+  /**
+   * Execute chaque<code>ChangeListener</code>.
+   * 
+   */
+  protected void fireAddMapChanged(DataMap map) {
+    AddDeleteMapEvent event = new AddDeleteMapEvent(this, map);
+    for (AddDeleteMapListener l : listenerAddDeleteMapList) {
+      l.addMap(event);
+    }
+  }
+
+  /**
+   * Execute chaque<code>ChangeListener</code>.
+   * 
+   */
+  protected void fireRemoveMapChanged(DataMap map) {
+    AddDeleteMapEvent event = new AddDeleteMapEvent(this, map);
+    for (AddDeleteMapListener l : listenerAddDeleteMapList) {
+      l.deleteMap(event);
+    }
+  }
+
 }

@@ -26,15 +26,6 @@ public class MailClientLinuxThunderbird extends AbstractMailClientThunderbird {
       throw new IllegalAccessError();
     }
   }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.turtlesport.mail.IMailClient#getName()
-   */
-  public String getName() {
-    return "Thunderbird";
-  }
   
   /**
    * D&eacute;termine si le client mail est valable.
