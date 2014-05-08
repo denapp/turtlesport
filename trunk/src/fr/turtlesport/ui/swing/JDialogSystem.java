@@ -9,6 +9,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 import javax.swing.JButton;
@@ -75,7 +76,9 @@ public class JDialogSystem extends JDialog {
     writer.write("Turtle Sport v" + Version.VERSION);
     writer.write("\r\n");
     try {
-      System.getProperties().store(writer, null);
+      Properties props = (Properties) System.getProperties().clone();
+      props.remove("http.agent");
+      props.store(writer, null);
       jText.setText(writer.toString());
     }
     catch (IOException e) {
