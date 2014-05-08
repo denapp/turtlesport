@@ -489,7 +489,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
       @Override
       public void windowOpened(WindowEvent e) {
-        if (Update.isCheckFirstEnd() && Update.checkFirst()) {
+        if (Update.detectUpdateAtBoot()) {
           ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
               .getManager().getCurrentLang(), MainGui.class);
           JShowMessage.ok(rb.getString("MessageUpdateYes"));

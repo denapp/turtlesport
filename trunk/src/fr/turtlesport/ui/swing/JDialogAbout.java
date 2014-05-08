@@ -43,6 +43,8 @@ public class JDialogAbout extends JDialog {
 
   private JButton        jButtonLicence;
 
+  private JButton        jButtonSystem;
+
   private ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
                                 .getManager().getCurrentLang(), getClass());
 
@@ -98,6 +100,7 @@ public class JDialogAbout extends JDialog {
     catch (Throwable e) {
     }
     jButtonLicence.setText(rb.getString("jButtonLicence"));
+    jButtonSystem.setText(rb.getString("jButtonSystem"));
   }
 
   /**
@@ -240,6 +243,7 @@ public class JDialogAbout extends JDialog {
       jPanelSouth.add(Box.createRigidArea(new Dimension(10, 1)));
       jPanelSouth.add(jLabel, null);
       jPanelSouth.add(Box.createHorizontalGlue());
+      jPanelSouth.add(getJButtonSystem());
       jPanelSouth.add(getJButtonLicence());
       jPanelSouth.add(getJButtonOK());
     }
@@ -266,4 +270,23 @@ public class JDialogAbout extends JDialog {
     return jButtonLicence;
   }
 
+  /**
+   * This method initializes jButtonClose
+   * 
+   * @return javax.swing.JButton
+   */
+  private JButton getJButtonSystem() {
+    if (jButtonSystem == null) {
+
+      jButtonSystem = new JButton();
+      jButtonSystem.setMnemonic(java.awt.event.KeyEvent.VK_ENTER);
+      jButtonSystem.setFont(GuiFont.FONT_PLAIN);
+      jButtonSystem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          JDialogSystem.prompt(JDialogAbout.this);
+        }
+      });
+    }
+    return jButtonSystem;
+  }
 }

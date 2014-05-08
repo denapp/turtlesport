@@ -5,6 +5,11 @@ import java.awt.Toolkit;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingUtilities;
 
@@ -21,7 +26,6 @@ import fr.turtlesport.util.Location;
 import fr.turtlesport.util.LocationException;
 import fr.turtlesport.util.ResourceBundleUtility;
 import fr.turtlesport.util.SystemProperties;
-import fr.turtlesport.util.ThreadUtil;
 
 /**
  * @author Denis Apparicio
@@ -43,10 +47,13 @@ public class SwingApplication {
 
     ResourceBundle rb;
 
+    Future<Boolean> futureHasUpdate = null;
+    ExecutorService execute = Executors.newSingleThreadExecutor();
+
     try {
-      // Initaialisation des proprietes
+      // Initialisation des proprietes
       SystemProperties.configure();
-      
+
       // Initialisation des localisations
       Location.initialize();
 
@@ -65,7 +72,12 @@ public class SwingApplication {
       ProxyConfiguration.configure();
 
       // Recherche des mises a jour
-      Update.init();
+      futureHasUpdate = execute.submit(new Callable<Boolean>() {
+        @Override
+        public Boolean call() throws Exception {
+          return Update.checkAtBoot();
+        }
+      });
     }
     catch (LocationException e) {
       splash.updateError(e.getMessage());
@@ -127,16 +139,12 @@ public class SwingApplication {
     }
 
     // Affichage de l'IHM
-    if (!Update.isCheckFirstEnd()) {
+    if (!futureHasUpdate.isDone()) {
       splash.updateProgress(rb.getString("splashUpdate"));
-      int nbRetry = 0;
-      while (nbRetry < 8) {
-        ThreadUtil.sleep(300);
-        log.error("nbRetry=" + nbRetry);
-        nbRetry++;
-        if (Update.isCheckFirstEnd()) {
-          break;
-        }
+      try {
+        futureHasUpdate.get(2, TimeUnit.SECONDS);
+      }
+      catch (Throwable e) {
       }
     }
 
@@ -190,15 +198,34 @@ public class SwingApplication {
    * Affichage du splash screen
    */
   private void showSplashScreen() {
-    splash.setVisible(true);
+    if (SwingUtilities.isEventDispatchThread()) {
+      splash.setVisible(true);
+    }
+    else {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          splash.setVisible(true);
+        }
+      });
+    }
   }
 
   /**
    * Suppression du splash screen
    */
   private void releaseSplashScreen() {
-    splash.setVisible(false);
-    splash = null;
+    if (SwingUtilities.isEventDispatchThread()) {
+      splash.dispose();
+      splash = null;
+    }
+    else {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          splash.dispose();
+          splash = null;
+        }
+      });
+    }    
   }
 
   /**
