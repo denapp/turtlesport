@@ -7,8 +7,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JProgressBar;
-import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXPanel;
@@ -22,7 +22,7 @@ import fr.turtlesport.ui.swing.img.ImagesRepository;
  * @author Denis Apparicio
  * 
  */
-public class JSplashScreen extends JWindow {
+public class JSplashScreen extends JFrame {
 
   private JXImagePanelStatus jContentPane;
 
@@ -42,8 +42,11 @@ public class JSplashScreen extends JWindow {
    * @return void
    */
   private void initialize() {
-    this.setSize(412, 302);
-    this.setContentPane(getJContentPane());
+    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    setLocationRelativeTo(null);
+    setUndecorated(true);
+    setSize(412, 302);
+    setContentPane(getJContentPane());
   }
 
   /**

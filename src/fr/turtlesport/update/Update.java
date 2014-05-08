@@ -20,68 +20,43 @@ public final class Update {
     log = (TurtleLogger) TurtleLogger.getLogger(Update.class);
   }
 
-  private static boolean      isFinished      = false;
-
-  private static boolean      needUpdateFirst = false;
+  private static boolean      hasUpdateAtBoot = false;
 
   private Update() {
+  }
+
+  public static boolean detectUpdateAtBoot() {
+    return hasUpdateAtBoot;
   }
 
   /**
    * Test s'il y a une nouvelle version disponible, au d&eacute;marrage de
    * l'application.
    */
-  public static void init() {
-    boolean bRun = Configuration.getConfig()
+  public static boolean checkAtBoot() {
+    boolean isCheckatbook = Configuration.getConfig()
         .getPropertyAsBoolean("update", "checkatbook", false);
-    if (bRun) {
-      new Thread() {
-        public void run() {
-          try {
-            needUpdateFirst = false;
-            
-            String version = currentVersion();
-            if (isNewVersion(version)) {
-              String iniVersion = Configuration.getConfig()
-                  .getProperty("update", "version", Version.VERSION);
-              if (!version.equals(iniVersion)) {
-                needUpdateFirst = true;
-                Configuration.getConfig().addProperty("update",
-                                                      "version",
-                                                      version);
-                Configuration.getConfig().save();
-              }
-            }
-          }
-          catch (Throwable e) {
-            log.error("", e);
-          }
-          finally {
-            isFinished = true;
-          }
+    if (!isCheckatbook) {
+      return false;
+    }
+
+    try {
+      String version = currentVersion();
+      if (isNewVersion(version)) {
+        String iniVersion = Configuration.getConfig()
+            .getProperty("update", "version", Version.VERSION);
+        if (!version.equals(iniVersion)) {
+          hasUpdateAtBoot = true;
+          Configuration.getConfig().addProperty("update", "version", version);
+          Configuration.getConfig().save();
         }
-      }.start();
+      }
     }
-    else {
-      isFinished = true;
-      needUpdateFirst = false;
+    catch (Throwable e) {
+      log.error("", e);
     }
-  }
 
-  public static boolean isCheckFirstEnd() {
-    return isFinished;
-  }
-
-  /**
-   * 
-   * D&eacute;termine si mise &agrave; jour diponible.
-   * 
-   * @return <code>true</code> si mise &agrave; jour disponible,
-   *         <code>false</code> sinon.
-   * @throws IOException
-   */
-  public static boolean checkFirst() {
-    return needUpdateFirst;
+    return hasUpdateAtBoot;
   }
 
   /**
@@ -104,7 +79,7 @@ public final class Update {
    * @return la version.
    * @throws IOException
    */
-  public static String currentVersion() throws IOException {
+  private static String currentVersion() throws IOException {
     String version = null;
 
     URL url = new URL("http://turtlesport.sourceforge.net/version.txt");
@@ -119,15 +94,14 @@ public final class Update {
       version = reader.readLine();
       reader.close();
     }
-
     return version;
   }
 
-  private static boolean isNewVersion(String version) {
+  private static boolean isNewVersion(String netVersion) {
     try {
+      float fNetVersion = Float.parseFloat(netVersion);
       float fVersion = Float.parseFloat(Version.VERSION);
-      float fNetVersion = Float.parseFloat(version);
-      return (fVersion >  fNetVersion);
+      return (fNetVersion > fVersion);
     }
     catch (Throwable e) {
       return false;
