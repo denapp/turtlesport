@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.img.activity.ImagesActivityRepository;
 import fr.turtlesport.unit.DistanceUnit;
@@ -163,13 +164,13 @@ public class DataRun {
    */
   public String getLibelleSportType() {
     if (isSportBike()) {
-      return DataLanguageRessource.getInstance().getString("sportBike");
+      return CommonLang.INSTANCE.getString("sportBike");
     }
     if (isSportRunning()) {
-      return DataLanguageRessource.getInstance().getString("sportRunning");
+      return CommonLang.INSTANCE.getString("sportRunning");
     }
     if (isSportRealOther()) {
-      return DataLanguageRessource.getInstance().getString("sportOther");
+      return CommonLang.INSTANCE.getString("sportOther");
     }
     try {
       return UserActivityTableManager.getInstance().retreiveName(sportType);
