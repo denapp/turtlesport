@@ -345,7 +345,6 @@
 				<include name="bin/**" />
 				<include name="lib/**" />
 
-				<exclude name="lib/ext/sunjce_provider.jar" />
 				<exclude name="bin/rmid.exe" />
 				<exclude name="bin/rmiregistry.exe" />
 				<exclude name="bin/tnameserv.exe" />
@@ -375,6 +374,8 @@
 				<exclude name="bin/jpinscp.dll" />
 				<exclude name="bin/jpioji.dll" />
 				<exclude name="bin/jpishare.dll" />
+				<exclude name="bin/jfxmedia.dll" />
+				<exclude name="bin/jfxwebkit.dll" />
 				<exclude name="lib/deploy.jar" />
 				<exclude name="lib/plugin.jar" />
 				<exclude name="lib/deploy/messages*.properties" />
