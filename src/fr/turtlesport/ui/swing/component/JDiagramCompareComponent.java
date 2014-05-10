@@ -15,22 +15,20 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.swing.JPanel;
 import javax.swing.RepaintManager;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.db.DataRunTrk;
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.model.ModelPointsManager;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.TimeUnit;
-import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
  * @author Denis Apparicio
@@ -98,10 +96,7 @@ public class JDiagramCompareComponent extends JPanel {
   }
 
   private void performedLanguage(ILanguage lang) {
-    ResourceBundle rb = ResourceBundleUtility
-        .getBundle(lang, JDiagramComponent.class);
-    model.setUnitX(MessageFormat.format(rb.getString("unitX"),
-                                        DistanceUnit.getDefaultUnit()));
+    model.setUnitX(CommonLang.INSTANCE.distanceWithUnit());
   }
 
   public TablePointsModel getModel() {

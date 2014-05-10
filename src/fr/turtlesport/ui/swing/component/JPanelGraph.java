@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.plaf.ComboBoxUI;
 
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
@@ -31,8 +32,6 @@ import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.JDialogDiagramComponents;
 import fr.turtlesport.ui.swing.img.diagram.ImagesDiagramRepository;
 import fr.turtlesport.unit.DistanceUnit;
-import fr.turtlesport.unit.PaceUnit;
-import fr.turtlesport.unit.SpeedUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
@@ -127,29 +126,25 @@ public class JPanelGraph extends JPanel implements LanguageListener,
 
   private void performedLanguage(ILanguage lang) {
     ResourceBundle rb = ResourceBundleUtility
-        .getBundle(lang, JDiagramComponent.class);
+        .getBundle(lang, CommonLang.class);
 
-    jDiagram.getModel().setUnitX(MessageFormat.format(rb.getString("unitX"),
-                                                      DistanceUnit
-                                                          .getDefaultUnit()));
-    jCheckBox1.setText(rb.getString("unitY1"));
-    jCheckBox2.setText("<html><font color=blue>" + rb.getString("unitY2")
+    
+    jDiagram.getModel().setUnitX(CommonLang.INSTANCE.distanceWithUnit());
+    
+    jCheckBox1.setText(rb.getString("bmp"));
+    jCheckBox2.setText("<html><font color=blue>" + CommonLang.INSTANCE.altitudeWithUnit()
                        + "</font></html>");
-    //jCheckBoxTime.setText(rb.getString("time"));
     jCheckBoxFilter.setText(rb.getString("filter"));
 
     jComboBoxY3.removeAllItems();
-    jComboBoxY3.addItem(rb.getString("speed") + "("
-                        + SpeedUnit.getDefaultUnit() + ")");
-    jComboBoxY3.addItem(rb.getString("allure") + "("
-                        + PaceUnit.getDefaultUnit() + ")");
+    jComboBoxY3.addItem(CommonLang.INSTANCE.speedWithUnit());
+    jComboBoxY3.addItem(CommonLang.INSTANCE.paceWithUnit());
 
-    jCheckBox4.setText("<html><font color=#FF00FF>" + rb.getString("unitY4")
+    jCheckBox4.setText("<html><font color=#FF00FF>" + rb.getString("Pace")
                        + "</font></html>");
     jComboBoxX.removeAllItems();
-    jComboBoxX.addItem(MessageFormat.format(rb.getString("unitX"),
-                                            DistanceUnit.getDefaultUnit()));
-    jComboBoxX.addItem(rb.getString("time"));
+    jComboBoxX.addItem(CommonLang.INSTANCE.distanceWithUnit());
+    jComboBoxX.addItem(rb.getString("Time"));
   }
 
   /*
@@ -167,10 +162,8 @@ public class JPanelGraph extends JPanel implements LanguageListener,
 
       int index = jComboBoxY3.getSelectedIndex();
       jComboBoxY3.removeAllItems();
-      jComboBoxY3.addItem(rb.getString("speed") + "("
-                          + SpeedUnit.getDefaultUnit() + ")");
-      jComboBoxY3.addItem(rb.getString("allure") + "("
-                          + PaceUnit.getDefaultUnit() + ")");
+      jComboBoxY3.addItem(CommonLang.INSTANCE.speedWithUnit());
+      jComboBoxY3.addItem(CommonLang.INSTANCE.paceWithUnit());
       if (index != -1) {
         jComboBoxY3.setSelectedIndex(index);
       }

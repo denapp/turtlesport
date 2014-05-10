@@ -20,9 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
@@ -34,6 +32,7 @@ import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.filter.SavitzkyGolay;
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
@@ -51,7 +50,6 @@ import fr.turtlesport.unit.TimeUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
-import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
  * @author Denis Apparicio
@@ -166,10 +164,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
   }
 
   private void performedLanguage(ILanguage lang) {
-    ResourceBundle rb = ResourceBundleUtility
-        .getBundle(lang, JDiagramComponent.class);
-    model.setUnitX(MessageFormat.format(rb.getString("unitX"),
-                                        DistanceUnit.getDefaultUnit()));
+    model.setUnitX(CommonLang.INSTANCE.distanceWithUnit());
   }
 
   /*
@@ -236,8 +231,8 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
                                               BufferedImage.TYPE_INT_RGB);
     Graphics2D g2 = myImage.createGraphics();
 
-    ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-        .getManager().getCurrentLang(), JDiagramComponent.class);
+//    ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+//        .getManager().getCurrentLang(), JDiagramComponent.class);
 
     paintGrid(g2);
     if (model != null && model.indexX2 != 0) {
@@ -256,7 +251,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
     }
     if (model.isVisibleY2()) {
       g2.setColor(COLORY2);
-      String s = rb.getString("unitY2");
+      String s = CommonLang.INSTANCE.altitudeWithUnit();
       g2.drawString(s, x, 10);
       x += g2.getFontMetrics().stringWidth(s) + 10;
     }
@@ -264,10 +259,10 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       g2.setColor(COLORY3);
       String unit = null;
       if (model.isVisiblePace()) {
-        unit = rb.getString("allure") + " (" + PaceUnit.getDefaultUnit() + ")";
+        unit = CommonLang.INSTANCE.paceWithUnit();
       }
       else {
-        unit = rb.getString("speed") + " (" + SpeedUnit.getDefaultUnit() + ")";
+        unit = CommonLang.INSTANCE.speedWithUnit();
       }
       g2.drawString(unit, x, 10);
     }
@@ -1230,11 +1225,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
     public void unitChanged(String newUnit) {
       if (!unit.equals(newUnit)) {
-        ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-            .getManager().getCurrentLang(), JDiagramComponent.class);
-        model.setUnitX(MessageFormat.format(rb.getString("unitX"),
-                                            DistanceUnit.getDefaultUnit()));
-
+        model.setUnitX(CommonLang.INSTANCE.distanceWithUnit());
         if (points != null) {
           for (DataRunTrk p : points) {
             p.setDistance((float) DistanceUnit.convert(unit,

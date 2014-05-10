@@ -41,8 +41,8 @@ import javax.swing.border.TitledBorder;
 
 import org.jdesktop.swingx.JXDatePicker;
 
-import fr.turtlesport.CommonLang;
 import fr.turtlesport.db.EquipementTableManager;
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.meteo.DataMeteo;

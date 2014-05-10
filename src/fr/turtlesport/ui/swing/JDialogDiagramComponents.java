@@ -7,7 +7,6 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 import javax.swing.Box;
@@ -19,6 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.plaf.ComboBoxUI;
 
 import fr.turtlesport.Configuration;
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JDiagramComponent;
@@ -27,7 +27,6 @@ import fr.turtlesport.ui.swing.component.JPanelGraphOne;
 import fr.turtlesport.ui.swing.model.ModelDialogDiagramComponents;
 import fr.turtlesport.ui.swing.model.ModelMapkitManager;
 import fr.turtlesport.ui.swing.model.ModelPointsManager;
-import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
 
@@ -259,10 +258,9 @@ public class JDialogDiagramComponents extends JDialog {
           .getPreferredSize().height));
       jComboBoxX.removeAllItems();
       ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-          .getManager().getCurrentLang(), JDiagramComponent.class);
-      jComboBoxX.addItem(MessageFormat.format(rb.getString("unitX"),
-                                              DistanceUnit.getDefaultUnit()));
-      jComboBoxX.addItem(rb.getString("time"));
+          .getManager().getCurrentLang(), CommonLang.class);
+      jComboBoxX.addItem(CommonLang.INSTANCE.distanceWithUnit());
+      jComboBoxX.addItem(rb.getString("Time"));
     }
     return jComboBoxX;
   }

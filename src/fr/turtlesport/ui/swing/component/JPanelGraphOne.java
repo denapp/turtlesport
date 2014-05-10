@@ -7,7 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -23,13 +22,13 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.ComboBoxUI;
 
+import org.jdesktop.swingx.color.ColorUtil;
+
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.img.diagram.ImagesDiagramRepository;
-import fr.turtlesport.unit.DistanceUnit;
-import fr.turtlesport.unit.PaceUnit;
-import fr.turtlesport.unit.SpeedUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
@@ -75,39 +74,41 @@ public class JPanelGraphOne extends JPanel {
 
   private void performedLanguage(ILanguage lang) {
     ResourceBundle rb = ResourceBundleUtility
-        .getBundle(lang, JDiagramComponent.class);
+        .getBundle(lang, CommonLang.class);
 
-    jDiagram.getModel().setUnitX(MessageFormat.format(rb.getString("unitX"),
-                                                      DistanceUnit
-                                                          .getDefaultUnit()));
+    jDiagram.getModel().setUnitX(CommonLang.INSTANCE.distanceWithUnit());
 
     switch (type) {
       case HEART:
         getJLabelTitle().setText("<html><font color=red>"
-                                 + rb.getString("unitY1") + "</font></html>");
+                                 + CommonLang.INSTANCE.distanceWithUnit() + "</font></html>");
         break;
 
       case ALTITUDE:
         getJLabelTitle().setText("<html><font color=blue>"
-                                 + rb.getString("unitY2") + "</font></html>");
+                                 + CommonLang.INSTANCE.altitudeWithUnit()
+                                 + "</font></html>");
         break;
 
       case CADENCE:
         getJLabelTitle().setText("<html><font color=#FF00FF>"
-                                 + rb.getString("unitY4") + "</font></html>");
+                                 + rb.getString("Pace") + "</font></html>");
         break;
 
       case SPEED:
       case PACE:
         getJComboBoxY3().removeAllItems();
-        getJComboBoxY3().addItem(rb.getString("speed") + "("
-                                 + SpeedUnit.getDefaultUnit() + ")");
-        getJComboBoxY3().addItem(rb.getString("allure") + "("
-                                 + PaceUnit.getDefaultUnit() + ")");
+        getJComboBoxY3().addItem(CommonLang.INSTANCE.speedWithUnit());
+        getJComboBoxY3().addItem(CommonLang.INSTANCE.paceWithUnit());
         jComboBoxY3.setSelectedIndex(jDiagram.getModel().isVisibleSpeed() ? 0
             : 1);
-        
+
       case TEMPERATURE:
+        String color = ColorUtil.toHexString(JDiagramComponent.COLORY5);
+        getJLabelTitle().setText("<html><font color=" + color + ">"
+                                 + CommonLang.INSTANCE.temperatureWithUnit()
+                                 + "</font></html>");
+
         break;
 
     }
@@ -127,15 +128,10 @@ public class JPanelGraphOne extends JPanel {
   public void unitChanged(UnitEvent e) {
     if (e.isEventSpeed() || e.isEventSpeedAndPace() || e.isEventPace()
         || e.isEventDistance()) {
-      ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-          .getManager().getCurrentLang(), JDiagramComponent.class);
-
       int index = jComboBoxY3.getSelectedIndex();
       jComboBoxY3.removeAllItems();
-      jComboBoxY3.addItem(rb.getString("speed") + "("
-                          + SpeedUnit.getDefaultUnit() + ")");
-      jComboBoxY3.addItem(rb.getString("allure") + "("
-                          + PaceUnit.getDefaultUnit() + ")");
+      jComboBoxY3.addItem(CommonLang.INSTANCE.speedWithUnit());
+      jComboBoxY3.addItem(CommonLang.INSTANCE.paceWithUnit());
       if (index != -1) {
         jComboBoxY3.setSelectedIndex(index);
       }
