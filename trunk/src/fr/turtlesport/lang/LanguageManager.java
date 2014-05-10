@@ -9,7 +9,6 @@ import javax.swing.JComponent;
 import javax.swing.UIManager;
 
 import fr.turtlesport.Configuration;
-import fr.turtlesport.db.DataLanguageRessource;
 import fr.turtlesport.log.TurtleLogger;
 
 /**
@@ -58,7 +57,7 @@ public final class LanguageManager {
     currentLang = LanguageFr.getInstance();
 
     // Ajout langage
-    addLanguageListener(DataLanguageRessource.getInstance());
+    addLanguageListener(CommonLang.INSTANCE);
     fireLanguageChanged(currentLang);
   }
 
