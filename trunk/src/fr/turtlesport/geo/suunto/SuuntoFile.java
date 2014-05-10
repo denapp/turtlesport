@@ -136,6 +136,8 @@ public class SuuntoFile implements IGeoFile {
 
     private boolean           isLap      = false;
 
+    private boolean           isLaps     = false;
+
     private int               diffLap    = 0;
 
     /**
@@ -260,7 +262,10 @@ public class SuuntoFile implements IGeoFile {
         isSample = true;
       }
       // Lap
-      else if (localName.equals("Lap")) {
+      else if (localName.equals("Laps")) {
+        isLaps = true;
+      }
+      else if (isLaps && localName.equals("Lap")) {
         currentLap = new Lap(listLap.size());
         isLap = true;
       }
@@ -286,7 +291,10 @@ public class SuuntoFile implements IGeoFile {
         isSample = false;
         listPoints.add(currentSample);
       }
-      if (localName.equals("Lap")) {
+      else if (localName.equals("Laps")) {
+        isLaps = false;
+      }
+      else if (isLaps && localName.equals("Lap")) {
         isLap = false;
         if (currentLap.getTotalTimeSeconds() > 0) {
           listLap.add(currentLap);

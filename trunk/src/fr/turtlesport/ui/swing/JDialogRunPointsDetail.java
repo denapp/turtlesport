@@ -1,7 +1,6 @@
 package fr.turtlesport.ui.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Rectangle;
@@ -23,6 +22,7 @@ import javax.swing.table.AbstractTableModel;
 
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunTrk;
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JTableCustom;
@@ -105,7 +105,7 @@ public class JDialogRunPointsDetail extends JDialog {
       log.error("", e);
     }
     view.tableModel.updateData(listTrks);
-    
+
     // show
     view.pack();
     view.setLocationRelativeTo(MainGui.getWindow());
@@ -119,13 +119,15 @@ public class JDialogRunPointsDetail extends JDialog {
   private void initialize() {
     rb = ResourceBundleUtility.getBundle(LanguageManager.getManager()
         .getCurrentLang(), getClass());
-
-    this.setContentPane(getJContentPane());
     setTitle(rb.getString("title"));
-    jLabelLibDistanceTot.setText(rb.getString("jLabelLibDistanceTot"));
-    jLabelLibTimeTot.setText(rb.getString("jLabelLibTimeTot"));
+
+    rb = ResourceBundleUtility.getBundle(LanguageManager.getManager()
+        .getCurrentLang(), CommonLang.class);
+    this.setContentPane(getJContentPane());
+    jLabelLibDistanceTot.setText(rb.getString("Distance") + " :");
+    jLabelLibTimeTot.setText(rb.getString("Time") + " :");
     jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());
-    this.setPreferredSize(new Dimension(795, 470));
+    // this.setPreferredSize(new Dimension(850, 470));
 
     // Evenement
     getRootPane().setDefaultButton(jButtonOK);
@@ -214,7 +216,7 @@ public class JDialogRunPointsDetail extends JDialog {
     return jPanelTable;
   }
 
-  public JTableCustom getJTable() {
+  public JTable getJTable() {
     if (jTable == null) {
       jTable = new JTableCustom();
       tableModel = new TableModelPoints();
@@ -224,7 +226,7 @@ public class JDialogRunPointsDetail extends JDialog {
       jTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
       jTable.setSortable(false);
 
-      jTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+      jTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       jTable.getTableHeader().setFont(GuiFont.FONT_PLAIN);
       jTable.setSortable(true);
       jTable.packAll();
@@ -262,10 +264,10 @@ public class JDialogRunPointsDetail extends JDialog {
                                             "bmp",
                                             "vitesse",
                                             "allure",
+                                            "cadence",
+                                            "temperature",
                                             "Longitude",
                                             "Latitude" };
-
-    private final int[]     columWidth  = { 20, 40, 40, 20, 30, 40, 40, 60, 60 };
 
     public List<DataRunTrk> listTrks;
 
@@ -273,6 +275,10 @@ public class JDialogRunPointsDetail extends JDialog {
 
       for (int i = 0; i < columnNames.length; i++) {
         switch (i) {
+          case 1:
+            columnNames[i] = rb.getString("Time");
+            break;
+
           case 2:
             columnNames[i] = DistanceUnit.getDefaultUnit();
             break;
@@ -293,10 +299,20 @@ public class JDialogRunPointsDetail extends JDialog {
             columnNames[i] = PaceUnit.getDefaultUnit();
             break;
 
-          case 1:
           case 7:
+            columnNames[i] = rb.getString("Cadence");
+            break;
+
           case 8:
-            columnNames[i] = rb.getString("TableModel_header" + i);
+            columnNames[i] = rb.getString("Temperature");
+            break;
+
+          case 9:
+            columnNames[i] = rb.getString("Longitude");
+            break;
+
+          case 10:
+            columnNames[i] = rb.getString("Latitude");
             break;
 
           default:
@@ -320,9 +336,9 @@ public class JDialogRunPointsDetail extends JDialog {
      * @param column
      * @return
      */
-    public int getPreferredWidth(int column) {
-      return columWidth[column] * 2;
-    }
+    // public int getPreferredWidth(int column) {
+    // return columWidth[column] * 2;
+    // }
 
     /*
      * (non-Javadoc)
@@ -425,11 +441,17 @@ public class JDialogRunPointsDetail extends JDialog {
           }
           return " ";
 
-        case 7: // Longitude
+        case 7: // Cadence
+          return data.isValidCadence() ? data.getCadence() : "-";
+
+        case 8: // Temperature.
+          return data.isValidTemperature() ? data.getTemperature() : "-";
+
+        case 9: // Longitude
           return data.isValidGps() ? GeoUtil.longititude(GeoUtil
               .makeLatitudeFromGarmin(data.getLongitude())) : "";
 
-        case 8: // Latitude.
+        case 10: // Latitude.
           return data.isValidGps() ? GeoUtil.latitude(GeoUtil
               .makeLatitudeFromGarmin(data.getLatitude())) : "";
 
@@ -445,7 +467,7 @@ public class JDialogRunPointsDetail extends JDialog {
      */
     public void updateData(List<DataRunTrk> listTrks) {
       this.listTrks = listTrks;
+      jTable.packAll();
     }
   }
-
 }

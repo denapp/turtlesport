@@ -25,9 +25,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import fr.turtlesport.CommonLang;
 import fr.turtlesport.db.AbstractDataActivity;
 import fr.turtlesport.db.DataSearchRun;
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;

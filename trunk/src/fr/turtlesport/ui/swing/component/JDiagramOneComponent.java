@@ -16,10 +16,8 @@ import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.swing.JPanel;
 import javax.swing.RepaintManager;
@@ -29,6 +27,7 @@ import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;
 import fr.turtlesport.filter.SavitzkyGolay;
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.ui.swing.GuiFont;
@@ -39,8 +38,8 @@ import fr.turtlesport.ui.swing.model.ModelMapkitManager;
 import fr.turtlesport.ui.swing.model.ModelPointsManager;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.SpeedUnit;
+import fr.turtlesport.unit.TemperatureUnit;
 import fr.turtlesport.unit.TimeUnit;
-import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
  * @author Denis Apparicio
@@ -156,10 +155,7 @@ public class JDiagramOneComponent extends JPanel {
   }
 
   private void performedLanguage(ILanguage lang) {
-    ResourceBundle rb = ResourceBundleUtility
-        .getBundle(lang, JDiagramComponent.class);
-    model.setUnitX(MessageFormat.format(rb.getString("unitX"),
-                                        DistanceUnit.getDefaultUnit()));
+    model.setUnitX(CommonLang.INSTANCE.distanceWithUnit());
   }
 
   public TablePointsModel getModel() {
@@ -1042,7 +1038,7 @@ public class JDiagramOneComponent extends JPanel {
           }
         }
       }
-      
+
       for (DataRunTrk p : newPoints) {
         boolean isClone = false;
         if (p.getTime().before(pPrev.getTime())) {
@@ -1082,6 +1078,11 @@ public class JDiagramOneComponent extends JPanel {
             }
             else {
               validLast = p.getTemperature();
+              if (!TemperatureUnit.isDefaultUnitDegree()) {
+                p = (DataRunTrk) p.clone();
+                p.setTemperature((int) TemperatureUnit.convertToFahrenheit(p
+                    .getTemperature()));
+              }
               if (p.getTemperature() > maxY) {
                 maxY = p.getTemperature();
               }
@@ -1190,9 +1191,9 @@ public class JDiagramOneComponent extends JPanel {
         gridXTime[i] = (maxTime * 1.0) * i / (gridXDistance.length - 1);
       }
 
-      switch(type) {
+      switch (type) {
         case ALTITUDE:
-        case  CADENCE:
+        case CADENCE:
         case TEMPERATURE:
         case HEART:
           for (int i = 0; i < gridY.length; i++) {
@@ -1217,7 +1218,7 @@ public class JDiagramOneComponent extends JPanel {
           minY = isVisibleSpeed() ? minYSpeed : minYPace;
           maxY = isVisibleSpeed() ? maxYSpeed : maxYPace;
           gridY = isVisibleSpeed() ? gridYSpeed : gridYPace;
-          break;        
+          break;
       }
 
       // max zoom
