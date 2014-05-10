@@ -378,6 +378,7 @@
 				<exclude name="bin/jfxwebkit.dll" />
 				<exclude name="lib/deploy.jar" />
 				<exclude name="lib/plugin.jar" />
+				<exclude name="lib/jfxrt.jar" />
 				<exclude name="lib/deploy/messages*.properties" />
 				<exclude name="lib/deploy/splash.jpg" />
 			</fileset>
