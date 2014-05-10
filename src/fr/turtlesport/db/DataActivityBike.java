@@ -1,10 +1,7 @@
 package fr.turtlesport.db;
 
-import java.util.ResourceBundle;
-
-import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.ui.swing.img.activity.ImagesActivityRepository;
-import fr.turtlesport.util.ResourceBundleUtility;
 
 /**
  * @author Denis Apparicio
@@ -37,9 +34,7 @@ public class DataActivityBike extends AbstractDataActivity {
    */
   @Override
   public String getName() {
-    ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-        .getManager().getCurrentLang(), getClass());
-    return rb.getString("name");
+    return CommonLang.INSTANCE.getString("sportBike");
   }
 
   /*
