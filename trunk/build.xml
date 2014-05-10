@@ -13,7 +13,7 @@
 	<property name="dest" location="${basedir}/classes" />
 	<property name="lib" location="${basedir}/lib" />
 	<property name="ant" location="${basedir}/ant" />
-	<property name="exe" location="${basedir}/exe" />
+	<property name="exe" location="${basedir}/build" />
 	<property name="build.javadocs" location="docs/api" />
 	<property name="packages" value="fr.turtlesport.*" />
 	<property name="release" location="${basedir}/release" />
