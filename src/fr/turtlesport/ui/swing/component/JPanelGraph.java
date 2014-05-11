@@ -140,7 +140,7 @@ public class JPanelGraph extends JPanel implements LanguageListener,
     jComboBoxY3.addItem(CommonLang.INSTANCE.speedWithUnit());
     jComboBoxY3.addItem(CommonLang.INSTANCE.paceWithUnit());
 
-    jCheckBox4.setText("<html><font color=#FF00FF>" + rb.getString("Pace")
+    jCheckBox4.setText("<html><font color=#FF00FF>" + rb.getString("Cadence")
                        + "</font></html>");
     jComboBoxX.removeAllItems();
     jComboBoxX.addItem(CommonLang.INSTANCE.distanceWithUnit());
