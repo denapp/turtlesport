@@ -13,6 +13,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.SwingConstants;
 
 import fr.turtlesport.lang.LanguageManager;
@@ -33,6 +34,8 @@ public class JDialogMap extends JDialog {
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(JDialogMap.class);
   }
+
+  private JSplitPane     jSplitPane;
 
   private JTurtleMapKit       mapKit;
 
@@ -123,13 +126,7 @@ public class JDialogMap extends JDialog {
     jLabelTitle.setHorizontalAlignment(SwingConstants.CENTER);
     jLabelTitle.setFont(GuiFont.FONT_PLAIN);
 
-    JPanel contentPane = new JPanel();
-    contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-    contentPane.add(getJPanelMap());
-    contentPane.add(Box.createRigidArea(new Dimension(5, 0)));
-    contentPane.add(getJPanelRight());
-
-    this.setContentPane(contentPane);
+    this.setContentPane(getJSplitPane());
     this.setTitle(rb.getString("title"));
 
     // Evenement
@@ -167,6 +164,7 @@ public class JDialogMap extends JDialog {
     if (jPanelRight == null) {
       jPanelRight = new JPanelRunLap();
       jPanelRight.setPreferredSize(new Dimension(300, 300));
+      jPanelRight.setMinimumSize(new Dimension(300, 300));
     }
     return jPanelRight;
   }
@@ -175,19 +173,32 @@ public class JDialogMap extends JDialog {
     if (mapKit == null) {
       mapKit = new JTurtleMapKit(false);
       mapKit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-      // mapKit.setBorder(BorderFactory
-      // .createTitledBorder(null,
-      // "",
-      // TitledBorder.DEFAULT_JUSTIFICATION,
-      // TitledBorder.DEFAULT_POSITION,
-      // GuiFont.FONT_PLAIN,
-      // null));
       Dimension dim = new Dimension(600, 600);
       mapKit.setPreferredSize(dim);
+      mapKit.setMinimumSize(dim);
       mapKit.setGeoPositionVisible(true);
       mapKit.setTimeVisible(true);
     }
     return mapKit;
+  }
+  
+  /**
+   * This method initializes jSplitPane
+   * 
+   * @return javax.swing.JSplitPane
+   */
+  private JSplitPane getJSplitPane() {
+    if (jSplitPane == null) {
+      jSplitPane = new JSplitPane();
+//      jSplitPane.setOpaque(false);
+      jSplitPane.setContinuousLayout( true );
+      jSplitPane.setOneTouchExpandable(true);
+      jSplitPane.setLeftComponent(getJPanelMap());
+      jSplitPane.setRightComponent(getJPanelRight());
+      jSplitPane.setDividerLocation(600);
+      jSplitPane.setResizeWeight(1.0);
+    }
+    return jSplitPane;
   }
 
 }
