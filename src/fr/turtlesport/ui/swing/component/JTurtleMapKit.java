@@ -675,6 +675,9 @@ public class JTurtleMapKit extends JXPanel {
       GeoPosition geo = mainMap.getCenterPosition();
 
       AbstractTileFactoryExtended tile = e.getMapTileFactory();
+      if (tile==null) {
+        return;
+      }
       mainMap.setTileFactory(tile);
       AllMapsFactory.getInstance().setDefaultTileFactory(tile);
 
