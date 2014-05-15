@@ -1683,6 +1683,8 @@ public class JPanelRun extends JPanelRight implements LanguageListener,
       jSplitPaneCenter.setOneTouchExpandable(true);
       jSplitPaneCenter.setTopComponent(getJPanelMap());
       jSplitPaneCenter.setBottomComponent(getJDiagram());
+      jSplitPaneCenter.setDividerLocation(400);
+      jSplitPaneCenter.setResizeWeight(0.5);
     }
     return jSplitPaneCenter;
   }
