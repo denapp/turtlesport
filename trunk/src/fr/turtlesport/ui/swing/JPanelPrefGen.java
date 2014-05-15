@@ -238,7 +238,6 @@ public class JPanelPrefGen extends JPanelPref implements LanguageListener,
     if (jComboBoxLanguage == null) {
       jComboBoxLanguage = new JComboBox(LanguageManager.getManager()
           .getLanguages());
-      new DefaultListCellRenderer();
       jComboBoxLanguage.setRenderer(new DefaultListCellRenderer() {
         @Override
         public Component getListCellRendererComponent(JList list,
