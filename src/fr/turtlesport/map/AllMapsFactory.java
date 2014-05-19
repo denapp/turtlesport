@@ -70,16 +70,6 @@ public final class AllMapsFactory implements AddDeleteMapListener {
                      null,
                      null);
 
-    // // IGN Carte
-    // String url =
-    // " http://gpp3-wxs.ign.fr/tyujsdxmzox31ituc2uw0qwl/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX=#zoom#&TILEROW=#y#&TILECOL=#x#&extParamId=aHR0cDovL3d3dy5nZW9wb3J0YWlsLmdvdXYuZnIvYWNjdWVpbA==";
-    // addMap(list, new UserDefineMapTileProviderInfo(url, "IGN carte"), url);
-    //
-    // // IGN Sat
-    // url =
-    // "http://gpp3-wxs.ign.fr/tyujsdxmzox31ituc2uw0qwl/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX=#zoom#&TILEROW=#y#&TILECOL=#x#&extParamId=aHR0cDovL3d3dy5nZW9wb3J0YWlsLmdvdXYuZnIvYWNjdWVpbA==";
-    // addMap(list, new UserDefineMapTileProviderInfo(url, "IGN Sat"), url);
-
     // User map define
     for (DataMap map : MapConfiguration.getConfig().getMaps().getMaps()) {
       addUserMap(map);
