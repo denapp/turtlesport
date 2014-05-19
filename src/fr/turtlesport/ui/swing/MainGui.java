@@ -626,7 +626,11 @@ public class MainGui extends JFrame implements LanguageListener {
     setRightComponent(new JPanelRun());
     setCurrentIdUser(oldIdUser);
 
-    log.debug("<<initialize");
+    // plein ecran
+//    pack();
+//    setExtendedState(this.MAXIMIZED_BOTH);
+
+    log.debug("<<initialize");    
   }
 
   /**
@@ -2061,6 +2065,7 @@ public class MainGui extends JFrame implements LanguageListener {
       if (!(panel instanceof JPanelRun)) {
         ModelPointsManager.getInstance().removeAllChangeListener();
         ModelMapkitManager.getInstance().removeAllChangeListener();
+        ModelMapkitManager.getInstance().removeAllAddDeleteListener();
       }
       // else {
       // JPanelListDateRun panelCalendar = getListDateRun();

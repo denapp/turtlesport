@@ -1,12 +1,13 @@
 package fr.turtlesport.map;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 
-import javax.swing.JPanel;
+import javax.swing.ImageIcon;
 
 import org.jdesktop.swingx.mapviewer.Tile;
 import org.jdesktop.swingx.mapviewer.TileCache;
@@ -17,13 +18,15 @@ import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
  * 
  */
 public class TurtleEmptyTileFactory extends AbstractTileFactoryExtended {
+  private static final ImageIcon ICON = new ImageIcon(AbstractTileFactoryExtended.class
+                                                      .getResource("map-off14.png"));
 
   /** The empty tile image. */
-  private BufferedImage      emptyTile;
+  private BufferedImage          emptyTile;
 
   /** Nom de la map. */
-  public static final String NAME = "mercator";
-
+  public static final String     NAME = "mercator";
+  
   /**
    * 
    */
@@ -55,7 +58,8 @@ public class TurtleEmptyTileFactory extends AbstractTileFactoryExtended {
     Graphics2D g = emptyTile.createGraphics();
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                        RenderingHints.VALUE_ANTIALIAS_ON);
-    g.setColor(new JPanel().getBackground());
+//    g.setColor(new JPanel().getBackground());
+    g.setColor(Color.WHITE);
     g.fillRect(0, 0, tileSize, tileSize);
     g.dispose();
 
@@ -167,6 +171,13 @@ public class TurtleEmptyTileFactory extends AbstractTileFactoryExtended {
   @Override
   public boolean isEditable() {
     return false;
+  }
+  
+  /* (non-Javadoc)
+   * @see fr.turtlesport.map.AbstractTileFactoryExtended#icon()
+   */
+  public ImageIcon getSmallIcon() {
+    return ICON;
   }
 
 }

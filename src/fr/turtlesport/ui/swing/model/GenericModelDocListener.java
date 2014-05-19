@@ -1,5 +1,7 @@
 package fr.turtlesport.ui.swing.model;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.lang.reflect.Method;
 import java.util.Date;
 
@@ -58,6 +60,46 @@ public class GenericModelDocListener implements DocumentListener {
     this.methodName = data.getClass().getMethod(methodName, arg);
   }
 
+  /**
+   * @param jTextField
+   * @param data
+   * @param methodName
+   * @boolean hasFocus
+   * @throws NoSuchMethodException
+   */
+  public GenericModelDocListener(JTextField jTextField,
+                                 Object data,
+                                 String methodName,
+                                 boolean hasFocus) throws NoSuchMethodException {
+    this(jTextField, data, methodName, String.class, hasFocus);
+  }
+
+  /**
+   * @param jTextField
+   * @param data
+   * @param methodName
+   * @param arg
+   * @boolean hasFocus
+   * @throws NoSuchMethodException
+   */
+  public GenericModelDocListener(JTextField jTextField,
+                                 Object data,
+                                 String methodName,
+                                 Class<?> arg,
+                                 boolean hasFocus) throws NoSuchMethodException {
+    this.jTextField = jTextField;
+    this.data = data;
+    this.arg = arg;
+    this.methodName = data.getClass().getMethod(methodName, arg);
+    FocusAdapter focusListener = new FocusAdapter() {
+      @Override
+      public void focusLost(FocusEvent e) {
+        fireUpdate();
+      }
+    };
+    jTextField.addFocusListener(focusListener);
+  }
+  
   /*
    * (non-Javadoc)
    * 

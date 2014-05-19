@@ -7,7 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -31,7 +30,6 @@ import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.ui.swing.GuiFont;
 import fr.turtlesport.ui.swing.JDialogDiagramComponents;
 import fr.turtlesport.ui.swing.img.diagram.ImagesDiagramRepository;
-import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
@@ -157,9 +155,6 @@ public class JPanelGraph extends JPanel implements LanguageListener,
   public void unitChanged(UnitEvent e) {
     if (e.isEventSpeed() || e.isEventSpeedAndPace() || e.isEventPace()
         || e.isEventDistance()) {
-      ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
-          .getManager().getCurrentLang(), JDiagramComponent.class);
-
       int index = jComboBoxY3.getSelectedIndex();
       jComboBoxY3.removeAllItems();
       jComboBoxY3.addItem(CommonLang.INSTANCE.speedWithUnit());
@@ -170,9 +165,8 @@ public class JPanelGraph extends JPanel implements LanguageListener,
 
       index = jComboBoxX.getSelectedIndex();
       jComboBoxX.removeAllItems();
-      jComboBoxX.addItem(MessageFormat.format(rb.getString("unitX"),
-                                              DistanceUnit.getDefaultUnit()));
-      jComboBoxX.addItem(rb.getString("time"));
+      jComboBoxX.addItem(CommonLang.INSTANCE.distanceWithUnit());
+      jComboBoxX.addItem(CommonLang.INSTANCE.getString("time"));
       if (index != -1) {
         jComboBoxX.setSelectedIndex(index);
       }
