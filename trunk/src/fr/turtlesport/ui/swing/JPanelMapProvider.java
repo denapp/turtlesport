@@ -106,7 +106,7 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
     jLabelLibName.setHorizontalAlignment(SwingConstants.RIGHT);
     add(jLabelLibName);
 
-    jLabelValName = new JLabel("tooky");
+    jLabelValName = new JLabel();
     jLabelValName.setBounds(new Rectangle(100, 30, 150, 25));
     jLabelValName.setFont(GuiFont.FONT_PLAIN);
     jLabelLibName.setLabelFor(jLabelValName);
@@ -210,9 +210,9 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
 
     this.data = data;
 
-    jTextFieldZoomMax.setEditable(data.isEditable());
-    jTextFieldZoomMin.setEditable(data.isEditable());
-    jTextFieldURL.setEditable(data.isEditable());
+    jTextFieldZoomMax.setEnabled(data.isEditable());
+    jTextFieldZoomMin.setEnabled(data.isEditable());
+    jTextFieldURL.setEnabled(data.isEditable());
 
     jLabelValName.setText(data.getName());
     jTextFieldURL.setText(data.getUrl());
@@ -242,6 +242,18 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
         String name = jLabelValName.getName();
         int zoomMin = Integer.parseInt(jTextFieldZoomMin.getText());
         int zoomMax = Integer.parseInt(jTextFieldZoomMax.getText());
+        if (zoomMin < 1) {
+          zoomMin = 1;
+        }
+        if (zoomMax < 2) {
+          zoomMin = 2;
+        }
+        if (zoomMax < zoomMin) {
+          jTextFieldZoomMax.setText(Integer.toString(zoomMin));
+          docZoomMax.fireUpdate();
+          jTextFieldZoomMin.setText(Integer.toString(zoomMax));
+          docZoomMin.fireUpdate();
+        }
         String baseURL = jTextFieldURL.getText();
         if (baseURL == null || baseURL.isEmpty()) {
           mapViewer.getMainMap().setTileFactory(new EmptyTileFactory());
@@ -272,21 +284,23 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
       docURL = new GenericModelDocListener(jTextFieldURL,
                                            data,
                                            "setUrl",
-                                           String.class);
+                                           String.class,
+                                           true);
       jTextFieldURL.getDocument().addDocumentListener(docURL);
 
       docZoomMax = new GenericModelDocListener(jTextFieldZoomMax,
                                                data,
                                                "setZoomMax",
-                                               Integer.TYPE);
+                                               Integer.TYPE,
+                                               true);
       jTextFieldZoomMax.getDocument().addDocumentListener(docZoomMax);
 
       docZoomMin = new GenericModelDocListener(jTextFieldZoomMin,
                                                data,
                                                "setZoomMin",
-                                               Integer.TYPE);
+                                               Integer.TYPE,
+                                               true);
       jTextFieldZoomMin.getDocument().addDocumentListener(docZoomMin);
-
     }
     catch (NoSuchMethodException e) {
       log.error("", e);
@@ -297,10 +311,6 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
    * Suppression des listeners de l'&eacute;quipement.
    */
   private void removeEvents() {
-    if (docURL == null) {
-      return;
-    }
-
     jTextFieldURL.getDocument().removeDocumentListener(docURL);
     jTextFieldZoomMax.getDocument().removeDocumentListener(docZoomMax);
     jTextFieldZoomMin.getDocument().removeDocumentListener(docZoomMin);

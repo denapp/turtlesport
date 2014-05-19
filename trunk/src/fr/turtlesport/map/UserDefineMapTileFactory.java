@@ -1,18 +1,23 @@
 package fr.turtlesport.map;
 
+import javax.swing.ImageIcon;
+
 /**
  * @author Denis Apparicio
  * 
  */
 public final class UserDefineMapTileFactory extends AbstractTileFactoryExtended {
+  private static final ImageIcon ICON = new ImageIcon(AbstractTileFactoryExtended.class
+                                          .getResource("map14.png"));
 
-  private String baseURL;
-  
+  private String                 baseURL;
+
   /**
    * @param url
    * @param name
    */
-  public UserDefineMapTileFactory(UserDefineMapTileProviderInfo tileInfo, String baseURL) {
+  public UserDefineMapTileFactory(UserDefineMapTileProviderInfo tileInfo,
+                                  String baseURL) {
     super(tileInfo);
     this.baseURL = baseURL;
     setThreadPoolSize(8);
@@ -54,6 +59,15 @@ public final class UserDefineMapTileFactory extends AbstractTileFactoryExtended 
   @Override
   public String getBaseURL() {
     return baseURL;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see fr.turtlesport.map.AbstractTileFactoryExtended#icon()
+   */
+  public ImageIcon getSmallIcon() {
+    return ICON;
   }
 
 }

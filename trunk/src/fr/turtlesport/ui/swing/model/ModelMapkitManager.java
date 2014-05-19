@@ -279,6 +279,21 @@ public class ModelMapkitManager implements ChangePointsListener {
     }
   }
 
+
+  /**
+   * Supprime tous les <code>ChangePointsListener</code>.
+   * 
+   * @param l
+   *          le <code>ChangePointsListener</code> &agrave; supprimer.
+   */
+  public void removeAllAddDeleteListener() {
+    Object[] objs = listenerAddDeleteMapList.toArray();
+    if (objs != null) {
+      for (Object o : objs) {
+        removAddDeleteMapListener((AddDeleteMapListener) o);
+      }
+    }
+  }
   /**
    * Supprime le <code>ChangeMapListener</code>.
    * 

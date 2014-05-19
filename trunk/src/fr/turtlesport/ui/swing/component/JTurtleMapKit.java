@@ -2,6 +2,7 @@ package fr.turtlesport.ui.swing.component;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
@@ -12,6 +13,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Line2D;
@@ -19,17 +22,16 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.border.EtchedBorder;
 
 import org.jdesktop.swingx.JXMapViewer;
@@ -59,10 +61,10 @@ import fr.turtlesport.util.GeoUtil;
 public class JTurtleMapKit extends JXPanel {
 
   /** Localisation par defaut PARIS */
-  private static final GeoPosition DEFAULT_GEO    = new GeoPosition(48.856638,
-                                                                    2.352241);
+  private static final GeoPosition DEFAULT_GEO  = new GeoPosition(48.856638,
+                                                                  2.352241);
 
-  private int                      originalZoom   = -1;
+  private int                      originalZoom = -1;
 
   private GeoPosition              originalPosition;
 
@@ -72,21 +74,13 @@ public class JTurtleMapKit extends JXPanel {
 
   private JButtonCustom            jButtonResize;
 
-  private Dimension                dimButton      = new Dimension(20, 20);
+  private Dimension                dimButton    = new Dimension(20, 20);
 
   private JTurtleMapViewer         mainMap;
 
   private JPanel                   jPanelButton;
 
-  private JXSplitButton            jXSplitButtonMap;
-
-  private ButtonGroup              buttonGroupDropDown;
-
-  private ImageIcon                iconConnect    = ImagesDiagramRepository
-                                                      .getImageIcon("map.png");
-
-  private ImageIcon                iconDisconnect = ImagesDiagramRepository
-                                                      .getImageIcon("map-off.png");
+  private JComboBox                jComboboxMap;
 
   private JMediaMapKit             jMediaMapKit;
 
@@ -103,9 +97,11 @@ public class JTurtleMapKit extends JXPanel {
 
   private GeoMouseMotionListener   geoMouseMotionListener;
 
-  private boolean                  isSmallFlag    = false;
+  private boolean                  isSmallFlag  = false;
 
-  private Color                    COLOR_TRACE    = Color.RED;
+  private Color                    COLOR_TRACE  = Color.RED;
+
+  private JLabel                   jLabelMapIcon;
 
   /**
    * 
@@ -126,7 +122,7 @@ public class JTurtleMapKit extends JXPanel {
         .getDefaultTileFactory();
 
     // mis a jour du bouton
-    mapListener.setTileMenu(tileFactory);
+    mapListener.setMap(tileFactory);
     mainMap.setTileFactory(tileFactory);
 
     AllMapsFactory.getInstance().setDefaultTileFactory(tileFactory);
@@ -239,6 +235,16 @@ public class JTurtleMapKit extends JXPanel {
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     mainMap.add(getJPanelButton(), gridBagConstraints);
 
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    jLabelMapIcon = new JLabel();
+    mainMap.add(jLabelMapIcon, gridBagConstraints);
+
     jMediaMapKit = new JMediaMapKit(this, isSmallFlag);
     setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
     setLayout(new BorderLayout(0, 0));
@@ -265,6 +271,17 @@ public class JTurtleMapKit extends JXPanel {
         if (getOriginalZoom() != -1) {
           mainMap.setZoom(getOriginalZoom());
           mainMap.setCenterPosition(getOriginalPosition());
+        }
+      }
+    });
+
+    jComboboxMap.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+          AbstractTileFactoryExtended tile = (AbstractTileFactoryExtended) jComboboxMap
+              .getSelectedItem();
+          ModelMapkitManager.getInstance().setMapTileFactory(tile);
+          jLabelMapIcon.setIcon(tile.getBigIcon());
         }
       }
     });
@@ -301,7 +318,7 @@ public class JTurtleMapKit extends JXPanel {
       jPanelButton.setOpaque(false);
       jPanelButton.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-      jPanelButton.add(getJXSplitButtonMap());
+      jPanelButton.add(getJComboboxMap());
       jPanelButton.add(getJButtonZoomMoins());
       jPanelButton.add(getJButtonZoomPlus());
       jPanelButton.add(getJButtonResize());
@@ -333,27 +350,40 @@ public class JTurtleMapKit extends JXPanel {
    * 
    * @return javax.swing.JButton
    */
-  public JXSplitButton getJXSplitButtonMap() {
-    if (jXSplitButtonMap == null) {
-      buttonGroupDropDown = new ButtonGroup();
-      JPopupMenu popmenu = new JPopupMenu();
+  public JComboBox getJComboboxMap() {
+    if (jComboboxMap == null) {
+      jComboboxMap = new JComboBox(AllMapsFactory.getInstance()
+          .getTileDisplayInfo());
 
-      for (String s : AllMapsFactory.getInstance().getTileNames()) {
-        JCheckBoxMenuItemMap mi = new JCheckBoxMenuItemMap(s);
-        buttonGroupDropDown.add(mi);
-        popmenu.add(mi);
-      }
+      final DefaultListCellRenderer renderer = new DefaultListCellRenderer() {
+        @Override
+        public Component getListCellRendererComponent(JList list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus) {
+          super.getListCellRendererComponent(list,
+                                             value,
+                                             index,
+                                             isSelected,
+                                             cellHasFocus);
+          AbstractTileFactoryExtended tile = (AbstractTileFactoryExtended) value;
+          if (tile != null) {
+            setFont(GuiFont.FONT_PLAIN_SMALL);
+            ImageIcon icon = tile.getSmallIcon();
+            if (icon != null) {
+              setIcon(icon);
+            }
+            setText(tile.getName());
+          }
+          return this;
+        }
+      };
 
-      jXSplitButtonMap = new JXSplitButton(null, null, popmenu);
-      // jXSplitButtonMap.setMargin(new Insets(2, 2, 2, 2));
-      Dimension dimButton = new Dimension(30, 20);
-
-      jXSplitButtonMap.setMaximumSize(dimButton);
-      jXSplitButtonMap.setMinimumSize(dimButton);
-      jXSplitButtonMap.setOpaque(false);
-      jXSplitButtonMap.setPreferredSize(dimButton);
+      jComboboxMap.setRenderer(renderer);
     }
-    return jXSplitButtonMap;
+
+    return jComboboxMap;
   }
 
   /**
@@ -394,43 +424,6 @@ public class JTurtleMapKit extends JXPanel {
       jButtonResize.setPreferredSize(dimButton);
     }
     return jButtonResize;
-  }
-
-  /**
-   * @author Denis Apparicio
-   * 
-   */
-  public class JCheckBoxMenuItemMap extends JCheckBoxMenuItem implements
-                                                             ActionListener {
-    private AbstractTileFactoryExtended tileFactory;
-
-    public JCheckBoxMenuItemMap(String text) {
-      super(text);
-      addActionListener(JCheckBoxMenuItemMap.this);
-      setFont(GuiFont.FONT_PLAIN);
-    }
-
-    /**
-     * @return
-     */
-    public AbstractTileFactoryExtended getTileFactory() {
-      if (tileFactory == null) {
-        synchronized (JCheckBoxMenuItemMap.class) {
-          tileFactory = AllMapsFactory.getInstance().getTileFactory(getText());
-        }
-      }
-      return tileFactory;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent e) {
-      ModelMapkitManager.getInstance().setMapTileFactory(getTileFactory());
-    }
   }
 
   /**
@@ -675,17 +668,16 @@ public class JTurtleMapKit extends JXPanel {
       GeoPosition geo = mainMap.getCenterPosition();
 
       AbstractTileFactoryExtended tile = e.getMapTileFactory();
-      if (tile==null) {
+      if (tile == null) {
         return;
       }
       mainMap.setTileFactory(tile);
       AllMapsFactory.getInstance().setDefaultTileFactory(tile);
-
       mainMap.setZoom(zoom);
       mainMap.setCenterPosition(geo);
 
       // Selectionne le menuItem
-      setTileMenu(tile);
+      setMap(tile);
     }
 
     /*
@@ -697,28 +689,22 @@ public class JTurtleMapKit extends JXPanel {
      */
     @Override
     public void deleteMap(AddDeleteMapEvent event) {
-      AbstractButton button = null;
-      Enumeration<AbstractButton> e = buttonGroupDropDown.getElements();
-      while (e.hasMoreElements()) {
-        AbstractButton tmp = e.nextElement();
-        if (tmp.getText().equals(event.getMapName())) {
-          button = tmp;
+
+      AbstractTileFactoryExtended selectedTile = null;
+      for (int i = 0; i < jComboboxMap.getItemCount(); i++) {
+        AbstractTileFactoryExtended tile = (AbstractTileFactoryExtended) jComboboxMap
+            .getItemAt(i);
+        if (tile.getName().equals(event.getMapName())) {
+          selectedTile = tile;
           break;
         }
       }
-      if (button != null) {
-        boolean isSelected = button.isSelected();
-        buttonGroupDropDown.remove(button);
-        jXSplitButtonMap.getDropDownMenu().remove(button);
-        if (isSelected) {
-          Enumeration<AbstractButton> e1 = buttonGroupDropDown.getElements();
-          e1.nextElement();
-          JCheckBoxMenuItemMap val = (JCheckBoxMenuItemMap) e1.nextElement();
-          buttonGroupDropDown.setSelected(val.getModel(), true);
-          val.setSelected(true);
-          val.doClick();
-        }
+
+      if (selectedTile != null) {
+        jComboboxMap.removeItem(selectedTile);
+        jComboboxMap.setSelectedIndex(1);
       }
+
     }
 
     /*
@@ -730,30 +716,12 @@ public class JTurtleMapKit extends JXPanel {
      */
     @Override
     public void addMap(AddDeleteMapEvent e) {
-      JCheckBoxMenuItemMap mi = new JCheckBoxMenuItemMap(e.getMapName());
-      buttonGroupDropDown.add(mi);
-      jXSplitButtonMap.getDropDownMenu().add(mi);
+      jComboboxMap.addItem(AllMapsFactory.getInstance().getTileFactory(e
+          .getMapName()));
     }
 
-    protected void setTileMenu(AbstractTileFactoryExtended tile) {
-      final String name = tile.getName();
-      Enumeration<AbstractButton> e = buttonGroupDropDown.getElements();
-      while (e.hasMoreElements()) {
-        AbstractButton b = e.nextElement();
-        if (b instanceof JCheckBoxMenuItemMap) {
-          JCheckBoxMenuItemMap val = (JCheckBoxMenuItemMap) b;
-          if (val.getText().equals(name)) {
-            buttonGroupDropDown.setSelected(val.getModel(), true);
-            val.setSelected(true);
-            break;
-          }
-        }
-      }
-
-      ImageIcon newIcon = tile.isConnected() ? iconConnect : iconDisconnect;
-      if (newIcon != jXSplitButtonMap.getIcon()) {
-        jXSplitButtonMap.setIcon(newIcon);
-      }
+    protected void setMap(AbstractTileFactoryExtended tile) {
+      jComboboxMap.setSelectedItem(tile);
     }
 
   }

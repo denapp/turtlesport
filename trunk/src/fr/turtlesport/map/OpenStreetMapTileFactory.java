@@ -1,5 +1,6 @@
 package fr.turtlesport.map;
 
+import javax.swing.ImageIcon;
 
 /**
  * @author Denis Apparicio
@@ -7,15 +8,28 @@ package fr.turtlesport.map;
  */
 public final class OpenStreetMapTileFactory extends AbstractTileFactoryExtended {
 
-  private String baseURL;
+  private String                baseURL;
+
+  public static final ImageIcon ICON = new ImageIcon(OpenStreetMapTileFactory.class
+                                         .getResource("osm14.png"));
 
   /**
    * @param url
    * @param name
    */
   public OpenStreetMapTileFactory(String url, String name) {
+    this(url, name, null);
+  }
+
+  /**
+   * @param url
+   * @param name
+   * @param icon
+   */
+  public OpenStreetMapTileFactory(String url, String name, ImageIcon icon) {
     super(new OpenStreetMapTileProviderInfo(url, name));
     this.baseURL = url;
+    setSmallIcon(icon == null ? ICON : icon);
     setThreadPoolSize(8);
   }
 

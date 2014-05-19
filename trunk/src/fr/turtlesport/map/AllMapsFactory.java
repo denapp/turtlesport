@@ -3,11 +3,14 @@ package fr.turtlesport.map;
 import java.io.File;
 import java.util.LinkedHashMap;
 
+import javax.swing.ImageIcon;
+
 import org.jdesktop.swingx.mapviewer.TileCache;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.ui.swing.model.AddDeleteMapEvent;
 import fr.turtlesport.ui.swing.model.AddDeleteMapListener;
+import fr.turtlesport.ui.swing.model.ModelMapkitManager;
 import fr.turtlesport.util.Location;
 
 /**
@@ -34,22 +37,42 @@ public final class AllMapsFactory implements AddDeleteMapListener {
   }
 
   private AllMapsFactory() {
+    ModelMapkitManager.getInstance().addAddDeleteMapListener(this);
+
     // mercator
     hashMap.put(TurtleEmptyTileFactory.NAME, new TurtleEmptyTileFactory());
     // mapnik
-    addOpenStreetMap("http://tile.openstreetmap.org", "mapnik");
+    addOpenStreetMap("http://tile.openstreetmap.org", "mapnik", null, null);
     // opencyclemap
-    addOpenStreetMap("http://tile.opencyclemap.org/cycle", "cyclemap");
-    // MapQuest
-    addOpenStreetMap("http://otile1.mqcdn.com/tiles/1.0.0/osm", "MapQuest");
+    addOpenStreetMap("http://tile.opencyclemap.org/cycle",
+                     "cyclemap",
+                     null,
+                     null);
+    // MapQuest map
+    addOpenStreetMap("http://otile1.mqcdn.com/tiles/1.0.0/osm",
+                     "MapQuest",
+                     new ImageIcon(getClass().getResource("mapquest14.png")),
+                     new ImageIcon(getClass().getResource("maquestLogo.png")));
+    // MapQuest sat
+    addOpenStreetMap("http://otile1.mqcdn.com/tiles/1.0.0/sat",
+                     "MapQuest sat",
+                     new ImageIcon(getClass().getResource("mapquest14.png")),
+                     new ImageIcon(getClass().getResource("maquestLogo.png")));
+
     // Transport
-    addOpenStreetMap("http://tile2.opencyclemap.org/transport", "Transport");
+    addOpenStreetMap("http://tile2.opencyclemap.org/transport",
+                     "Transport",
+                     null,
+                     null);
     // Landscape
-    addOpenStreetMap("http://tile3.opencyclemap.org/landscape", "Landscape");
+    addOpenStreetMap("http://tile3.opencyclemap.org/landscape",
+                     "Landscape",
+                     null,
+                     null);
 
     // // IGN Carte
     // String url =
-    // "http://gpp3-wxs.ign.fr/tyujsdxmzox31ituc2uw0qwl/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX=#zoom#&TILEROW=#y#&TILECOL=#x#&extParamId=aHR0cDovL3d3dy5nZW9wb3J0YWlsLmdvdXYuZnIvYWNjdWVpbA==";
+    // " http://gpp3-wxs.ign.fr/tyujsdxmzox31ituc2uw0qwl/geoportail/wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX=#zoom#&TILEROW=#y#&TILECOL=#x#&extParamId=aHR0cDovL3d3dy5nZW9wb3J0YWlsLmdvdXYuZnIvYWNjdWVpbA==";
     // addMap(list, new UserDefineMapTileProviderInfo(url, "IGN carte"), url);
     //
     // // IGN Sat
@@ -77,9 +100,14 @@ public final class AllMapsFactory implements AddDeleteMapListener {
     hashMap.put(map.getName(), tileFactory);
   }
 
-  private void addOpenStreetMap(String url, String name) {
+  private void addOpenStreetMap(String url,
+                                String name,
+                                ImageIcon smallIcon,
+                                ImageIcon bigIcon) {
     OpenStreetMapTileFactory tileFactory = new OpenStreetMapTileFactory(url,
-                                                                        name);
+                                                                        name,
+                                                                        smallIcon);
+    tileFactory.setBigIcon(bigIcon);
     File dir = new File(DIR_CACHE, tileFactory.getInfo().getName());
     tileFactory.setTileCache(new DiskTitleCache(dir, tileFactory.getInfo()));
 
@@ -123,6 +151,17 @@ public final class AllMapsFactory implements AddDeleteMapListener {
    */
   public String[] getTileNames() {
     return names;
+  }
+
+  /**
+   * Restitue les noms des maps.
+   * 
+   * @return les noms des maps
+   */
+  public AbstractTileFactoryExtended[] getTileDisplayInfo() {
+    AbstractTileFactoryExtended[] tab = new AbstractTileFactoryExtended[hashMap
+        .values().size()];
+    return hashMap.values().toArray(tab);
   }
 
   /**

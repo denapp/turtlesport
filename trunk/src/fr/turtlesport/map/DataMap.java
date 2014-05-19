@@ -7,6 +7,9 @@
 
 package fr.turtlesport.map;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -42,11 +45,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "mapType", propOrder = { "name",
-                                        "url",
-                                        "zoomMin",
-                                        "zoomMax",
-                                        "x" })
+@XmlType(name = "mapType", propOrder = { "name", "url", "zoomMin", "zoomMax" })
 public class DataMap {
 
   @XmlElement(required = true)
@@ -58,8 +57,6 @@ public class DataMap {
   protected int                       zoomMin;
 
   protected int                       zoomMax;
-
-  protected String                    x;
 
   @XmlAttribute(name = "editable", required = true)
   protected boolean                   editable;
@@ -75,6 +72,8 @@ public class DataMap {
     super();
     this.name = name;
     this.editable = isEditable;
+    this.zoomMin = 1;
+    this.zoomMax = 15;
   }
 
   @Override
@@ -157,27 +156,6 @@ public class DataMap {
   }
 
   /**
-   * Gets the value of the x property.
-   * 
-   * @return possible object is {@link String }
-   * 
-   */
-  public String getX() {
-    return x;
-  }
-
-  /**
-   * Sets the value of the x property.
-   * 
-   * @param value
-   *          allowed object is {@link String }
-   * 
-   */
-  public void setX(String value) {
-    this.x = value;
-  }
-
-  /**
    * Gets the value of the editable property.
    * 
    */
@@ -201,12 +179,60 @@ public class DataMap {
     this.tileMap = tileMap;
   }
 
+  public boolean hasSameFields(DataMap map) {
+    try {
+      return (equals(map) && url.equals(map.url) && zoomMax == map.zoomMax && zoomMin == map.zoomMin);
+    }
+    catch (Throwable e) {
+      return false;
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
   @Override
   public boolean equals(Object obj) {
     if (name == null || obj == null || !(obj instanceof DataMap)) {
       return false;
     }
-    return name.equals( ((DataMap)obj).name);
+    return name.equals(((DataMap) obj).name);
+  }
+
+  /**
+   * @return D&eacute;termine si la map est valide
+   */
+  public boolean isValidMap() {
+    if (url == null) {
+      return false;
+    }
+    try {
+      new URL(url);
+    }
+    catch (MalformedURLException e) {
+      return false;
+    }
+    if (zoomMin < 0 || zoomMax < 0 || zoomMin == zoomMax) {
+      return false;
+    }
+    if (zoomMin > zoomMax) {
+      int tmp = zoomMax;
+      zoomMax = zoomMin;
+      zoomMin = tmp;
+    }
+    return true;
   }
 
 }

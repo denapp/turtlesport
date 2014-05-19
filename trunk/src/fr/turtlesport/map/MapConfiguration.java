@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -62,8 +63,8 @@ public final class MapConfiguration {
    */
   public void addMap(DataMap map) {
     checkInTransaction();
-    if (!transaction.get().maps.contains(map)) {
-      transaction.get().maps.add(map);
+    if (!transaction.get().getMaps().contains(map)) {
+      transaction.get().getMaps().add(map);
     }
   }
 
@@ -75,7 +76,7 @@ public final class MapConfiguration {
    */
   public void removeMap(DataMap map) {
     checkInTransaction();
-    transaction.get().maps.remove(map);
+    transaction.get().getMaps().remove(map);
   }
 
   private void checkInTransaction() {
@@ -85,24 +86,24 @@ public final class MapConfiguration {
   }
 
   private Maps initMaps() {
-    Maps maps = null;
+    Maps mapsRead = null;
     // chargement du fichier
     FileInputStream fis = null;
     try {
       fileMap = new File(Location.userLocation(), CONFIG_FILE);
       if (!fileMap.isFile()) {
-        maps = new Maps();
+        mapsRead = new Maps();
       }
       else {
         fis = new FileInputStream(fileMap);
         JAXBContext jc = JAXBContext.newInstance("fr.turtlesport.map");
         Unmarshaller um = jc.createUnmarshaller();
-        maps = (Maps) um.unmarshal(fis);
+        mapsRead = (Maps) um.unmarshal(fis);
       }
     }
     catch (Throwable e) {
       log.error("", e);
-      maps = new Maps();
+      mapsRead = new ObjectFactory().createMaps();
     }
     finally {
       if (fis != null) {
@@ -113,7 +114,7 @@ public final class MapConfiguration {
         }
       }
     }
-    return maps;
+    return mapsRead;
   }
 
   /**
@@ -126,8 +127,16 @@ public final class MapConfiguration {
   }
 
   /**
-   * Transaction.
+   * Restitue les maps.
    * 
+   * @return les maps.
+   */
+  public Maps getMapsTransaction() {
+    return transaction.get();
+  }
+
+  /**
+   * Transaction.
    */
   public synchronized void beginTransaction() {
     log.debug(">>beginTransaction");
@@ -157,7 +166,16 @@ public final class MapConfiguration {
       return;
     }
 
-    Maps mapsNew = transaction.get();
+    // check valid
+    Maps mapsNew = getMapsTransaction();
+    Iterator<DataMap> it = mapsNew.maps.iterator();
+    while (it.hasNext()) {
+      DataMap data = it.next();
+      if (!data.isValidMap()) {
+        it.remove();
+      }
+    }
+    
     for (DataMap map : mapsNew.maps) {
       if (!maps.maps.contains(map)) {
         // Ajout d'une map
@@ -170,8 +188,15 @@ public final class MapConfiguration {
         ModelMapkitManager.getInstance().removeMapTileFactory(map);
       }
     }
+    for (DataMap map : mapsNew.maps) {
+      int index = maps.maps.indexOf(map);
+      if (index != -1 && !maps.maps.get(index).hasSameFields(map)) {
+        // map mis a jour
+        ModelMapkitManager.getInstance().removeMapTileFactory(map);
+        ModelMapkitManager.getInstance().addMapTileFactory(map);
+      }
+    }
 
-    maps = transaction.get();
     transaction.set(null);
 
     log.debug("<<commitTransaction");
@@ -192,10 +217,10 @@ public final class MapConfiguration {
   /**
    * Sauvegarde du fichier
    */
-  private void save(Maps maps) {
+  private void save(Maps mapsNew) {
     log.debug(">>save");
 
-    this.maps = maps;
+    maps = mapsNew;
 
     FileOutputStream fos = null;
     try {
@@ -204,10 +229,10 @@ public final class MapConfiguration {
       JAXBContext jc = JAXBContext.newInstance("fr.turtlesport.map");
       // Créer un programme de conversion
       Marshaller m = jc.createMarshaller();
+
       m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
       // Convertir l'objet en fichier.
       m.marshal(maps, fos);
-
     }
     catch (Throwable e) {
       log.error("Impossible de sauvegarder le fichier map", e);

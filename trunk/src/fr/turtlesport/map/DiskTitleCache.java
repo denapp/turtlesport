@@ -46,7 +46,6 @@ public class DiskTitleCache extends TileCache {
     this.tileProviderInfo = tileProviderInfo;
     this.dirCache = dirCache;
     if (!dirCache.exists()) {
-      System.out.println(dirCache.getAbsolutePath());
       dirCache.mkdir();
     }
     cleanCache();

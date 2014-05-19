@@ -40,8 +40,9 @@ import fr.turtlesport.util.ResourceBundleUtility;
  * @author Denis Apparicio
  * 
  */
-public class JPanelPrefMapProvider extends JPanelPref implements LanguageListener,
-                                                 PanelPrefListener {
+public class JPanelPrefMapProvider extends JPanelPref implements
+                                                     LanguageListener,
+                                                     PanelPrefListener {
 
   private JPanelPrefTitle        jPanelTitle;
 
@@ -78,8 +79,8 @@ public class JPanelPrefMapProvider extends JPanelPref implements LanguageListene
 
     // Maps par defaut
     for (String name : AllMapsFactory.getInstance().getTileNames()) {
-      AbstractTileFactoryExtended tileMap = AllMapsFactory
-          .getInstance().retreiveTileFactory(name);
+      AbstractTileFactoryExtended tileMap = AllMapsFactory.getInstance()
+          .retreiveTileFactory(name);
       if (!tileMap.isEditable()) {
         DataMap map = new DataMap(tileMap.getName(), tileMap.isEditable());
         map.setTileMap(tileMap);
@@ -90,10 +91,14 @@ public class JPanelPrefMapProvider extends JPanelPref implements LanguageListene
       }
     }
     // Les maps users
-    for (DataMap map : MapConfiguration.getConfig().getMaps().getMaps()) {
+    for (DataMap map : MapConfiguration.getConfig().getMapsTransaction()
+        .getMaps()) {
       addMap(map);
     }
 
+    // positionnement sur la 2eme map (apres mercator)
+    jTableMapProvider.setRowSelectionInterval(1, 1);
+    jTableMapProvider.requestFocus();
   }
 
   /*
@@ -102,6 +107,7 @@ public class JPanelPrefMapProvider extends JPanelPref implements LanguageListene
    * @see fr.turtlesport.ui.swing.component.PanelPrefListener#viewChanged()
    */
   public void viewChanged() {
+    // commit des changements
   }
 
   /*
@@ -196,7 +202,6 @@ public class JPanelPrefMapProvider extends JPanelPref implements LanguageListene
   private JPanel getJPanelCenter() {
     if (jPanelCenter == null) {
       jPanelCenter = new JPanel();
-      // jPanelCenter.setLayout(new BorderLayout());
       jPanelCenter.setLayout(new BoxLayout(jPanelCenter, BoxLayout.X_AXIS));
 
       jPanelMapProvider = new JPanelMapProvider();
@@ -328,8 +333,9 @@ public class JPanelPrefMapProvider extends JPanelPref implements LanguageListene
 
     public void actionPerformed(ActionEvent e) {
       while (true) {
-        String name = JShowMessage.showInputDialog(rb.getString("dialogName"),
-                                                   rb.getString("dialogAddTitle"));
+        String name = JShowMessage
+            .showInputDialog(rb.getString("dialogName"),
+                             rb.getString("dialogAddTitle"));
         if (name == null || "".equals(name.trim())) {
           break;
         }
