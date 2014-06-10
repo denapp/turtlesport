@@ -165,17 +165,18 @@ public class JPanelPrefMapProvider extends JPanelPref implements
     jTableMapProvider.getSelectionModel()
         .addListSelectionListener(new ListSelectionListener() {
           public void valueChanged(ListSelectionEvent e) {
-            int row = jTableMapProvider.getSelectedRow();
-            if (row == -1) {
-              jButtonDelete.setEnabled(true);
-              return;
+            if (!e.getValueIsAdjusting()) {
+              int row = jTableMapProvider.getSelectedRow();
+              if (row == -1) {
+                jButtonDelete.setEnabled(true);
+                return;
+              }
+
+              DataMap data = (DataMap) tableModelMap.getValueAt(row, 0);
+              jButtonDelete.setEnabled(data.isEditable());
+              jPanelMapProvider.updateView(data);
             }
-
-            DataMap data = (DataMap) tableModelMap.getValueAt(row, 0);
-            jButtonDelete.setEnabled(data.isEditable());
-            jPanelMapProvider.updateView(data);
           }
-
         });
 
     performedLanguage(LanguageManager.getManager().getCurrentLang());

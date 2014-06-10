@@ -12,11 +12,16 @@ public class JComboBoxActivity extends JComboBox {
 
   public JComboBoxActivity() {
     super();
-    setRenderer(new ComboBoxActivityRenderer());
+    setRenderer(new ComboBoxActivityListCellRenderer());
   }
 
   public JComboBoxActivity(ActivityComboBoxModel aModel) {
     super(aModel);
-    setRenderer(new ComboBoxActivityRenderer());
+    setRenderer(new ComboBoxActivityListCellRenderer());
   }
+
+  public JComboBoxActivity(Object[] items) {
+    super(items);
+  }  
+  
 }

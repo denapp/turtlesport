@@ -47,7 +47,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
 import org.xml.sax.SAXParseException;
 
 import fr.turtlesport.Configuration;
@@ -66,7 +65,8 @@ import fr.turtlesport.geo.GeoLoadException;
 import fr.turtlesport.geo.IGeoRoute;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.ui.swing.component.ComboBoxActivityRenderer;
+import fr.turtlesport.ui.swing.component.ComboBoxActivityListCellRenderer;
+import fr.turtlesport.ui.swing.component.JComboBoxActivity;
 import fr.turtlesport.ui.swing.component.JFileChooserOS;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.component.JTableCustom;
@@ -734,15 +734,6 @@ public final class JDialogImport extends JDialog implements
           final int size = listRows.size();
           TableRowObject rowObj = new TableRowObject(size, r, file);
           listRows.add(rowObj);
-          switch (r.getSportType()) {
-            case IGeoRoute.SPORT_TYPE_RUNNING:
-            case IGeoRoute.SPORT_TYPE_BIKE:
-              rowObj.setActivity(r.getSportType());
-              break;
-            default:
-              rowObj.setActivity(IGeoRoute.SPORT_TYPE_OTHER);
-              break;
-          }
           if (!EventQueue.isDispatchThread()) {
             SwingUtilities.invokeLater(new Runnable() {
               public void run() {
@@ -794,10 +785,12 @@ public final class JDialogImport extends JDialog implements
         case 6: // Activites
           return new ComboBoxCellRenderer(users);
         case 7: // Activites
+          // ComboBoxCellRendererActivity renderer = new
+          // ComboBoxCellRendererActivity(activities);
+          // renderer.setRenderer(new ComboBoxActivityListCellRenderer());
           ComboBoxCellRenderer renderer = new ComboBoxCellRenderer(activities);
-          renderer.setRenderer(new ComboBoxActivityRenderer());
+          renderer.setRenderer(new ComboBoxActivityListCellRenderer());
           return renderer;
-//          return new ComboBoxCellRenderer(activities);
         case 8: // Equipement
           return new ComboBoxCellRenderer(equipements);
         default:
@@ -1045,10 +1038,10 @@ public final class JDialogImport extends JDialog implements
           comboUsers.setFont(GuiFont.FONT_PLAIN);
           return new DefaultCellEditor(comboUsers);
         case 7: // Activite
-          final JComboBox comboAct = new JComboBox(activities);
-          comboAct.setRenderer(new ComboBoxActivityRenderer());
+          final JComboBoxActivity comboAct = new JComboBoxActivity(activities);
           comboAct.setFont(GuiFont.FONT_PLAIN);
-          return new ComboBoxCellEditor(comboAct);
+          comboAct.setRenderer(new ComboBoxActivityListCellRenderer());
+          return new DefaultCellEditor(comboAct);
         case 8: // Equipement
           final JComboBox comboEqu = new JComboBox(equipements);
           comboEqu.setFont(GuiFont.FONT_PLAIN);
@@ -1235,8 +1228,19 @@ public final class JDialogImport extends JDialog implements
         setEquipement(defaultEquipement);
       }
       if (defaultActivity != null) {
-        setActivity(defaultActivity);
+        this.activity = defaultActivity;
       }
+
+      switch (route.getSportType()) {
+        case IGeoRoute.SPORT_TYPE_RUNNING:
+        case IGeoRoute.SPORT_TYPE_BIKE:
+          setActivity(route.getSportType());
+          break;
+        default:
+          setActivity(IGeoRoute.SPORT_TYPE_OTHER);
+          break;
+      }
+
       if (defaultUser != null) {
         setUser(defaultUser);
       }
@@ -1312,10 +1316,6 @@ public final class JDialogImport extends JDialog implements
       return isValidDateTime;
     }
 
-    public boolean isValidTimeTot() {
-      return isValidTimeTot;
-    }
-
     public void setValidDateTime(boolean isValidDateTime) {
       this.isValidDateTime = isValidDateTime;
       if (!isValidDateTime) {
@@ -1377,10 +1377,8 @@ public final class JDialogImport extends JDialog implements
       if (activity == null) {
         return;
       }
-      if (this.activity != null && this.activity.equals(activity)) {
-        return;
-      }
       this.activity = activity;
+      route.setSportType(activity.getSportType());
     }
 
     public void setActivity(int sportType) {
@@ -1925,7 +1923,7 @@ public final class JDialogImport extends JDialog implements
       }
 
     }
-    
+
   }
 
 }
