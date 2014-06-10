@@ -170,7 +170,7 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
     mapViewer.getMainMap().setCenterPosition(GEO_DEFAULT);
     mapViewer.setBounds(new Rectangle(80, 220, 300, 250));
     add(mapViewer);
-    
+
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     LanguageManager.getManager().addLanguageListener(this);
   }
@@ -207,7 +207,6 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
    */
   public void updateView(final DataMap data) {
     removeEvents();
-
     this.data = data;
 
     jTextFieldZoomMax.setEnabled(data.isEditable());
@@ -266,7 +265,7 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
         tileFactory = new UserDefineMapTileFactory(tileInfo, baseURL);
       }
       mapViewer.getMainMap().setTileFactory(tileFactory);
-      mapViewer.setZoom(4);      
+      mapViewer.setZoom(4);
       mapViewer.getMainMap().setCenterPosition(GEO_DEFAULT);
     }
     catch (NumberFormatException e) {
@@ -279,15 +278,12 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
    */
   private void addEvents(final DataMap data) {
     try {
-      removeEvents();
-
       docURL = new GenericModelDocListener(jTextFieldURL,
                                            data,
                                            "setUrl",
                                            String.class,
                                            true);
       jTextFieldURL.getDocument().addDocumentListener(docURL);
-
       docZoomMax = new GenericModelDocListener(jTextFieldZoomMax,
                                                data,
                                                "setZoomMax",
@@ -311,13 +307,19 @@ public class JPanelMapProvider extends JPanel implements LanguageListener {
    * Suppression des listeners de l'&eacute;quipement.
    */
   private void removeEvents() {
-    jTextFieldURL.getDocument().removeDocumentListener(docURL);
-    jTextFieldZoomMax.getDocument().removeDocumentListener(docZoomMax);
-    jTextFieldZoomMin.getDocument().removeDocumentListener(docZoomMin);
-
+    if (docURL != null) {
+      jTextFieldURL.getDocument().removeDocumentListener(docURL);
+      jTextFieldZoomMax.getDocument().removeDocumentListener(docZoomMax);
+      jTextFieldZoomMin.getDocument().removeDocumentListener(docZoomMin);
+      
+      jTextFieldURL.removeFocusListener(docURL);
+      jTextFieldZoomMax.removeFocusListener(docZoomMax);
+      jTextFieldZoomMin.removeFocusListener(docZoomMin);
+    }
     docURL = null;
     docZoomMax = null;
     docZoomMin = null;
+    data = null;
   }
 
 }

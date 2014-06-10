@@ -13,7 +13,7 @@ import fr.turtlesport.ui.swing.img.activity.ImagesActivityRepository;
  * @author Denis Apparicio
  *
  */
-public class ComboBoxActivityRenderer extends DefaultListCellRenderer {
+public class ComboBoxActivityListCellRenderer extends DefaultListCellRenderer {
 
 
   @Override

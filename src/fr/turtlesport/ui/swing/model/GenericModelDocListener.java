@@ -1,7 +1,7 @@
 package fr.turtlesport.ui.swing.model;
 
-import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.lang.reflect.Method;
 import java.util.Date;
 
@@ -17,7 +17,7 @@ import fr.turtlesport.util.ConvertStringTo;
  * @author Denis Apparicio
  * 
  */
-public class GenericModelDocListener implements DocumentListener {
+public class GenericModelDocListener implements DocumentListener, FocusListener {
   private static TurtleLogger log;
   static {
     log = (TurtleLogger) TurtleLogger.getLogger(GenericModelDocListener.class);
@@ -29,7 +29,9 @@ public class GenericModelDocListener implements DocumentListener {
 
   private Object              data;
 
-  private Class<?>               arg;
+  private Class<?>            arg;
+  
+  private boolean hasFocus = false;
 
   /**
    * @param jTextField
@@ -90,20 +92,37 @@ public class GenericModelDocListener implements DocumentListener {
     this.jTextField = jTextField;
     this.data = data;
     this.arg = arg;
+    this.hasFocus = hasFocus;
     this.methodName = data.getClass().getMethod(methodName, arg);
-    FocusAdapter focusListener = new FocusAdapter() {
-      @Override
-      public void focusLost(FocusEvent e) {
-        fireUpdate();
-      }
-    };
-    jTextField.addFocusListener(focusListener);
+    jTextField.addFocusListener(this);
   }
-  
+
   /*
    * (non-Javadoc)
    * 
-   * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.DocumentEvent)
+   * @see java.awt.event.FocusListener#focusGained(java.awt.event.FocusEvent)
+   */
+  @Override
+  public void focusGained(FocusEvent e) {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.awt.event.FocusListener#focusLost(java.awt.event.FocusEvent)
+   */
+  @Override
+  public void focusLost(FocusEvent e) {
+    if (hasFocus) {
+      fireUpdate();
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.
+   * DocumentEvent)
    */
   public void changedUpdate(DocumentEvent e) {
     update();
@@ -112,7 +131,9 @@ public class GenericModelDocListener implements DocumentListener {
   /*
    * (non-Javadoc)
    * 
-   * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent)
+   * @see
+   * javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent
+   * )
    */
   public void insertUpdate(DocumentEvent e) {
     update();
@@ -121,7 +142,9 @@ public class GenericModelDocListener implements DocumentListener {
   /*
    * (non-Javadoc)
    * 
-   * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent)
+   * @see
+   * javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent
+   * )
    */
   public void removeUpdate(DocumentEvent e) {
     update();
@@ -135,13 +158,13 @@ public class GenericModelDocListener implements DocumentListener {
   }
 
   /**
-   * Mis a jour de la valeur. 
+   * Mis a jour de la valeur.
    */
   private void update() {
     try {
       Object text = null;
       if (jTextField instanceof JFormattedTextField) {
-        text = ((JFormattedTextField) jTextField).getValue();        
+        text = ((JFormattedTextField) jTextField).getValue();
       }
       else {
         text = jTextField.getText();

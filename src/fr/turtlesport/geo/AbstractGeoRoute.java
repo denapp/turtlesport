@@ -90,16 +90,11 @@ public abstract class AbstractGeoRoute implements IGeoRoute {
    * @see fr.turtlesport.geo.IGeoRoute#setSportType(int)
    */
   public void setSportType(int sportType) {
-    switch (sportType) {
-      case SPORT_TYPE_RUNNING:
-        this.sportType = SPORT_TYPE_RUNNING;
-        break;
-      case SPORT_TYPE_BIKE:
-        this.sportType = SPORT_TYPE_BIKE;
-        break;
-      default:
-        this.sportType = SPORT_TYPE_OTHER;
-        break;
+    if (sportType < SPORT_TYPE_RUNNING) {
+      this.sportType = SPORT_TYPE_OTHER;
+    }
+    else {
+      this.sportType = sportType;
     }
   }
 

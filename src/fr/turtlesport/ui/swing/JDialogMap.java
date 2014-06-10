@@ -81,16 +81,16 @@ public class JDialogMap extends JDialog {
     view.mapKit.getMainMap().setCenterPosition(mapKit.getMainMap()
         .getCenterPosition());
     int zoom = mapKit.getMainMap().getZoom();
-    if (zoom != 1) {
-      zoom--;
-    }
+//    if (zoom != 1) {
+//      zoom--;
+//    }
     view.mapKit.getMainMap().setZoom(zoom);
 
     // original zoom et position
     zoom = mapKit.getOriginalZoom();
-    if (zoom != 1) {
-      zoom--;
-    }
+//    if (zoom != 1) {
+//      zoom--;
+//    }
     view.mapKit.setOriginalZoom(zoom);
     view.mapKit.setOriginalPosition(mapKit.getOriginalPosition());
 
