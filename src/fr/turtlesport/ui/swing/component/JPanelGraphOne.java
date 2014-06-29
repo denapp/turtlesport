@@ -80,8 +80,7 @@ public class JPanelGraphOne extends JPanel {
 
     switch (type) {
       case HEART:
-        getJLabelTitle().setText("<html><font color=red>"
-                                 + CommonLang.INSTANCE.distanceWithUnit() + "</font></html>");
+        getJLabelTitle().setText(CommonLang.INSTANCE.getString("bmp"));
         break;
 
       case ALTITUDE:
