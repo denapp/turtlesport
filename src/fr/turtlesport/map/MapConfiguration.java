@@ -91,10 +91,7 @@ public final class MapConfiguration {
     FileInputStream fis = null;
     try {
       fileMap = new File(Location.userLocation(), CONFIG_FILE);
-      if (!fileMap.isFile()) {
-        mapsRead = new Maps();
-      }
-      else {
+      if (fileMap.isFile()) {
         fis = new FileInputStream(fileMap);
         JAXBContext jc = JAXBContext.newInstance("fr.turtlesport.map");
         Unmarshaller um = jc.createUnmarshaller();
@@ -113,6 +110,9 @@ public final class MapConfiguration {
         catch (IOException e) {
         }
       }
+    }
+    if (mapsRead == null) {
+      mapsRead = new Maps();
     }
     return mapsRead;
   }
@@ -168,18 +168,19 @@ public final class MapConfiguration {
 
     // check valid
     Maps mapsNew = getMapsTransaction();
-    Iterator<DataMap> it = mapsNew.maps.iterator();
-    while (it.hasNext()) {
-      DataMap data = it.next();
-      if (!data.isValidMap()) {
-        it.remove();
+    if (mapsNew != null && mapsNew.maps != null) {
+      Iterator<DataMap> it = mapsNew.maps.iterator();
+      while (it.hasNext()) {
+        DataMap data = it.next();
+        if (!data.isValidMap()) {
+          it.remove();
+        }
       }
-    }
-    
-    for (DataMap map : mapsNew.maps) {
-      if (!maps.maps.contains(map)) {
-        // Ajout d'une map
-        ModelMapkitManager.getInstance().addMapTileFactory(map);
+      for (DataMap map : mapsNew.maps) {
+        if (!maps.maps.contains(map)) {
+          // Ajout d'une map
+          ModelMapkitManager.getInstance().addMapTileFactory(map);
+        }
       }
     }
     for (DataMap map : maps.maps) {
