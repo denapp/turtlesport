@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//src/fr/turtlesport/lang/CommonLang_hu.properties=UTF-8
+encoding//src/fr/turtlesport/lang/CommonLang_it.properties=UTF-8
+encoding//src/fr/turtlesport/ui/swing/JDialogAbout_hu.properties=UTF-8
+encoding//src/fr/turtlesport/ui/swing/JDialogRunPointsDetail_hu.properties=UTF-8
+encoding//src/fr/turtlesport/ui/swing/JDialogSystem_hu.properties=UTF-8
+encoding//src/fr/turtlesport/ui/swing/JPanelPrefMap_hu.properties=UTF-8
+encoding//src/fr/turtlesport/ui/swing/JPanelRun_hu.properties=UTF-8
+encoding//src/fr/turtlesport/ui/swing/JPanelRun_it.properties=UTF-8
+encoding//src/fr/turtlesport/ui/swing/JPanelRun_sv.properties=ISO-8859-1
+encoding//src/fr/turtlesport/ui/swing/model/ModelPref_hu.properties=UTF-8
