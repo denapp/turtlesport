@@ -7,7 +7,7 @@ import java.util.Hashtable;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbPacketOutputStream;
 import fr.turtlesport.UsbProtocolException;
-import fr.turtlesport.garmin.GarminUsbDevice;
+import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.D1006CourseType;
 import fr.turtlesport.protocol.data.D1007CourseLapType;

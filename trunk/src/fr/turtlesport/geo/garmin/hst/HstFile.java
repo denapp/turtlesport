@@ -1,44 +1,8 @@
 package fr.turtlesport.geo.garmin.hst;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.xml.XMLConstants;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import fr.turtlesport.IProductDevice;
-import fr.turtlesport.db.DataRun;
-import fr.turtlesport.db.DataRunLap;
-import fr.turtlesport.db.DataRunTrk;
-import fr.turtlesport.db.RunLapTableManager;
-import fr.turtlesport.db.RunTrkTableManager;
-import fr.turtlesport.geo.AbstractGeoRoute;
-import fr.turtlesport.geo.GeoConvertException;
-import fr.turtlesport.geo.GeoLoadException;
-import fr.turtlesport.geo.IGeoConvertProgress;
-import fr.turtlesport.geo.IGeoConvertRun;
-import fr.turtlesport.geo.IGeoFile;
-import fr.turtlesport.geo.IGeoPositionWithAlt;
-import fr.turtlesport.geo.IGeoRoute;
-import fr.turtlesport.geo.IGeoSegment;
+import fr.turtlesport.db.*;
+import fr.turtlesport.device.IProductDevice;
+import fr.turtlesport.geo.*;
 import fr.turtlesport.geo.garmin.Lap;
 import fr.turtlesport.geo.garmin.Position;
 import fr.turtlesport.geo.garmin.Track;
@@ -49,6 +13,23 @@ import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.GeoUtil;
 import fr.turtlesport.util.Location;
 import fr.turtlesport.util.XmlUtil;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.*;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Training Center Database v1.

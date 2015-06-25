@@ -31,11 +31,7 @@ public class GeoPositionWithAlt extends GeoPosition implements
 
   /**
    * Construit une instance de GeoPosition.
-   * 
-   * @param latitude
-   *          la latitude en degr&eacute;
-   * @param longitude
-   *          la longitude en degr&eacute;
+   *
    */
   public GeoPositionWithAlt() {
     super(INVALID_POS, INVALID_POS);
@@ -68,8 +64,6 @@ public class GeoPositionWithAlt extends GeoPosition implements
    *          la latitude en degr&eacute;
    * @param longitude
    *          la longitude en degr&eacute;
-   * @param elevation
-   *          l'altitude en metre;
    */
   public GeoPositionWithAlt(double latitude, double longitude) {
     this(latitude, longitude, Double.NaN);
@@ -145,7 +139,7 @@ public class GeoPositionWithAlt extends GeoPosition implements
   /**
    * Valorise la date de ce point.
    * 
-   * @param time
+   * @param date
    *          la date de ce point.
    */
   public void setDate(Date date) {
@@ -169,7 +163,9 @@ public class GeoPositionWithAlt extends GeoPosition implements
    *          la fr&eacute;quence cardiaque.
    */
   public void setHeartRate(int heartRate) {
-    this.heartRate = heartRate;
+    if (heartRate > 0) {
+      this.heartRate = heartRate;
+    }
   }
 
   /**

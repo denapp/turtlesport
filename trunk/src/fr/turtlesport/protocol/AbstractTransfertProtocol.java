@@ -2,7 +2,7 @@ package fr.turtlesport.protocol;
 
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbProtocolException;
-import fr.turtlesport.garmin.GarminUsbDevice;
+import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.ByteUtil;
 

@@ -87,7 +87,7 @@ public final class MacOSXTurleApp implements InvocationHandler {
       macOSXApplication = Class.forName("com.apple.eawt.Application")
           .newInstance();
 
-      setQuitHandler(Launcher.getInstance(), Launcher.class
+      setQuitHandler(TurtleSport.getInstance(), TurtleSport.class
           .getDeclaredMethod("stopIt"));
       setAboutHandler(JDialogAbout.class, JDialogAbout.class
           .getDeclaredMethod("prompt"));

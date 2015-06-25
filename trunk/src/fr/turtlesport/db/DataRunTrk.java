@@ -282,7 +282,7 @@ public class DataRunTrk implements Cloneable {
    *         sinon
    */
   public boolean isValidAltitude() {
-    return (altitude != 1.0e25f);
+    return (altitude != 1.0e25f) && (altitude >= 0);
   }
 
   /**
@@ -338,7 +338,7 @@ public class DataRunTrk implements Cloneable {
    * Clone en remplacant les points invalide avec un intervalle
    * 
    * @param listTrksOriginal
-   * @param intervalle
+   * @param interval
    *          en seconde
    * @return
    */

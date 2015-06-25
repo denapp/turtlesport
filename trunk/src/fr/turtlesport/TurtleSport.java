@@ -1,23 +1,22 @@
 package fr.turtlesport;
 
-import java.io.File;
-
-import org.apache.log4j.xml.DOMConfigurator;
-
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.SwingApplication;
 import fr.turtlesport.util.Location;
 import fr.turtlesport.util.OperatingSystem;
+import org.apache.log4j.xml.DOMConfigurator;
+
+import java.io.File;
 
 /**
  * @author Denis Apparicio
  * 
  */
-public final class Launcher {
+public final class TurtleSport {
   private static TurtleLogger log;
 
   /** instance unique */
-  private static Launcher     singleton = new Launcher();
+  private static TurtleSport     singleton = new TurtleSport();
 
   /** GUI. */
   private SwingApplication    gui;
@@ -25,14 +24,14 @@ public final class Launcher {
   /**
    * Constructeur par defaut
    */
-  private Launcher() {
+  private TurtleSport() {
   }
 
   /**
    * 
    * @return Restitue une instance unique de <code>Application</code>
    */
-  public static Launcher getInstance() {
+  public static TurtleSport getInstance() {
     return singleton;
   }
 
@@ -77,10 +76,10 @@ public final class Launcher {
       }
 
       // positionne les traces
-      String dirExe = Location.dirNameExecution(Launcher.class);
+      String dirExe = Location.dirNameExecution(TurtleSport.class);
       File file = new File(dirExe, "log4J.xml");
       DOMConfigurator.configure(file.toURI().toURL());
-      log = (TurtleLogger) TurtleLogger.getLogger(Launcher.class);
+      log = (TurtleLogger) TurtleLogger.getLogger(TurtleSport.class);
       log.debug(">>main");
 
       // log
@@ -97,7 +96,7 @@ public final class Launcher {
       logProperty("os.arch");
 
       // demarre l'application
-      Launcher.getInstance().startIt();
+      TurtleSport.getInstance().startIt();
 
       log.debug("<<main");
     }

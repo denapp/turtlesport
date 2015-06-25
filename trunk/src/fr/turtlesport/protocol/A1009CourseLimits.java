@@ -3,7 +3,7 @@ package fr.turtlesport.protocol;
 import fr.turtlesport.UsbDecodeException;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbProtocolException;
-import fr.turtlesport.garmin.GarminUsbDevice;
+import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.D1013CourseLimitsType;
 

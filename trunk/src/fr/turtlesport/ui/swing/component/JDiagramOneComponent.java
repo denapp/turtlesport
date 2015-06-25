@@ -1,27 +1,5 @@
 package fr.turtlesport.ui.swing.component;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.Toolkit;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.awt.image.BufferedImage;
-import java.sql.SQLException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JPanel;
-import javax.swing.RepaintManager;
-
 import fr.turtlesport.Configuration;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
@@ -31,15 +9,20 @@ import fr.turtlesport.lang.CommonLang;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.ui.swing.GuiFont;
-import fr.turtlesport.ui.swing.model.ChangeMapEvent;
-import fr.turtlesport.ui.swing.model.ChangeMapListener;
-import fr.turtlesport.ui.swing.model.ChangePointsEvent;
-import fr.turtlesport.ui.swing.model.ModelMapkitManager;
-import fr.turtlesport.ui.swing.model.ModelPointsManager;
+import fr.turtlesport.ui.swing.model.*;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.SpeedUnit;
 import fr.turtlesport.unit.TemperatureUnit;
 import fr.turtlesport.unit.TimeUnit;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Denis Apparicio
@@ -893,8 +876,9 @@ public class JDiagramOneComponent extends JPanel {
     protected double getY(int i) {
       switch (type) {
         case HEART:
-          return (model.isFilter()) ? pointsFilter[i].getHeartRate() : points
+          double value = (model.isFilter()) ? pointsFilter[i].getHeartRate() : points
               .get(i).getHeartRate();
+          return (value < minY)?minY:value;
         case SPEED:
           return isVisibleSpeed() ? points.get(i).getSpeed() : points.get(i)
               .getPace();
@@ -993,7 +977,6 @@ public class JDiagramOneComponent extends JPanel {
     /**
      * Mis a jour des donn&eacute;es.
      * 
-     * @param points
      */
     private void fireChangedAllPoints(DataRun dataRun,
                                       List<DataRunTrk> newPoints) {

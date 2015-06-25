@@ -3,9 +3,8 @@ package fr.turtlesport.geo.gpx;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.turtlesport.IProductDevice;
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.geo.AbstractGeoRoute;
-import fr.turtlesport.geo.AbstractGeoSegment;
 import fr.turtlesport.geo.IGeoPositionWithAlt;
 import fr.turtlesport.geo.IGeoSegment;
 import fr.turtlesport.util.GeoUtil;
@@ -142,7 +141,7 @@ public class Rte extends AbstractGeoRoute {
   /**
    * Ajoute un point.
    * 
-   * @param rtept
+   * @param wpt
    *          le point.
    */
   protected void addRtept(Wpt wpt) {

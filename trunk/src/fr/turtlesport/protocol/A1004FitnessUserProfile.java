@@ -5,7 +5,7 @@ import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbPacketInputStream;
 import fr.turtlesport.UsbPacketOutputStream;
 import fr.turtlesport.UsbProtocolException;
-import fr.turtlesport.garmin.GarminUsbDevice;
+import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.D1004FitnessUserProfileType;
 

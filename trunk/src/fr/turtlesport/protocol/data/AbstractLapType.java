@@ -3,7 +3,7 @@ package fr.turtlesport.protocol.data;
 import java.util.Date;
 
 import fr.turtlesport.UsbPacketInputStream;
-import fr.turtlesport.garmin.GarminUsbDevice;
+import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 
 // typedef struct
