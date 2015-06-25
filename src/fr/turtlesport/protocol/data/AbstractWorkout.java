@@ -2,7 +2,7 @@ package fr.turtlesport.protocol.data;
 
 import java.util.List;
 
-import fr.turtlesport.garmin.GarminUsbDevice;
+import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
 
 public abstract class AbstractWorkout extends AbstractData {

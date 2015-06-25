@@ -1,22 +1,10 @@
 package fr.turtlesport.db;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-
-import fr.turtlesport.IProductDevice;
 import fr.turtlesport.db.progress.GeoRouteStoreProgressAdaptor;
 import fr.turtlesport.db.progress.IGeoRouteStoreProgress;
 import fr.turtlesport.db.progress.IRunStoreProgress;
 import fr.turtlesport.db.progress.RunStoreProgressAdaptor;
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.geo.IGeoPositionWithAlt;
 import fr.turtlesport.geo.IGeoRoute;
 import fr.turtlesport.log.TurtleLogger;
@@ -25,6 +13,11 @@ import fr.turtlesport.protocol.data.AbstractLapType;
 import fr.turtlesport.protocol.data.AbstractRunType;
 import fr.turtlesport.protocol.data.AbstractTrkPointType;
 import fr.turtlesport.protocol.progress.IRunTransfertProgress;
+
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Date;
 
 /**
  * @author denis
@@ -119,7 +112,7 @@ public final class RunTableManager extends AbstractTableManager {
    * Recuperation des run d'un utilisateur.
    * 
    * @param idUser
-   * @param date
+   * @param search
    * 
    * @return
    * @throws SQLException
@@ -662,7 +655,7 @@ public final class RunTableManager extends AbstractTableManager {
   /**
    * Insertion d'un run.
    * 
-   * @param route
+   * @param listRoute
    * @param progress
    * @throws SQLException
    */
@@ -921,7 +914,6 @@ public final class RunTableManager extends AbstractTableManager {
    * 
    * @param dataRun
    * @param listTrks
-   * @param progress
    * @throws SQLException
    */
   public void store(DataRun dataRun, List<DataRunTrk> listTrks) throws SQLException {
@@ -1882,8 +1874,7 @@ public final class RunTableManager extends AbstractTableManager {
    * Recuperation des run d'un utilisateur.
    * 
    * @param idUser
-   * @param date
-   * 
+   *
    * @return
    * @throws SQLException
    */
@@ -1935,8 +1926,7 @@ public final class RunTableManager extends AbstractTableManager {
    * Recuperation des run d'un utilisateur.
    * 
    * @param idUser
-   * @param date
-   * 
+   *
    * @return
    * @throws SQLException
    */
@@ -1996,7 +1986,7 @@ public final class RunTableManager extends AbstractTableManager {
    * Recuperation des run d'un utilisateur.
    * 
    * @param idUser
-   * @param date
+   * @param sportType
    * 
    * @return
    * @throws SQLException
@@ -2409,8 +2399,6 @@ public final class RunTableManager extends AbstractTableManager {
    * @param id
    * @param comments
    *          les commentaires.
-   * @param sportType
-   *          le sport.
    * @throws SQLException
    */
   public void updateComments(int id, String comments) throws SQLException {
@@ -2446,12 +2434,8 @@ public final class RunTableManager extends AbstractTableManager {
    * Mis &agrave; jour de l'&eacute;quipement.
    * 
    * @param id
-   * @param comments
-   *          les commentaires.
    * @param equipment
    *          le nom de l'&eacute;quipement.
-   * @param sportType
-   *          le sport.
    * @throws SQLException
    */
   public void updateEquipment(int id, String equipment) throws SQLException {

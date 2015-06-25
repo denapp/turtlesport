@@ -1,21 +1,16 @@
 package fr.turtlesport.meteo;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.ResourceBundle;
-
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-
 import fr.turtlesport.lang.LanguageEn;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.ResourceBundleUtility;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Donn&eacute;es meteo historique de Wunderground
@@ -193,10 +188,22 @@ public class DataMeteo {
       Date date = sdf.parse(datas[datas.length - 1]);
 
       DataMeteo d = new DataMeteo(date);
-      d.temperature = (int) Float.parseFloat(datas[1]);
-      d.humidity = (int) Float.parseFloat(datas[3]);
-      d.pressurehPa = (int) Float.parseFloat(datas[4]);
-      d.visibility = Float.parseFloat(datas[5]);
+      try {
+        d.temperature = (int) Float.parseFloat(datas[1]);
+      }
+      catch(NumberFormatException e) {}
+      try {
+        d.humidity = (int) Float.parseFloat(datas[3]);
+      }
+      catch(NumberFormatException e) {}
+      try {
+        d.pressurehPa = (int) Float.parseFloat(datas[4]);
+      }
+      catch(NumberFormatException e) {}
+      try {
+        d.visibility = Float.parseFloat(datas[5]);
+      }
+      catch(NumberFormatException e) {}
 
       d.windDirection = datas[6];
 
@@ -367,9 +374,7 @@ public class DataMeteo {
 
   /**
    * Restitue une image.
-   * 
-   * @param name
-   *          nom de l'image.
+   *
    * @return
    */
   public BufferedImage getImage() {

@@ -1,13 +1,14 @@
 package fr.turtlesport.geo;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-
+import fr.turtlesport.geo.energympro.CpoFile;
 import fr.turtlesport.geo.garmin.fit.FitFile;
 import fr.turtlesport.geo.garmin.hst.HstFile;
 import fr.turtlesport.geo.garmin.tcx.TcxFile;
 import fr.turtlesport.geo.gpx.GpxFile;
 import fr.turtlesport.geo.suunto.SuuntoFile;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * @author Denis Apparicio
@@ -37,25 +38,28 @@ public final class FactoryGeoLoad {
   /**
    * Restitue une instance.
    * 
-   * @param extension
+   * @param ext
    *          l'extension.
    * @return une instance.
    */
-  public static IGeoFile getInstance(String extension) {
-    if (GPX.equals(extension)) {
+  public static IGeoFile getInstance(String ext) {
+    if (isIn(GpxFile.EXT, ext)) {
       return new GpxFile();
     }
-    if (TCX.equals(extension)) {
+    else if (isIn(TcxFile.EXT, ext)) {
       return new TcxFile();
     }
-    if (HST.equals(extension)) {
+    else if (isIn(HstFile.EXT, ext)) {
       return new HstFile();
     }
-    if (FIT.equals(extension)) {
+    else if (isIn(FitFile.EXT, ext)) {
       return new FitFile();
     }
-    if (XML.equals(extension)) {
+    else if (isIn(SuuntoFile.EXT, ext)) {
       return new SuuntoFile();
+    }
+    else if (isIn(CpoFile.EXT, ext)) {
+      return new CpoFile();
     }
     
     throw new IllegalArgumentException();
@@ -85,26 +89,7 @@ public final class FactoryGeoLoad {
       ext = s.substring(i + 1).toLowerCase();
     }
 
-    IGeoFile geo;
-    if (isIn(GpxFile.EXT, ext)) {
-      geo = new GpxFile();
-    }
-    else if (isIn(TcxFile.EXT, ext)) {
-      geo = new TcxFile();
-    }
-    else if (isIn(HstFile.EXT, ext)) {
-      geo = new HstFile();
-    }
-    else if (isIn(FitFile.EXT, ext)) {
-      geo = new FitFile();
-    }
-    else if (isIn(SuuntoFile.EXT, ext)) {
-      geo = new SuuntoFile();
-    }
-    else {
-      throw new IllegalArgumentException();
-    }
-
+    IGeoFile geo = getInstance(ext);
     return geo.load(file);
   }
 

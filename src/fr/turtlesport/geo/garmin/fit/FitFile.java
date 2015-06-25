@@ -24,7 +24,7 @@ import com.garmin.fit.RecordMesg;
 import com.garmin.fit.SessionMesg;
 import com.garmin.fit.SoftwareMesg;
 
-import fr.turtlesport.IProductDevice;
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.ProductDeviceUtil;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.geo.AbstractGeoRoute;

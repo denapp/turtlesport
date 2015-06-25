@@ -42,21 +42,24 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import fr.turtlesport.device.Device;
+import fr.turtlesport.device.Devices;
+import fr.turtlesport.device.energympro.EnergymproDevice;
 import org.jdesktop.swingx.JXCollapsiblePane;
 
 import fr.turtlesport.Configuration;
-import fr.turtlesport.IProductDevice;
-import fr.turtlesport.Launcher;
+import fr.turtlesport.device.IProductDevice;
+import fr.turtlesport.TurtleSport;
 import fr.turtlesport.MacOSXTurleApp;
 import fr.turtlesport.UsbProtocolException;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataSearchRun;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.UserTableManager;
-import fr.turtlesport.garmin.GarminDevices;
-import fr.turtlesport.garmin.GarminFitDevice;
-import fr.turtlesport.garmin.GarminGpxDevice;
-import fr.turtlesport.garmin.GarminUsbDevice;
+import fr.turtlesport.device.garmin.GarminDevices;
+import fr.turtlesport.device.garmin.GarminFitDevice;
+import fr.turtlesport.device.garmin.GarminGpxDevice;
+import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
 import fr.turtlesport.lang.ILanguage;
 import fr.turtlesport.lang.LanguageEvent;
@@ -1381,7 +1384,7 @@ public class MainGui extends JFrame implements LanguageListener {
    * Quitte l'application.
    */
   private void quit() {
-    Launcher.getInstance().stopIt();
+    TurtleSport.getInstance().stopIt();
   }
 
   /**
@@ -1634,9 +1637,9 @@ public class MainGui extends JFrame implements LanguageListener {
 
         @Override
         public Object construct() {
-          IProductDevice deviceSelected = null;
+          Device deviceSelected = null;
 
-          List<IProductDevice> devices = GarminDevices.list();
+          List<Device> devices = Devices.list();
           switch (devices.size()) {
             case 0:
               try {
@@ -1661,18 +1664,16 @@ public class MainGui extends JFrame implements LanguageListener {
             if (deviceSelected instanceof GarminUsbDevice) {
               doUsbDevice(deviceSelected);
             }
-            else if (deviceSelected instanceof GarminFitDevice) {
-              GarminFitDevice fitDevice = (GarminFitDevice) deviceSelected;
-
-              List<File> list = fitDevice.getNewFiles();
-              File[] files = new File[list.size()];
-              JDialogImport.prompt(list.toArray(files));
-            }
             else if (deviceSelected instanceof GarminGpxDevice) {
               GarminGpxDevice gpxDevice = (GarminGpxDevice) deviceSelected;
 
               File[] files = { gpxDevice.getCurrentFile() };
               JDialogImport.prompt(files);
+            }
+            else if (deviceSelected instanceof Device) {
+              List<File> list = deviceSelected.getNewFiles();
+              File[] files = new File[list.size()];
+              JDialogImport.prompt(list.toArray(files));
             }
           }
           return null;
@@ -1683,12 +1684,12 @@ public class MainGui extends JFrame implements LanguageListener {
           afterRunnableSwing();
         }
 
-        private IProductDevice selectDevice(List<IProductDevice> devices) {
+        private Device selectDevice(List<Device> devices) {
           String name = Configuration.getConfig()
               .getProperty("DeviceGPS", Integer.toString(getCurrentIdUser()));
 
-          IProductDevice defaultDevice = devices.get(0);
-          for (IProductDevice d : devices) {
+          Device defaultDevice = devices.get(0);
+          for (Device d : devices) {
             if (d.toString().equals(name)) {
               defaultDevice = d;
               break;
@@ -1701,7 +1702,7 @@ public class MainGui extends JFrame implements LanguageListener {
           final String titleChooseWatch = rb.getString("titleChooseWatch");
           final IProductDevice[] options = new IProductDevice[devices.size()];
           devices.toArray(options);
-          return (IProductDevice) JShowMessage
+          return (Device) JShowMessage
               .input(msgChooseWatch,
                      titleChooseWatch,
                      JOptionPane.INFORMATION_MESSAGE,

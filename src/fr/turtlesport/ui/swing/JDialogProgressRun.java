@@ -37,7 +37,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import fr.turtlesport.IProductDevice;
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.db.AbstractDataActivity;
 import fr.turtlesport.db.DataActivityOther;
 import fr.turtlesport.db.DataEquipement;
@@ -1074,7 +1074,7 @@ public class JDialogProgressRun extends JDialog implements
     /**
      * 
      * @param row
-     * @param index
+     * @param runType
      */
     public TableRowObject(int row, AbstractRunType runType) {
       super();

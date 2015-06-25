@@ -28,7 +28,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import fr.turtlesport.IProductDevice;
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataRunLap;
 import fr.turtlesport.db.DataRunTrk;

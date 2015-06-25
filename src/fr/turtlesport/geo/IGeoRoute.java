@@ -3,7 +3,7 @@ package fr.turtlesport.geo;
 import java.util.Date;
 import java.util.List;
 
-import fr.turtlesport.IProductDevice;
+import fr.turtlesport.device.IProductDevice;
 
 /**
  * @author Denis Apparicio
@@ -44,7 +44,7 @@ public interface IGeoRoute {
   /**
    * Valorise des donn&eacute;es; compl&eacute;mentaires.
    * 
-   * @param object
+   * @param objet
    *          les donn&eacute;es; compl&eacute;mentaire.
    */
   void setExtra(Object objet);
@@ -117,10 +117,8 @@ public interface IGeoRoute {
 
   /**
    * Restitue la distance en metre.
-   * 
-   * @param index
-   *          l'index du segment.
-   * @return les points d'un segment.
+   *
+   * @return la a distance en metre.
    */
   double distanceTot();
 

@@ -1,13 +1,9 @@
 package fr.turtlesport.protocol.data;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import fr.turtlesport.garmin.GarminUsbDevice;
+import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.log.TurtleLogger;
+
+import java.util.*;
 
 public abstract class AbstractRunType extends AbstractData {
   private static TurtleLogger         log;
@@ -110,7 +106,7 @@ public abstract class AbstractRunType extends AbstractData {
   /**
    * Ajoute un point.
    * 
-   * @param d304
+   * @param pt
    */
   public void addTrkPointType(AbstractTrkPointType pt) {
     if (pt == null) {

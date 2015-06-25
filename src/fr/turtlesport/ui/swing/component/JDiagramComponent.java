@@ -221,8 +221,7 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
   /**
    * Sauvegarde le composant swing dans un fichier.
    * 
-   * @param component
-   * @param filename
+   * @param file
    */
   public void saveComponentAsJPEG(File file) throws IOException {
     Dimension size = getSize();
@@ -624,7 +623,6 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
         && !model.isVisibleY4()) {
       return;
     }
-
     if (model.getIntervalX1() != -1
         && (model.getIntervalX1() == 0 || (model.getIntervalX1() >= model
             .getDistance(model.indexX1)))
@@ -1155,8 +1153,8 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
       if (this.isVisibleY4 != isVisibleY4) {
         this.isVisibleY4 = isVisibleY4;
         Configuration.getConfig().addProperty("Diagram",
-                                              "isVisibleY4",
-                                              Boolean.toString(isVisibleY4));
+                "isVisibleY4",
+                Boolean.toString(isVisibleY4));
         changeVisible();
       }
     }
@@ -1267,7 +1265,6 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
      * turtlesport.ui.swing.component.ChangePointsEvent)
      */
     public void changedLap(ChangePointsEvent e) {
-
       DataRunLap[] runLaps = ModelPointsManager.getInstance().getRunLaps();
       int index = ModelPointsManager.getInstance().getLapIndex();
       if (runLaps != null && index != -1) {
@@ -1536,8 +1533,6 @@ public class JDiagramComponent extends JPanel implements LanguageListener,
 
     /**
      * Mis a jour des donn&eacute;es.
-     * 
-     * @param points
      */
     private void fireChangedAllPoints() {
       intervalX1 = -1;

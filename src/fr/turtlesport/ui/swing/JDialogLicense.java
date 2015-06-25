@@ -15,7 +15,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import fr.turtlesport.Launcher;
+import fr.turtlesport.TurtleSport;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.ResourceBundleUtility;
@@ -67,7 +67,7 @@ public class JDialogLicense extends JDialog {
     // recuperation de la licence
     BufferedReader reader = null;
     try {
-      reader = new BufferedReader(new InputStreamReader(Launcher.class
+      reader = new BufferedReader(new InputStreamReader(TurtleSport.class
           .getResourceAsStream("lgpl-2.1.txt")));
       StringBuilder st = new StringBuilder();
       String line;

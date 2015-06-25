@@ -18,7 +18,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import fr.turtlesport.IProductDevice;
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.geo.AbstractGeoRoute;
 import fr.turtlesport.geo.GeoLoadException;
 import fr.turtlesport.geo.IGeoFile;
