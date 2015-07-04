@@ -30,7 +30,10 @@
 		<os family="windows" />
 	</condition>
 	<condition property="isLinux" value="true">
-		<os family="unix" />
+		<and>
+			<os family="unix" />
+			<not><os family="mac"/></not>
+		</and>
 	</condition>
 	<condition property="isMacosx" value="true">
 		<os family="mac" />
@@ -39,7 +42,10 @@
 		<os family="windows" />
 	</condition>
 	<condition property="os.shortname" value="linux">
-		<os family="unix" />
+		<and>
+			<os family="unix" />
+			<not><os family="mac"/></not>
+		</and>
 	</condition>
 	<condition property="os.shortname" value="macosx">
 		<os family="mac" />
@@ -210,6 +216,8 @@
 	<!--   Bundle jarApp macosx                                              -->
 	<!--  ================================================================== -->
 	<target name="jarAppBundle2">
+		<echo message="java.home ${macosx.javahome.dir}"/>
+
 		<!-- task oracle -->
 		<taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask">
 			<classpath>
@@ -219,7 +227,11 @@
 
 		<delete dir="${dirBundle}" />
 		<mkdir dir="${dirBundle}" />
+
 		<bundleapp outputdirectory="${dirBundle}" name="TurtleSport" displayname="TurtleSport" identifier="fr.turtlesport.TurtleSport" icon="${exe}/macosx/turtleIcon.icns" shortversion="1.0" copyright="2013 Turtle Sport" applicationCategory="public.app-category.developer-tools" mainclassname="fr/turtlesport/Launcher">
+			<!-- runtime -->
+			<runtime dir="${macosx.javahome.dir}" />
+
 			<!-- Classpath -->
 			<classpath dir="${exe}/macosx/">
 				<include name="turtlesport.jar" />
