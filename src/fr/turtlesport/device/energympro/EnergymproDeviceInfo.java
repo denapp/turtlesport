@@ -1,12 +1,11 @@
 package fr.turtlesport.device.energympro;
 
-import fr.turtlesport.util.ByteUtil;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
+
+import fr.turtlesport.util.ByteUtil;
 
 /**
  * Created by denisapparicio on 16/06/2015.
