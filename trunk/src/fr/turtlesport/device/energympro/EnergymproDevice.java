@@ -1,22 +1,23 @@
 package fr.turtlesport.device.energympro;
 
-import fr.turtlesport.db.DataUser;
-import fr.turtlesport.db.RunTableManager;
-import fr.turtlesport.device.Device;
-import fr.turtlesport.device.garmin.GarminDeviceInfo;
-import fr.turtlesport.geo.GeoLoadException;
-import fr.turtlesport.geo.energympro.CpoFile;
-import fr.turtlesport.geo.garmin.fit.FitFile;
-import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.util.OperatingSystem;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TimeZone;
+
+import fr.turtlesport.db.DataUser;
+import fr.turtlesport.db.RunTableManager;
+import fr.turtlesport.device.Device;
+import fr.turtlesport.geo.GeoLoadException;
+import fr.turtlesport.geo.energympro.CpoFile;
+import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.util.OperatingSystem;
 
 /**
  * @author Denis Apparicio
@@ -137,35 +138,39 @@ public class EnergymproDevice implements Device {
         }
         // Windows
         else if (OperatingSystem.isWindows()) {
-            StringBuilder st = new StringBuilder();
-            String tmp = System.getenv("APPDATA");
-            if (tmp != null) {
-                st.append(tmp);
-                st.append("\\GARMIN\\Devices");
-                listDir.add(new File(st.toString()));
-            }
-
-            // Ajout des Forerunner 10, 110, Garmin Fenix...
             for (File dir : File.listRoots()) {
-                if (new File(dir, "GARMIN").exists()) {
-                    listDir.add(new File(dir, "GARMIN"));
-                }
+                listDir.add(dir);
             }
         }
         // Linux
         else if (OperatingSystem.isLinux()) {
-            // Forerunner 10, 110..
-            listDir.add(new File("/media/GARMIN"));
-
+            final FileFilter filter = new FileFilter() {
+               public boolean accept(File pathname) {
+                 return  (pathname != null && pathname.isDirectory());
+               }
+            };
+          
+            File[] dirs = new File("/media").listFiles(filter);
+            if (dirs != null) {
+              for(File f: dirs) {
+                listDir.add(f);                    
+              }
+            }
+            
             String userName = System.getProperty("user.name");
             if (userName != null) {
-                listDir.add(new File("/media/" + userName + "/GARMIN"));
+                dirs = new File("/media/" + userName).listFiles(filter);
+                if (dirs != null) {
+                  for(File f: dirs) {
+                    listDir.add(f);                    
+                  }
+                }
             }
         }
 
         return listDir;
     }
-
+    
     private static boolean isDirAvailable(File pathname) {
         return (pathname != null &&
                 pathname.isDirectory() &&
