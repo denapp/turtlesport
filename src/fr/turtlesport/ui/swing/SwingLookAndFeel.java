@@ -110,7 +110,17 @@ public final class SwingLookAndFeel {
     String value = getProperty();
     try {
       if (value == null || "".equals(value.trim())) {
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        if (OperatingSystem.isLinux()) {
+          try {
+            UIManager.setLookAndFeel(getLookAndFeelClassName("Nimbus"));
+          }
+          catch(Throwable e) {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());            
+          }
+        }
+        else {
+          UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());          
+        }
       }
       else if (!value.equals(getCurrentLookAndFeel())
                && getLookAndFeelClassName(value) != null) {
