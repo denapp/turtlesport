@@ -3,7 +3,7 @@
 
 	<!-- set global properties for this build -->
 	<property name="Name" value="turtlesport" />
-	<property name="version" value="1.6" />
+	<property name="version" value="1.7" />
 	<property name="src" location="${basedir}/src" />
 	<property name="test" location="${basedir}/test" />
 	<property name="srcccommonUsbCom" location="${basedir}/c/usbcom/srccommon" />
@@ -126,7 +126,7 @@
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac compiler="javac1.6" srcdir="${src}" destdir="${dest}" debug="yes" deprecation="on" encoding="ISO-8859-1">
+		<javac compiler="javac1.7" srcdir="${src}" destdir="${dest}" debug="yes" deprecation="on" encoding="ISO-8859-1">
 			<compilerarg value="-Xlint:unchecked" />
 			<classpath>
 				<path refid="app.classpath" />
@@ -182,7 +182,7 @@
 		<delete file="${exe}/${jarApp}" />
 		<jar destfile="${exe}/${jarApp}" basedir="${dest}">
 			<manifest>
-				<attribute name="Main-Class" value="fr.turtlesport.Launcher" />
+				<attribute name="Main-Class" value="fr.turtlesport.TurtleSport" />
 				<attribute name="Class-Path" value="fit.jar swingx.jar swingx-ws.jar log4j.jar derby.jar jcommon.jar jfreechart.jar" />
 				<section name="common">
 					<attribute name="Specification-Title" value="${Name}" />
@@ -219,7 +219,7 @@
 
 		<delete dir="${dirBundle}" />
 		<mkdir dir="${dirBundle}" />
-		<bundleapp outputdirectory="${dirBundle}" name="TurtleSport" displayname="TurtleSport" identifier="fr.turtlesport.Launcher" icon="${exe}/macosx/turtleIcon.icns" shortversion="1.0" copyright="2013 Turtle Sport" applicationCategory="public.app-category.developer-tools" mainclassname="fr/turtlesport/Launcher">
+		<bundleapp outputdirectory="${dirBundle}" name="TurtleSport" displayname="TurtleSport" identifier="fr.turtlesport.TurtleSport" icon="${exe}/macosx/turtleIcon.icns" shortversion="1.0" copyright="2013 Turtle Sport" applicationCategory="public.app-category.developer-tools" mainclassname="fr/turtlesport/Launcher">
 			<!-- Classpath -->
 			<classpath dir="${exe}/macosx/">
 				<include name="turtlesport.jar" />
@@ -247,7 +247,7 @@
 		<!-- avec jre -->
 		<delete dir="${dirBundlejre}" />
 		<mkdir dir="${dirBundlejre}" />
-		<bundleapp outputdirectory="${dirBundlejre}" name="TurtleSport" displayname="TurtleSport" identifier="fr.turtlesport.Launcher" icon="${exe}/macosx/turtleIcon.icns" shortversion="1.0" copyright="2013 Turtle Sport" applicationCategory="public.app-category.developer-tools" mainclassname="fr/turtlesport/Launcher">
+		<bundleapp outputdirectory="${dirBundlejre}" name="TurtleSport" displayname="TurtleSport" identifier="fr.turtlesport.TurtleSport" icon="${exe}/macosx/turtleIcon.icns" shortversion="1.0" copyright="2013 Turtle Sport" applicationCategory="public.app-category.developer-tools" mainclassname="fr/turtlesport/Launcher">
 			<!-- Classpath -->
 			<classpath dir="${exe}/macosx/">
 				<include name="turtlesport.jar" />
@@ -278,7 +278,7 @@
 	<target name="jarAppBundle">
 		<delete dir="${dirBundle}" />
 		<mkdir dir="${dirBundle}" />
-		<jarbundler dir="${dirBundle}" name="TurtleSport" mainclass="fr.turtlesport.Launcher" jar="${exe}/macosx/${jarApp}" build="${version}" version="${version}" workingdirectory="$APP_PACKAGE" infostring="Turtle Sport" jvmversion="1.5+" vmoptions="-Xmx256m" shortname="Turtle Sport" verbose="true" icon="${exe}/macosx/turtleIcon.icns" showplist="true">
+		<jarbundler dir="${dirBundle}" name="TurtleSport" mainclass="fr.turtlesport.TurtleSport" jar="${exe}/macosx/${jarApp}" build="${version}" version="${version}" workingdirectory="$APP_PACKAGE" infostring="Turtle Sport" jvmversion="1.5+" vmoptions="-Xmx256m" shortname="Turtle Sport" verbose="true" icon="${exe}/macosx/turtleIcon.icns" showplist="true">
 			<!-- Adjust the look and feel and behavior -->
 			<javaproperty name="apple.laf.useScreenMenuBar" value="true" />
 			<javaproperty name="apple.awt.brushMetal" value="true" />
@@ -431,7 +431,7 @@
 
 	<!-- Creates a Ubuntu/Debian package -->
 	<target name="packagingLinuxDeb" if="isLinux">
-		<deb todir="${release}" package="turtlesport" section="utils" depends="sun-java6-jre | openjdk-6-jre | sun-java7-jre | openjdk-7-jre" postinst="${packaging}/linux/debian/postinst">
+		<deb todir="${release}" package="turtlesport" section="utils" depends="sun-java7-jre | openjdk-7-jre" postinst="${packaging}/linux/debian/postinst">
 			<version upstream="${version}" />
 			<maintainer name="Denis Apparicio" email="turtlesport@sourceforge.net" />
 			<description synopsis="Turtle Sport">Turtle Sport garmin logbook.</description>
