@@ -18,8 +18,7 @@
 	<property name="packages" value="fr.turtlesport.*" />
 	<property name="release" location="${basedir}/release" />
 	<property name="jarApp" value="${Name}.jar" />
-	<property name="dirBundle" location="${exe}/macosx/turlesport" />
-	<property name="dirBundlejre" location="${exe}/macosx/turlesportjre" />
+	<property name="dirBundle" location="${exe}/macosx/turtlesportjre" />
 	<property name="rootdir" value='/tmp/turtlesport_dist' />
 	<property name="rpmbuilddir" value="${rootdir}/RPMBUILD" />
 	<property name="rpmdistdir" value="${rpmbuilddir}/BUILDROOT/turtlesport-${version}-1.noarch" />
@@ -52,6 +51,7 @@
 	</condition>
 
 	<!-- os  properties-->
+	<echo>Load build.${os.shortname}.properties </echo>
 	<property file="build.${os.shortname}.properties" />
 
 	<target name="init">
@@ -63,7 +63,6 @@
 		<mkdir dir="${exe}/linux" />
 		<mkdir dir="${exe}/macosx" />
 		<mkdir dir="${dirBundle}" />
-		<mkdir dir="${dirBundlejre}" />
 		<mkdir dir="${release}" />
 	</target>
 
@@ -215,8 +214,9 @@
 	<!--  ================================================================== -->
 	<!--   Bundle jarApp macosx                                              -->
 	<!--  ================================================================== -->
-	<target name="jarAppBundle2">
-		<echo message="java.home ${macosx.javahome.dir}"/>
+	<target name="jarAppBundle">
+		<echo>java.home ${macosx.javahome.dir}</echo>
+		<echo>java.home ${dirBundle}</echo>
 
 		<!-- task oracle -->
 		<taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask">
@@ -225,41 +225,18 @@
 			</classpath>
 		</taskdef>
 
-		<delete dir="${dirBundle}" />
-		<mkdir dir="${dirBundle}" />
-
-		<bundleapp outputdirectory="${dirBundle}" name="TurtleSport" displayname="TurtleSport" identifier="fr.turtlesport.TurtleSport" icon="${exe}/macosx/turtleIcon.icns" shortversion="1.0" copyright="2013 Turtle Sport" applicationCategory="public.app-category.developer-tools" mainclassname="fr/turtlesport/Launcher">
-			<!-- runtime -->
-			<runtime dir="${macosx.javahome.dir}" />
-
-			<!-- Classpath -->
-			<classpath dir="${exe}/macosx/">
-				<include name="turtlesport.jar" />
-				<include name="fit.jar" />
-				<include name="jcommon.jar" />
-				<include name="jfreechart.jar" />
-				<include name="swingx.jar" />
-				<include name="swingx-ws.jar" />
-				<include name="derby.jar" />
-				<include name="log4j.jar" />
-				<include name="log4J.xml" />
-				<include name="libturtleUsbjni.jnilib" />
-			</classpath>
-			<!-- Adjust the look and feel and behavior -->
-			<option value="-Dapple.laf.useScreenMenuBar=true" />
-			<option value="-Dapple.awt.brushMetal=true" />
-			<option value="-Dapple.awt.showGrowBox=false" />
-			<option value="-Dcom.apple.macos.use-file-dialog-packages=true" />
-			<option value="-Dcom.apple.macos.useScreenMenuBar=true" />
-			<option value="-Dcom.apple.mrj.application.apple.menu.about.name=${bundle.name}" />
-			<option value="-Dcom.apple.smallTabs=true" />
-			<option value="-Xmx1024M" />
-		</bundleapp>
-
 		<!-- avec jre -->
-		<delete dir="${dirBundlejre}" />
-		<mkdir dir="${dirBundlejre}" />
-		<bundleapp outputdirectory="${dirBundlejre}" name="TurtleSport" displayname="TurtleSport" identifier="fr.turtlesport.TurtleSport" icon="${exe}/macosx/turtleIcon.icns" shortversion="1.0" copyright="2013 Turtle Sport" applicationCategory="public.app-category.developer-tools" mainclassname="fr/turtlesport/Launcher">
+		<delete dir="${dirBundle}" />
+		<mkdir dir="${dirBundle}" />
+		<bundleapp outputdirectory="${dirBundle}"
+				   name="TurtleSport"
+				   displayname="TurtleSport"
+				   identifier="fr.turtlesport.TurtleSport"
+				   icon="${exe}/macosx/turtleIcon.icns"
+				   shortversion="${version}"
+				   copyright="2015 Turtle Sport"
+				   applicationCategory="public.app-category.developer-tools"
+				   mainclassname="fr/turtlesport/TurtleSport">
 			<!-- Classpath -->
 			<classpath dir="${exe}/macosx/">
 				<include name="turtlesport.jar" />
@@ -287,28 +264,6 @@
 			<option value="-Xmx1024M" />
 		</bundleapp>
 	</target>
-	<target name="jarAppBundle">
-		<delete dir="${dirBundle}" />
-		<mkdir dir="${dirBundle}" />
-		<jarbundler dir="${dirBundle}" name="TurtleSport" mainclass="fr.turtlesport.TurtleSport" jar="${exe}/macosx/${jarApp}" build="${version}" version="${version}" workingdirectory="$APP_PACKAGE" infostring="Turtle Sport" jvmversion="1.5+" vmoptions="-Xmx256m" shortname="Turtle Sport" verbose="true" icon="${exe}/macosx/turtleIcon.icns" showplist="true">
-			<!-- Adjust the look and feel and behavior -->
-			<javaproperty name="apple.laf.useScreenMenuBar" value="true" />
-			<javaproperty name="apple.awt.brushMetal" value="true" />
-			<javaproperty name="apple.awt.showGrowBox" value="false" />
-		</jarbundler>
-
-		<!-- copy des jars -->
-		<copy file="${exe}/macosx/fit.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${exe}/macosx/jcommon.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${exe}/macosx/jfreechart.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${exe}/macosx/swingx.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${exe}/macosx/swingx-ws.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${exe}/macosx/derby.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${exe}/macosx/log4j.jar" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${exe}/macosx/log4J.xml" todir="${dirBundle}/TurtleSport.app/Contents/Resources/Java" />
-		<copy file="${exe}/macosx/libturtleUsbjni.jnilib" tofile="${dirBundle}/TurtleSport.app/Contents/Resources/Java/libturtleUsbjni.jnilib" />
-	</target>
-
 
 	<!--  ============================================================== -->
 	<!--   Creation de de la documentation des API                       -->
@@ -399,29 +354,16 @@
 
 	<target name="releaseMacosx" if="isMacosx">
 		<delete file="${release}/${Name}-macosx-${version}.dmg" />
-		<exec executable="hdiutil">
-			<arg value="create" />
-			<arg value="-srcfolder" />
-			<arg value="${dirBundle}" />
+		<copy todir='${dirBundle}'>
+			<fileset file='${exe}/macosx/appdmg/appTurtlesport.json' />
+			<fileset file='${exe}/macosx/appdmg/background.png' />
+		</copy>
+		<exec executable="appdmg"
+			  dir="${dirBundle}">
+			<arg value="appTurtlesport.json" />
 			<arg value="${release}/${Name}-macosx-${version}.dmg" />
 		</exec>
-		<exec executable="hdiutil">
-			<arg value="verify" />
-			<arg value="${release}/${Name}-macosx-${version}.dmg" />
-		</exec>
-		<!--  jre -->
-		<delete file="${release}/${Name}-jre-macosx-${version}.dmg" />
-		<exec executable="hdiutil">
-			<arg value="create" />
-			<arg value="-srcfolder" />
-			<arg value="${dirBundlejre}" />
-			<arg value="${release}/${Name}-jre-macosx-${version}.dmg" />
-		</exec>
-		<exec executable="hdiutil">
-			<arg value="verify" />
-			<arg value="${release}/${Name}-jre-macosx-${version}.dmg" />
-		</exec>
-	</target>
+    </target>
 
 	<!-- Linux -->
 	<target name="releaseLinux" if="isLinux" depends="packagingLinuxTar, packagingLinuxDeb, packagingLinuxRmp" />
