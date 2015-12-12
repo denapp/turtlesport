@@ -54,7 +54,7 @@ public final class LanguageManager {
     }
 
     // Langage par defaut
-    currentLang = LanguageFr.getInstance();
+    currentLang = LanguageEn.getInstance();
 
     // Ajout langage
     addLanguageListener(CommonLang.INSTANCE);
