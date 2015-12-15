@@ -53,7 +53,7 @@ public final class LanguageManager {
       mapLang.put(l.toString(), l);
     }
 
-    // Langage par defaut
+    // Langage par defaut.
     currentLang = LanguageEn.getInstance();
 
     // Ajout langage
