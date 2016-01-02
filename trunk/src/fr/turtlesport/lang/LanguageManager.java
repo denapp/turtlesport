@@ -33,7 +33,8 @@ public final class LanguageManager {
       LanguageHu.getInstance(),
       LanguageIt.getInstance(),
       LanguageNl.getInstance(),
-      LanguagePt.getInstance()                        };
+      LanguagePt.getInstance(),
+      LanguageZh.getInstance()};
 
   private static HashMap<String, ILanguage> mapLang;
 
@@ -53,7 +54,7 @@ public final class LanguageManager {
       mapLang.put(l.toString(), l);
     }
 
-    // Langage par defaut.
+    // Langage par defaut
     currentLang = LanguageEn.getInstance();
 
     // Ajout langage
