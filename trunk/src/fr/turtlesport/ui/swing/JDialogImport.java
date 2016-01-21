@@ -1649,7 +1649,7 @@ public final class JDialogImport extends JDialog implements
               if (row.isSave()) {
                 listGeoRoute.add(row.route);
                 // mis a jour date/heures et duree
-                row.route.update(row.getFullDate(), row.getTimeTotLong());
+                //BUG row.route.update(row.getFullDate(), row.getTimeTotLong());
                 if (row.getEquipement() != null
                     && !listEquipement.contains(row.getEquipement())) {
                   listEquipement.add(row.getEquipement());
