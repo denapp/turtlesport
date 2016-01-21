@@ -1,0 +1,9 @@
+{
+"title": "Turtle Sport",
+"icon-size": 80,
+"background": "background.png",
+"contents": [
+{ "x": 348, "y": 180, "type": "link", "path": "/Applications" },
+{ "x": 100, "y": 180, "type": "file", "path": "TurtleSport.app" }
+]
+}
