@@ -185,7 +185,7 @@ public class CpoFile implements IGeoFile, IGeoConvertRun {
 
             DecimalFormat df = new DecimalFormat("#.##");
             for (DataPoint point: listPoint) {
-                currentTime += point.intervalTime*100;
+                currentTime += point.intervalTime*1000;
                 CpoPoint cpo = new CpoPoint(point, new Date(currentTime));
                 listCpoPoint.add(cpo);
                 if (prevPoint != null && point.status == 0) {

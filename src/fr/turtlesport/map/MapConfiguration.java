@@ -189,7 +189,7 @@ public final class MapConfiguration {
         ModelMapkitManager.getInstance().removeMapTileFactory(map);
       }
     }
-    for (DataMap map : mapsNew.maps) {
+    for (DataMap map : mapsNew.getMaps()) {
       int index = maps.maps.indexOf(map);
       if (index != -1 && !maps.maps.get(index).hasSameFields(map)) {
         // map mis a jour

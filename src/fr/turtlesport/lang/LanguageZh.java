@@ -51,7 +51,7 @@ public final class LanguageZh extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#getFlag()
    */
   public ImageIcon getFlag() {
-    String name = "flag/us.png";
+    final String name = "flag/zh.png";
     URL url = ImagesRepository.class.getResource(name);
     return (url == null) ? null : new ImageIcon(url);
   }
