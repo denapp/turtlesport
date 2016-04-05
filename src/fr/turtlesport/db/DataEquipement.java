@@ -28,6 +28,8 @@ public class DataEquipement {
 
   private boolean isDefault;
 
+  private boolean isOn = true;
+
   /**
    * Constructeur.
    */
@@ -199,6 +201,10 @@ public class DataEquipement {
   public void setDefault(boolean isDefault) {
     this.isDefault = isDefault;
   }
+
+  public boolean isOn() { return isOn; }
+
+  public void setOn(boolean isOn) {this.isOn = isOn; }
 
   /**
    * @return

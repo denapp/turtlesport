@@ -26,12 +26,10 @@ import fr.turtlesport.lang.LanguageEvent;
 import fr.turtlesport.lang.LanguageListener;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.ui.swing.component.JButtonPhoto;
-import fr.turtlesport.ui.swing.component.PhotoEvent;
-import fr.turtlesport.ui.swing.component.PhotoListener;
-import fr.turtlesport.ui.swing.component.TextFormatterFactory;
+import fr.turtlesport.ui.swing.component.*;
 import fr.turtlesport.ui.swing.model.GenericModelCheckBoxListener;
 import fr.turtlesport.ui.swing.model.GenericModelDocListener;
+import fr.turtlesport.ui.swing.model.GenericModelSwitchBoxListener;
 import fr.turtlesport.ui.swing.model.ModelEquipement;
 import fr.turtlesport.unit.DistanceUnit;
 import fr.turtlesport.unit.WeightUnit;
@@ -81,6 +79,8 @@ public class JPanelUserEquipement extends JPanel implements LanguageListener,
 
   private JCheckBox                           jCheckBoxDefaultEquipment;
 
+  private JSwitchBox                          jSwitchBox;
+
   // model
   private ModelEquipement                     model;
 
@@ -90,6 +90,8 @@ public class JPanelUserEquipement extends JPanel implements LanguageListener,
   private GenericModelDocListener             docLstEquimentDistanceMax;
 
   private GenericModelCheckBoxListener        checkLstEquimentWarning;
+
+  private GenericModelSwitchBoxListener       switchEquiment;
 
   private PhotoListener                       photoListener;
 
@@ -231,6 +233,11 @@ public class JPanelUserEquipement extends JPanel implements LanguageListener,
                                                                  "setAlert");
       jCheckBoxWarning.addActionListener(checkLstEquimentWarning);
 
+      switchEquiment = new GenericModelSwitchBoxListener(jSwitchBox,
+                                                         data,
+                                                         "setOn");
+      jSwitchBox.addActionListener(switchEquiment);
+
       photoListener = new PhotoListener() {
         public void photoChanged(PhotoEvent event) {
           data.setPath(event.getPath());
@@ -256,11 +263,13 @@ public class JPanelUserEquipement extends JPanel implements LanguageListener,
         .removeDocumentListener(docLstEquimentDistanceMax);
     jCheckBoxWarning.removeActionListener(checkLstEquimentWarning);
     jButtonPhoto.removePhotoListener(photoListener);
+    jSwitchBox.removeActionListener(switchEquiment);
 
     docLstEquimentWeight = null;
     docLstEquimentDistanceMax = null;
     checkLstEquimentWarning = null;
     photoListener = null;
+    switchEquiment = null;
   }
 
   /**
@@ -310,11 +319,17 @@ public class JPanelUserEquipement extends JPanel implements LanguageListener,
     g = new GridBagConstraints();
     g.insets = insets1;
     g.weightx = 0.0;
-    g.gridwidth = GridBagConstraints.REMAINDER;
     g.anchor = GridBagConstraints.WEST;
     gridbagLayout.setConstraints(getJComboBoxWeightUnits(), g);
     this.add(getJComboBoxWeightUnits());
-
+    g = new GridBagConstraints();
+    g.insets = insets1;
+    g.weightx = 0.0;
+    g.anchor = GridBagConstraints.WEST;
+    g.gridwidth = GridBagConstraints.REMAINDER;
+    gridbagLayout.setConstraints(getJCheckBoxWarning(), g);
+    this.add(getJCheckBoxWarning());
+    this.add(getJSwitchBox(), g);
     // Distances
     jLabelLibDistanceMax = new JLabel("Distance max. :");
     jLabelLibDistanceMax.setFont(GuiFont.FONT_PLAIN);
@@ -431,6 +446,10 @@ public class JPanelUserEquipement extends JPanel implements LanguageListener,
       public void actionPerformed(ActionEvent e) {
         owner.setDefaultEquipement(model.getData(), jCheckBoxDefaultEquipment
             .isSelected());
+        if (jCheckBoxDefaultEquipment.isSelected()) {
+          jSwitchBox.setSelected(true);
+          model.getData().setOn(true);
+        }
       }
     });
 
@@ -438,6 +457,14 @@ public class JPanelUserEquipement extends JPanel implements LanguageListener,
     performedLanguage(LanguageManager.getManager().getCurrentLang());
     UnitManager.getManager().addUnitListener(this);
   }
+
+  public JSwitchBox getJSwitchBox() {
+    if (jSwitchBox == null) {
+      jSwitchBox = new JSwitchBox(true);
+    }
+    return jSwitchBox;
+  }
+
 
   /**
    * This method initializes jTextField.
