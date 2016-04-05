@@ -82,6 +82,7 @@ public class ModelEquipement {
 
     view.getJCheckBoxDefaultEquipment().setSelected(data.isDefault());
     view.getJCheckBoxWarning().setSelected(data.isAlert());
+    view.getJSwitchBox().setSelected(data.isOn());
     view.getJLabelValFirstUsed().setText(dateToString(data.getFirstUsed()));
     view.getJLabelValLastUsed().setText(dateToString(data.getLastUsed()));
 
@@ -112,6 +113,7 @@ public class ModelEquipement {
     view.getJLabelValDistanceRun().setText("");
     view.getJTextFieldDistanceMax().setValue(0);
     view.getJCheckBoxWarning().setSelected(false);
+    view.getJSwitchBox().setSelected(true);
     view.getJLabelValFirstUsed().setText("");
     view.getJLabelValLastUsed().setText("");
     view.getJButtonPhoto().setText("Photo");
@@ -174,7 +176,7 @@ public class ModelEquipement {
    * 
    * @param view
    *          la vue.
-   * @param event
+   * @param e
    */
   public void performedUnit(JPanelUserEquipement view, UnitEvent e) {
     if (e.isEventDistance()) {

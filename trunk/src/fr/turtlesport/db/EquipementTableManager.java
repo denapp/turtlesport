@@ -199,6 +199,58 @@ public final class EquipementTableManager extends AbstractTableManager {
   /**
    * @throws SQLException
    */
+  public List<DataEquipement> retreiveOn() throws SQLException {
+    log.debug(">>retreiveOn");
+
+    ArrayList<DataEquipement> list;
+    Connection conn = DatabaseManager.getConnection();
+
+    try {
+      StringBuilder st = new StringBuilder();
+      st.append("SELECT * FROM ");
+      st.append(getTableName());
+      st.append(" WHERE is_active = ?");
+      st.append(" ORDER BY NAME ASC");
+
+      PreparedStatement pstmt = conn.prepareStatement(st.toString());
+      pstmt.setInt(1, convertToSmallInt(true));
+
+      ResultSet rs = pstmt.executeQuery();
+
+      list = new ArrayList<DataEquipement>();
+      DataEquipement data;
+      while (rs.next()) {
+        data = new DataEquipement();
+        data.setName(rs.getString(1));
+        data.setAlert(convertToBoolean(rs.getInt(2)));
+        data.setWeight(rs.getFloat(3));
+        data.setDistanceMax(rs.getFloat(4));
+        data.setPath(rs.getString(5));
+        data.setDefault(convertToBoolean(rs.getInt(6)));
+        data.setDistanceInit(rs.getFloat(7));
+        data.setOn(convertToBoolean(rs.getInt(8)));
+
+        // recuperation de la distance parouru
+        data.setDistance(distance(data.getName()));
+        // recuperation des dates d'utilisation
+        data.setFirstUsed(firstUsed(data.getName()));
+        data.setLastUsed(lastUsed(data.getName()));
+
+        list.add(data);
+      }
+
+    }
+    finally {
+      DatabaseManager.releaseConnection(conn);
+    }
+
+    log.debug("<<retreiveOn");
+    return list;
+  }
+
+  /**
+   * @throws SQLException
+   */
   public List<DataEquipement> retreive() throws SQLException {
     log.debug(">>retreive");
 
@@ -226,6 +278,7 @@ public final class EquipementTableManager extends AbstractTableManager {
         data.setPath(rs.getString(5));
         data.setDefault(convertToBoolean(rs.getInt(6)));
         data.setDistanceInit(rs.getFloat(7));
+        data.setOn(convertToBoolean(rs.getInt(8)));
 
         // recuperation de la distance parouru
         data.setDistance(distance(data.getName()));
@@ -327,18 +380,21 @@ public final class EquipementTableManager extends AbstractTableManager {
           data.getDistanceMax(),
           data.getDistanceInit(),
           file,
-          data.isDefault());
+          data.isDefault(),
+          data.isOn());
   }
 
   /**
    * Ajoute un &eacute;quipement.
    * 
    * @param name
-   * @param sportType
    * @param isAlert
+   * @param weight
    * @param weight
    * @param distanceMax
    * @param file
+   * @param isDefault
+   * @param isOn
    * @throws SQLException
    */
   public void store(String name,
@@ -347,7 +403,8 @@ public final class EquipementTableManager extends AbstractTableManager {
                     float distanceMax,
                     float distanceInit,
                     File file,
-                    boolean isDefault) throws SQLException {
+                    boolean isDefault,
+                    boolean isOn) throws SQLException {
 
     boolean isInTransaction = DatabaseManager.isInTransaction();
     if (!isInTransaction) {
@@ -361,7 +418,7 @@ public final class EquipementTableManager extends AbstractTableManager {
       StringBuilder st = new StringBuilder();
       st.append("INSERT INTO ");
       st.append(getTableName());
-      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?)");
+      st.append(" VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
 
       PreparedStatement pstmt = conn.prepareStatement(st.toString());
 
@@ -377,7 +434,7 @@ public final class EquipementTableManager extends AbstractTableManager {
       }
       pstmt.setInt(6, convertToSmallInt(isDefault));
       pstmt.setFloat(7, distanceInit);
-
+      pstmt.setFloat(8, convertToSmallInt(isOn));
       pstmt.executeUpdate();
       pstmt.close();
     }
@@ -412,7 +469,7 @@ public final class EquipementTableManager extends AbstractTableManager {
   /**
    * Suppression d'un &eacute;quipment.
    * 
-   * @param equipement
+   * @param name
    * @throws SQLException
    */
   public boolean delete(String name) throws SQLException {
@@ -506,7 +563,7 @@ public final class EquipementTableManager extends AbstractTableManager {
   /**
    * Restitue la distance parcouru par en km.
    * 
-   * @param nom
+   * @param name
    *          de l'&eacute;quipement
    * @throws SQLException
    */
@@ -556,7 +613,7 @@ public final class EquipementTableManager extends AbstractTableManager {
   /**
    * Restitue la date de premi&agrave;re utilisation.
    * 
-   * @param nom
+   * @param name
    *          de l'&eacute;quipement
    * @throws SQLException
    */
@@ -567,7 +624,7 @@ public final class EquipementTableManager extends AbstractTableManager {
   /**
    * Restitue la date de premi&agrave;re utilisation.
    * 
-   * @param nom
+   * @param name
    *          de l'&eacute;quipement
    * @throws SQLException
    */
@@ -578,7 +635,7 @@ public final class EquipementTableManager extends AbstractTableManager {
   /**
    * Restitue la date de premi&agrave;re utilisation.
    * 
-   * @param nom
+   * @param name
    *          de l'&eacute;quipement
    * @throws SQLException
    */

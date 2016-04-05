@@ -94,7 +94,7 @@ public class DatabaseManager {
   /**
    * Valorise le nouveau r&eacute;pertoire de la database.
    * 
-   * @param Restitue
+   * @param dir
    *          le repertoire de la database.
    * @throws FileNotFoundException
    * @throws NotDirIOException
@@ -191,7 +191,7 @@ public class DatabaseManager {
   /**
    * Initialisation de la database.
    * 
-   * @param isDropTables
+   * @param splash
    * @throws SQLException
    */
   public static synchronized void initDatabase(JSplashScreen splash) throws SQLException {
@@ -995,7 +995,7 @@ public class DatabaseManager {
         PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM "
                                                         + TABLE_EQUIPEMENT);
         rs = pstmt.executeQuery();
-
+        StringBuilder st = null;
         switch (rs.getMetaData().getColumnCount()) {
           case 5:
             // table existe dans une ancienne version ( <= à 0.1.13)
@@ -1030,10 +1030,29 @@ public class DatabaseManager {
             // nouvelle version avec creation index
             releaseConnection(conn);
             conn = null;
-            StringBuilder st = new StringBuilder();
+            st = new StringBuilder();
             st.append("ALTER TABLE ");
             st.append(TABLE_EQUIPEMENT);
             st.append(" ADD COLUMN distance_init SMALLINT");
+            executeUpdate(st.toString());
+
+            st = new StringBuilder();
+            st.append("ALTER TABLE ");
+            st.append(TABLE_EQUIPEMENT);
+            st.append(" ADD COLUMN is_active SMALLINT");
+            executeUpdate(st.toString());
+
+            return;
+
+          case 7:
+            // table existe dans une ancienne version ( = 1.8)
+            // nouvelle version avec creation index
+            releaseConnection(conn);
+            conn = null;
+            st = new StringBuilder();
+            st.append("ALTER TABLE ");
+            st.append(TABLE_EQUIPEMENT);
+            st.append(" ADD COLUMN is_active SMALLINT");
             executeUpdate(st.toString());
             return;
 
@@ -1062,6 +1081,7 @@ public class DatabaseManager {
     st.append("image_path VARCHAR(500), ");
     st.append("default_equipement SMALLINT, ");
     st.append("distance_init FLOAT, ");
+    st.append("is_active SMALLINT, ");
     st.append("PRIMARY KEY (name)");
     st.append(')');
 

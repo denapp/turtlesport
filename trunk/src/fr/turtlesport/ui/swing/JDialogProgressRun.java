@@ -160,7 +160,7 @@ public class JDialogProgressRun extends JDialog implements
 
     // Equipements
     List<DataEquipement> listEquipement = EquipementTableManager.getInstance()
-        .retreive();
+        .retreiveOn();
     equipements = new String[listEquipement.size()];
     if (listEquipement.size() > 0) {
       for (int i = 0; i < listEquipement.size(); i++) {
