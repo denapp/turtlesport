@@ -158,7 +158,6 @@ public final class JDialogImport extends JDialog implements
 
   /**
    * @param owner
-   * @param modal
    * @throws SQLException
    */
   private JDialogImport(Frame owner) throws SQLException {
@@ -506,7 +505,7 @@ public final class JDialogImport extends JDialog implements
     if (jButtonCancel == null) {
       jButtonCancel = new JButton();
       jButtonCancel.setFont(GuiFont.FONT_PLAIN);
-      jButtonCancel.setText(rb.getString("jButtonCancel"));
+      jButtonCancel.setText(LanguageManager.getManager().getCurrentLang().cancel());
       jButtonCancel.setEnabled(true);
     }
     return jButtonCancel;
@@ -695,7 +694,7 @@ public final class JDialogImport extends JDialog implements
                                                         .getTime();
 
     /**
-     * @param files
+     *
      */
     public TableModelImport() {
       super();
@@ -1690,7 +1689,7 @@ public final class JDialogImport extends JDialog implements
           getJPanelButton().remove(getJButtonSelect());
           getJPanelButton().remove(getJButtonUnselect());
           getJPanelButton().remove(getJButtonSave());
-          getJButtonCancel().setText(rb.getString("textEnd"));
+          getJButtonCancel().setText(LanguageManager.getManager().getCurrentLang().ok());
           getJButtonCancel().addActionListener(cancelActionListener);
           jLabelProgress.setText("");
           jProgressBar.setValue(0);

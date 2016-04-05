@@ -26,14 +26,6 @@ public final class LanguageHu extends AbstractLanguage {
   public static LanguageHu getInstance() {
     return singleton;
   }
-  
-  /* (non-Javadoc)
-   * @see fr.turtlesport.lang.ILanguage#getEncoding()
-   */
-  public String getEncoding() {
-    return "UTF-8";
-  }
-
 
   /*
    * (non-Javadoc)

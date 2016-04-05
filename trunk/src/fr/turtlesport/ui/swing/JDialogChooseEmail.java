@@ -123,7 +123,7 @@ public final class JDialogChooseEmail extends JDialog {
         }
       });
       jButtonCancel.setFont(GuiFont.FONT_PLAIN);
-      jButtonCancel.setText(rb.getString("jButtonCancel"));
+      jButtonCancel.setText(LanguageManager.getManager().getCurrentLang().cancel());
 
       jPanelSouth.setLayout(new FlowLayout(FlowLayout.RIGHT));
       jPanelSouth.add(jCheckBoxRemember);
