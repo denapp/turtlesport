@@ -606,7 +606,7 @@ public class JDialogProgressRun extends JDialog implements
     if (jButtonCancel == null) {
       jButtonCancel = new JButton();
       jButtonCancel.setFont(GuiFont.FONT_PLAIN);
-      jButtonCancel.setText(rb.getString("jButtonCancel"));
+      jButtonCancel.setText(LanguageManager.getManager().getCurrentLang().cancel());
       jButtonCancel.setEnabled(true);
     }
     return jButtonCancel;
@@ -1422,7 +1422,7 @@ public class JDialogProgressRun extends JDialog implements
           getJPanelButton().remove(getJButtonUnselect());
           getJPanelButton().remove(getJButtonSave());
           getJButtonCancel().setEnabled(true);
-          getJButtonCancel().setText(rb.getString("textEnd"));
+          getJButtonCancel().setText(LanguageManager.getManager().getCurrentLang().ok());
           getJButtonCancel().addActionListener(cancelActionListener);
           jLabelProgress.setText("");
           jProgressBar.setValue(0);

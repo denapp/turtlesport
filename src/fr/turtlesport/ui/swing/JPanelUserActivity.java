@@ -246,7 +246,7 @@ public class JPanelUserActivity extends JPanel implements LanguageListener,
     borderPanelZoneSpeed.setTitle(rb.getString("borderPanelZoneSpeed"));
     jRadioButtonBpm.setText(rb.getString("jRadioButtonBpm"));
     jRadioButtonPourFcMax.setText(rb.getString("jRadioButtonPourFcMax"));
-    jButtonCalculate.setText("Calculate");
+    jButtonCalculate.setText(rb.getString("jButtonCalculate")==null?"calculate":rb.getString("jButtonCalculate"));
   }
 
   /*

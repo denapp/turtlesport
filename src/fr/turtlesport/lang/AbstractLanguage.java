@@ -8,6 +8,13 @@ import fr.turtlesport.ui.swing.img.ImagesRepository;
 
 public abstract class AbstractLanguage implements ILanguage {
 
+  /* (non-Javadoc)
+  * @see fr.turtlesport.lang.ILanguage#getEncoding()
+  */
+  public String getEncoding() {
+    return "UTF-8";
+  }
+
   /*
    * (non-Javadoc)
    * 

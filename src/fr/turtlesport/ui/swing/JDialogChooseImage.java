@@ -279,7 +279,7 @@ public class JDialogChooseImage extends JDialog {
   private JButton getJButtonOK() {
     if (jButtonOK == null) {
       jButtonOK = new JButton();
-      jButtonOK.setText(rb.getString("jButtonOK"));
+      jButtonOK.setText(LanguageManager.getManager().getCurrentLang().ok());
       jButtonOK.setFont(GuiFont.FONT_PLAIN);
     }
     return jButtonOK;
@@ -293,7 +293,7 @@ public class JDialogChooseImage extends JDialog {
   private JButton getJButtonCancel() {
     if (jButtonCancel == null) {
       jButtonCancel = new JButton();
-      jButtonCancel.setText(rb.getString("jButtonCancel"));
+      jButtonCancel.setText(LanguageManager.getManager().getCurrentLang().cancel());
       jButtonCancel.setFont(GuiFont.FONT_PLAIN);
     }
     return jButtonCancel;

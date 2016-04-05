@@ -28,15 +28,6 @@ public final class LanguageIt extends AbstractLanguage {
   /*
    * (non-Javadoc)
    * 
-   * @see fr.turtlesport.lang.ILanguage#getEncoding()
-   */
-  public String getEncoding() {
-    return "UTF-8";
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see fr.turtlesport.lang.ILanguage#getLocale()
    */
   public Locale getLocale() {

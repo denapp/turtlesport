@@ -29,13 +29,6 @@ public final class LanguageZh extends AbstractLanguage {
     return singleton;
   }
 
-  /* (non-Javadoc)
-   * @see fr.turtlesport.lang.ILanguage#getEncoding()
-   */
-  public String getEncoding() {
-    return "UTF-8";
-  }
-
   /*
    * (non-Javadoc)
    * 
@@ -134,7 +127,7 @@ public final class LanguageZh extends AbstractLanguage {
    * @see fr.turtlesport.lang.ILanguage#ok()
    */
   public String ok() {
-    return "好";
+    return "确认";
   }
 
   /*
