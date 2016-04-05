@@ -44,8 +44,6 @@ public class JXTableZebra extends JXTable {
   }
 
   public void paintComponent(java.awt.Graphics g) {
-    System.out.println("isOpaque="+isOpaque());
-    System.out.println("drawStripes="+drawStripes);
 
     /*
     if (!(drawStripes = isOpaque())) {
@@ -53,7 +51,6 @@ public class JXTableZebra extends JXTable {
       return;
     }
     */
-    System.out.println("updateZebraColors="+drawStripes);
 
     // Paint zebra background stripes
     updateZebraColors();

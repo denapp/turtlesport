@@ -274,7 +274,6 @@ public class JPanelWorkoutListStep extends JPanel {
 
       DefaultMutableTreeTableNode node = (DefaultMutableTreeTableNode) value;
       Object obj = node.getUserObject();
-      System.out.println("obj=" + obj);
       if (obj instanceof StepT) {
         setIcon(null);
         if (((StepT) obj).getDuration() instanceof DistanceT) {

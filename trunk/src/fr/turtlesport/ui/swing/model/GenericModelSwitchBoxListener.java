@@ -38,8 +38,6 @@ public class GenericModelSwitchBoxListener implements ActionListener {
     this.jSwitchBox = jSwitchBox;
     this.data = data;
     this.methodName = data.getClass().getMethod(methodName, Boolean.TYPE);
-    System.out.println("- " +((DataEquipement) data).getName() + " " + ((DataEquipement) data).isOn());
-
   }
 
   /*
@@ -56,7 +54,6 @@ public class GenericModelSwitchBoxListener implements ActionListener {
    */
   private void update() {
     try {
-      System.out.println("update " +((DataEquipement) data).getName() + " " + ((DataEquipement) data).isOn());
       methodName.invoke(data, jSwitchBox.isSelected());
     }
     catch (Throwable e) {

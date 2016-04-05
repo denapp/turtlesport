@@ -49,7 +49,6 @@ public class JSwitchBox extends AbstractButton {
 
   public JSwitchBox(boolean isOn) {
     this(isOn, "ON", "OFF");
-    System.out.println("JSwitchBox --> " + isSelected());
   }
 
   public JSwitchBox(boolean isOn, String trueLabel, String falseLabel) {
@@ -111,7 +110,6 @@ public class JSwitchBox extends AbstractButton {
 
   @Override
   public void setSelected(boolean b) {
-    System.out.println("setSelected " +b);
     if (b) {
       setText(trueLabel);
       setBackground(green);
