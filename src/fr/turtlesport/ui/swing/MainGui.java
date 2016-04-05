@@ -1,9 +1,6 @@
 package fr.turtlesport.ui.swing;
 
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -21,26 +18,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
-import javax.swing.AbstractAction;
-import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
 import fr.turtlesport.device.Device;
 import fr.turtlesport.device.Devices;
@@ -689,6 +667,7 @@ public class MainGui extends JFrame implements LanguageListener {
       // jToolBar.add(getJButtonWorkout());
 
       jToolBar.add(Box.createHorizontalGlue());
+
       jSearchTextField = new JSearchTextField(20,
                                               ImagesRepository
                                                   .getImageIcon("book-open.png"));
@@ -707,6 +686,7 @@ public class MainGui extends JFrame implements LanguageListener {
     }
     return jToolBar;
   }
+
 
   /**
    * This method initializes jButtonRetreive
