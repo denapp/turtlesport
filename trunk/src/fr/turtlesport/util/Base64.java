@@ -1,7 +1,7 @@
 package fr.turtlesport.util;
 
 /**
- * Classe pour l'encodage et décodage en base 64.
+ * Classe pour l'encodage et decodage en base 64.
  * 
  * @author Denis Apparicio
  * 

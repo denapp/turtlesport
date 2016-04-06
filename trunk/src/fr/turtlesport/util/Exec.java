@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 
 /**
  * Cette classe presente un utilitaire pour executer une commande. Elle permet
- * de vider les streams de process. Sous certaines OS si ça n'est pas fait cela
+ * de vider les streams de process. Sous certaines OS si ca n'est pas fait cela
  * peut bloquer le process.
  * 
  * @author Denis Apparicio
@@ -106,7 +106,7 @@ public final class Exec {
    * Execute une commande avec des arguments.
    * 
    * @param cmdarray
-   *          le tableau de paramètres.
+   *          le tableau de parametres.
    * @throws IOException
    */
   public static void exec(String[] cmdarray) throws IOException {
