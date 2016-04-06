@@ -66,7 +66,7 @@ public class JTreePref extends JTree implements TreeSelectionListener {
    * Ajoute un enfant au noeud courant.
    * 
    * @param child
-   *          objet à ajouter
+   *          objet a ajouter
    * @return le noeud fils
    */
   public DefaultMutableTreeNode addObject(Object child) {
@@ -88,7 +88,7 @@ public class JTreePref extends JTree implements TreeSelectionListener {
    * @param parent
    *          noeud parent
    * @param child
-   *          objet à ajouter
+   *          objet a ajouter
    * @return le noeud fils
    */
   public DefaultMutableTreeNode addObject(DefaultMutableTreeNode parent,

@@ -439,7 +439,8 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
       ((GeoPositionWithAlt) list.get(0)).setDistanceMeters(distance);
       for (int i = 1; i < list.size(); i++) {
         if (!list.get(i).isValidDistance()) {
-          distance += GeoUtil.computeDistance(list.get(i - 1), list.get(i));
+          distance = GeoUtil.computeDistance(list.get(i - 1), list.get(i))+
+                     list.get(i - 1).getDistanceMeters();
           ((GeoPositionWithAlt) list.get(i)).setDistanceMeters(distance);
         }
       }
