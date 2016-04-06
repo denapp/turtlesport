@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="turtlesport" default="jarApp" basedir=".">
- 
+
 	<!-- set global properties for this build -->
 	<property name="Name" value="turtlesport" />
 	<property name="version" value="1.8" />
@@ -131,7 +131,7 @@
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac compiler="javac1.7" srcdir="${src}" destdir="${dest}" debug="yes" deprecation="on" encoding="ISO-8859-1">
+		<javac compiler="javac1.7" srcdir="${src}" destdir="${dest}" debug="yes" deprecation="on" encoding="UTF8">
 			<compilerarg value="-Xlint:unchecked" />
 			<classpath>
 				<path refid="app.classpath" />
