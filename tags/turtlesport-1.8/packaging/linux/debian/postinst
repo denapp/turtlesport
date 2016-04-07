@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "configure" ] ; then
+    if [ ! -e  /etc/udev/rules.d/51-garmin.rules ] ; then
+       echo "SUBSYSTEM==\"usb\", ATTR{idVendor}==\"091e\", ATTR{idProduct}==\"0003\", MODE=\"666\"" >> /etc/udev/rules.d/51-garmin.rules
+       chmod 644 /etc/udev/rules.d/51-garmin.rules
+       chown root:root /etc/udev/rules.d/51-garmin.rules
+    fi
+fi
+
+exit 0
