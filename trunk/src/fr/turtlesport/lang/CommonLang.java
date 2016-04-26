@@ -21,10 +21,6 @@ public enum CommonLang implements LanguageListener {
 
   private ResourceBundle rb;
 
-  private CommonLang() {
-    // Ajouter directement dans LanguageManager.
-  }
-
   /**
    * @return Restitue l'altitude avec l'unit&eacute;.
    */
