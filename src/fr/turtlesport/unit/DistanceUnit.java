@@ -142,7 +142,7 @@ public final class DistanceUnit extends Unit {
   /**
    * Formate une distance.
    * 
-   * @param distance
+   * @param dist
    *          distance.
    * @return la distance.
    */
@@ -153,8 +153,8 @@ public final class DistanceUnit extends Unit {
   /**
    * Defformate une distance.
    * 
-   * @param distance
-   *          distance.
+   * @param formatNumber
+   *          formatNumber.
    * @return la distance.
    */
   public static double reverseFormat(String formatNumber) {
@@ -213,9 +213,21 @@ public final class DistanceUnit extends Unit {
   }
 
   /**
+   * Formate une distance.
+   *
+   * @param dist
+   *          la distance.
+   */
+  public static String formatDefaultUnit(double dist) {
+    return isDefaultUnitKm()?
+            DECIMAL_FORMAT.format(dist / 1000.0):
+            DECIMAL_FORMAT.format(convertKmToMile(dist / 1000.0));
+  }
+
+  /**
    * Formate une distance en metre en km.
    * 
-   * @param distance
+   * @param dist
    *          distance en metre.
    * @return la distance en km.
    */

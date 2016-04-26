@@ -286,14 +286,6 @@ public final class RunLapTableManager extends AbstractTableManager {
 
   /**
    * Insertion d'un run interm&eacute;diaire.
-   * 
-   * @param sportType
-   * @param programType
-   * @param multisport
-   * @param time
-   * @param distance
-   * @return l'id.
-   * @throws Exception
    */
   protected int store(int id,
                       int lapIndex,
@@ -363,7 +355,7 @@ public final class RunLapTableManager extends AbstractTableManager {
   /**
    * Restitue les calories d'un run.
    * 
-   * @param date
+   * @param idRun
    * @return
    * @throws SQLException
    */
@@ -398,7 +390,6 @@ public final class RunLapTableManager extends AbstractTableManager {
   /**
    * Restitue la frequence cardiaque max d'un run.
    * 
-   * @param date
    * @return
    * @throws SQLException
    */
@@ -433,7 +424,6 @@ public final class RunLapTableManager extends AbstractTableManager {
   /**
    * Restitue la frequence cardiaque moyenne d'un run.
    * 
-   * @param date
    * @return
    * @throws SQLException
    */
@@ -513,7 +503,6 @@ public final class RunLapTableManager extends AbstractTableManager {
   /**
    * Restitue la frequence cardiaque moyenne d'un run.
    * 
-   * @param date
    * @return
    * @throws SQLException
    */
@@ -594,7 +583,7 @@ public final class RunLapTableManager extends AbstractTableManager {
   /**
    * Restitue la frequence cardiaque moyenne d'un run.
    * 
-   * @param date
+   * @param idRun
    * @return
    * @throws SQLException
    */
@@ -688,7 +677,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return la distance totale.
    * @throws SQLException
    */
-  public List<DataStatYear> distanceByYear(int idUser, int sportType) throws SQLException {
+  public DataStatYear[] distanceByYear(int idUser, int sportType) throws SQLException {
     log.info(">>distanceByYear");
 
     List<DataStatYear> res = new ArrayList<DataStatYear>();
@@ -746,7 +735,10 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     log.info("<<distanceByYear");
-    return res;
+
+    DataStatYear[] tabRes = new DataStatYear[res.size()];
+    res.toArray(tabRes);
+    return tabRes;
   }
 
   /**
@@ -756,7 +748,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return la distance totale.
    * @throws SQLException
    */
-  public List<DataStatYear> timeByYear(int idUser) throws SQLException {
+  public DataStatYear[] timeByYear(int idUser) throws SQLException {
     log.info(">>distanceByYear");
 
     List<DataStatYear> res = new ArrayList<DataStatYear>();
@@ -802,17 +794,21 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     log.info("<<distanceByYear");
-    return res;
+
+    DataStatYear[] tabRes = new DataStatYear[res.size()];
+    res.toArray(tabRes);
+    return tabRes;
   }
 
   /**
    * Restitue la distance totale par mois.
    * 
-   * @param idRun
+   * @param idUser
+   *
    * @return la distance totale.
    * @throws SQLException
    */
-  public List<DataStatYearMonth> distanceByMonth(int idUser, int sportType) throws SQLException {
+  public DataStatYearMonth[] distanceByMonth(int idUser, int sportType) throws SQLException {
     log.info(">>distanceByMonth");
 
     List<DataStatYearMonth> res = new ArrayList<DataStatYearMonth>();
@@ -875,7 +871,10 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     log.info("<<distanceByMonth");
-    return res;
+
+    DataStatYearMonth[] tabRes = new DataStatYearMonth[res.size()];
+    res.toArray(tabRes);
+    return tabRes;
   }
 
   /**
@@ -885,7 +884,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return la distance totale.
    * @throws SQLException
    */
-  public List<DataStatYearMonth> timeByMonth(int idUser) throws SQLException {
+  public DataStatYearMonth[] timeByMonth(int idUser) throws SQLException {
     log.info(">>timeByMonth");
 
     List<DataStatYearMonth> res = new ArrayList<DataStatYearMonth>();
@@ -950,17 +949,19 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     log.info("<<timeByMonth");
-    return res;
+
+    DataStatYearMonth[] tabRes = new DataStatYearMonth[res.size()];
+    res.toArray(tabRes);
+    return tabRes;
   }
 
   /**
    * Restitue les stats par semaine.
    * 
-   * @param idRun
    * @return les stats par semaine.
    * @throws SQLException
    */
-  public List<DataStatYearWeek> statByWeek(int idUser, int sportType) throws SQLException {
+  public DataStatYearWeek[] statByWeek(int idUser, int sportType) throws SQLException {
     log.info(">>statByWeek");
 
     List<DataStatYearWeek> res = new ArrayList<DataStatYearWeek>();
@@ -1049,7 +1050,10 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     log.info("<<statByWeek");
-    return res;
+
+    DataStatYearWeek[] tabRes = new DataStatYearWeek[res.size()];
+    res.toArray(tabRes);
+    return tabRes;
   }
 
   /**
@@ -1059,12 +1063,12 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return les stats par jour de la semaine.
    * @throws SQLException
    */
-  public DataStat[] statByDayOfWeek(int idUser, int sportType) throws SQLException {
+  public DataStatWeek[] statByDayOfWeek(int idUser, int sportType) throws SQLException {
     log.info(">>statByDayOfWeek");
 
-    DataStat[] res = new DataStat[7];
+    DataStatWeek[] res = new DataStatWeek[7];
     for (int i = 0; i < res.length; i++) {
-      res[i] = new DataStat(0, 0, 0);
+      res[i] = new DataStatWeek(i, 0, 0, 0);
     }
     Connection conn = DatabaseManager.getConnection();
     try {
@@ -1149,7 +1153,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return les stats par mois.
    * @throws SQLException
    */
-  public List<DataStatYearMonth> statByMonth(int idUser, int sportType) throws SQLException {
+  public DataStatYearMonth[] statByMonth(int idUser, int sportType) throws SQLException {
     log.info(">>statByMonth");
 
     List<DataStatYearMonth> res = new ArrayList<DataStatYearMonth>();
@@ -1214,7 +1218,10 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     log.info("<<statByMonth");
-    return res;
+
+    DataStatYearMonth[] tabRes = new DataStatYearMonth[res.size()];
+    res.toArray(tabRes);
+    return tabRes;
   }
 
   /**
@@ -1224,7 +1231,7 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return les stats par an.
    * @throws SQLException
    */
-  public List<DataStatYear> statByYear(int idUser, int sportType) throws SQLException {
+  public DataStatYear[] statByYear(int idUser, int sportType) throws SQLException {
     log.info(">>statByYear");
 
     List<DataStatYear> res = new ArrayList<DataStatYear>();
@@ -1287,13 +1294,16 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     log.info("<<statByYear");
-    return res;
+
+    DataStatYear[] tabRes = new DataStatYear[res.size()];
+    res.toArray(tabRes);
+    return tabRes;
   }
 
   /**
    * Restitue les informations de statistiques.
    * 
-   * @param idRun
+   * @param idUser
    * @return la distance totale.
    * @throws SQLException
    */
@@ -1352,11 +1362,10 @@ public final class RunLapTableManager extends AbstractTableManager {
   /**
    * Restitue la distance totale par mois.
    * 
-   * @param idRun
    * @return la distance totale.
    * @throws SQLException
    */
-  public List<DataStatYearWeek> distanceByWeek(int idUser, int sportType) throws SQLException {
+  public DataStatYearWeek[] distanceByWeek(int idUser, int sportType) throws SQLException {
     log.info(">>distanceByWeek");
 
     List<DataStatYearWeek> res = new ArrayList<DataStatYearWeek>();
@@ -1440,17 +1449,20 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     log.info("<<distanceByWeek");
-    return res;
+
+    DataStatYearWeek[] tabRes = new DataStatYearWeek[res.size()];
+    res.toArray(tabRes);
+    return tabRes;
   }
 
   /**
    * Restitue la distance totale par mois.
    * 
-   * @param idRun
+   * @param idUser
    * @return la distance totale.
    * @throws SQLException
    */
-  public List<DataStatYearWeek> timeByWeek(int idUser) throws SQLException {
+  public DataStatYearWeek[] timeByWeek(int idUser) throws SQLException {
     log.info(">>timeByWeek");
 
     List<DataStatYearWeek> res = new ArrayList<DataStatYearWeek>();
@@ -1520,7 +1532,10 @@ public final class RunLapTableManager extends AbstractTableManager {
     }
 
     log.info("<<timeByWeek");
-    return res;
+
+    DataStatYearWeek[] tabRes = new DataStatYearWeek[res.size()];
+    res.toArray(tabRes);
+    return tabRes;
   }
 
   /**
@@ -1530,13 +1545,14 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return la distance totale.
    * @throws SQLException
    */
-  public DataStat[] distanceByDayOfWeek(int idUser, int sportType) throws SQLException {
+  public DataStatWeek[] distanceByDayOfWeek(int idUser, int sportType) throws SQLException {
     log.info(">>distanceByDayOfWeek");
 
-    DataStat[] res = new DataStat[7];
+    DataStatWeek[] res = new DataStatWeek[7];
     for (int i = 0; i < res.length; i++) {
-      res[i] = new DataStat(0, 0, 0);
+      res[i] = new DataStatWeek(i, 0, 0, 0);
     }
+
     Connection conn = DatabaseManager.getConnection();
     try {
       StringBuilder st = new StringBuilder();
@@ -1616,12 +1632,12 @@ public final class RunLapTableManager extends AbstractTableManager {
    * @return la distance totale.
    * @throws SQLException
    */
-  public DataStat[] timeByDayOfWeek(int idUser) throws SQLException {
+  public DataStatWeek[] timeByDayOfWeek(int idUser) throws SQLException {
     log.info(">>timeByDayOfWeek");
 
-    DataStat[] res = new DataStat[7];
+    DataStatWeek[] res = new DataStatWeek[7];
     for (int i = 0; i < res.length; i++) {
-      res[i] = new DataStat(0, 0, 0);
+      res[i] = new DataStatWeek(i, 0, 0, 0);
     }
     Connection conn = DatabaseManager.getConnection();
     try {
