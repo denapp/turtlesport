@@ -3,7 +3,7 @@
 
 	<!-- set global properties for this build -->
 	<property name="Name" value="turtlesport" />
-	<property name="version" value="1.8" />
+	<property name="version" value="1.9" />
 	<property name="src" location="${basedir}/src" />
 	<property name="test" location="${basedir}/test" />
 	<property name="srcccommonUsbCom" location="${basedir}/c/usbcom/srccommon" />
@@ -234,7 +234,7 @@
 				   identifier="fr.turtlesport.TurtleSport"
 				   icon="${exe}/macosx/turtleIcon.icns"
 				   shortversion="${version}"
-				   copyright="2015 Turtle Sport"
+				   copyright="2016 Turtle Sport"
 				   applicationCategory="public.app-category.developer-tools"
 				   mainclassname="fr/turtlesport/TurtleSport">
 			<!-- Classpath -->
@@ -385,7 +385,7 @@
 
 	<!-- Creates a Ubuntu/Debian package -->
 	<target name="packagingLinuxDeb" if="isLinux">
-		<deb todir="${release}" package="turtlesport" section="utils" depends="sun-java7-jre | openjdk-7-jre" postinst="${packaging}/linux/debian/postinst">
+		<deb todir="${release}" package="turtlesport" section="utils" depends="sun-java7-jre | openjdk-7-jre | openjdk-8-jre | java-8-oracle | java-8-oracle | oracle-java7-installer | oracle-java8-installer" postinst="${packaging}/linux/debian/postinst">
 			<version upstream="${version}" />
 			<maintainer name="Denis Apparicio" email="turtlesport@sourceforge.net" />
 			<description synopsis="Turtle Sport">Turtle Sport garmin logbook.</description>
