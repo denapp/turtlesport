@@ -17,6 +17,6 @@ public final class Version {
   public static final String VERSION_MAJOR = "1";
   
   /** Version mineure. */
-  public static final String VERSION_MINOR = "8";
+  public static final String VERSION_MINOR = "9";
 
 }
