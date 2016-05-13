@@ -23,6 +23,7 @@ import javax.swing.*;
 import fr.turtlesport.device.Device;
 import fr.turtlesport.device.Devices;
 import fr.turtlesport.device.energympro.EnergymproDevice;
+import fr.turtlesport.lang.*;
 import org.jdesktop.swingx.JXCollapsiblePane;
 
 import fr.turtlesport.Configuration;
@@ -39,10 +40,6 @@ import fr.turtlesport.device.garmin.GarminFitDevice;
 import fr.turtlesport.device.garmin.GarminGpxDevice;
 import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
-import fr.turtlesport.lang.ILanguage;
-import fr.turtlesport.lang.LanguageEvent;
-import fr.turtlesport.lang.LanguageListener;
-import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.mail.Mail;
 import fr.turtlesport.mail.MessageMail;
@@ -298,7 +295,7 @@ public class MainGui extends JFrame implements LanguageListener {
 
     jMenuItemRunGoogleMap.setText(rb.getString("jMenuItemRunGoogleMap"));
     jMenuItemRunGoogleEarth.setText(rb.getString("jMenuItemRunGoogleEarth"));
-    jMenuRunExport.setText(rb.getString("jMenuRunExport"));
+    jMenuRunExport.setText(CommonLang.INSTANCE.getString("Export"));
     jMenuItemRunExportGpx.setText(rb.getString("jMenuItemRunExportGpx"));
     jMenuItemRunExportGoogleEarth.setText(rb
         .getString("jMenuItemRunExportGoogleEarth"));

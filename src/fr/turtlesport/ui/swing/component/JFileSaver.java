@@ -50,29 +50,29 @@ public final class JFileSaver {
                                     final String description) {
 
     final String suffix = (ext.charAt(0) == '.') ? ext : '.' + ext;
-    File out = null;    
-    if (OperatingSystem.isMacOSX()) {
-      // Bug sous Mac OS X les extenions ne sont pas affichees et retournees
-      FileDialog dlg = new FileDialog(MainGui.getWindow());
-      dlg.setLocale(LanguageManager.getManager().getLocale());
-      dlg.setMode(FileDialog.SAVE);
-      dlg.setDirectory(currentDirectory.getPath());
-      dlg.setFile(name + suffix);
-      dlg.setFilenameFilter(new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          return name.endsWith(suffix);
-        }
-      });
-      dlg.setVisible(true);
-      String fileName = dlg.getFile();
-      if (fileName != null) {
-        if (!fileName.endsWith(suffix)) {
-          fileName = fileName + suffix;
-        }
-        out = new File(dlg.getDirectory() + File.separator + fileName);
-      }
-    }
-    else {
+    File out = null;
+//    if (OperatingSystem.isMacOSX()) {
+//      // Bug sous Mac OS X les extensions ne sont pas affichees et retournees
+//      FileDialog dlg = new FileDialog(MainGui.getWindow());
+//      dlg.setLocale(LanguageManager.getManager().getLocale());
+//      dlg.setMode(FileDialog.SAVE);
+//      dlg.setDirectory(currentDirectory.getPath());
+//      dlg.setFile(name + suffix);
+//      dlg.setFilenameFilter(new FilenameFilter() {
+//        public boolean accept(File dir, String name) {
+//          return name.endsWith(suffix);
+//        }
+//      });
+//      dlg.setVisible(true);
+//      String fileName = dlg.getFile();
+//      if (fileName != null) {
+//        if (!fileName.endsWith(suffix)) {
+//          fileName = fileName + suffix;
+//        }
+//        out = new File(dlg.getDirectory() + File.separator + fileName);
+//      }
+//    }
+//    else {
       // Autres OS
       final MyJFileChooser fc = new MyJFileChooser(currentDirectory, suffix);
       if (name != null && !"".equals(name)) {
@@ -93,7 +93,7 @@ public final class JFileSaver {
       if (fc.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
         out = fc.getSelectedFile();
       }
-    }
+//    }
 
     if (out != null) {
       // sauvegarde dans le .ini
