@@ -1,12 +1,12 @@
 package fr.turtlesport.lang;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import javax.swing.JComponent;
-import javax.swing.UIManager;
+import javax.swing.*;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.log.TurtleLogger;
@@ -142,8 +142,9 @@ public final class LanguageManager {
       l.languageChanged(e);
     }
     // composant
-    JComponent.setDefaultLocale(lang.getLocale());
     Locale.setDefault(lang.getLocale());
+    JComponent.setDefaultLocale(lang.getLocale());
+    JFileChooser.setDefaultLocale(lang.getLocale());
     UIManager.put("OptionPane.cancelButtonText", lang.cancel());
   }
 
@@ -166,9 +167,6 @@ public final class LanguageManager {
 
   /**
    * D&eacute;clenche le changement de language par d&eacute;fault.
-   * 
-   * @param locale
-   *          le language.
    */
   public void fireLanguageChanged() {
     log.debug(">>fireLanguageChanged");

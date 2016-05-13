@@ -1,5 +1,13 @@
 package fr.turtlesport.meteo;
 
+import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.util.CSVReader;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,16 +17,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.util.CSVReader;
 
 /**
  * @author Denis Apparicio
@@ -146,7 +144,7 @@ public class Wundergound {
     }
     List<DataMeteo> listDatas = new ArrayList<DataMeteo>();
 
-    StringBuilder sUrl = new StringBuilder("http://www.wunderground.com/history/airport/");
+    StringBuilder sUrl = new StringBuilder("https://www.wunderground.com/history/airport/");
     sUrl.append(station.getAirportCode());
     sUrl.append('/');
     sUrl.append(cal.get(Calendar.YEAR));
@@ -162,6 +160,7 @@ public class Wundergound {
     }
 
     HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
+    cnx.setInstanceFollowRedirects(true);
     cnx.setConnectTimeout(5000);
     cnx.setReadTimeout(5000);
     cnx.setRequestMethod("GET");
@@ -174,32 +173,36 @@ public class Wundergound {
     cnx.addRequestProperty("User-Agent",
                            "Mozilla/5.0 (X11; Linux i686; rv:2.0.1) Gecko/20100101 Firefox/4.0.1");
 
-    if (cnx.getResponseCode() == HttpURLConnection.HTTP_OK) {
       try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream()));
-        CSVReader cvs = new CSVReader(reader);
-        cvs.readHeader();
+        if (cnx.getResponseCode() == HttpURLConnection.HTTP_OK) {
+          BufferedReader reader = new BufferedReader(new InputStreamReader(cnx.getInputStream()));
+          CSVReader cvs = new CSVReader(reader);
+          cvs.readHeader();
 
-        String[] datas;
-        while ((datas = cvs.readLine()) != null) {
-          if (log.isInfoEnabled()) {
-            StringBuilder st = new StringBuilder();
-            for (String s: datas) {
-              st.append(s);
-              st.append(' ');
+          String[] datas;
+          while ((datas = cvs.readLine()) != null) {
+            if (log.isInfoEnabled()) {
+              StringBuilder st = new StringBuilder();
+              for (String s : datas) {
+                st.append(s);
+                st.append(' ');
+              }
+              log.info(st.toString());
             }
-            log.info(st.toString());
+            DataMeteo d = DataMeteo.compute(datas);
+            if (d != null) {
+              listDatas.add(d);
+            }
           }
-          DataMeteo d = DataMeteo.compute(datas);
-          if (d != null) {
-            listDatas.add(d);
-          }
+        }
+        else {
+          log.info("Meteo " + cnx.getResponseCode());
         }
       }
       finally {
         cnx.disconnect();
       }
-    }
+
 
     if (log.isInfoEnabled()) {
       log.info("<<history");

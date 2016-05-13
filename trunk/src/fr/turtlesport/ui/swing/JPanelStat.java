@@ -1,56 +1,11 @@
 package fr.turtlesport.ui.swing;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.GradientPaint;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
-import java.lang.reflect.Method;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
-import java.text.MessageFormat;
-import java.text.NumberFormat;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-
-import fr.turtlesport.db.*;
-import fr.turtlesport.geo.FactoryGeoConvertRun;
-import fr.turtlesport.geo.GeoConvertException;
-import fr.turtlesport.geo.IGeoConvertRun;
-import fr.turtlesport.ui.swing.component.JFileSaver;
-import fr.turtlesport.ui.swing.model.ModelPointsManager;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.DateTickMarkPosition;
-import org.jfree.chart.axis.DateTickUnit;
-import org.jfree.chart.axis.DateTickUnitType;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.labels.StandardXYToolTipGenerator;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.data.time.SimpleTimePeriod;
-import org.jfree.data.time.TimePeriodValues;
-import org.jfree.data.time.TimePeriodValuesCollection;
-import org.jfree.data.xy.XYDataset;
-
 import fr.turtlesport.Configuration;
-import fr.turtlesport.lang.ILanguage;
-import fr.turtlesport.lang.LanguageEvent;
-import fr.turtlesport.lang.LanguageListener;
-import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.db.*;
+import fr.turtlesport.lang.*;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.component.JComboBoxActivity;
+import fr.turtlesport.ui.swing.component.JFileSaver;
 import fr.turtlesport.ui.swing.component.JShowMessage;
 import fr.turtlesport.ui.swing.img.ImagesRepository;
 import fr.turtlesport.ui.swing.model.ActivityComboBoxModel;
@@ -62,6 +17,29 @@ import fr.turtlesport.unit.event.UnitEvent;
 import fr.turtlesport.unit.event.UnitListener;
 import fr.turtlesport.unit.event.UnitManager;
 import fr.turtlesport.util.ResourceBundleUtility;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.*;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.data.time.SimpleTimePeriod;
+import org.jfree.data.time.TimePeriodValues;
+import org.jfree.data.time.TimePeriodValuesCollection;
+import org.jfree.data.xy.XYDataset;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.reflect.Method;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
+
 
 /**
  * @author Denis Apparicio
@@ -77,13 +55,13 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
   private int                   idUser          = MainGui.getWindow()
                                                     .getCurrentIdUser();
 
-  private JPanel                jPanelCenter;
+  private JPanel jPanelCenter;
 
-  private JPanel                jPanelSummary;
+  private JPanel jPanelSummary;
 
   private TitledBorder          borderPanelRunSummary;
 
-  private JLabel                jLabelLibDistTot;
+  private JLabel jLabelLibDistTot;
 
   private JLabel                jLabelValDistTot;
 
@@ -111,17 +89,17 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
 
   private ChartPanel            jPanelChart;
 
-  private JPanel                jPanelSelectChart;
+  private JPanel jPanelSelectChart;
 
-  private JComboBox             jComboxBoxCriter1;
+  private JComboBox jComboxBoxCriter1;
 
-  private JComboBox             jComboxBoxCriter2;
+  private JComboBox jComboxBoxCriter2;
 
   private JComboBoxActivity     jComboxBoxCriter3;
 
   private TitledBorder          borderPanelSelect;
 
-  private JButton               jButtonConvert;
+  private JButton jButtonConvert;
 
   private ActivityComboBoxModel modelActivities = new ActivityComboBoxModel(new DataActivityNull());
 
@@ -142,19 +120,19 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
    * @see fr.turtlesport.ui.swing.UserListener#userSelect(int)
    */
   public void userSelect(final int idUser) throws SQLException {
-    if (SwingUtilities.isEventDispatchThread()) {
+    if (javax.swing.SwingUtilities.isEventDispatchThread()) {
       notifyUserSelect(idUser);
     }
     else {
       MainGui.getWindow().beforeRunnableSwing();
-      SwingUtilities.invokeLater(new Runnable() {
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           try {
             notifyUserSelect(idUser);
           }
           catch (SQLException e) {
             log.error("", e);
-            ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+            java.util.ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
                 .getManager().getCurrentLang(), MainGui.class);
             JShowMessage.error(rb.getString("errorSQL"));
           }
@@ -218,7 +196,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
   }
 
   private void updateChart() {
-    ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+    java.util.ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
         .getManager().getCurrentLang(), getClass());
     String libRace = rb.getString("titleChart");
 
@@ -279,21 +257,21 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     dataStat = resDayOfWeek;
 
     DateAxis dateAxis = new DateAxis("");
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("EEEE"));
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("EEEE"));
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, 1));
     TimePeriodValuesExt s1 = new TimePeriodValuesExt(libRace);
-    Calendar cal = GregorianCalendar.getInstance();
+    java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
     cal.setTimeInMillis(System.currentTimeMillis());
-    cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-    cal.set(GregorianCalendar.MINUTE, 0);
-    cal.set(GregorianCalendar.MILLISECOND, 1);
-    cal.set(GregorianCalendar.WEEK_OF_MONTH, 2);
-    cal.set(GregorianCalendar.DAY_OF_WEEK, Calendar.MONDAY);
+    cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 0);
+    cal.set(java.util.GregorianCalendar.MINUTE, 0);
+    cal.set(java.util.GregorianCalendar.MILLISECOND, 1);
+    cal.set(java.util.GregorianCalendar.WEEK_OF_MONTH, 2);
+    cal.set(java.util.GregorianCalendar.DAY_OF_WEEK, java.util.Calendar.MONDAY);
 
     long timeInMillisDeb, timeInMillisEnd;
     for (int i = 1; i < resDayOfWeek.length; i++) {
       timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
+      cal.add(java.util.GregorianCalendar.HOUR_OF_DAY, 24);
       timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
              resDayOfWeek[i].getTimeTot());
@@ -304,7 +282,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
                      libRace + " : " + resDayOfWeek[i].getNumberRaces());
     }
     timeInMillisDeb = cal.getTimeInMillis();
-    cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
+    cal.add(java.util.GregorianCalendar.HOUR_OF_DAY, 24);
     timeInMillisEnd = cal.getTimeInMillis();
     s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
            resDayOfWeek[0].getTimeTot());
@@ -324,21 +302,21 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     dataStat = resDayOfWeek;
 
     DateAxis dateAxis = new DateAxis("");
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("EEEE"));
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("EEEE"));
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, 1));
     TimePeriodValuesExt s1 = new TimePeriodValuesExt(libRace);
-    Calendar cal = GregorianCalendar.getInstance();
+    java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
     cal.setTimeInMillis(System.currentTimeMillis());
-    cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-    cal.set(GregorianCalendar.MINUTE, 0);
-    cal.set(GregorianCalendar.MILLISECOND, 1);
-    cal.set(GregorianCalendar.WEEK_OF_MONTH, 2);
-    cal.set(GregorianCalendar.DAY_OF_WEEK, Calendar.MONDAY);
+    cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 0);
+    cal.set(java.util.GregorianCalendar.MINUTE, 0);
+    cal.set(java.util.GregorianCalendar.MILLISECOND, 1);
+    cal.set(java.util.GregorianCalendar.WEEK_OF_MONTH, 2);
+    cal.set(java.util.GregorianCalendar.DAY_OF_WEEK, java.util.Calendar.MONDAY);
 
     long timeInMillisDeb, timeInMillisEnd;
     for (int i = 1; i < resDayOfWeek.length; i++) {
       timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
+      cal.add(java.util.GregorianCalendar.HOUR_OF_DAY, 24);
       timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
              convertDistance(resDayOfWeek[i].getDistance()));
@@ -350,7 +328,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     }
 
     timeInMillisDeb = cal.getTimeInMillis();
-    cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
+    cal.add(java.util.GregorianCalendar.HOUR_OF_DAY, 24);
     timeInMillisEnd = cal.getTimeInMillis();
     s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
            convertDistance(resDayOfWeek[0].getDistance()));
@@ -372,19 +350,19 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.YEAR, 1));
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("yyyy", LanguageManager
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("yyyy", LanguageManager
         .getManager().getCurrentLang().getLocale()));
     final TimePeriodValuesExt sYear = new TimePeriodValuesExt(libRace);
     for (DataStatYear d : resYear) {
-      Calendar cal = GregorianCalendar.getInstance();
-      cal.set(GregorianCalendar.YEAR, d.getYear());
-      cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
-      cal.set(GregorianCalendar.MONTH, Calendar.JANUARY);
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
+      cal.set(java.util.GregorianCalendar.YEAR, d.getYear());
+      cal.set(java.util.GregorianCalendar.DAY_OF_MONTH, 1);
+      cal.set(java.util.GregorianCalendar.MONTH, java.util.Calendar.JANUARY);
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 0);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.YEAR, 1);
+      cal.add(java.util.GregorianCalendar.YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
                 convertDistance(d.getDistance()));
@@ -406,19 +384,19 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.YEAR, 1));
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("yyyy", LanguageManager
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("yyyy", LanguageManager
         .getManager().getCurrentLang().getLocale()));
     final TimePeriodValuesExt sYear = new TimePeriodValuesExt(libRace);
     for (DataStatYear d : resYear) {
-      Calendar cal = GregorianCalendar.getInstance();
-      cal.set(GregorianCalendar.YEAR, d.getYear());
-      cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
-      cal.set(GregorianCalendar.MONTH, Calendar.JANUARY);
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
+      cal.set(java.util.GregorianCalendar.YEAR, d.getYear());
+      cal.set(java.util.GregorianCalendar.DAY_OF_MONTH, 1);
+      cal.set(java.util.GregorianCalendar.MONTH, java.util.Calendar.JANUARY);
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 0);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.YEAR, 1);
+      cal.add(java.util.GregorianCalendar.YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
                 d.getTimeTot());
@@ -439,22 +417,22 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, 1));
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("MMMMM yyyy",
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("MMMMM yyyy",
                                                         LanguageManager
                                                             .getManager()
                                                             .getCurrentLang()
                                                             .getLocale()));
     final TimePeriodValuesExt sMonth = new TimePeriodValuesExt(libRace);
     for (DataStatYearMonth d : resMonth) {
-      Calendar cal = GregorianCalendar.getInstance();
-      cal.set(GregorianCalendar.YEAR, d.getYear());
-      cal.set(GregorianCalendar.MONTH, d.getMonth() - 1);
-      cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
+      cal.set(java.util.GregorianCalendar.YEAR, d.getYear());
+      cal.set(java.util.GregorianCalendar.MONTH, d.getMonth() - 1);
+      cal.set(java.util.GregorianCalendar.DAY_OF_MONTH, 1);
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 0);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.MONTH, 1);
+      cal.add(java.util.GregorianCalendar.MONTH, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
                  convertDistance(d.getDistance()));
@@ -474,22 +452,22 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, 1));
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("MMMMM yyyy",
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("MMMMM yyyy",
                                                         LanguageManager
                                                             .getManager()
                                                             .getCurrentLang()
                                                             .getLocale()));
     final TimePeriodValuesExt sMonth = new TimePeriodValuesExt(libRace);
     for (DataStatYearMonth d : resMonth) {
-      Calendar cal = GregorianCalendar.getInstance();
-      cal.set(GregorianCalendar.YEAR, d.getYear());
-      cal.set(GregorianCalendar.MONTH, d.getMonth() - 1);
-      cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
+      cal.set(java.util.GregorianCalendar.YEAR, d.getYear());
+      cal.set(java.util.GregorianCalendar.MONTH, d.getMonth() - 1);
+      cal.set(java.util.GregorianCalendar.DAY_OF_MONTH, 1);
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 0);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.MONTH, 1);
+      cal.add(java.util.GregorianCalendar.MONTH, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
                  d.getTimeTot());
@@ -508,7 +486,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     dataStat = resWeek;
 
     DateAxis dateAxis = new DateAxis("");
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("w-yyyy",
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("w-yyyy",
                                                         LanguageManager
                                                             .getManager()
                                                             .getCurrentLang()
@@ -517,14 +495,14 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     // domainAxis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, 7));
     final TimePeriodValuesExt s1 = new TimePeriodValuesExt(libRace);
     for (DataStatYearWeek d : resWeek) {
-      Calendar cal = GregorianCalendar.getInstance();
-      cal.set(GregorianCalendar.YEAR, d.getYear());
-      cal.set(GregorianCalendar.WEEK_OF_YEAR, d.getWeek());
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 01);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
+      cal.set(java.util.GregorianCalendar.YEAR, d.getYear());
+      cal.set(java.util.GregorianCalendar.WEEK_OF_YEAR, d.getWeek());
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 01);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.WEEK_OF_YEAR, 1);
+      cal.add(java.util.GregorianCalendar.WEEK_OF_YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
              convertDistance(d.getDistance()));
@@ -545,7 +523,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     dataStat = resWeek;
 
     DateAxis dateAxis = new DateAxis("");
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("w-yyyy",
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("w-yyyy",
                                                         LanguageManager
                                                             .getManager()
                                                             .getCurrentLang()
@@ -554,14 +532,14 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     // domainAxis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, 7));
     final TimePeriodValuesExt s1 = new TimePeriodValuesExt(libRace);
     for (DataStatYearWeek d : resWeek) {
-      Calendar cal = GregorianCalendar.getInstance();
-      cal.set(GregorianCalendar.YEAR, d.getYear());
-      cal.set(GregorianCalendar.WEEK_OF_YEAR, d.getWeek());
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 01);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
+      cal.set(java.util.GregorianCalendar.YEAR, d.getYear());
+      cal.set(java.util.GregorianCalendar.WEEK_OF_YEAR, d.getWeek());
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 01);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.WEEK_OF_YEAR, 1);
+      cal.add(java.util.GregorianCalendar.WEEK_OF_YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
              d.getTimeTot());
@@ -587,13 +565,13 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
       DataRun d = listRun.get(i);
       dataStat[i] = new DataStatRun(d);
 
-      Calendar cal = GregorianCalendar.getInstance();
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
       cal.setTime(d.getTime());
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 1);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 1);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.HOUR_OF_DAY, 22);
+      cal.add(java.util.GregorianCalendar.HOUR_OF_DAY, 22);
       long timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
              convertDistance(d.getComputeDistanceTot()));
@@ -618,13 +596,13 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     for (int i= 0; i < listRun.size(); i++) {
       DataRun d = listRun.get(i);
       dataStat[i] = new DataStatRun(d);
-      Calendar cal = GregorianCalendar.getInstance();
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
       cal.setTime(d.getTime());
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 1);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 1);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.HOUR_OF_DAY, 22);
+      cal.add(java.util.GregorianCalendar.HOUR_OF_DAY, 22);
       long timeInMillisEnd = cal.getTimeInMillis();
 
       long timeTot = d.computeTimeTot() - d.computeTimePauseTot();
@@ -659,24 +637,24 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
       StandarXYToolTipGenratorExt generator = new StandarXYToolTipGenratorExt(format,
                                                                               dateAxis
                                                                                   .getDateFormatOverride(),
-                                                                              new DecimalFormat("0.00"));
+                                                                              new java.text.DecimalFormat("0.00"));
       renderer.setBaseToolTipGenerator(generator);
     }
 
-    plot.setBackgroundPaint(Color.white);
-    plot.setDomainGridlinePaint(Color.black);
-    plot.setRangeGridlinePaint(Color.black);
+    plot.setBackgroundPaint(java.awt.Color.white);
+    plot.setDomainGridlinePaint(java.awt.Color.black);
+    plot.setRangeGridlinePaint(java.awt.Color.black);
 
     // disable bar outlines...
     renderer.setDrawBarOutline(false);
 
     // set up gradient paints for series...
-    final GradientPaint gp = new GradientPaint(0.0f,
+    final java.awt.GradientPaint gp = new java.awt.GradientPaint(0.0f,
                                                0.0f,
-                                               Color.blue,
+                                               java.awt.Color.blue,
                                                0.0f,
                                                0.0f,
-                                               Color.lightGray);
+                                               java.awt.Color.lightGray);
     renderer.setSeriesPaint(0, gp);
 
     // set the range axis to display integers only...
@@ -711,20 +689,20 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
       renderer.setBaseToolTipGenerator(generator);
     }
 
-    plot.setBackgroundPaint(Color.white);
-    plot.setDomainGridlinePaint(Color.black);
-    plot.setRangeGridlinePaint(Color.black);
+    plot.setBackgroundPaint(java.awt.Color.white);
+    plot.setDomainGridlinePaint(java.awt.Color.black);
+    plot.setRangeGridlinePaint(java.awt.Color.black);
 
     // disable bar outlines...
     renderer.setDrawBarOutline(false);
 
     // set up gradient paints for series...
-    final GradientPaint gp = new GradientPaint(0.0f,
+    final java.awt.GradientPaint gp = new java.awt.GradientPaint(0.0f,
                                                0.0f,
-                                               Color.blue,
+                                               java.awt.Color.blue,
                                                0.0f,
                                                0.0f,
-                                               Color.lightGray);
+                                               java.awt.Color.lightGray);
     renderer.setSeriesPaint(0, gp);
 
     // set the range axis to display integers only...
@@ -742,22 +720,22 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, 1));
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("MMMMM yyyy",
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("MMMMM yyyy",
                                                         LanguageManager
                                                             .getManager()
                                                             .getCurrentLang()
                                                             .getLocale()));
     final TimePeriodValuesExt sMonth = new TimePeriodValuesExt(libRace);
     for (DataStatYearMonth d : resMonth) {
-      Calendar cal = GregorianCalendar.getInstance();
-      cal.set(GregorianCalendar.YEAR, d.getYear());
-      cal.set(GregorianCalendar.MONTH, d.getMonth() - 1);
-      cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
+      cal.set(java.util.GregorianCalendar.YEAR, d.getYear());
+      cal.set(java.util.GregorianCalendar.MONTH, d.getMonth() - 1);
+      cal.set(java.util.GregorianCalendar.DAY_OF_MONTH, 1);
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 0);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.MONTH, 1);
+      cal.add(java.util.GregorianCalendar.MONTH, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       sMonth.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
                  d.getNumberRaces());
@@ -779,13 +757,13 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     for (int i= 0; i < listRun.size(); i++) {
       DataRun d = listRun.get(i);
       dataStat[i] = new DataStatRun(d);
-      Calendar cal = GregorianCalendar.getInstance();
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
       cal.setTime(d.getTime());
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 1);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 1);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.HOUR_OF_DAY, 22);
+      cal.add(java.util.GregorianCalendar.HOUR_OF_DAY, 22);
       long timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd), 1);
       s1.addValueExt("", "");
@@ -802,7 +780,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     dataStat = resWeek;
 
     DateAxis dateAxis = new DateAxis("");
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("w-yyyy",
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("w-yyyy",
                                                         LanguageManager
                                                             .getManager()
                                                             .getCurrentLang()
@@ -811,14 +789,14 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     // domainAxis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, 7));
     final TimePeriodValuesExt s1 = new TimePeriodValuesExt(libRace);
     for (DataStatYearWeek d : resWeek) {
-      Calendar cal = GregorianCalendar.getInstance();
-      cal.set(GregorianCalendar.YEAR, d.getYear());
-      cal.set(GregorianCalendar.WEEK_OF_YEAR, d.getWeek());
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 01);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
+      cal.set(java.util.GregorianCalendar.YEAR, d.getYear());
+      cal.set(java.util.GregorianCalendar.WEEK_OF_YEAR, d.getWeek());
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 01);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.WEEK_OF_YEAR, 1);
+      cal.add(java.util.GregorianCalendar.WEEK_OF_YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
              d.getNumberRaces());
@@ -837,21 +815,21 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     dataStat = resDayOfWeek;
 
     DateAxis dateAxis = new DateAxis("");
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("EEEE"));
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("EEEE"));
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, 1));
     TimePeriodValuesExt s1 = new TimePeriodValuesExt(libRace);
-    Calendar cal = GregorianCalendar.getInstance();
+    java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
     cal.setTimeInMillis(System.currentTimeMillis());
-    cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-    cal.set(GregorianCalendar.MINUTE, 0);
-    cal.set(GregorianCalendar.MILLISECOND, 1);
-    cal.set(GregorianCalendar.WEEK_OF_MONTH, 2);
-    cal.set(GregorianCalendar.DAY_OF_WEEK, Calendar.MONDAY);
+    cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 0);
+    cal.set(java.util.GregorianCalendar.MINUTE, 0);
+    cal.set(java.util.GregorianCalendar.MILLISECOND, 1);
+    cal.set(java.util.GregorianCalendar.WEEK_OF_MONTH, 2);
+    cal.set(java.util.GregorianCalendar.DAY_OF_WEEK, java.util.Calendar.MONDAY);
 
     long timeInMillisDeb, timeInMillisEnd;
     for (int i = 1; i < resDayOfWeek.length; i++) {
       timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
+      cal.add(java.util.GregorianCalendar.HOUR_OF_DAY, 24);
       timeInMillisEnd = cal.getTimeInMillis();
       s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
              resDayOfWeek[i].getNumberRaces());
@@ -860,7 +838,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     }
 
     timeInMillisDeb = cal.getTimeInMillis();
-    cal.add(GregorianCalendar.HOUR_OF_DAY, 24);
+    cal.add(java.util.GregorianCalendar.HOUR_OF_DAY, 24);
     timeInMillisEnd = cal.getTimeInMillis();
     s1.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
            resDayOfWeek[0].getNumberRaces());
@@ -878,19 +856,19 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
 
     DateAxis dateAxis = new DateAxis("");
     dateAxis.setTickUnit(new DateTickUnit(DateTickUnitType.YEAR, 1));
-    dateAxis.setDateFormatOverride(new SimpleDateFormat("yyyy", LanguageManager
+    dateAxis.setDateFormatOverride(new java.text.SimpleDateFormat("yyyy", LanguageManager
         .getManager().getCurrentLang().getLocale()));
     final TimePeriodValuesExt sYear = new TimePeriodValuesExt(libRace);
     for (DataStatYear d : resYear) {
-      Calendar cal = GregorianCalendar.getInstance();
-      cal.set(GregorianCalendar.YEAR, d.getYear());
-      cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
-      cal.set(GregorianCalendar.MONTH, Calendar.JANUARY);
-      cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-      cal.set(GregorianCalendar.MINUTE, 0);
-      cal.set(GregorianCalendar.MILLISECOND, 0);
+      java.util.Calendar cal = java.util.GregorianCalendar.getInstance();
+      cal.set(java.util.GregorianCalendar.YEAR, d.getYear());
+      cal.set(java.util.GregorianCalendar.DAY_OF_MONTH, 1);
+      cal.set(java.util.GregorianCalendar.MONTH, java.util.Calendar.JANUARY);
+      cal.set(java.util.GregorianCalendar.HOUR_OF_DAY, 0);
+      cal.set(java.util.GregorianCalendar.MINUTE, 0);
+      cal.set(java.util.GregorianCalendar.MILLISECOND, 0);
       long timeInMillisDeb = cal.getTimeInMillis();
-      cal.add(GregorianCalendar.YEAR, 1);
+      cal.add(java.util.GregorianCalendar.YEAR, 1);
       long timeInMillisEnd = cal.getTimeInMillis();
       sYear.add(new SimpleTimePeriod(timeInMillisDeb, timeInMillisEnd),
                 d.getNumberRaces());
@@ -913,7 +891,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     dateAxis.setTickMarkPosition(DateTickMarkPosition.MIDDLE);
 
     final NumberAxis rangeAxis = new NumberAxis("Nombre");
-    rangeAxis.setNumberFormatOverride(NumberFormat.getIntegerInstance());
+    rangeAxis.setNumberFormatOverride(java.text.NumberFormat.getIntegerInstance());
     XYBarRenderer renderer = new XYBarRenderer();
     final XYPlot plot = new XYPlot(dataset, dateAxis, rangeAxis, renderer);
 
@@ -928,20 +906,20 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
       renderer.setBaseToolTipGenerator(generator);
     }
 
-    plot.setBackgroundPaint(Color.white);
-    plot.setDomainGridlinePaint(Color.black);
-    plot.setRangeGridlinePaint(Color.black);
+    plot.setBackgroundPaint(java.awt.Color.white);
+    plot.setDomainGridlinePaint(java.awt.Color.black);
+    plot.setRangeGridlinePaint(java.awt.Color.black);
 
     // disable bar outlines...
     renderer.setDrawBarOutline(false);
 
     // set up gradient paints for series...
-    final GradientPaint gp = new GradientPaint(0.0f,
+    final java.awt.GradientPaint gp = new java.awt.GradientPaint(0.0f,
                                                0.0f,
-                                               Color.blue,
+                                               java.awt.Color.blue,
                                                0.0f,
                                                0.0f,
-                                               Color.lightGray);
+                                               java.awt.Color.lightGray);
     renderer.setSeriesPaint(0, gp);
 
     // set the range axis to display integers only...
@@ -957,9 +935,9 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
    * @return void
    */
   private void initialize() {
-    this.setLayout(new BorderLayout(10, 10));
+    this.setLayout(new java.awt.BorderLayout(10, 10));
     // this.add(getJPanelSummary(), BorderLayout.NORTH);
-    this.add(getJPanelCenter(), BorderLayout.CENTER);
+    this.add(getJPanelCenter(), java.awt.BorderLayout.CENTER);
     this.setFont(GuiFont.FONT_PLAIN);
 
     LanguageManager.getManager().addLanguageListener(this);
@@ -978,7 +956,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     ActionListener action = new ActionListener() {
       public void actionPerformed(final ActionEvent e) {
         MainGui.getWindow().beforeRunnableSwing();
-        SwingUtilities.invokeLater(new Runnable() {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             saveConfig();
 
@@ -994,7 +972,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     ActionListener actionActivity = new ActionListener() {
       public void actionPerformed(final ActionEvent e) {
         MainGui.getWindow().beforeRunnableSwing();
-        SwingUtilities.invokeLater(new Runnable() {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             saveConfig();
 
@@ -1028,8 +1006,9 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
   }
 
   private void performedLanguage(ILanguage lang) {
-    ResourceBundle rb = ResourceBundleUtility.getBundle(lang, getClass());
+    java.util.ResourceBundle rb = ResourceBundleUtility.getBundle(lang, getClass());
 
+    jButtonConvert.setText(CommonLang.INSTANCE.getString("Export"));
     jLabelLibDistTot.setText(rb.getString("jLabelLibDistTot"));
     jLabelLibTimeTot.setText(rb.getString("jLabelLibTimeTot"));
     jLabelLibSpeedMoy.setText(rb.getString("jLabelLibSpeedMoy"));
@@ -1074,11 +1053,11 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
    * .LanguageEvent)
    */
   public void languageChanged(final LanguageEvent event) {
-    if (SwingUtilities.isEventDispatchThread()) {
+    if (javax.swing.SwingUtilities.isEventDispatchThread()) {
       performedLanguage(event.getLang());
     }
     else {
-      SwingUtilities.invokeLater(new Runnable() {
+      javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           performedLanguage(event.getLang());
         }
@@ -1137,10 +1116,10 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
    *
    * @return javax.swing.JPanel
    */
-  private JPanel getJPanelCenter() {
+  private javax.swing.JPanel getJPanelCenter() {
     if (jPanelCenter == null) {
-      jPanelCenter = new JPanel();
-      jPanelCenter.setLayout(new BoxLayout(jPanelCenter, BoxLayout.Y_AXIS));
+      jPanelCenter = new javax.swing.JPanel();
+      jPanelCenter.setLayout(new javax.swing.BoxLayout(jPanelCenter, javax.swing.BoxLayout.Y_AXIS));
       jPanelCenter.add(getJPanelSummary(), null);
       jPanelCenter.add(getJPanelSelectChart(), null);
       jPanelCenter.add(getJPanelChart(), null);
@@ -1153,11 +1132,11 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
    *
    * @return javax.swing.JPanel
    */
-  public JPanel getJPanelSummary() {
+  public javax.swing.JPanel getJPanelSummary() {
     if (jPanelSummary == null) {
-      jPanelSummary = new JPanel();
+      jPanelSummary = new javax.swing.JPanel();
 
-      borderPanelRunSummary = BorderFactory
+      borderPanelRunSummary = javax.swing.BorderFactory
           .createTitledBorder(null,
                               "Course",
                               TitledBorder.DEFAULT_JUSTIFICATION,
@@ -1165,7 +1144,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
                               GuiFont.FONT_PLAIN,
                               null);
       jPanelSummary.setBorder(borderPanelRunSummary);
-      GridLayout layout = new GridLayout(3, 4, 10, 10);
+      java.awt.GridLayout layout = new java.awt.GridLayout(3, 4, 10, 10);
       jPanelSummary.setLayout(layout);
 
       // distance
@@ -1216,10 +1195,10 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     return jPanelSummary;
   }
 
-  private JPanel getJPanelSelectChart() {
+  private javax.swing.JPanel getJPanelSelectChart() {
     if (jPanelSelectChart == null) {
-      jPanelSelectChart = new JPanel();
-      borderPanelSelect = BorderFactory
+      jPanelSelectChart = new javax.swing.JPanel();
+      borderPanelSelect = javax.swing.BorderFactory
           .createTitledBorder(null,
                               "Critères",
                               TitledBorder.DEFAULT_JUSTIFICATION,
@@ -1229,11 +1208,11 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
       jPanelSelectChart.setBorder(borderPanelSelect);
 
       JLabel label = new JLabel(ImagesRepository.getImageIcon("loupe24.png"));
-      jPanelSelectChart.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-      jComboxBoxCriter1 = new JComboBox();
+      jPanelSelectChart.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 10));
+      jComboxBoxCriter1 = new javax.swing.JComboBox();
       jComboxBoxCriter1.setFont(GuiFont.FONT_PLAIN);
 
-      jComboxBoxCriter2 = new JComboBox();
+      jComboxBoxCriter2 = new javax.swing.JComboBox();
       jComboxBoxCriter2.setFont(GuiFont.FONT_PLAIN);
 
       jLabelLibActivity = new JLabel();
@@ -1242,7 +1221,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
       jComboxBoxCriter3 = new JComboBoxActivity(modelActivities);
       jComboxBoxCriter3.setFont(GuiFont.FONT_PLAIN);
 
-      jButtonConvert = new JButton("Export");
+      jButtonConvert = new javax.swing.JButton("Export");
       jButtonConvert.setFont(GuiFont.FONT_PLAIN);
 
       jPanelSelectChart.add(label);
@@ -1255,11 +1234,11 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     return jPanelSelectChart;
   }
 
-  private JPanel getJPanelChart() {
+  private javax.swing.JPanel getJPanelChart() {
     if (jPanelChart == null) {
       jPanelChart = new ChartPanel(null);
       jPanelChart.setFont(GuiFont.FONT_PLAIN);
-      jPanelChart.setBorder(BorderFactory
+      jPanelChart.setBorder(javax.swing.BorderFactory
           .createTitledBorder(null,
                               "",
                               TitledBorder.DEFAULT_JUSTIFICATION,
@@ -1298,7 +1277,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
    * @author Denis Apparicio
    *
    */
-  private class HourNumberFormat extends NumberFormat {
+  private class HourNumberFormat extends java.text.NumberFormat {
 
     /*
      * (non-Javadoc)
@@ -1309,7 +1288,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     @Override
     public StringBuffer format(double number,
                                StringBuffer toAppendTo,
-                               FieldPosition pos) {
+                               java.text.FieldPosition pos) {
       return format((long) number, toAppendTo, pos);
     }
 
@@ -1322,7 +1301,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
     @Override
     public StringBuffer format(long number,
                                StringBuffer toAppendTo,
-                               FieldPosition pos) {
+                               java.text.FieldPosition pos) {
       return toAppendTo.append(TimeUnit.formatHundredSecondeTime(number));
     }
 
@@ -1333,7 +1312,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
      * java.text.ParsePosition)
      */
     @Override
-    public Number parse(String source, ParsePosition parsePosition) {
+    public Number parse(String source, java.text.ParsePosition parsePosition) {
       return null;
     }
 
@@ -1346,8 +1325,8 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
   private class StandarXYToolTipGenratorExt extends StandardXYToolTipGenerator {
 
     public StandarXYToolTipGenratorExt(java.lang.String formatString,
-                                       DateFormat xFormat,
-                                       NumberFormat yFormat) {
+                                       java.text.DateFormat xFormat,
+                                       java.text.NumberFormat yFormat) {
       super(formatString, xFormat, yFormat);
     }
 
@@ -1370,7 +1349,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
       itemsExt[itemsExt.length - 1] = ((TimePeriodValuesExt) (((TimePeriodValuesCollection) dataset)
           .getSeries(series))).getValueExt2(item);
 
-      result = MessageFormat.format(getFormatString(), itemsExt);
+      result = java.text.MessageFormat.format(getFormatString(), itemsExt);
       return result;
     }
   }
@@ -1380,9 +1359,9 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
    *
    */
   private class TimePeriodValuesExt extends TimePeriodValues {
-    List<Object> dataExt1 = new ArrayList<Object>();
+    List<Object> dataExt1 = new java.util.ArrayList<Object>();
 
-    List<Object> dataExt2 = new ArrayList<Object>();
+    List<Object> dataExt2 = new java.util.ArrayList<Object>();
 
     public TimePeriodValuesExt(String name) {
       super(name);
@@ -1420,19 +1399,19 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
       String name = LanguageManager.getManager().getCurrentLang()
               .getDateTimeFormatterWithoutSep()
               .format(new Date());
-      final File out = JFileSaver.showSaveDialog(MainGui.getWindow(),
+      final java.io.File out = JFileSaver.showSaveDialog(MainGui.getWindow(),
               name,
-              ".csv",
+              "csv",
               "Comma-separated values");
       if (out != null) {
         MainGui.getWindow().beforeRunnableSwing();
 
-        SwingUtilities.invokeLater(new Runnable() {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             try {
-              FileOutputStream fos = new FileOutputStream(out);
-              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
-              ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
+              java.io.FileOutputStream fos = new java.io.FileOutputStream(out);
+              java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.OutputStreamWriter(fos));
+              java.util.ResourceBundle rb = ResourceBundleUtility.getBundle(LanguageManager
                       .getManager().getCurrentLang(), JPanelRun.class);
               JShowMessage.ok(rb.getString("exportOK"),
                       rb.getString("exportTitle"));
@@ -1445,7 +1424,7 @@ public class JPanelStat extends JPanelRight implements LanguageListener,
               }
               writer.close();
             }
-            catch (IOException e) {
+            catch (java.io.IOException e) {
               log.error("", e);
               JShowMessage.error(e.getMessage());
             }
