@@ -131,7 +131,7 @@
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac compiler="javac1.7" srcdir="${src}" destdir="${dest}" debug="yes" deprecation="on" encoding="UTF8">
+		<javac source="1.7" target="1.7" srcdir="${src}" destdir="${dest}" debug="yes" deprecation="on" encoding="UTF8">
 			<compilerarg value="-Xlint:unchecked" />
 			<classpath>
 				<path refid="app.classpath" />
@@ -384,8 +384,14 @@
 	</target>
 
 	<!-- Creates a Ubuntu/Debian package -->
+<!-- depends sun-java7-jre | openjdk-8-jre-headless | openjdk-7-jre-headless | java-8-oracle | java-8-oracle | oracle-java7-installer | oracle-java8-installer-->
+	<!-- depends="default-jre (>= 1:1.7) | java7-runtime | java8-runtime | java-7-oracle | java-8-oracle" -->
+
 	<target name="packagingLinuxDeb" if="isLinux">
-		<deb todir="${release}" package="turtlesport" section="utils" depends="sun-java7-jre | openjdk-7-jre | openjdk-8-jre | java-8-oracle | java-8-oracle | oracle-java7-installer | oracle-java8-installer" postinst="${packaging}/linux/debian/postinst">
+		<deb todir="${release}"
+                     package="turtlesport" 
+                     section="utils"
+                     postinst="${packaging}/linux/debian/postinst">
 			<version upstream="${version}" />
 			<maintainer name="Denis Apparicio" email="turtlesport@sourceforge.net" />
 			<description synopsis="Turtle Sport">Turtle Sport garmin logbook.</description>
@@ -417,7 +423,7 @@
 	<target name="packagingLinuxRmp" if="isLinux">
 		<echo message='Prepare files to build RPM package' />
 
-		<delete dir="${rootdir}" />
+		<!--<delete dir="${rootdir}" />-->
 		<!-- Create structure-->
 		<mkdir dir='${rootdir}' />
 		<mkdir dir='${rpmbuilddir}' />
