@@ -1,41 +1,9 @@
 package fr.turtlesport.geo.gpx;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.ProductDeviceUtil;
-import fr.turtlesport.db.DataRun;
-import fr.turtlesport.db.DataRunLap;
-import fr.turtlesport.db.DataRunTrk;
-import fr.turtlesport.db.RunLapTableManager;
-import fr.turtlesport.db.RunTrkTableManager;
-import fr.turtlesport.geo.GeoConvertException;
-import fr.turtlesport.geo.GeoConvertProgressAdaptor;
-import fr.turtlesport.geo.GeoLoadException;
-import fr.turtlesport.geo.IGeoConvertCourse;
-import fr.turtlesport.geo.IGeoConvertProgress;
-import fr.turtlesport.geo.IGeoConvertRun;
-import fr.turtlesport.geo.IGeoFile;
-import fr.turtlesport.geo.IGeoRoute;
+import fr.turtlesport.db.*;
+import fr.turtlesport.device.IProductDevice;
+import fr.turtlesport.geo.*;
 import fr.turtlesport.lang.LanguageManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.data.D1006CourseType;
@@ -43,6 +11,20 @@ import fr.turtlesport.protocol.data.D304TrkPointType;
 import fr.turtlesport.util.GeoUtil;
 import fr.turtlesport.util.Location;
 import fr.turtlesport.util.XmlUtil;
+import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.*;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 /**
  * @author Denis Apparicio
@@ -56,6 +38,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
   /** Extensions. */
   public static final String[] EXT = { "gpx" };
+
+  private static final String NS_TURTLE = "www.turtlesport.fr";
 
   private SimpleDateFormat     timeFormat;
 
@@ -145,6 +129,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         writer.write("<trk>");
         writeln(writer);
         writer.write("<name>" + timeFormat.format(data.getTime()) + "</name>");
+        writeln(writer);
+        writer.write("<extension xmlns=\"" + NS_TURTLE + "\">" + data.getSportType() + "</extension>");
         writeln(writer);
 
         // Ecriture des tours intermediaires.
@@ -238,6 +224,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       writer.write("<trk>");
       writeln(writer);
       writer.write("<name>" + file.getName() + "</name>");
+      writeln(writer);
+      writer.write("<extension xmlns=\"" + NS_TURTLE + "\">" + data.getSportType() + "</extension>");
       writeln(writer);
 
       // Ecriture des tours intermediaires.
@@ -698,7 +686,6 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         nbTrk++;
         isTrk = true;
       }
-
       // trkseg
       if (localName.equals("trkseg") && isTrk) {
         currentTrkseg = new Trkseg(currentTrk.getSegmentSize());
@@ -818,8 +805,6 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         }
       }
 
-      stBuffer = null;
-
       // rte
       // -------------------------
       if (localName.equals("rte")) {
@@ -843,6 +828,13 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
           addTrk(currentTrk);
         }
       }
+      // extension
+      else if (localName.equals("extension") && NS_TURTLE.equals(uri) && isTrk) {
+        try {
+          currentTrk.setSportType(Integer.parseInt(stBuffer.toString()));
+        }catch(NumberFormatException nfe) {
+        }
+      }
       // trkpt
       // ------------
       else if (localName.equals("trkpt")) {
@@ -859,6 +851,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         }
       }
 
+      stBuffer = null;
     }
 
     /*

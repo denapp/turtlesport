@@ -1,29 +1,21 @@
 package fr.turtlesport.db;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
-import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.apache.derby.jdbc.EmbeddedDriver;
-
 import fr.turtlesport.CantWriteIOException;
 import fr.turtlesport.Configuration;
 import fr.turtlesport.NotDirIOException;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.JSplashScreen;
 import fr.turtlesport.util.Location;
+import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.apache.derby.jdbc.EmbeddedDriver;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * @author Denis Apparicio
@@ -1385,7 +1377,7 @@ public class DatabaseManager {
     // Week
     st = new StringBuilder();
     try {
-      executeUpdate("DROP FUNCTION  APP.Week");
+      executeUpdate("DROP FUNCTION APP.Week");
     }
     catch (SQLException e) {
     }
@@ -1400,7 +1392,7 @@ public class DatabaseManager {
     // Year Week
     st = new StringBuilder();
     try {
-      executeUpdate("DROP FUNCTION  APP.YearWeek");
+      executeUpdate("DROP FUNCTION APP.YearWeek");
     }
     catch (SQLException e) {
     }
