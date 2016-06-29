@@ -1,5 +1,15 @@
 package fr.turtlesport.device.garmin;
 
+import fr.turtlesport.db.DataUser;
+import fr.turtlesport.db.RunTableManager;
+import fr.turtlesport.device.Device;
+import fr.turtlesport.geo.GeoLoadException;
+import fr.turtlesport.geo.garmin.fit.FitFile;
+import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.util.OperatingSystem;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
@@ -7,18 +17,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import fr.turtlesport.device.Device;
-import org.xml.sax.SAXException;
-
-import fr.turtlesport.db.DataUser;
-import fr.turtlesport.db.RunTableManager;
-import fr.turtlesport.geo.GeoLoadException;
-import fr.turtlesport.geo.garmin.fit.FitFile;
-import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.util.OperatingSystem;
 
 /**
  * @author Denis Apparicio
@@ -265,9 +263,18 @@ public class GarminFitDevice implements Device {
       listDir.add(file);
 
       // Foreunner usb like Foreunner 10, 110..
-      file = new File("/Volumes/GARMIN/Garmin");
-      listDir.add(file);
-
+      File volume = new File("/Volumes");
+      File[] files = volume.listFiles(new FileFilter() {
+        @Override
+        public boolean accept(File pathname) {
+          return pathname.isDirectory() && pathname.getPath().contains("GARMIN");
+        }
+      });
+      if (files != null) {
+        for (File f: files) {
+          listDir.add(f);
+        }
+      }
       return listDir;
     }
     // Windows
