@@ -391,7 +391,8 @@
 		<deb todir="${release}"
                      package="turtlesport" 
                      section="utils"
-                     postinst="${packaging}/linux/debian/postinst">
+             		depends="default-jre (>= 1:1.7) | java-8-oracle | java-7-oracle | java8-runtime | java7-runtime | openjdk-8-jre | openjdk-7-jre"
+		postinst="${packaging}/linux/debian/postinst">
 			<version upstream="${version}" />
 			<maintainer name="Denis Apparicio" email="turtlesport@sourceforge.net" />
 			<description synopsis="Turtle Sport">Turtle Sport garmin logbook.</description>
