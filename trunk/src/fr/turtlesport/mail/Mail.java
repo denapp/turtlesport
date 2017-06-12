@@ -1,13 +1,13 @@
 package fr.turtlesport.mail;
 
-import java.io.IOException;
-
 import fr.turtlesport.Configuration;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.mail.linux.MailLinuxManager;
 import fr.turtlesport.mail.macosx.MailMacosxManager;
 import fr.turtlesport.mail.windows.MailWinManager;
 import fr.turtlesport.util.OperatingSystem;
+
+import java.io.IOException;
 
 /**
  * @author Denis Apparicio
@@ -36,7 +36,7 @@ public final class Mail {
   }
 
   /**
-   * D&eacute;termine si cle client de messagerie est choisi.
+   * D&eacute;termine si le client de messagerie est choisi.
    * 
    * @return <code>true</code> si choisi.
    */

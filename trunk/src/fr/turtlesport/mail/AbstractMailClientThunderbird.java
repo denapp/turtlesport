@@ -1,13 +1,12 @@
 package fr.turtlesport.mail;
 
+import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.util.Exec;
+
+import javax.swing.ImageIcon;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import javax.swing.ImageIcon;
-
-import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.util.Exec;
 
 /**
  * @author Denis Apparicio
@@ -103,7 +102,7 @@ public abstract class AbstractMailClientThunderbird implements IMailClient {
     log.debug("<<mail");
   }
 
-  private String constructMailto(List<String> listTo,
+  public String constructMailto(List<String> listTo,
                                  String subject,
                                  String body,
                                  List<File> listAttach) {
