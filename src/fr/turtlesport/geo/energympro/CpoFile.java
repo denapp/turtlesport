@@ -1,14 +1,12 @@
 package fr.turtlesport.geo.energympro;
 
-import com.garmin.fit.Decode;
-import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.db.DataRun;
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.geo.*;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.Wgs84;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -77,7 +75,7 @@ public class CpoFile implements IGeoFile, IGeoConvertRun {
     }
 
     @Override
-    public IGeoRoute[] load(File file) throws GeoLoadException, FileNotFoundException {
+    public IGeoRoute[] load(File file, IProductDevice productDevice) throws GeoLoadException, FileNotFoundException {
         log.debug(">>load " + file.getName());
 
         IGeoRoute[] tabRoute = null;

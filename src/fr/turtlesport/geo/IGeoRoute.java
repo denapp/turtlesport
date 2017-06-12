@@ -1,9 +1,9 @@
 package fr.turtlesport.geo;
 
+import fr.turtlesport.device.IProductDevice;
+
 import java.util.Date;
 import java.util.List;
-
-import fr.turtlesport.device.IProductDevice;
 
 /**
  * @author Denis Apparicio

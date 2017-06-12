@@ -1,34 +1,23 @@
 package fr.turtlesport.geo.suunto;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
+import fr.turtlesport.device.IProductDevice;
+import fr.turtlesport.geo.*;
+import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.unit.TemperatureUnit;
+import fr.turtlesport.util.GeoUtil;
+import fr.turtlesport.util.XmlUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import fr.turtlesport.device.IProductDevice;
-import fr.turtlesport.geo.AbstractGeoRoute;
-import fr.turtlesport.geo.GeoLoadException;
-import fr.turtlesport.geo.IGeoFile;
-import fr.turtlesport.geo.IGeoPositionWithAlt;
-import fr.turtlesport.geo.IGeoRoute;
-import fr.turtlesport.geo.IGeoSegment;
-import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.unit.TemperatureUnit;
-import fr.turtlesport.util.GeoUtil;
-import fr.turtlesport.util.XmlUtil;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author Denis Apparicio
@@ -64,7 +53,7 @@ public class SuuntoFile implements IGeoFile {
   }
 
   @Override
-  public IGeoRoute[] load(File file) throws GeoLoadException,
+  public IGeoRoute[] load(File file, IProductDevice productDevice) throws GeoLoadException,
                                     FileNotFoundException {
     log.debug(">>load");
 

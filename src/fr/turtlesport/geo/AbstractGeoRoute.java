@@ -1,11 +1,5 @@
 package fr.turtlesport.geo;
 
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import fr.turtlesport.UsbPacketInputStream;
 import fr.turtlesport.db.DataActivityBike;
 import fr.turtlesport.db.DataActivityOther;
@@ -13,6 +7,12 @@ import fr.turtlesport.db.DataActivityRun;
 import fr.turtlesport.db.UserActivityTableManager;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.util.GeoUtil;
+
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Denis Apparicio

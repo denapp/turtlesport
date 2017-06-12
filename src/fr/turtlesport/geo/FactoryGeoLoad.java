@@ -1,5 +1,6 @@
 package fr.turtlesport.geo;
 
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.geo.energympro.CpoFile;
 import fr.turtlesport.geo.garmin.fit.FitFile;
 import fr.turtlesport.geo.garmin.hst.HstFile;
@@ -46,19 +47,19 @@ public final class FactoryGeoLoad {
     if (isIn(GpxFile.EXT, ext)) {
       return new GpxFile();
     }
-    else if (isIn(TcxFile.EXT, ext)) {
+    if (isIn(TcxFile.EXT, ext)) {
       return new TcxFile();
     }
-    else if (isIn(HstFile.EXT, ext)) {
+    if (isIn(HstFile.EXT, ext)) {
       return new HstFile();
     }
-    else if (isIn(FitFile.EXT, ext)) {
+    if (isIn(FitFile.EXT, ext)) {
       return new FitFile();
     }
-    else if (isIn(SuuntoFile.EXT, ext)) {
+    if (isIn(SuuntoFile.EXT, ext)) {
       return new SuuntoFile();
     }
-    else if (isIn(CpoFile.EXT, ext)) {
+    if (isIn(CpoFile.EXT, ext)) {
       return new CpoFile();
     }
     
@@ -75,7 +76,7 @@ public final class FactoryGeoLoad {
    *           si fichier non trouv&eacute;
    * @throws GeoLoadException
    */
-  public static IGeoRoute[] getRoutes(File file) throws FileNotFoundException,
+  public static IGeoRoute[] getRoutes(File file, IProductDevice productDevice) throws FileNotFoundException,
                                                 GeoLoadException {
     if (file == null || !file.isFile()) {
       throw new FileNotFoundException();
@@ -90,7 +91,7 @@ public final class FactoryGeoLoad {
     }
 
     IGeoFile geo = getInstance(ext);
-    return geo.load(file);
+    return geo.load(file, productDevice);
   }
 
   private static boolean isIn(String[] ext, String theExt) {

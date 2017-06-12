@@ -1,5 +1,15 @@
 package fr.turtlesport.geo.garmin.fit;
 
+import com.garmin.fit.*;
+import fr.turtlesport.ProductDeviceUtil;
+import fr.turtlesport.db.DataRun;
+import fr.turtlesport.device.IProductDevice;
+import fr.turtlesport.geo.*;
+import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.util.GeoUtil;
+import fr.turtlesport.util.Location;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,38 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import com.garmin.fit.ActivityMesg;
-import com.garmin.fit.Decode;
-import com.garmin.fit.DeviceInfoMesg;
-import com.garmin.fit.EventMesg;
-import com.garmin.fit.FileCreatorMesg;
-import com.garmin.fit.FileIdMesg;
-import com.garmin.fit.LapMesg;
-import com.garmin.fit.Mesg;
-import com.garmin.fit.MesgListener;
-import com.garmin.fit.MesgNum;
-import com.garmin.fit.RecordMesg;
-import com.garmin.fit.SessionMesg;
-import com.garmin.fit.SoftwareMesg;
-
-import fr.turtlesport.device.IProductDevice;
-import fr.turtlesport.ProductDeviceUtil;
-import fr.turtlesport.db.DataRun;
-import fr.turtlesport.geo.AbstractGeoRoute;
-import fr.turtlesport.geo.GeoConvertException;
-import fr.turtlesport.geo.GeoLoadException;
-import fr.turtlesport.geo.GeoPositionWithAlt;
-import fr.turtlesport.geo.IGeoConvertProgress;
-import fr.turtlesport.geo.IGeoConvertRun;
-import fr.turtlesport.geo.IGeoFile;
-import fr.turtlesport.geo.IGeoPositionWithAlt;
-import fr.turtlesport.geo.IGeoRoute;
-import fr.turtlesport.geo.IGeoSegment;
-import fr.turtlesport.lang.LanguageManager;
-import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.util.GeoUtil;
-import fr.turtlesport.util.Location;
 
 /**
  * @author Denis Apparicio
@@ -152,7 +130,7 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
    * 
    * @see fr.turtlesport.geo.IGeoFile#load(java.io.File)
    */
-  public IGeoRoute[] load(File file) throws GeoLoadException,
+  public IGeoRoute[] load(File file, IProductDevice productDevice) throws GeoLoadException,
                                     FileNotFoundException {
     IGeoRoute[] geos = null;
 
@@ -170,7 +148,7 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
         log.info("Nombre de points : " + listener.session.listRecord.size());
       }
 
-      listener.checkIsValid();
+      listener.onEnd();
 
       geos = new IGeoRoute[1];
       geos[0] = new FitGeoRoute(listener.session);
@@ -256,11 +234,8 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
           if (log.isInfoEnabled()) {
             SoftwareMesg software = new SoftwareMesg(msg);
             log.info("-->SOFTWARE");
-            log.info("   GarminProduct=" + software.getGarminProduct());
-            log.info("   Manufacturer=" + software.getManufacturer());
             log.info("   MessageIndex=" + software.getMessageIndex());
             log.info("   PartNumber=" + software.getPartNumber());
-            log.info("   Product=" + software.getProduct());
             log.info("   Version=" + software.getVersion());
             log.info("-----------");
           }
@@ -374,37 +349,72 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
           break;
 
         default:
-          if (log.isInfoEnabled()) {
-            log.info("NAME=" + msg.getName() + " num=" + msg.getNum());
+          if (log.isDebugEnabled()) {
+            log.debug("NAME=" + msg.getName() + " num=" + msg.getNum());
           }
       }
     }
 
-    public void checkIsValid() throws GeoLoadException {
+    public void onEnd() throws GeoLoadException {
+
+      checkIsValid();
+
+      if (session.sessionMesg == null) {
+        session.sessionMesg = new SessionMesg();
+
+        float totalDistance = 0;
+        float totalElapsedTime = 0;
+        for (int i =0; i < session.listLap.size(); i++) {
+          LapMesg lap = session.listLap.get(i).lapmsg;
+          if (lap.getTotalDistance() != null) {
+            totalDistance += lap.getTotalDistance();
+          }
+          if (lap.getTotalElapsedTime() != null) {
+            totalElapsedTime += lap.getTotalElapsedTime();
+          }
+          else if (lap.getTotalTimerTime() != null) {
+            totalElapsedTime += lap.getTotalTimerTime();
+          }
+        }
+        session.sessionMesg.setStartTime(new DateTime(session.listLap.get(0).getStartTime()));
+        session.sessionMesg.setTotalDistance(totalDistance);
+        session.sessionMesg.setTotalElapsedTime(totalElapsedTime);
+
+        checkIsValid();
+      }
+      if (log.isInfoEnabled()) {
+        log.info("-->onEnd sessionMesg");
+        log.info("   StartTime="+session.sessionMesg.getStartTime());
+        log.info("   TotalDistance="+session.sessionMesg.getTotalDistance());
+        log.info("   TotalElapsedTime="+session.sessionMesg.getTotalElapsedTime());
+      }
+    }
+
+    private void checkIsValid() throws GeoLoadException {
       // fileID
       if (fileId == null) {
         log.warn("fileId est null");
         throw new GeoLoadException("fileId est null");
       }
-      if (fileId.getType() != com.garmin.fit.File.ACTIVITY) {
-        log.warn("Not activity file : " + fileId.getType());
-        throw new GeoLoadException("Not activity file : " + fileId.getType());
-      }
+      //if (fileId.getType() != com.garmin.fit.File.ACTIVITY) {
+      //  log.warn("Not activity file : " + fileId.getType());
+      //  throw new GeoLoadException("Not activity file : " + fileId.getType());
+      //}
 
       // 1 message Activity
-      if (activityMsg == null) {
-        log.warn("activityMsg est null");
-        throw new GeoLoadException("activityMsg est null");
-      }
+      //if (activityMsg == null) {
+      //  log.warn("activityMsg est null");
+      //  throw new GeoLoadException("activityMsg est null");
+      //}
 
       // 1 sessionMesg Activity
-      if (session.sessionMesg == null) {
-        log.warn("sessionMesg est null");
-        throw new GeoLoadException("sessionMesg est null");
-      }
+      //if (session.sessionMesg == null) {
+      //  log.warn("sessionMesg est null");
+      //  throw new GeoLoadException("sessionMesg est null");
+      //}
 
       // Au moins un lap
-      if (session.listLap.size() == 0) {
+      if (session.listLap.size() < 1 || session.listLap.get(0).lapmsg == null) {
         log.warn("pas de lap");
         throw new GeoLoadException("pas de lap");
       }
@@ -461,16 +471,14 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
     }
 
     public void initSportType() {
-      switch (session.sessionMesg.getSport()) {
-        case CYCLING:
-          setSportType(SPORT_TYPE_BIKE);
-          break;
-        case RUNNING:
-          setSportType(SPORT_TYPE_RUNNING);
-          break;
-        default:
-          setSportType(SPORT_TYPE_OTHER);
-          break;
+      if (Sport.CYCLING.equals(session.sessionMesg.getSport())) {
+        setSportType(SPORT_TYPE_BIKE);
+      }
+      else if (Sport.RUNNING.equals(session.sessionMesg.getSport())) {
+        setSportType(SPORT_TYPE_RUNNING);
+      }
+      else {
+        setSportType(SPORT_TYPE_OTHER);
       }
     }
 

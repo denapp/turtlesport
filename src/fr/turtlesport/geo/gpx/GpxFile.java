@@ -39,6 +39,9 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
   /** Extensions. */
   public static final String[] EXT = { "gpx" };
 
+  /** Montre trainer Energympro */
+  private static final String NS_CLUETRUST = "http://www.cluetrust.com/XML/GPXDATA/1/0";
+
   private static final String NS_TURTLE = "www.turtlesport.fr";
 
   private SimpleDateFormat     timeFormat;
@@ -373,7 +376,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
    * 
    * @see fr.turtlesport.geo.IGeoFile#load(java.io.File)
    */
-  public IGeoRoute[] load(File file) throws GeoLoadException,
+  public IGeoRoute[] load(File file, IProductDevice productDevice) throws GeoLoadException,
                                     FileNotFoundException {
     log.debug(">>load");
 
@@ -396,11 +399,10 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         log.debug("handler.nbTrkseg=" + handler.nbTrkseg);
         log.debug("handler.nbTrkpt=" + handler.nbTrkpt);
       }
-  
-      GPXDevice device = null;
-      if (handler.creator != null && ProductDeviceUtil.isKnown(handler.creator)) {
-        device = (handler.creator == null) ? null
-            : new GPXDevice(handler.creator);
+
+      IProductDevice device = productDevice;
+      if (productDevice == null && handler.creator != null && !ProductDeviceUtil.isKnown(handler.creator)) {
+        device = new GPXDevice(handler.creator);
       }
 
       // construction de la reponse
@@ -623,6 +625,8 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
     private String         creator;
 
+    private String sportType;
+
     /**
      * 
      */
@@ -725,32 +729,32 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
 
       // hr
       if (localName.equals("hr") && isTrk) {
-        currentTrkpt.setHeartRate(Integer.valueOf(stBuffer.toString()));
+        currentTrkpt.setHeartRate(Integer.valueOf(stBuffer.toString().trim()));
       }
       // hr
       else if (localName.equals("cad") && isTrk) {
-        currentTrkpt.setCadence(Integer.valueOf(stBuffer.toString()));
+        currentTrkpt.setCadence(Integer.valueOf(stBuffer.toString().trim()));
       }
       // elevation
       else if (localName.equals("ele")) {
         if (isTrkpt) { // de trkpt
-          currentTrkpt.setElevation(Double.valueOf(stBuffer.toString()));
+          currentTrkpt.setElevation(Double.valueOf(stBuffer.toString().trim()));
         }
         else if (isRtept) { // de rtept
-          currentRtept.setElevation(Double.valueOf(stBuffer.toString()));
+          currentRtept.setElevation(Double.valueOf(stBuffer.toString().trim()));
           log.debug("Rtept ele: " + currentRtept.getElevation());
         }
       }
       // time
       else if (localName.equals("time")) {
         if (isTrkpt) { // de trkpt
-          currentTrkpt.setDate(XmlUtil.getTime(stBuffer.toString()));
+          currentTrkpt.setDate(XmlUtil.getTime(stBuffer.toString().trim()));
           if (log.isDebugEnabled()) {
             log.debug("Trkpt Time: " + currentTrkpt.getDate());
           }
         }
         else if (isRtept) { // de rtept
-          currentRtept.setDate(XmlUtil.getTime(stBuffer.toString()));
+          currentRtept.setDate(XmlUtil.getTime(stBuffer.toString().trim()));
           if (log.isDebugEnabled()) {
             log.debug("Rtept Time: " + currentRtept.getDate());
           }
@@ -832,7 +836,7 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
       else if (localName.equals("extension") && NS_TURTLE.equals(uri) && isTrk) {
         try {
           currentTrk.setSportType(Integer.parseInt(stBuffer.toString()));
-        }catch(NumberFormatException nfe) {
+        } catch (NumberFormatException nfe) {
         }
       }
       // trkpt
@@ -848,6 +852,16 @@ public class GpxFile implements IGeoFile, IGeoConvertRun, IGeoConvertCourse {
         log.debug("currentTrkseg.getTrkSize()=" + currentTrkseg.getTrkSize());
         if (currentTrkseg.getTrkSize() > 0) {
           currentTrk.addTrkseg(currentTrkseg);
+        }
+      }
+      // Extensions --> sport
+      else if (isTrk && !isTrkseg && localName.equals("sport") && NS_CLUETRUST.equals(uri)) {
+        String sportType = stBuffer.toString().trim();
+        if ("bike".equals(sportType)) {
+          currentTrk.setSportType(IGeoRoute.SPORT_TYPE_BIKE);
+        }
+        else if ("run".equals(sportType)) {
+          currentTrk.setSportType(IGeoRoute.SPORT_TYPE_RUNNING);
         }
       }
 
