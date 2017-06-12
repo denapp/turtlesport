@@ -1,17 +1,16 @@
 package fr.turtlesport.device.garmin;
 
+import fr.turtlesport.device.Device;
+import fr.turtlesport.device.FileDevice;
+import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.util.OperatingSystem;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import fr.turtlesport.device.Device;
-import org.xml.sax.SAXException;
-
-import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.util.OperatingSystem;
 
 /**
  * Classe pour les montres type Foretrex Fenix.
@@ -23,12 +22,12 @@ public class GarminGpxDevice implements Device {
   private static TurtleLogger log = (TurtleLogger) TurtleLogger
                                       .getLogger(GarminGpxDevice.class);
 
-  private GarminDeviceInfo    info;
+  private GarminProductDevice info;
 
   private GarminGpxDevice(File dir) throws SAXException,
                                    IOException,
                                    ParserConfigurationException {
-    this.info = new GarminDeviceInfo(dir);
+    this.info = new GarminProductDevice(dir);
   }
 
   /**
@@ -36,7 +35,7 @@ public class GarminGpxDevice implements Device {
    * 
    * @return Restitue les informations sur le device.
    */
-  public GarminDeviceInfo getInfo() {
+  public GarminProductDevice getInfo() {
     return info;
   }
 
@@ -129,35 +128,35 @@ public class GarminGpxDevice implements Device {
   }
 
   @Override
-  public List<File> getFiles() {
-    List<File> list = new ArrayList<File>();
-    list.add(getCurrentFile());
+  public List<FileDevice> getFiles() {
+    List<FileDevice> list = new ArrayList<>();
+    list.add(new FileDevice(getCurrentFile(), this));
     return list;
   }
 
   @Override
-  public List<File> getNewFiles() {
+  public List<FileDevice> getNewFiles() {
     return getFiles();
   }
 
   @Override
   public String displayName() {
-    return info.getDisplayName();
+    return info.displayName();
   }
 
   @Override
   public String id() {
-    return info.getId();
+    return info.id();
   }
 
   @Override
   public String softwareVersion() {
-    return info.getSoftwareVersion();
+    return info.softwareVersion();
   }
 
   @Override
   public String toString() {
-    return displayName() + " (" + info.getId() + ")";
+    return displayName() + " (" + info.id() + ")";
   }
 
   public File getCurrentFile() {

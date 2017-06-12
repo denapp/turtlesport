@@ -1,20 +1,20 @@
 package fr.turtlesport.device.garmin;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-
-import fr.turtlesport.device.Device;
 import fr.turtlesport.UsbPacket;
 import fr.turtlesport.UsbProtocol;
 import fr.turtlesport.UsbProtocolException;
+import fr.turtlesport.device.Device;
+import fr.turtlesport.device.FileDevice;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.protocol.AppProtocolCommand;
 import fr.turtlesport.protocol.StartSessionCommand;
 import fr.turtlesport.protocol.data.ProductDataType;
 import fr.turtlesport.protocol.data.ProtocolCapability;
 import fr.turtlesport.protocol.data.ProtocolDataType;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * @author Denis Apparicio
@@ -264,12 +264,12 @@ public final class GarminUsbDevice implements Device {
   }
 
   @Override
-  public List<File> getFiles() {
+  public List<FileDevice> getFiles() {
     throw new IllegalAccessError();
   }
 
   @Override
-  public List<File> getNewFiles()  {
+  public List<FileDevice> getNewFiles()  {
     throw new IllegalAccessError();
   }
 }

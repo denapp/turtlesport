@@ -1,24 +1,24 @@
 package fr.turtlesport.device.garmin;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import fr.turtlesport.device.IProductDevice;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  * @author Denis Apparicio
  *
  */
-public class GarminDeviceInfo {
+public class GarminProductDevice implements IProductDevice {
   private String id;
 
   private String softwareVersion;
@@ -35,7 +35,7 @@ public class GarminDeviceInfo {
    * @throws IOException
    * @throws ParserConfigurationException
    */
-  protected GarminDeviceInfo(File dir) throws SAXException,
+  protected GarminProductDevice(File dir) throws SAXException,
                              IOException,
                              ParserConfigurationException {
     this.dir = dir;
@@ -64,18 +64,6 @@ public class GarminDeviceInfo {
     softwareVersion = getText(doc.getDocumentElement(), "SoftwareVersion");
   }
 
-  public String getId() {
-    return id;
-  }
-
-  public String getSoftwareVersion() {
-    return softwareVersion;
-  }
-
-  public String getDisplayName() {
-    return displayName;
-  }
-
   public File getDir() {
     return dir;
   }
@@ -100,5 +88,20 @@ public class GarminDeviceInfo {
       }
     }
     return null;
+  }
+
+  @Override
+  public String displayName() {
+    return displayName;
+  }
+
+  @Override
+  public String id() {
+    return id;
+  }
+
+  @Override
+  public String softwareVersion() {
+    return softwareVersion;
   }
 }

@@ -1,6 +1,7 @@
 package fr.turtlesport.device;
 
 import fr.turtlesport.device.energympro.EnergymproDevice;
+import fr.turtlesport.device.energympro.TrainerDevice;
 import fr.turtlesport.device.garmin.GarminDevices;
 
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ public final class Devices {
 
         // Energympro
         result.addAll(EnergymproDevice.getDevices());
+
+        // Energympro Trainer
+        result.addAll(TrainerDevice.getDevices());
 
         return result;
     }
