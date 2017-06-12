@@ -1,55 +1,26 @@
 package fr.turtlesport.ui.swing;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Properties;
-import java.util.ResourceBundle;
-
-import javax.swing.*;
-
-import fr.turtlesport.device.Device;
-import fr.turtlesport.device.Devices;
-import fr.turtlesport.device.energympro.EnergymproDevice;
-import fr.turtlesport.lang.*;
-import org.jdesktop.swingx.JXCollapsiblePane;
-
 import fr.turtlesport.Configuration;
-import fr.turtlesport.device.IProductDevice;
-import fr.turtlesport.TurtleSport;
 import fr.turtlesport.MacOSXTurleApp;
+import fr.turtlesport.TurtleSport;
 import fr.turtlesport.UsbProtocolException;
 import fr.turtlesport.db.DataRun;
 import fr.turtlesport.db.DataSearchRun;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.UserTableManager;
-import fr.turtlesport.device.garmin.GarminDevices;
-import fr.turtlesport.device.garmin.GarminFitDevice;
-import fr.turtlesport.device.garmin.GarminGpxDevice;
+import fr.turtlesport.device.Device;
+import fr.turtlesport.device.Devices;
+import fr.turtlesport.device.FileDevice;
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.device.garmin.GarminUsbDevice;
 import fr.turtlesport.geo.FactoryGeoConvertRun;
+import fr.turtlesport.lang.*;
 import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.mail.Mail;
 import fr.turtlesport.mail.MessageMail;
 import fr.turtlesport.protocol.A1000RunTransferProtocol;
 import fr.turtlesport.ui.swing.action.ExportAllActionListener;
-import fr.turtlesport.ui.swing.component.JChevron;
-import fr.turtlesport.ui.swing.component.JMenuItemTurtle;
-import fr.turtlesport.ui.swing.component.JSearchTextField;
-import fr.turtlesport.ui.swing.component.JShowMessage;
-import fr.turtlesport.ui.swing.component.JXSplitButton;
+import fr.turtlesport.ui.swing.component.*;
 import fr.turtlesport.ui.swing.component.calendar.JPanelCalendar;
 import fr.turtlesport.ui.swing.component.calendar.JPanelListDateRun;
 import fr.turtlesport.ui.swing.component.workout.JPanelWorkout;
@@ -64,6 +35,19 @@ import fr.turtlesport.update.Update;
 import fr.turtlesport.util.BrowserUtil;
 import fr.turtlesport.util.OperatingSystem;
 import fr.turtlesport.util.ResourceBundleUtility;
+import org.jdesktop.swingx.JXCollapsiblePane;
+
+import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.event.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * @author Denis Apparicio
@@ -836,7 +820,8 @@ public class MainGui extends JFrame implements LanguageListener {
       jMenuRun.setFont(GuiFont.FONT_PLAIN);
       jMenuRun.add(getJMenuItemRunDetail());
       jMenuRun.add(getJMenuItemRunDetailGps());
-      jMenuRun.add(getJMenuItemRunCompare());
+      getJMenuItemRunCompare();
+      //jMenuRun.add(getJMenuItemRunCompare());
       jMenuRun.add(getJMenuItemRunMap());
       if (Mail.isSupported()) {
         jMenuRun.add(getJMenuItemRunEmail());
@@ -1641,15 +1626,9 @@ public class MainGui extends JFrame implements LanguageListener {
             if (deviceSelected instanceof GarminUsbDevice) {
               doUsbDevice(deviceSelected);
             }
-            else if (deviceSelected instanceof GarminGpxDevice) {
-              GarminGpxDevice gpxDevice = (GarminGpxDevice) deviceSelected;
-
-              File[] files = { gpxDevice.getCurrentFile() };
-              JDialogImport.prompt(files);
-            }
             else if (deviceSelected instanceof Device) {
-              List<File> list = deviceSelected.getNewFiles();
-              File[] files = new File[list.size()];
+              List<FileDevice> list = deviceSelected.getNewFiles();
+              FileDevice[] files = new FileDevice[list.size()];
               JDialogImport.prompt(list.toArray(files));
             }
           }

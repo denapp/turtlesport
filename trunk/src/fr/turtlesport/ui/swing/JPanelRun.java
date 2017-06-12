@@ -1931,11 +1931,12 @@ public class JPanelRun extends JPanelRight implements LanguageListener,
                                        unit,
                                        runLaps[i].getTotalDist());
           runLaps[i].setTotalDist((float) value);
-          fireTableCellUpdated(i, 0);
+          /*fireTableCellUpdated(i, 0);
           fireTableCellUpdated(i, 2);
-          fireTableCellUpdated(i, 3);
+          fireTableCellUpdated(i, 3);*/
         }
         unitDistance = unit;
+        fireTableDataChanged();
       }
     }
 

@@ -1,43 +1,23 @@
 package fr.turtlesport.ui.swing;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.ResourceBundle;
+import fr.turtlesport.Configuration;
+import fr.turtlesport.db.*;
+import fr.turtlesport.db.progress.IGeoRouteStoreProgress;
+import fr.turtlesport.device.FileDevice;
+import fr.turtlesport.geo.FactoryGeoLoad;
+import fr.turtlesport.geo.GeoLoadException;
+import fr.turtlesport.geo.IGeoRoute;
+import fr.turtlesport.lang.LanguageManager;
+import fr.turtlesport.log.TurtleLogger;
+import fr.turtlesport.ui.swing.component.*;
+import fr.turtlesport.ui.swing.component.jtable.*;
+import fr.turtlesport.ui.swing.img.ImagesRepository;
+import fr.turtlesport.unit.DistanceUnit;
+import fr.turtlesport.unit.TimeUnit;
+import fr.turtlesport.util.ResourceBundleUtility;
+import org.xml.sax.SAXParseException;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultCellEditor;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.SortOrder;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -46,41 +26,16 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-
-import org.xml.sax.SAXParseException;
-
-import fr.turtlesport.Configuration;
-import fr.turtlesport.db.AbstractDataActivity;
-import fr.turtlesport.db.DataActivityOther;
-import fr.turtlesport.db.DataEquipement;
-import fr.turtlesport.db.DataRunExtra;
-import fr.turtlesport.db.DataUser;
-import fr.turtlesport.db.EquipementTableManager;
-import fr.turtlesport.db.RunTableManager;
-import fr.turtlesport.db.UserActivityTableManager;
-import fr.turtlesport.db.UserTableManager;
-import fr.turtlesport.db.progress.IGeoRouteStoreProgress;
-import fr.turtlesport.geo.FactoryGeoLoad;
-import fr.turtlesport.geo.GeoLoadException;
-import fr.turtlesport.geo.IGeoRoute;
-import fr.turtlesport.lang.LanguageManager;
-import fr.turtlesport.log.TurtleLogger;
-import fr.turtlesport.ui.swing.component.ComboBoxActivityListCellRenderer;
-import fr.turtlesport.ui.swing.component.JComboBoxActivity;
-import fr.turtlesport.ui.swing.component.JFileChooserOS;
-import fr.turtlesport.ui.swing.component.JShowMessage;
-import fr.turtlesport.ui.swing.component.JTableCustom;
-import fr.turtlesport.ui.swing.component.JTextFieldLength;
-import fr.turtlesport.ui.swing.component.jtable.ComboBoxCellRenderer;
-import fr.turtlesport.ui.swing.component.jtable.DateCellEditor;
-import fr.turtlesport.ui.swing.component.jtable.DateCellRenderer;
-import fr.turtlesport.ui.swing.component.jtable.ProgressBarCellRenderer;
-import fr.turtlesport.ui.swing.component.jtable.TimeCellEditor;
-import fr.turtlesport.ui.swing.component.jtable.TimeCellRenderer;
-import fr.turtlesport.ui.swing.img.ImagesRepository;
-import fr.turtlesport.unit.DistanceUnit;
-import fr.turtlesport.unit.TimeUnit;
-import fr.turtlesport.util.ResourceBundleUtility;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
 
 /**
  * @author Denis Apparicio
@@ -221,7 +176,7 @@ public final class JDialogImport extends JDialog implements
   /**
   *
   */
-  public static void prompt(File[] files) {
+  public static void prompt(FileDevice[] files) {
     if (files == null) {
       return;
     }
@@ -245,7 +200,7 @@ public final class JDialogImport extends JDialog implements
   /**
    * Recuperation des fichiers &agrave; importer.
    */
-  private static File[] getSelectedFiles() {
+  private static FileDevice[] getSelectedFiles() {
     JFileChooserOS fc = new JFileChooserOS();
     fc.setMultiSelectionEnabled(true);
 
@@ -269,14 +224,19 @@ public final class JDialogImport extends JDialog implements
     if (ret != JFileChooser.APPROVE_OPTION) {
       return null;
     }
+
     File[] files = fc.getSelectedFiles();
+    FileDevice[] fileDevices = new FileDevice[files.length];
+    for (int i= 0; i < fileDevices.length; i++) {
+      fileDevices[i] = new FileDevice(files[i]);
+    }
 
     // Sauvegarde du dernier repertoire dans le .ini
     Configuration.getConfig().addProperty("Import",
                                           "lastDir",
                                           files[0].getParent());
 
-    return files;
+    return fileDevices;
   }
 
   /*
@@ -719,19 +679,19 @@ public final class JDialogImport extends JDialog implements
     /**
      * Ajout d'une course.
      */
-    public boolean addImportCourse(File file) throws FileNotFoundException,
+    public boolean addImportCourse(FileDevice file) throws FileNotFoundException,
                                              GeoLoadException {
       boolean isAdd = false;
 
       // Recuperation des routes
-      IGeoRoute[] routes = FactoryGeoLoad.getRoutes(file);
+      IGeoRoute[] routes = FactoryGeoLoad.getRoutes(file.getFile(), file);
       if (routes != null) {
         for (IGeoRoute r : routes) {
           // if (r.totalTime() < 1000) {
           // continue;
           // }
           final int size = listRows.size();
-          TableRowObject rowObj = new TableRowObject(size, r, file);
+          TableRowObject rowObj = new TableRowObject(size, r, file.getFile());
           listRows.add(rowObj);
           if (!EventQueue.isDispatchThread()) {
             SwingUtilities.invokeLater(new Runnable() {
@@ -751,15 +711,15 @@ public final class JDialogImport extends JDialog implements
     }
 
     /**
-     * Determine si la liste conient deja cette import.
+     * Determine si la liste contient deja cette import.
      * 
      * @param file
      * @return
      */
-    public boolean contains(File file) {
+    public boolean contains(FileDevice file) {
       if (listRows != null) {
         for (TableRowObject r : listRows) {
-          if (r.getFile().equals(file)) {
+          if (r.equals(file.getFile())) {
             return true;
           }
         }
@@ -919,7 +879,7 @@ public final class JDialogImport extends JDialog implements
           listRows.get(row).setTime((Date) value);
           break;
 
-        case 5: // Distance
+        case 5: // TimeTot
           listRows.get(row).setTimeTot((Date) value);
           break;
 
@@ -1192,10 +1152,14 @@ public final class JDialogImport extends JDialog implements
 
     private User                 user;
 
+    private boolean hasChangeDate = false;
+
+    private boolean hasChangeTimeLong = false;
+
     /**
-     * 
+     *
      * @param row
-     * @param index
+     * @param route
      */
     public TableRowObject(int row, IGeoRoute route, File file) {
       super();
@@ -1229,15 +1193,16 @@ public final class JDialogImport extends JDialog implements
       if (defaultActivity != null) {
         this.activity = defaultActivity;
       }
-
-      switch (route.getSportType()) {
-        case IGeoRoute.SPORT_TYPE_RUNNING:
-        case IGeoRoute.SPORT_TYPE_BIKE:
-          setActivity(route.getSportType());
-          break;
-        default:
-          setActivity(IGeoRoute.SPORT_TYPE_OTHER);
-          break;
+      else {
+        switch (route.getSportType()) {
+          case IGeoRoute.SPORT_TYPE_RUNNING:
+          case IGeoRoute.SPORT_TYPE_BIKE:
+            setActivity(route.getSportType());
+            break;
+          default:
+            setActivity(IGeoRoute.SPORT_TYPE_OTHER);
+            break;
+        }
       }
 
       if (defaultUser != null) {
@@ -1282,7 +1247,7 @@ public final class JDialogImport extends JDialog implements
     /**
      * Valorise le temps de la course.
      * 
-     * @param totalTime
+     * @param timeTot
      *          le temps de la course.
      */
     public void setTimeTot(Date timeTot) {
@@ -1297,6 +1262,7 @@ public final class JDialogImport extends JDialog implements
       if (cal.get(Calendar.HOUR_OF_DAY) > 0 || cal.get(Calendar.MINUTE) > 0
           || cal.get(Calendar.SECOND) > 0) {
         isValidTimeTot = true;
+        hasChangeTimeLong = true;
       }
       else {
         isValidTimeTot = false;
@@ -1438,7 +1404,7 @@ public final class JDialogImport extends JDialog implements
     /**
      * Valorise la date du tour.
      * 
-     * @param date
+     * @param dateDay
      *          la nouvelle valeur.
      */
     public void setDateDay(Date dateDay) {
@@ -1449,6 +1415,7 @@ public final class JDialogImport extends JDialog implements
         calendar.set(Calendar.YEAR, cal.get(Calendar.YEAR));
         calendar.set(Calendar.MONTH, cal.get(Calendar.MONTH));
         calendar.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
+        hasChangeDate = true;
       }
       tableModel.fireTableCellUpdatedEventQueueConvert(row, 2);
       tableModel.fireRowsDateChanged();
@@ -1466,7 +1433,7 @@ public final class JDialogImport extends JDialog implements
     /**
      * Valorise la date du tour.
      * 
-     * @param date
+     * @param dateTime
      *          la nouvelle valeur.
      */
     public void setTime(Date dateTime) {
@@ -1477,6 +1444,7 @@ public final class JDialogImport extends JDialog implements
         calendar.set(Calendar.HOUR_OF_DAY, cal.get(Calendar.HOUR_OF_DAY));
         calendar.set(Calendar.MINUTE, cal.get(Calendar.MINUTE));
         calendar.set(Calendar.SECOND, cal.get(Calendar.SECOND));
+        hasChangeDate = true;
       }
       tableModel.fireTableCellUpdatedEventQueueConvert(row, 3);
       tableModel.fireRowsDateChanged();
@@ -1648,7 +1616,9 @@ public final class JDialogImport extends JDialog implements
               if (row.isSave()) {
                 listGeoRoute.add(row.route);
                 // mis a jour date/heures et duree
-                //BUG row.route.update(row.getFullDate(), row.getTimeTotLong());
+                if (row.hasChangeDate || row.hasChangeTimeLong) {
+                  row.route.update(row.getFullDate(), row.getTimeTotLong());
+                }
                 if (row.getEquipement() != null
                     && !listEquipement.contains(row.getEquipement())) {
                   listEquipement.add(row.getEquipement());
@@ -1733,7 +1703,7 @@ public final class JDialogImport extends JDialog implements
     public void actionPerformed(ActionEvent actionevent) {
 
       // recuperation des fichiers
-      final File[] files = getSelectedFiles();
+      final FileDevice[] files = getSelectedFiles();
       if (files == null) {
         return;
       }
@@ -1742,7 +1712,7 @@ public final class JDialogImport extends JDialog implements
       fireFiles(files);
     }
 
-    public void fireFiles(final File[] files) {
+    public void fireFiles(final FileDevice[] files) {
       MainGui.getWindow().beforeRunnableSwing();
       JDialogImport.this.setCursor(Cursor
           .getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -1758,7 +1728,7 @@ public final class JDialogImport extends JDialog implements
           // Ajout du model
           jProgressBar.setIndeterminate(true);
           boolean isAdd = false;
-          for (File f : files) {
+          for (FileDevice f : files) {
             if (!tableModel.contains(f)) {
               try {
                 isAdd |= tableModel.addImportCourse(f);
@@ -1767,7 +1737,7 @@ public final class JDialogImport extends JDialog implements
                 log.error("", e);
                 if (nbError < 3) {
                   error.append(MessageFormat.format(rb
-                      .getString("errorDialogImportDetMsg1"), f.getName()));
+                      .getString("errorDialogImportDetMsg1"), f.getFile().getName()));
                 }
                 nbError++;
               }
@@ -1775,7 +1745,7 @@ public final class JDialogImport extends JDialog implements
                 log.error("", e);
                 if (nbError < 3) {
                   error.append(MessageFormat.format(rb
-                      .getString("errorDialogImportDetMsg2"), f.getName()));
+                      .getString("errorDialogImportDetMsg2"), f.getFile().getName()));
                   if (e.getCause() != null
                       && (e.getCause() instanceof SAXParseException)) {
                     SAXParseException se = (SAXParseException) e.getCause();
