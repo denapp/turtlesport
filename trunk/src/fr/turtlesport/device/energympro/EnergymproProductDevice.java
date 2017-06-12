@@ -1,16 +1,17 @@
 package fr.turtlesport.device.energympro;
 
+import fr.turtlesport.device.IProductDevice;
+import fr.turtlesport.util.ByteUtil;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import fr.turtlesport.util.ByteUtil;
-
 /**
  * Created by denisapparicio on 16/06/2015.
  */
-public class EnergymproDeviceInfo {
+public class EnergymproProductDevice implements IProductDevice {
 
     protected static String FILENAME = "SetupInfo.cpi";
 
@@ -18,7 +19,7 @@ public class EnergymproDeviceInfo {
 
     private short version;
 
-    protected EnergymproDeviceInfo(File file) throws IOException {
+    protected EnergymproProductDevice(File file) throws IOException {
         FileInputStream in = null;
         try {
             in = new FileInputStream(file);
@@ -52,5 +53,20 @@ public class EnergymproDeviceInfo {
 
         // Version.VerNum
         version = ByteUtil.toShort((byte)in.read(), (byte) in.read());
+    }
+
+    @Override
+    public String displayName() {
+        return product + "v" + softwareVersion();
+    }
+
+    @Override
+    public String id() {
+        return product;
+    }
+
+    @Override
+    public String softwareVersion() {
+        return Short.toString(version);
     }
 }

@@ -1,6 +1,5 @@
 package fr.turtlesport.device;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -14,11 +13,11 @@ public interface Device extends IProductDevice {
     /**
      * @return les fichiers tracks de ce device.
      */
-    List<File> getFiles();
+    List<FileDevice> getFiles();
 
     /**
      *
      * @return Restitue les nouveaux fichiers.
      */
-    List<File> getNewFiles();
+    List<FileDevice> getNewFiles();
 }

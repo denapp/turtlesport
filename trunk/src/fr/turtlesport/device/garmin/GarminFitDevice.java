@@ -3,6 +3,7 @@ package fr.turtlesport.device.garmin;
 import fr.turtlesport.db.DataUser;
 import fr.turtlesport.db.RunTableManager;
 import fr.turtlesport.device.Device;
+import fr.turtlesport.device.FileDevice;
 import fr.turtlesport.geo.GeoLoadException;
 import fr.turtlesport.geo.garmin.fit.FitFile;
 import fr.turtlesport.log.TurtleLogger;
@@ -26,7 +27,7 @@ public class GarminFitDevice implements Device {
   private static TurtleLogger   log      = (TurtleLogger) TurtleLogger
                                              .getLogger(GarminFitDevice.class);
 
-  private GarminDeviceInfo               info;
+  private GarminProductDevice info;
 
   /** Noms des repertoires TCX */
   private static final String[] DIRS_TCX = { "History" };
@@ -37,14 +38,14 @@ public class GarminFitDevice implements Device {
   private GarminFitDevice(File dir) throws SAXException,
                                    IOException,
                                    ParserConfigurationException {
-    this.info = new GarminDeviceInfo(dir);
+    this.info = new GarminProductDevice(dir);
   }
 
   /**
    * 
    * @return Restitue les nouveaux fichiers.
    */
-  public List<File> getNewFiles() {
+  public List<FileDevice> getNewFiles() {
     return (getTcxFiles().size() > 0) ? getNewTcxFiles() : getNewFitFiles();
   }
 
@@ -52,14 +53,14 @@ public class GarminFitDevice implements Device {
    * 
    * @return Restitue les fichiers tcx.
    */
-  public List<File> getTcxFiles() {
+  public List<FileDevice> getTcxFiles() {
     for (String dir : DIRS_TCX) {
-      List<File> files = getFiles(dir, ".tcx");
+      List<FileDevice> files = getFiles(dir, ".tcx");
       if (files.size() > 0) {
         return files;
       }
     }
-    return new ArrayList<File>();
+    return new ArrayList<FileDevice>();
   }
 
   /**
@@ -67,12 +68,12 @@ public class GarminFitDevice implements Device {
    * 
    * @return les fichiers tcx.
    */
-  public List<File> getNewTcxFiles() {
-    List<File> files = getTcxFiles();
+  public List<FileDevice> getNewTcxFiles() {
+    List<FileDevice> files = getTcxFiles();
 
-    Iterator<File> it = files.iterator();
+    Iterator<FileDevice> it = files.iterator();
     while (it.hasNext()) {
-      if (isTcxAlreadyImport(it.next())) {
+      if (isTcxAlreadyImport(it.next().getFile())) {
         it.remove();
       }
     }
@@ -85,14 +86,14 @@ public class GarminFitDevice implements Device {
    * 
    * @return les fichiers fit.
    */
-  public List<File> getFitFiles() {
+  public List<FileDevice> getFitFiles() {
     for (String dir : DIRS_FIT) {
-      List<File> files = getFiles(dir, ".fit");
+      List<FileDevice> files = getFiles(dir, ".fit");
       if (files.size() > 0) {
         return files;
       }
     }
-    return new ArrayList<File>();
+    return new ArrayList<FileDevice>();
   }
 
   /**
@@ -100,12 +101,12 @@ public class GarminFitDevice implements Device {
    * 
    * @return les fichiers fir.
    */
-  public List<File> getNewFitFiles() {
-    List<File> files = getFitFiles();
+  public List<FileDevice> getNewFitFiles() {
+    List<FileDevice> files = getFitFiles();
 
-    Iterator<File> it = files.iterator();
+    Iterator<FileDevice> it = files.iterator();
     while (it.hasNext()) {
-      if (isFitAlreadyImport(it.next())) {
+      if (isFitAlreadyImport(it.next().getFile())) {
         it.remove();
       }
     }
@@ -157,8 +158,8 @@ public class GarminFitDevice implements Device {
     }
   }
 
-  private List<File> getFiles(final String dirName, final String ext) {
-    List<File> files = new ArrayList<File>();
+  private List<FileDevice> getFiles(final String dirName, final String ext) {
+    List<FileDevice> files = new ArrayList<>();
 
     // recuperation des repertoires des montres FIT
     File[] dirsFit = new File(info.getDir(), dirName)
@@ -172,7 +173,7 @@ public class GarminFitDevice implements Device {
     // filtre sur les montres supportants TCX
     if (dirsFit != null) {
       for (File f : dirsFit) {
-        files.add(f);
+        files.add(new FileDevice(f, this));
       }
     }
     return files;
@@ -183,7 +184,7 @@ public class GarminFitDevice implements Device {
    * 
    * @return Restitue les informations sur le device.
    */
-  public GarminDeviceInfo getInfo() {
+  public GarminProductDevice getInfo() {
     return info;
   }
 
@@ -240,7 +241,7 @@ public class GarminFitDevice implements Device {
   private static boolean isGarminFitAvailable(File pathname) {
     if (pathname != null && pathname.isDirectory()
         && isFitorTcxSupported(pathname)) {
-      for (String s : GarminDeviceInfo.GARMIN_DEVICE_NAME) {
+      for (String s : GarminProductDevice.GARMIN_DEVICE_NAME) {
         if (new File(pathname, s).isFile()) {
           return true;
         }
@@ -323,28 +324,28 @@ public class GarminFitDevice implements Device {
   }
 
   @Override
-  public List<File> getFiles() {
+  public List<FileDevice> getFiles() {
     return getNewFiles();
   }
 
   @Override
   public String displayName() {
-    return info.getDisplayName();
+    return info.displayName();
   }
 
   @Override
   public String id() {
-    return info.getId();
+    return info.id();
   }
 
   @Override
   public String softwareVersion() {
-    return info.getSoftwareVersion();
+    return info.softwareVersion();
   }
 
   @Override
   public String toString() {
-    return displayName() + " (" + info.getId() + ")";
+    return displayName() + " (" + info.id() + ")";
   }
 
 }
