@@ -1,16 +1,12 @@
 package fr.turtlesport.geo.pcx5;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
+import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.geo.GeoLoadException;
 import fr.turtlesport.geo.IGeoFile;
 import fr.turtlesport.geo.IGeoRoute;
 import fr.turtlesport.log.TurtleLogger;
+
+import java.io.*;
 
 // H SOFTWARE NAME & VERSION
 // I PCX5 2.09
@@ -79,7 +75,7 @@ public class Pcx5File implements IGeoFile {
    * @see fr.turtlesport.geo.IGeoFile#load(java.io.File)
    */
 
-  public IGeoRoute[] load(File file) throws GeoLoadException,
+  public IGeoRoute[] load(File file, IProductDevice device) throws GeoLoadException,
                                     FileNotFoundException {
     log.debug(">>load");
 

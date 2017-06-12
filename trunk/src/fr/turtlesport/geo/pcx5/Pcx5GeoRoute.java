@@ -1,12 +1,12 @@
 package fr.turtlesport.geo.pcx5;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import fr.turtlesport.device.IProductDevice;
 import fr.turtlesport.geo.AbstractGeoRoute;
 import fr.turtlesport.geo.IGeoPositionWithAlt;
 import fr.turtlesport.geo.IGeoSegment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Denis Apparicio
@@ -93,7 +93,6 @@ public class Pcx5GeoRoute extends AbstractGeoRoute {
   }
 
   public IGeoSegment getSegment(int index) {
-    // TODO Auto-generated method stub
     return null;
   }
 
@@ -107,7 +106,6 @@ public class Pcx5GeoRoute extends AbstractGeoRoute {
   }
 
   public List<IGeoSegment> getSegments() {
-    // TODO Auto-generated method stub
     return null;
   }
 

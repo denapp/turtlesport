@@ -169,7 +169,7 @@ public class HstFile implements IGeoFile, IGeoConvertRun {
    * 
    * @see fr.turtlesport.geo.IGeoFile#load(java.io.File)
    */
-  public IGeoRoute[] load(File file) throws GeoLoadException,
+  public IGeoRoute[] load(File file, IProductDevice productDevice) throws GeoLoadException,
                                     FileNotFoundException {
     log.debug(">>load");
 
