@@ -1,17 +1,15 @@
 package fr.turtlesport.map;
 
-import java.io.File;
-import java.util.LinkedHashMap;
-
-import javax.swing.ImageIcon;
-
-import org.jdesktop.swingx.mapviewer.TileCache;
-
 import fr.turtlesport.Configuration;
 import fr.turtlesport.ui.swing.model.AddDeleteMapEvent;
 import fr.turtlesport.ui.swing.model.AddDeleteMapListener;
 import fr.turtlesport.ui.swing.model.ModelMapkitManager;
 import fr.turtlesport.util.Location;
+import org.jdesktop.swingx.mapviewer.TileCache;
+
+import javax.swing.ImageIcon;
+import java.io.File;
+import java.util.LinkedHashMap;
 
 /**
  * @author Denis Apparicio
@@ -40,7 +38,7 @@ public final class AllMapsFactory implements AddDeleteMapListener {
     ModelMapkitManager.getInstance().addAddDeleteMapListener(this);
 
     // mercator
-    hashMap.put(TurtleEmptyTileFactory.NAME, new TurtleEmptyTileFactory());
+    //hashMap.put(TurtleEmptyTileFactory.NAME, new TurtleEmptyTileFactory());
     // mapnik
     addOpenStreetMap("http://tile.openstreetmap.org", "mapnik", null, null);
     // opencyclemap
@@ -49,15 +47,15 @@ public final class AllMapsFactory implements AddDeleteMapListener {
                      null,
                      null);
     // MapQuest map
-    addOpenStreetMap("http://otile1.mqcdn.com/tiles/1.0.0/osm",
-                     "MapQuest",
-                     new ImageIcon(getClass().getResource("mapquest14.png")),
-                     new ImageIcon(getClass().getResource("maquestLogo.png")));
+    //addOpenStreetMap("http://otile1.mqcdn.com/tiles/1.0.0/osm",
+    //                 "MapQuest",
+    //                 new ImageIcon(getClass().getResource("mapquest14.png")),
+    //                 new ImageIcon(getClass().getResource("maquestLogo.png")));
     // MapQuest sat
-    addOpenStreetMap("http://otile1.mqcdn.com/tiles/1.0.0/sat",
-                     "MapQuest sat",
-                     new ImageIcon(getClass().getResource("mapquest14.png")),
-                     new ImageIcon(getClass().getResource("maquestLogo.png")));
+    //addOpenStreetMap("http://otile1.mqcdn.com/tiles/1.0.0/sat",
+    //                 "MapQuest sat",
+    //                 new ImageIcon(getClass().getResource("mapquest14.png")),
+    //                 new ImageIcon(getClass().getResource("maquestLogo.png")));
 
     // Transport
     addOpenStreetMap("http://tile2.opencyclemap.org/transport",
