@@ -372,7 +372,7 @@
     </target>
 
 	<!-- Linux -->
-	<target name="releaseLinux" if="isLinux" depends="packagingLinuxTar, packagingLinuxDeb, packagingLinuxRmp" />
+	<target name="releaseLinux" if="isLinux" depends="packagingLinuxTar, packagingLinuxDeb, packagingLinuxRpm" />
 
 	<!-- Desktop Linux Turtle -->
 	<target name="desktopLinuxTurtle">
@@ -427,7 +427,7 @@
 	</target>
 
 	<!-- Creates a rpm package -->
-	<target name="packagingLinuxRmp" if="isLinux">
+	<target name="packagingLinuxRpm" if="isLinux">
 		<echo message='Prepare files to build RPM package' />
 
 		<!--<delete dir="${rootdir}" />-->
