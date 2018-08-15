@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import fr.turtlesport.Configuration;
 import fr.turtlesport.ConfigurationException;
@@ -249,11 +249,11 @@ public class SwingApplication {
   /**
    * Affichage de l'IHM
    * 
-   * @param screenSize
    */
   private void showGUI() {
     MainGui.getWindow().setVisible(true);
     MainGui.getWindow().updateComponentTreeUI();
+    MainGui.getWindow().setExtendedState(JFrame.MAXIMIZED_BOTH);
   }
 
 }
