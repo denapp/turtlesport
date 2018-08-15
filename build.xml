@@ -3,7 +3,7 @@
 
 	<!-- set global properties for this build -->
 	<property name="Name" value="turtlesport" />
-	<property name="version" value="1.9" />
+	<property name="version" value="2.1" />
 	<property name="src" location="${basedir}/src" />
 	<property name="test" location="${basedir}/test" />
 	<property name="srcccommonUsbCom" location="${basedir}/c/usbcom/srccommon" />
@@ -188,7 +188,7 @@
 		<jar destfile="${exe}/${jarApp}" basedir="${dest}">
 			<manifest>
 				<attribute name="Main-Class" value="fr.turtlesport.TurtleSport" />
-				<attribute name="Class-Path" value="fit.jar swingx.jar swingx-ws.jar log4j.jar derby.jar jcommon.jar jfreechart.jar" />
+				<attribute name="Class-Path" value="activation-1.1.1.jar jaxb-api-2.2.11.jar jaxb-impl-2.2.11.jar jaxb-core-2.2.11.jar fit.jar swingx.jar swingx-ws.jar log4j.jar derby.jar jcommon.jar jfreechart.jar" />
 				<section name="common">
 					<attribute name="Specification-Title" value="${Name}" />
 					<attribute name="Specification-Version" value="${version}" />
@@ -247,6 +247,9 @@
 				<include name="swingx-ws.jar" />
 				<include name="derby.jar" />
 				<include name="log4j.jar" />
+			    <include name="activation-1.1.1.jar"/>
+			    <include name="jaxb-api-2.2.11.jar"/>
+				<include name="jaxb-impl-2.2.11.jar"/>
 				<include name="log4J.xml" />
 				<include name="libturtleUsbjni.jnilib" />
 			</classpath>
