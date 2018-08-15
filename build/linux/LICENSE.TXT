@@ -10,3 +10,5 @@ See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program 
 in the file named COPYING.TXT; if not, see <http://www.gnu.org/licenses>.
+
+Please, read the files named THIRDPARTY-LICENSE for more details about third parties materials licenses.
