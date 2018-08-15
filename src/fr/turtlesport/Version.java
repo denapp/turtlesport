@@ -11,12 +11,12 @@ public final class Version {
   }
   
   /** Version de l'application. */
-  public static final String VERSION = "2.0";
+  public static final String VERSION = "2.1";
   
   /** Version majeure. */
   public static final String VERSION_MAJOR = "2";
   
   /** Version mineure. */
-  public static final String VERSION_MINOR = "0";
+  public static final String VERSION_MINOR = "1";
 
 }
