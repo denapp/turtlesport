@@ -115,6 +115,9 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
       }
       return listener.date;
     }
+    catch(Throwable e) {
+      throw new GeoLoadException(e);
+    }
     finally {
       try {
         fis.close();
@@ -158,6 +161,9 @@ public class FitFile implements IGeoFile, IGeoConvertRun {
                  + dateFormat.format(listener.session.listLap.get(0)
                      .getStartTime()));
       }
+    }
+    catch(Throwable e) {
+      throw new GeoLoadException(e);
     }
     finally {
       try {
