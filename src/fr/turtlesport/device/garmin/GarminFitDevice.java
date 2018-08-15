@@ -139,9 +139,6 @@ public class GarminFitDevice implements Device {
     catch (GeoLoadException e) {
       log.error("", e);
     }
-    catch (Throwable e) {
-      log.error("", e);
-    }
     return false;
   }
 
