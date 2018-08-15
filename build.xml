@@ -251,6 +251,9 @@
 			    <include name="jaxb-api-2.2.11.jar"/>
 				<include name="jaxb-impl-2.2.11.jar"/>
 				<include name="log4J.xml" />
+				<include name="COPYING.TXT" />
+				<include name="LICENSE.TXT" />
+			    <include name="THIRDPARTY-LICENSE-JAVA.TXT"/>
 				<include name="libturtleUsbjni.jnilib" />
 			</classpath>
 			<!-- runtime -->
