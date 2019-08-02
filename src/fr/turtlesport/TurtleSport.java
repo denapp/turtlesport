@@ -4,6 +4,10 @@ import fr.turtlesport.log.TurtleLogger;
 import fr.turtlesport.ui.swing.SwingApplication;
 import fr.turtlesport.util.Location;
 import fr.turtlesport.util.OperatingSystem;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import java.io.File;
@@ -13,6 +17,7 @@ import java.io.File;
  * 
  */
 public final class TurtleSport {
+
   private static TurtleLogger log;
 
   /** instance unique */
@@ -78,7 +83,12 @@ public final class TurtleSport {
       // positionne les traces
       String dirExe = Location.dirNameExecution(TurtleSport.class);
       File file = new File(dirExe, "log4J.xml");
-      DOMConfigurator.configure(file.toURI().toURL());
+
+      // Avoid exception if file does not exist.
+      if(file.exists()) {
+          DOMConfigurator.configure(file.toURI().toURL());
+      }
+
       log = (TurtleLogger) TurtleLogger.getLogger(TurtleSport.class);
       log.debug(">>main");
 
